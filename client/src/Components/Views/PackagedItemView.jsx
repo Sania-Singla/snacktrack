@@ -31,6 +31,7 @@ export default function PackagedItemView({ item, reference }) {
             type: 'PackagedFood',
             price,
             quantity: 1,
+            isPacked: false,
         };
         localStorage.setItem(
             'cartItems',

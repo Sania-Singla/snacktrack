@@ -191,7 +191,7 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
 });
 
 // for kitchen page
-const getOrders = tryCatch('get orders', async (req, res, next) => {
+const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
     const hostelType = req.hostelType;
     const hostelNumber = req.hostelNumber;
 
@@ -247,6 +247,7 @@ const getOrders = tryCatch('get orders', async (req, res, next) => {
             $group: {
                 _id: '$_id',
                 amount: { $first: '$amount' },
+                packingCharges: { $first: '$packingCharges' },
                 status: { $first: '$status' },
                 canteenId: { $first: '$canteenId' },
                 studentId: { $first: '$studentId' },
@@ -279,5 +280,5 @@ export {
     updatePassword,
     updateAvatar,
     getCanteens,
-    getOrders,
+    getKitchenOrders,
 };

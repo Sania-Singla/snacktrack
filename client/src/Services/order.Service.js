@@ -1,7 +1,7 @@
 import { SERVER_ERROR } from '../Constants/constants';
 
 class OrderService {
-    async placeOrder(cartItems, total) {
+    async placeOrder(cartItems, total, packingCharges) {
         try {
             const res = await fetch('/api/orders', {
                 method: 'POST',
@@ -13,8 +13,11 @@ class OrderService {
                         quantity: i.quantity,
                         itemType: i.type,
                         price: i.price,
+                        specialInstructions: i.specialInstructions,
+                        isPacked: i.isPacked,
                     })),
-                    total,
+                    amount: total,
+                    packingCharges,
                 }),
             });
 

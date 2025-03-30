@@ -4,10 +4,11 @@ import { LIMIT } from '../../Constants/constants';
 import { paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { motion } from 'framer-motion';
+import { useOrderContext } from '../../Contexts';
 import { ContractorOrderCard } from '..';
 
 export default function PreparedOrders() {
-    const [orders, setOrders] = useState([]);
+    const { preparedOrders, setPreparedOrders } = useOrderContext();
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function PreparedOrders() {
                     signal
                 );
                 if (res && !res.message) {
-                    setOrders(res.orders);
+                    setPreparedOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
                 }
             } catch (err) {
@@ -44,13 +45,13 @@ export default function PreparedOrders() {
 
     return loading ? (
         <div>loading...</div>
-    ) : orders.length > 0 ? (
+    ) : preparedOrders.length > 0 ? (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-            {orders.map((order, i) => (
+            {preparedOrders.map((order, i) => (
                 <motion.div
                     key={order._id}
                     initial={{ y: 20, opacity: 0 }}
@@ -60,7 +61,8 @@ export default function PreparedOrders() {
                     <ContractorOrderCard
                         order={order}
                         reference={
-                            i + 1 === orders.length && ordersInfo?.hasNextPage
+                            i + 1 === preparedOrders.length &&
+                            ordersInfo?.hasNextPage
                                 ? paginateRef
                                 : null
                         }

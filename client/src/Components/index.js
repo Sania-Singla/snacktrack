@@ -21,6 +21,7 @@ import EditSnackPopup from './Popups/EditSnack.Popup';
 import EditItemPopup from './Popups/EditItem.Popup';
 import RemoveSnackPopup from './Popups/RemoveSnack.Popup';
 import RemoveItemPopup from './Popups/RemoveItem.Popup';
+import EditCartItemPopup from './Popups/EditCartItem.Popup';
 import SnackView from './Views/SnackView';
 import PackagedItemView from './Views/PackagedItemView';
 import StudentView from './Views/StudentView';
@@ -57,6 +58,7 @@ export {
     UpdatePassword,
     Popup,
     RemoveStudentPopup,
+    EditCartItemPopup,
     RemoveAllStudentsPopup,
     StudentOrderCard,
     NotificationsPopup,

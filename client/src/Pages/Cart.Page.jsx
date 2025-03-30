@@ -2,29 +2,46 @@ import { useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { SNACK_PLACEHOLDER_IMAGE } from '../Constants/constants';
+import {
+    PER_ITEM_PACKAGING_CHARGES,
+    SNACK_PLACEHOLDER_IMAGE,
+    TAX,
+} from '../Constants/constants';
 import { orderService } from '../Services';
-import { usePopupContext } from '../Contexts';
+import { usePopupContext, useSocketContext, useUserContext } from '../Contexts';
 
 export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
     const navigate = useNavigate();
+    const { socket } = useSocketContext();
+    const { user } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const [cartItems, setCartItems] = useState(
-        JSON.parse(localStorage.getItem('cartItems')) || []
+        JSON.parse(localStorage.getItem('cartItems'))?.map((item) => ({
+            ...item,
+            pack: item.pack || false,
+            specialInstructions: item.specialInstructions || '',
+        })) || []
     );
 
+    // Calculate charges
     const subtotal = cartItems.reduce(
         (acc, item) => acc + item.price * item.quantity,
         0
     );
-    const tax = subtotal * 0.05; // 5% tax
-    const total = subtotal + tax;
+    const packingCharges = cartItems.reduce(
+        (acc, item) =>
+            acc +
+            (item.isPacked ? PER_ITEM_PACKAGING_CHARGES * item.quantity : 0),
+        0
+    );
+    const tax = (subtotal + packingCharges) * TAX; // 5% tax on subtotal + packing
+    const total = subtotal + packingCharges + tax;
 
-    function updateQuantity(itemId, price, newQuantity) {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    function updateQuantity(item, newQuantity) {
+        const { _id, price } = item;
         const updatedCartItems = cartItems.map((item) =>
-            item._id === itemId && item.price === price
+            item._id === _id && item.price === price
                 ? { ...item, quantity: newQuantity }
                 : item
         );
@@ -32,17 +49,15 @@ export default function CartPage() {
         setCartItems(updatedCartItems);
     }
 
-    function removeFromCart(itemId, price, type) {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-
+    function removeFromCart(item) {
+        const { _id, price, type } = item;
         const updatedCartItems = cartItems.filter((item) => {
             if (type === 'Snack') {
-                return item._id !== itemId;
+                return item._id !== _id;
             } else {
-                return !(item._id === itemId && item.price === price);
+                return !(item._id === _id && item.price === price);
             }
         });
-
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
         setCartItems(updatedCartItems);
     }
@@ -50,9 +65,11 @@ export default function CartPage() {
     async function placeOrder() {
         try {
             setOrdering(true);
-            const cartItems =
-                JSON.parse(localStorage.getItem('cartItems')) || [];
-            const res = await orderService.placeOrder(cartItems, total);
+            const res = await orderService.placeOrder(
+                cartItems,
+                total,
+                packingCharges
+            );
             if (res && !res.message) {
                 setShowPopup(true);
                 setPopupInfo({
@@ -61,6 +78,7 @@ export default function CartPage() {
                 });
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
+                socket.emit('newOrder', res);
             }
         } catch (err) {
             navigate('/server-error');
@@ -69,8 +87,20 @@ export default function CartPage() {
         }
     }
 
-    const cartItemElements = cartItems.map(
-        ({ price, _id, name, category, type, image, quantity }) => (
+    function editItem(item) {
+        setShowPopup(true);
+        setPopupInfo({
+            type: 'editCartItem',
+            item,
+            setCartItems,
+            cartItems,
+        });
+    }
+
+    const cartItemElements = cartItems.map((item) => {
+        const { price, _id, name, category, type, image, quantity, pack } =
+            item;
+        return (
             <div
                 key={`${_id}-${price}`}
                 className="w-full flex flex-col sm:flex-row items-end sm:items-center justify-between border-b border-gray-200 py-4"
@@ -92,6 +122,11 @@ export default function CartPage() {
                             </h3>
                             <p className="text-sm text-gray-500">
                                 ₹{price.toFixed(2)}
+                                {pack && (
+                                    <span className="text-xs text-gray-500 ml-1">
+                                        (+₹5 packing)
+                                    </span>
+                                )}
                             </p>
                         </div>
                     </div>
@@ -101,8 +136,8 @@ export default function CartPage() {
                             className="px-3 py-1 text-gray-500 hover:bg-gray-100"
                             onClick={() =>
                                 quantity === 1
-                                    ? removeFromCart(_id, price, type)
-                                    : updateQuantity(_id, price, quantity - 1)
+                                    ? removeFromCart(item)
+                                    : updateQuantity(item, quantity - 1)
                             }
                             btnText="-"
                         />
@@ -111,9 +146,7 @@ export default function CartPage() {
                         </span>
                         <Button
                             className="px-3 py-1 text-gray-500 hover:bg-gray-100"
-                            onClick={() =>
-                                updateQuantity(_id, price, quantity + 1)
-                            }
+                            onClick={() => updateQuantity(item, quantity + 1)}
                             btnText="+"
                         />
                     </div>
@@ -126,8 +159,8 @@ export default function CartPage() {
                             className="px-3 py-1 text-gray-500 hover:bg-gray-100"
                             onClick={() =>
                                 quantity === 1
-                                    ? removeFromCart(_id, price, type)
-                                    : updateQuantity(_id, price, quantity - 1)
+                                    ? removeFromCart(item)
+                                    : updateQuantity(item, quantity - 1)
                             }
                             btnText="-"
                         />
@@ -136,25 +169,18 @@ export default function CartPage() {
                         </span>
                         <Button
                             className="px-3 py-1 text-gray-500 hover:bg-gray-100"
-                            onClick={() =>
-                                updateQuantity(_id, price, quantity + 1)
-                            }
+                            onClick={() => updateQuantity(item, quantity + 1)}
                             btnText="+"
                         />
                     </div>
                     <div className="flex items-center gap-1">
                         <p className="text-lg font-semibold mr-1 text-gray-900">
-                            ₹{(price * quantity).toFixed(2)}
+                            ₹
+                            {(
+                                price * quantity +
+                                (pack ? 5 * quantity : 0)
+                            ).toFixed(2)}
                         </p>
-                        <Button
-                            btnText={
-                                <div className="size-[18px] fill-red-600">
-                                    {icons.delete}
-                                </div>
-                            }
-                            className="hover:bg-gray-100 p-2 rounded-full"
-                            onClick={() => removeFromCart(_id, price, type)}
-                        />
                         <Button
                             btnText={
                                 <div className="size-[18px] fill-[#4977ec]">
@@ -162,13 +188,22 @@ export default function CartPage() {
                                 </div>
                             }
                             className="hover:bg-gray-100 p-2 rounded-full"
-                            onClick={() => editItem(_id, price, type)}
+                            onClick={() => editItem(item)}
+                        />
+                        <Button
+                            btnText={
+                                <div className="size-[18px] fill-red-600">
+                                    {icons.delete}
+                                </div>
+                            }
+                            className="hover:bg-gray-100 p-2 rounded-full"
+                            onClick={() => removeFromCart(item)}
                         />
                     </div>
                 </div>
             </div>
-        )
-    );
+        );
+    });
 
     return cartItems.length > 0 ? (
         <div className="bg-gray-100 rounded-xl drop-shadow-sm w-full py-10 px-4 sm:px-6 lg:px-8">
@@ -192,6 +227,12 @@ export default function CartPage() {
                             <p className="text-gray-600">Subtotal</p>
                             <p className="text-gray-900">
                                 ₹{subtotal.toFixed(2)}
+                            </p>
+                        </div>
+                        <div className="flex justify-between">
+                            <p className="text-gray-600">Packing Charges</p>
+                            <p className="text-gray-900">
+                                ₹{packingCharges.toFixed(2)}
                             </p>
                         </div>
                         <div className="flex justify-between">

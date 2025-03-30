@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { orderService } from '../Services';
-import { useUserContext } from '../Contexts';
+import { useUserContext, useOrderContext } from '../Contexts';
 import { motion } from 'framer-motion';
 import { icons } from '../Assets/icons';
 import { Button, StudentOrderCard } from '../Components';
@@ -9,7 +9,7 @@ import { paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 
 export default function MyOrdersPage() {
-    const [orders, setOrders] = useState([]);
+    const { setStudentOrders, studentOrders } = useOrderContext();
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -31,7 +31,7 @@ export default function MyOrdersPage() {
                     LIMIT
                 );
                 if (data && !data.message) {
-                    setOrders(data.orders);
+                    setStudentOrders(data.orders);
                     setOrdersInfo(data.ordersInfo);
                 }
             } catch (err) {
@@ -48,7 +48,7 @@ export default function MyOrdersPage() {
         <div className="w-full p-4">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
-                {orders.length > 0 && (
+                {studentOrders.length > 0 && (
                     <Button
                         btnText={
                             <div className="flex items-center gap-2">
@@ -70,13 +70,13 @@ export default function MyOrdersPage() {
                         {icons.loading}
                     </div>
                 </div>
-            ) : orders.length > 0 ? (
+            ) : studentOrders.length > 0 ? (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                    {orders.map((order, i) => (
+                    {studentOrders.map((order, i) => (
                         <motion.div
                             key={order._id}
                             initial={{ y: 20, opacity: 0 }}
@@ -86,7 +86,7 @@ export default function MyOrdersPage() {
                             <StudentOrderCard
                                 order={order}
                                 reference={
-                                    i + 1 === orders.length &&
+                                    i + 1 === studentOrders.length &&
                                     ordersInfo?.hasNextPage
                                         ? paginateRef
                                         : null

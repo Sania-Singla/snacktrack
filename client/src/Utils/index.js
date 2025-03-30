@@ -1,6 +1,7 @@
 import verifyExpression from './regex';
 import paginate from './paginate';
 import { fileRestrictions } from './files';
+import { sendNotification } from './notifications';
 import {
     formatDateExact,
     formatDateRelative,
@@ -12,6 +13,7 @@ import { getRollNo } from './student';
 
 export {
     verifyExpression,
+    sendNotification,
     paginate,
     fileRestrictions,
     formatDateExact,

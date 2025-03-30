@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import './Styles/index.css';
 
-import { RouterProvider } from 'react-router-dom';
+import { RouterProvider, useNavigate } from 'react-router-dom';
 import { router } from './Router';
 
 import {
@@ -11,22 +11,28 @@ import {
     SearchContextProvider,
     StudentContextProvider,
     SnackContextProvider,
+    OrderContextProvider,
+    SocketContextProvider,
 } from './Contexts';
 
 function Root() {
     return (
         <UserContextProvider>
-            <SnackContextProvider>
-                <StudentContextProvider>
-                    <PopupContextProvider>
-                        <SideBarContextProvider>
-                            <SearchContextProvider>
-                                <RouterProvider router={router} />
-                            </SearchContextProvider>
-                        </SideBarContextProvider>
-                    </PopupContextProvider>
-                </StudentContextProvider>
-            </SnackContextProvider>
+            <OrderContextProvider>
+                <SocketContextProvider>
+                    <SnackContextProvider>
+                        <StudentContextProvider>
+                            <PopupContextProvider>
+                                <SideBarContextProvider>
+                                    <SearchContextProvider>
+                                        <RouterProvider router={router} />
+                                    </SearchContextProvider>
+                                </SideBarContextProvider>
+                            </PopupContextProvider>
+                        </StudentContextProvider>
+                    </SnackContextProvider>
+                </SocketContextProvider>
+            </OrderContextProvider>
         </UserContextProvider>
     );
 }

@@ -57,6 +57,8 @@ export default function SnackView({ snack, reference }) {
             image,
             type: 'Snack',
             quantity: 1,
+            isPacked: false,
+            specialInstructions: '',
         };
         localStorage.setItem(
             'cartItems',

@@ -9,6 +9,8 @@ const MAX_FILE_SIZE = 5;
 const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 const SERVER_ERROR = 500;
 const BAD_REQUEST = 400;
+const PER_ITEM_PACKAGING_CHARGES = 0.5;
+const TAX = 0.05; // 5% tax on total amount
 
 const CONTRIBUTORS = [
     {
@@ -58,10 +60,12 @@ export {
     SNACK_PLACEHOLDER_IMAGE,
     USER_PLACEHOLDER_IMAGE,
     MAX_FILE_SIZE,
+    PER_ITEM_PACKAGING_CHARGES,
     ALLOWED_EXT,
     CONTRIBUTORS,
     EMAIL,
     CONTACTNUMBER,
     SERVER_ERROR,
     BAD_REQUEST,
+    TAX,
 };

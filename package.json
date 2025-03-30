@@ -5,7 +5,8 @@
     "scripts": {
         "client": "cd client && npm i && npm run dev",
         "server": "cd server && npm i && npm run dev",
-        "dev": "concurrently \"npm run client\" \"npm run server\""
+        "dev": "concurrently \"npm run client\" \"npm run server\"",
+        "build": "npm i && cd client && npm i && cd ../server && npm i"
     },
     "keywords": [],
     "author": "Kode Crafts",

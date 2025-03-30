@@ -8,14 +8,18 @@ const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });
 
 io.on('connection', async (socket) => {
-    const userId = socket.handshake.auth.userId;
+    const { userId, canteenId, role } = socket.handshake.auth;
 
     console.log('a user connected:', socket.id);
 
     // store its socket id in cache (redis)
     try {
-        await setSocketId(userId, socket);
-        console.log(`socket id of user ${userId} stored in cache.`);
+        role === 'student'
+            ? await setSocketId(userId, socket)
+            : await setSocketId(canteenId, socket);
+        console.log(
+            `socket id of user ${role === 'student' ? userId : canteenId} stored in cache.`
+        );
     } catch (err) {
         return console.error("Error store user's socket id in cache: ", err);
     }

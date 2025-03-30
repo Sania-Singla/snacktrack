@@ -5,9 +5,10 @@ import { paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { motion } from 'framer-motion';
 import { ContractorOrderCard } from '..';
+import { useOrderContext } from '../../Contexts';
 
 export default function CompletedOrders() {
-    const [orders, setOrders] = useState([]);
+    const { pickedUpOrders, setPickedUpOrders } = useOrderContext();
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function CompletedOrders() {
                     signal
                 );
                 if (res && !res.message) {
-                    setOrders(res.orders);
+                    setPickedUpOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
                 }
             } catch (err) {
@@ -44,13 +45,13 @@ export default function CompletedOrders() {
 
     return loading ? (
         <div>loading...</div>
-    ) : orders.length > 0 ? (
+    ) : pickedUpOrders.length > 0 ? (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-            {orders.map((order, i) => (
+            {pickedUpOrders.map((order, i) => (
                 <motion.div
                     key={order._id}
                     initial={{ y: 20, opacity: 0 }}
@@ -60,7 +61,8 @@ export default function CompletedOrders() {
                     <ContractorOrderCard
                         order={order}
                         reference={
-                            i + 1 === orders.length && ordersInfo?.hasNextPage
+                            i + 1 === pickedUpOrders.length &&
+                            ordersInfo?.hasNextPage
                                 ? paginateRef
                                 : null
                         }

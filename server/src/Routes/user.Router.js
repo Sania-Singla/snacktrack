@@ -14,7 +14,7 @@ import {
     getCanteens,
     login,
     getContractors,
-    getOrders,
+    getKitchenOrders,
 } from '../Controllers/user.Controller.js';
 
 userRouter.route('/canteens').get(getCanteens);
@@ -23,7 +23,7 @@ userRouter.route('/login').patch(login);
 
 userRouter.route('/contractors').post(verifyAdminKeyJwt, getContractors);
 
-userRouter.route('/orders').post(verifyStaffKeyJwt, getOrders);
+userRouter.route('/orders').post(verifyStaffKeyJwt, getKitchenOrders);
 
 userRouter.use(verifyJwt);
 

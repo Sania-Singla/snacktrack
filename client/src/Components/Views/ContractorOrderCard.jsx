@@ -1,15 +1,17 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
-import { getRollNo } from '../../Utils';
+import { getRollNo, sendNotification } from '../../Utils';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
+import { useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
     const { amount, _id, createdAt, items, studentInfo } = order;
     const rollNo = getRollNo(studentInfo?.userName);
+    const { socket } = useSocketContext();
     const [statusOptions, setStatusOptions] = useState([
         { value: '', label: 'Pending' },
         { value: 'PickedUp', label: 'Picked Up' },
@@ -24,6 +26,10 @@ export default function ContractorOrderCard({ order, reference }) {
             const res = await orderService.updateOrderStatus(_id, status);
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
+                socket.emit(`order${status}`, order);
+                // TODO: SEND NOTIFICATION TO STUDENT
+                // const text = `Your order has been ${status.toLowerCase()}.`;
+                // sendNotification(text);
             }
         } catch (err) {
             navigate('/server-error');

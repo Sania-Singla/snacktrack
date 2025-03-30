@@ -44,6 +44,14 @@ const orderSchema = new Schema(
                     required: true,
                     default: 1,
                 },
+                specialInstructions: {
+                    type: String,
+                    default: '',
+                },
+                isPacked: {
+                    type: Boolean,
+                    default: false,
+                },
                 price: {
                     // usefull when we are adding specific variants for items (each variant will be considered as separate item)
                     type: Number,

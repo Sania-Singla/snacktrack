@@ -6,17 +6,112 @@ import { Types } from 'mongoose';
 // only student can do
 
 const placeOrder = tryCatch('place order', async (req, res) => {
-    const { cartItems, total } = req.body;
+    const { cartItems, amount, packingCharges } = req.body;
     const student = req.user;
 
+    // Create a new order
     const order = await Order.create({
         studentId: student._id,
         canteenId: student.canteenId,
-        amount: total,
+        amount,
         items: cartItems,
+        packingCharges,
     });
 
-    return res.status(OK).json(order);
+    // Now, populate the items just like in getCanteenOrders
+    const populatedOrder = await Order.aggregate([
+        { $match: { _id: order._id } },
+        { $unwind: '$items' },
+        {
+            $lookup: {
+                from: 'students',
+                localField: 'studentId',
+                foreignField: '_id',
+                as: 'studentInfo',
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            phoneNumber: 1,
+                            rollNo: 1,
+                            avatar: 1,
+                            userName: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: 'snacks',
+                localField: 'items.itemId',
+                foreignField: '_id',
+                as: 'snackDetails',
+                pipeline: [{ $project: { name: 1, image: 1 } }],
+            },
+        },
+        {
+            $lookup: {
+                from: 'packagedfoods',
+                localField: 'items.itemId',
+                foreignField: '_id',
+                as: 'packagedFoodDetails',
+                pipeline: [{ $project: { category: 1 } }],
+            },
+        },
+        {
+            $addFields: {
+                'items.name': {
+                    $cond: [
+                        { $eq: ['$items.itemType', 'Snack'] },
+                        { $arrayElemAt: ['$snackDetails.name', 0] },
+                        null,
+                    ],
+                },
+                'items.image': {
+                    $cond: [
+                        { $eq: ['$items.itemType', 'Snack'] },
+                        { $arrayElemAt: ['$snackDetails.image', 0] },
+                        null,
+                    ],
+                },
+                'items.category': {
+                    $cond: [
+                        { $eq: ['$items.itemType', 'PackagedFood'] },
+                        {
+                            $arrayElemAt: ['$packagedFoodDetails.category', 0],
+                        },
+                        null,
+                    ],
+                },
+            },
+        },
+        {
+            $group: {
+                _id: '$_id',
+                amount: { $first: '$amount' },
+                packingCharges: { $first: '$packingCharges' },
+                status: { $first: '$status' },
+                canteenId: { $first: '$canteenId' },
+                studentId: { $first: '$studentId' },
+                items: { $push: '$items' },
+                createdAt: { $first: '$createdAt' },
+                updatedAt: { $first: '$updatedAt' },
+                studentInfo: {
+                    $first: { $arrayElemAt: ['$studentInfo', 0] },
+                },
+            },
+        },
+        { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
+    ]);
+
+    return res
+        .status(OK)
+        .json(
+            populatedOrder.length
+                ? populatedOrder[0]
+                : { message: 'Order not found' }
+        );
 });
 
 // implement something to flush all the orders after 6 months to save space
@@ -80,6 +175,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                 $group: {
                     _id: '$_id',
                     amount: { $first: '$amount' },
+                    packingCharges: { $first: '$packingCharges' },
                     status: { $first: '$status' },
                     canteenId: { $first: '$canteenId' },
                     studentId: { $first: '$studentId' },
@@ -233,6 +329,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 $group: {
                     _id: '$_id',
                     amount: { $first: '$amount' },
+                    packingCharges: { $first: '$packingCharges' },
                     status: { $first: '$status' },
                     canteenId: { $first: '$canteenId' },
                     studentId: { $first: '$studentId' },

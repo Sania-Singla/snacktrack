@@ -5,6 +5,7 @@ import { Button, Dropdown, OrderDropdown } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
 import { getRollNo } from '../Utils';
+import { useUserContext } from '../Contexts';
 
 export default function KitchenPage() {
     const [orders, setOrders] = useState([]);
@@ -12,6 +13,7 @@ export default function KitchenPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [key, setKey] = useState('');
+    const { setUser } = useUserContext();
     const [verifying, setVerifying] = useState(false);
     const [showKey, setShowKey] = useState(false);
     const [hostel, setHostel] = useState({});
@@ -37,6 +39,10 @@ export default function KitchenPage() {
                     if (res.message) {
                         const data = await userService.getCanteens(signal);
                         if (data) {
+                            setUser({
+                                canteenId: res[0].canteenId,
+                                role: 'contractor', // although staff but no issue (non impacting)
+                            });
                             setHostels((prev) => [
                                 ...prev,
                                 ...data.map((h) => ({
@@ -89,6 +95,7 @@ export default function KitchenPage() {
                     name,
                     itemId,
                     specialInstructions,
+                    isPacked,
                 }) => {
                     if (itemType === 'Snack') {
                         // for left side
@@ -103,6 +110,7 @@ export default function KitchenPage() {
                             specialInstructions:
                                 specialInstructions ||
                                 'No special instructions',
+                            isPacked,
                         });
 
                         // for right side
@@ -198,18 +206,16 @@ export default function KitchenPage() {
                         <div className="divide-y divide-gray-200 max-h-[calc(100vh-220px)] overflow-y-auto">
                             {individualItems.length > 0 ? (
                                 individualItems.map(
-                                    (
-                                        {
-                                            orderId,
-                                            itemId,
-                                            fullName,
-                                            rollNo,
-                                            itemName,
-                                            quantity,
-                                            specialInstructions,
-                                        },
-                                        i
-                                    ) => (
+                                    ({
+                                        orderId,
+                                        itemId,
+                                        fullName,
+                                        rollNo,
+                                        itemName,
+                                        quantity,
+                                        specialInstructions,
+                                        isPacked,
+                                    }) => (
                                         <div
                                             key={orderId + itemId}
                                             className="p-4 hover:bg-gray-50 transition-colors flex flex-col gap-2"
@@ -232,10 +238,17 @@ export default function KitchenPage() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between gap-4">
-                                                <p className="text-sm text-gray-500 mt-1 italic">
-                                                    {specialInstructions}
-                                                </p>
+                                            <div className="flex justify-between items-center gap-4">
+                                                <div className="space-x-2">
+                                                    {isPacked && (
+                                                        <span className="px-2 pt-[2px] pb-[3px] text-xs font-bold rounded-full bg-yellow-50 text-yellow-700">
+                                                            Pack
+                                                        </span>
+                                                    )}
+                                                    <span className="text-sm text-gray-500 mt-1 italic">
+                                                        {specialInstructions}
+                                                    </span>
+                                                </div>
 
                                                 <div className="w-fit">
                                                     <OrderDropdown

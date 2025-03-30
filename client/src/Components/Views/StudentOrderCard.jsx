@@ -4,7 +4,7 @@ import { icons } from '../../Assets/icons';
 
 export default function StudentOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
-    const { amount, _id, createdAt, status, items } = order;
+    const { amount, _id, createdAt, status, items, packingCharges } = order;
 
     return (
         <motion.div
@@ -106,9 +106,8 @@ export default function StudentOrderCard({ order, reference }) {
                             <span>₹{amount.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm text-gray-600 mt-1">
-                            <span>Packing</span>
-                            {/* <span>₹{packingCharges.toFixed(2)}</span> */}
-                            <span>₹0.00</span>
+                            <span>Packing Charges</span>
+                            <span>₹{packingCharges.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-medium text-gray-900 mt-2">
                             <span>Total</span>
