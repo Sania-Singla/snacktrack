@@ -1,0 +1,20 @@
+{
+    "name": "snack-track",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "client": "cd client && npm i && npm run dev",
+        "server": "cd server && npm i && npm run dev",
+        "dev": "concurrently \"npm run client\" \"npm run server\""
+    },
+    "keywords": [],
+    "author": "Kode Crafts",
+    "license": "ISC",
+    "description": "A web application to track your snacks",
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "concurrently": "^9.1.2",
+        "nodemon": "^3.1.9",
+        "prettier": "^3.5.3"
+    }
+}
