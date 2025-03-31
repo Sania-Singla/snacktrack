@@ -31,10 +31,9 @@ export default function App() {
                     if (prem === 'granted') {
                         // Generate firebase messaging Token
                         const token = await getToken(messaging, {
-                            vapidKey:
-                                'BCxZt9stp1i5D14jimoNnfZa74RhKjwpbSxB32RRwa9ryG0TLVomU1c2VW9a0JXmtJoHNj9pWxXQ2c8En151KD8',
+                            vapidKey: import.meta.env.VITE_VAPID_KEY,
                         });
-                        console.log('Token', token);
+                        await userService.saveNotificationToken(token);
                     } else toast.error('Notification permissions are blocked');
                 } else {
                     setUser(null);

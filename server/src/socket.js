@@ -3,6 +3,7 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/options.js';
 import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
+import { sendNotification, getUserNotificationToken } from './firebase.js';
 
 const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });
@@ -34,19 +35,46 @@ io.on('connection', async (socket) => {
 
     // order rejected => notify student
     socket.on('orderRejected', async (order) => {
-        const socketId = await getSocketId(order.studentId);
+        const [socketId, token] = await Promise.all([
+            getSocketId(order.studentId),
+            getUserNotificationToken(order.studentId),
+        ]);
+        if (token)
+            sendNotification(
+                token,
+                'Order Update',
+                'Your Order has been rejected'
+            );
         socket.to(socketId).emit('orderRejected', order);
     });
 
     // order prepared  => notify student
     socket.on('orderPrepared', async (order) => {
-        const socketId = await getSocketId(order.studentId);
+        const [socketId, token] = await Promise.all([
+            getSocketId(order.studentId),
+            getUserNotificationToken(order.studentId),
+        ]);
+        if (token)
+            sendNotification(
+                token,
+                'Order Update',
+                'Your Order is ready to be picked up'
+            );
         socket.to(socketId).emit('orderPrepared', order);
     });
 
     // order picked up => notify student
     socket.on('orderPickedUp', async (order) => {
-        const socketId = await getSocketId(order.studentId);
+        const [socketId, token] = await Promise.all([
+            getSocketId(order.studentId),
+            getUserNotificationToken(order.studentId),
+        ]);
+        if (token)
+            sendNotification(
+                token,
+                'Order Update',
+                'Your Order has been picked up'
+            );
         socket.to(socketId).emit('orderPickedUp', order);
     });
 

@@ -180,6 +180,28 @@ class UserService {
         }
     }
 
+    async saveNotificationToken(token) {
+        try {
+            const res = await fetch('/api/users/notification-token', {
+                method: 'PATCH',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token }),
+            });
+
+            const data = await res.json();
+            console.log(data);
+
+            if (res.status === SERVER_ERROR) {
+                throw new Error(data.message);
+            }
+            return data;
+        } catch (err) {
+            console.error('error in saveNotificationToken service', err);
+            throw err;
+        }
+    }
+
     async resendEmailVerification(email) {
         try {
             const res = await fetch('/api/users/resend-mail', {

@@ -19,6 +19,8 @@ const transporter = await generateTransporter();
 // await seedDatabase();
 
 // start the server
-http.listen(PORT, () => console.log(`✅ server listening on port ${PORT}...`));
+http.listen(PORT, '0.0.0.0', () =>
+    console.log(`✅ server listening on port ${PORT}...`)
+);
 
 export { transporter, redisClient };

@@ -9,6 +9,7 @@ import {
 } from '../Constants/constants';
 import { orderService } from '../Services';
 import { usePopupContext, useSocketContext, useUserContext } from '../Contexts';
+import toast from 'react-hot-toast';
 
 export default function CartPage() {
     const [ordering, setOrdering] = useState(false);

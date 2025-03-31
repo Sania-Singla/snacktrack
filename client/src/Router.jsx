@@ -49,6 +49,7 @@ export const router = createBrowserRouter(
                     <Route path="about-us" element={<AboutUsPage />} />
                     <Route path="contact-us" element={<ContactUsPage />} />
                     <Route path="faqs" element={<FAQpage />} />
+                    <Route path="server-error" element={<ServerErrorPage />} />
                 </Route>
 
                 {/* accessable to student only */}
@@ -103,7 +104,7 @@ export const router = createBrowserRouter(
             <Route path="new-user" element={<Layout renderTemplate={false} />}>
                 <Route path="" element={<NewUserPage />} />
             </Route>
-            <Route path="server-error" element={<ServerErrorPage />} />
+
             <Route path="*" element={<NotFoundPage />} />
         </Route>
     )

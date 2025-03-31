@@ -1,6 +1,6 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
-import { getRollNo, sendNotification, formatTime } from '../../Utils';
+import { getRollNo, formatTime } from '../../Utils';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -27,9 +27,6 @@ export default function ContractorOrderCard({ order, reference }) {
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
                 socket.emit(`order${status}`, order);
-                // TODO: SEND NOTIFICATION TO STUDENT
-                // const text = `Your order has been ${status.toLowerCase()}.`;
-                // sendNotification(text);
             }
         } catch (err) {
             navigate('/server-error');
