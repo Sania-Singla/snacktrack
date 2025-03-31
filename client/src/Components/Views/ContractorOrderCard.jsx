@@ -1,6 +1,6 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
-import { getRollNo, sendNotification } from '../../Utils';
+import { getRollNo, sendNotification, formatTime } from '../../Utils';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -99,13 +99,7 @@ export default function ContractorOrderCard({ order, reference }) {
                             ORDER #{_id.slice(-8).toUpperCase()}
                         </h2>
                         <p className="text-xs text-gray-500">
-                            {new Date(createdAt).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })}
+                            {formatTime(createdAt)}
                         </p>
                     </div>
                     <div className="flex items-center gap-3">

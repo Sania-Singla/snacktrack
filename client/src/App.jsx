@@ -3,6 +3,9 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSideBarContext, useUserContext, usePopupContext } from './Contexts';
 import { userService } from './Services';
 import { icons } from './Assets/icons';
+import toast from 'react-hot-toast';
+import { messaging } from './Utils';
+import { getToken } from 'firebase/messaging';
 
 export default function App() {
     const [loading, setLoading] = useState(true);
@@ -20,12 +23,26 @@ export default function App() {
         (async function currentUser() {
             try {
                 setLoading(true);
-                const user = await userService.getCurrentUser(signal);
-                setUser(user && !user.message ? user : null);
+                const res = await userService.getCurrentUser(signal);
+                if (res && !res.message) {
+                    setUser(res);
+                    setLoading(false);
+                    const prem = await Notification.requestPermission();
+                    if (prem === 'granted') {
+                        // Generate firebase messaging Token
+                        const token = await getToken(messaging, {
+                            vapidKey:
+                                'BCxZt9stp1i5D14jimoNnfZa74RhKjwpbSxB32RRwa9ryG0TLVomU1c2VW9a0JXmtJoHNj9pWxXQ2c8En151KD8',
+                        });
+                        console.log('Token', token);
+                    } else toast.error('Notification permissions are blocked');
+                } else {
+                    setUser(null);
+                    setLoading(false);
+                }
             } catch (err) {
-                navigate('/server-error');
-            } finally {
                 setLoading(false);
+                navigate('/server-error');
             }
         })();
 

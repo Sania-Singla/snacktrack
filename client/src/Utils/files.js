@@ -13,9 +13,6 @@ export function fileRestrictions(file) {
         const fileSizeMB = file.size / (1024 * 1024);
         if (!ALLOWED_EXT.includes(extension) || fileSizeMB > MAX_FILE_SIZE) {
             return false;
-        }
-        return true;
-    } else {
-        return 'file is missing';
-    }
+        } else return true;
+    } else return 'file is missing';
 }

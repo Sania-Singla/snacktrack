@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { icons } from '../../Assets/icons';
+import { formatTime } from '../../Utils';
 
 export default function StudentOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -23,13 +24,7 @@ export default function StudentOrderCard({ order, reference }) {
                             ORDER #{_id.slice(-8).toUpperCase()}
                         </h2>
                         <p className="text-xs text-gray-500">
-                            {new Date(createdAt).toLocaleDateString('en-US', {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                            })}
+                            {formatTime(createdAt)}
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">

@@ -4,9 +4,10 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "npm run format && vite",
+        "generate-config": "node scripts/generate-firebase-config.js",
+        "dev": "npm run generate-config && vite",
         "format": "prettier --write .",
-        "build": "vite build",
+        "build": "npm run generate-config && vite build",
         "lint": "eslint .",
         "preview": "vite preview"
     },
@@ -14,6 +15,7 @@
         "@tailwindcss/vite": "^4.0.12",
         "date-fns": "^4.1.0",
         "dotenv": "^16.4.7",
+        "firebase": "^11.5.0",
         "framer-motion": "^12.4.10",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
