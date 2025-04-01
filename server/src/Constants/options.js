@@ -5,20 +5,12 @@ const COOKIE_OPTIONS = {
     sameSite: 'None',
 };
 
-const WHITELIST = process.env.WHITELIST ? process.env.WHITELIST.split(',') : [];
-
 const CORS_OPTIONS = {
-    origin: function (origin, callback) {
-        if (!origin || WHITELIST.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: process.env.FRONTEND_URL,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
     optionsSuccessStatus: 200,
     allowedHeaders: ['Content-Type', 'authorization'],
 };
 
-export { COOKIE_OPTIONS, CORS_OPTIONS, WHITELIST };
+export { COOKIE_OPTIONS, CORS_OPTIONS };

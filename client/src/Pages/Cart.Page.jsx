@@ -72,6 +72,7 @@ export default function CartPage() {
                 packingCharges
             );
             if (res && !res.message) {
+                socket.emit('newOrder', res);
                 setShowPopup(true);
                 setPopupInfo({
                     type: 'orderPlaced',
@@ -79,7 +80,6 @@ export default function CartPage() {
                 });
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
-                socket.emit('newOrder', res);
             }
         } catch (err) {
             navigate('/server-error');

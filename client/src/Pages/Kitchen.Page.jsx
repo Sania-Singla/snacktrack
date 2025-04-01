@@ -39,10 +39,6 @@ export default function KitchenPage() {
                     if (res.message) {
                         const data = await userService.getCanteens(signal);
                         if (data) {
-                            setUser({
-                                canteenId: res[0].canteenId,
-                                role: 'contractor', // although staff but no issue (non impacting)
-                            });
                             setHostels((prev) => [
                                 ...prev,
                                 ...data.map((h) => ({
@@ -52,7 +48,13 @@ export default function KitchenPage() {
                             ]);
                             setError(true);
                         }
-                    } else setOrders(res);
+                    } else {
+                        setUser({
+                            canteenId: res[0].canteenId,
+                            role: 'contractor', // although staff but no issue (non impacting)
+                        });
+                        setOrders(res);
+                    }
                 }
             } catch (err) {
                 console.log(err);
@@ -72,6 +74,10 @@ export default function KitchenPage() {
                 `${hostel.hostelType}${hostel.hostelNumber}-${key}`
             );
             if (res && !res.message) {
+                setUser({
+                    canteenId: res[0].canteenId,
+                    role: 'contractor', // although staff but no issue (non impacting)
+                });
                 setError(false);
                 setOrders(res);
             } else toast.error('Please Enter a Valid Key');

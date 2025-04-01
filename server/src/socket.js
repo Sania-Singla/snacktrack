@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/options.js';
 import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
-import { sendNotification, getUserNotificationToken } from './firebase.js';
+import { createMessage } from './sms.js';
 
 const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });
@@ -29,52 +29,46 @@ io.on('connection', async (socket) => {
 
     // new order => notify canteen
     socket.on('newOrder', async (order) => {
+        console.log('new order event received');
         const socketId = await getSocketId(order.canteenId);
+        createMessage({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order has been placed successfully',
+            link: process.env.FRONTEND_URL + '/my-orders',
+        });
         socket.to(socketId).emit('newOrder', order);
     });
 
     // order rejected => notify student
     socket.on('orderRejected', async (order) => {
-        const [socketId, token] = await Promise.all([
-            getSocketId(order.studentId),
-            getUserNotificationToken(order.studentId),
-        ]);
-        if (token)
-            sendNotification(
-                token,
-                'Order Update',
-                'Your Order has been rejected'
-            );
+        const socketId = await getSocketId(order.studentId);
+        createMessage({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order has been rejected',
+            link: process.env.FRONTEND_URL + '/my-orders',
+        });
         socket.to(socketId).emit('orderRejected', order);
     });
 
     // order prepared  => notify student
     socket.on('orderPrepared', async (order) => {
-        const [socketId, token] = await Promise.all([
-            getSocketId(order.studentId),
-            getUserNotificationToken(order.studentId),
-        ]);
-        if (token)
-            sendNotification(
-                token,
-                'Order Update',
-                'Your Order is ready to be picked up'
-            );
+        const socketId = await getSocketId(order.studentId);
+        createMessage({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order is ready for pickup',
+            link: process.env.FRONTEND_URL + '/my-orders',
+        });
         socket.to(socketId).emit('orderPrepared', order);
     });
 
     // order picked up => notify student
     socket.on('orderPickedUp', async (order) => {
-        const [socketId, token] = await Promise.all([
-            getSocketId(order.studentId),
-            getUserNotificationToken(order.studentId),
-        ]);
-        if (token)
-            sendNotification(
-                token,
-                'Order Update',
-                'Your Order has been picked up'
-            );
+        const socketId = await getSocketId(order.studentId);
+        createMessage({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order has been picked up',
+            link: process.env.FRONTEND_URL + '/my-orders',
+        });
         socket.to(socketId).emit('orderPickedUp', order);
     });
 

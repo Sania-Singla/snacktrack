@@ -12,13 +12,7 @@ import {
     uploadOnCloudinary,
     deleteFromCloudinary,
 } from '../Helpers/index.js';
-import {
-    Canteen,
-    Student,
-    Contractor,
-    Order,
-    NotificationToken,
-} from '../Models/index.js';
+import { Canteen, Student, Contractor, Order } from '../Models/index.js';
 import bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
 
@@ -278,23 +272,6 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
     return res.status(OK).json(orders);
 });
 
-const saveUserNotificationToken = tryCatch(
-    'save user notification token',
-    async (req, res, next) => {
-        const { token } = req.body;
-        if (!token) return next(new ErrorHandler('missing token', BAD_REQUEST));
-
-        // create if not found or if found then update
-        await NotificationToken.findOneAndUpdate(
-            { userId: new Types.ObjectId(req.user._id) },
-            { $set: { token } },
-            { upsert: true, new: true }
-        );
-
-        return res.status(OK).json({ message: 'token saved successfully' });
-    }
-);
-
 export {
     getCurrentUser,
     login,
@@ -304,5 +281,4 @@ export {
     updateAvatar,
     getCanteens,
     getKitchenOrders,
-    saveUserNotificationToken,
 };

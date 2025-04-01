@@ -292,9 +292,9 @@ const registerStudent = tryCatch(
 
         // send this password on student's email
         await sendMail({
-            to: data.email,
+            to: student.email,
             subject: 'Welcome to SnackTrack',
-            html: `Hello ${data.fullName}, <br> Your temporary password is ${randomPassword}, You can update it anytime after logging in from settings.`,
+            html: `Hello ${student.fullName}, <br> Your temporary password is ${randomPassword}, You can update it anytime after logging in from settings.`,
         });
 
         return res.status(CREATED).json(student);

@@ -3,9 +3,6 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSideBarContext, useUserContext, usePopupContext } from './Contexts';
 import { userService } from './Services';
 import { icons } from './Assets/icons';
-import toast from 'react-hot-toast';
-import { messaging } from './Utils';
-import { getToken } from 'firebase/messaging';
 
 export default function App() {
     const [loading, setLoading] = useState(true);
@@ -24,24 +21,12 @@ export default function App() {
             try {
                 setLoading(true);
                 const res = await userService.getCurrentUser(signal);
-                if (res && !res.message) {
-                    setUser(res);
-                    setLoading(false);
-                    const prem = await Notification.requestPermission();
-                    if (prem === 'granted') {
-                        // Generate firebase messaging Token
-                        const token = await getToken(messaging, {
-                            vapidKey: import.meta.env.VITE_VAPID_KEY,
-                        });
-                        await userService.saveNotificationToken(token);
-                    } else toast.error('Notification permissions are blocked');
-                } else {
-                    setUser(null);
-                    setLoading(false);
-                }
+                if (res && !res.message) setUser(res);
+                else setUser(null);
             } catch (err) {
-                setLoading(false);
                 navigate('/server-error');
+            } finally {
+                setLoading(false);
             }
         })();
 

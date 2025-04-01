@@ -5,7 +5,7 @@ import { useUserContext } from './User.Context';
 
 const SocketContext = createContext();
 
-const SocketContextProvider = ({ children, navigate }) => {
+const SocketContextProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const { user } = useUserContext();
     const { setStudentOrders, setPendingOrders } = useOrderContext();
@@ -30,24 +30,19 @@ const SocketContextProvider = ({ children, navigate }) => {
         // Error Handling
         socketInstance.on('connect_error', (err) => {
             console.error('Socket connection error:', err);
-            navigate('/server-error');
+            console.log(err);
         });
 
         socketInstance.on('error', (err) => {
             console.error('Socket error:', err);
-            navigate('/server-error');
+            console.log(err);
         });
 
         // Events
         socketInstance.on('orderRejected', (order) => {
             setStudentOrders((prev) =>
                 prev.map((o) =>
-                    o._id === order._id
-                        ? {
-                              ...o,
-                              status: 'Rejected',
-                          }
-                        : o
+                    o._id === order._id ? { ...o, status: 'Rejected' } : o
                 )
             );
         });
@@ -55,12 +50,7 @@ const SocketContextProvider = ({ children, navigate }) => {
         socketInstance.on('orderPrepared', (order) => {
             setStudentOrders((prev) =>
                 prev.map((o) =>
-                    o._id === order._id
-                        ? {
-                              ...o,
-                              status: 'Prepared',
-                          }
-                        : o
+                    o._id === order._id ? { ...o, status: 'Prepared' } : o
                 )
             );
         });
@@ -68,12 +58,7 @@ const SocketContextProvider = ({ children, navigate }) => {
         socketInstance.on('orderPickedUp', (order) => {
             setStudentOrders((prev) =>
                 prev.map((o) =>
-                    o._id === order._id
-                        ? {
-                              ...o,
-                              status: 'PickedUp',
-                          }
-                        : o
+                    o._id === order._id ? { ...o, status: 'PickedUp' } : o
                 )
             );
         });

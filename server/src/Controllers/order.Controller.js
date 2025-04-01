@@ -240,9 +240,16 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     const { limit = 10, page = 1, status = 'Pending' } = req.query;
     const canteenId = req.user.canteenId; // contractor
 
+    // Get current date in UTC
     const now = new Date();
-    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+    const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
+
+    // Set hours in UTC
+    const startOfDay = new Date(utcNow);
+    startOfDay.setUTCHours(8, 0, 0, 0); // 8 AM UTC
+
+    const endOfDay = new Date(utcNow);
+    endOfDay.setUTCHours(22, 0, 0, 999); // 10 PM UTC
 
     // Fetch today's orders from this canteen
     const result = await Order.aggregatePaginate(
@@ -250,10 +257,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
             {
                 $match: {
                     canteenId: new Types.ObjectId(canteenId),
-                    $or: [
-                        { createdAt: { $gte: startOfDay, $lt: endOfDay } },
-                        { updatedAt: { $gte: startOfDay, $lt: endOfDay } },
-                    ],
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
                     status,
                 },
             },
