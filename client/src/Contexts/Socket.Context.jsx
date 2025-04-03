@@ -2,13 +2,16 @@ import { useContext, createContext, useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useOrderContext } from './Order.Context';
 import { useUserContext } from './User.Context';
+import { usePopupContext } from './Popup.Context';
+import { playSound } from '../Utils';
 
 const SocketContext = createContext();
 
 const SocketContextProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const { user } = useUserContext();
-    const { setStudentOrders, setPendingOrders } = useOrderContext();
+    const { setShowPopup, setPopupInfo } = usePopupContext();
+    const { setStudentOrders } = useOrderContext();
 
     function connectSocket() {
         if (!user || socket) return;
@@ -55,6 +58,14 @@ const SocketContextProvider = ({ children }) => {
             );
         });
 
+        socketInstance.on('orderAccepted', (order) => {
+            setStudentOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'Pending' } : o
+                )
+            );
+        });
+
         socketInstance.on('orderPickedUp', (order) => {
             setStudentOrders((prev) =>
                 prev.map((o) =>
@@ -64,7 +75,11 @@ const SocketContextProvider = ({ children }) => {
         });
 
         socketInstance.on('newOrder', (order) => {
-            setPendingOrders((prev) => [order, ...prev]);
+            // make a sound
+            playSound();
+            // show order popup to contractor
+            setShowPopup(true);
+            setPopupInfo({ type: 'newOrder', order });
         });
 
         return socketInstance; // optional

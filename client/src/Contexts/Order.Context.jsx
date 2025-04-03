@@ -4,12 +4,7 @@ const OrderContext = createContext();
 
 const OrderContextProvider = ({ children }) => {
     const [studentOrders, setStudentOrders] = useState([]);
-
-    // for canteen & kitchen
-    const [pendingOrders, setPendingOrders] = useState([]);
-    const [rejectedOrders, setRejectedOrders] = useState([]);
-    const [preparedOrders, setPreparedOrders] = useState([]);
-    const [pickedUpOrders, setPickedUpOrders] = useState([]);
+    const [pendingOrders, setPendingOrders] = useState([]); // for canteen & kitchen
 
     return (
         <OrderContext.Provider
@@ -18,12 +13,6 @@ const OrderContextProvider = ({ children }) => {
                 setStudentOrders,
                 pendingOrders,
                 setPendingOrders,
-                rejectedOrders,
-                setRejectedOrders,
-                preparedOrders,
-                setPreparedOrders,
-                pickedUpOrders,
-                setPickedUpOrders,
             }}
         >
             {children}

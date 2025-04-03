@@ -1,9 +1,10 @@
 const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api';
-const LIMIT = 20;
+const LIMIT = 10;
 import SANIAIMAGE from '../Assets/images/sania.jpg';
 import LOGO from '../Assets/images/logo.png';
 import SNACK_PLACEHOLDER_IMAGE from '../Assets/images/snack.png';
 import USER_PLACEHOLDER_IMAGE from '../Assets/images/user.png';
+import AUDIO_FILE from '../Assets/audios/notification.wav';
 const EMAIL = 'snacktrack@gmail.com';
 const CONTACTNUMBER = 'xxxxxxxxxx';
 const MAX_FILE_SIZE = 5;
@@ -59,6 +60,7 @@ export {
     BASE_BACKEND_URL,
     LIMIT,
     LOGO,
+    AUDIO_FILE,
     SNACK_PLACEHOLDER_IMAGE,
     USER_PLACEHOLDER_IMAGE,
     MAX_FILE_SIZE,

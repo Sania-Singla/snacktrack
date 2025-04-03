@@ -19,19 +19,19 @@ function Root() {
     return (
         <UserContextProvider>
             <OrderContextProvider>
-                <SocketContextProvider>
-                    <SnackContextProvider>
-                        <StudentContextProvider>
-                            <PopupContextProvider>
+                <PopupContextProvider>
+                    <SocketContextProvider>
+                        <SnackContextProvider>
+                            <StudentContextProvider>
                                 <SideBarContextProvider>
                                     <SearchContextProvider>
                                         <RouterProvider router={router} />
                                     </SearchContextProvider>
                                 </SideBarContextProvider>
-                            </PopupContextProvider>
-                        </StudentContextProvider>
-                    </SnackContextProvider>
-                </SocketContextProvider>
+                            </StudentContextProvider>
+                        </SnackContextProvider>
+                    </SocketContextProvider>
+                </PopupContextProvider>
             </OrderContextProvider>
         </UserContextProvider>
     );

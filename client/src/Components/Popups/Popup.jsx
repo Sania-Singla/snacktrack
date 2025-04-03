@@ -14,6 +14,7 @@ import {
     EmailVerificationPopup,
     OrderPlacedPopup,
     EditCartItemPopup,
+    NewOrderPopup,
 } from '..';
 import { usePopupContext } from '../../Contexts';
 
@@ -38,6 +39,12 @@ export default function Popup() {
     if (!showPopup) return null;
 
     switch (popupInfo.type) {
+        case 'newOrder':
+            return (
+                <Wrapper>
+                    <NewOrderPopup />
+                </Wrapper>
+            );
         case 'editCartItem':
             return (
                 <Wrapper>

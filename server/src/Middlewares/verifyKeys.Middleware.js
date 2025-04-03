@@ -1,4 +1,4 @@
-import jwt, { decode } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { FORBIDDEN, COOKIE_OPTIONS, BAD_REQUEST } from '../Constants/index.js';
 import {
     extractTokens,
@@ -35,7 +35,7 @@ const verifyAdminKeyJwt = async (req, res, next) => {
             const adminKeyToken = await generateAdminKeyToken(key);
             res.cookie('adminKeyToken', adminKeyToken, {
                 ...COOKIE_OPTIONS,
-                maxAge: parseInt(process.env.ADMIN_KEY_TOKEN_MAXAGE),
+                maxAge: Number(process.env.ADMIN_KEY_TOKEN_MAXAGE),
             });
             return next();
         }
@@ -81,7 +81,7 @@ const verifyStaffKeyJwt = async (req, res, next) => {
             const staffKeyToken = await generateStaffKeyToken(key);
             res.cookie('staffKeyToken', staffKeyToken, {
                 ...COOKIE_OPTIONS,
-                maxAge: parseInt(process.env.STAFF_KEY_TOKEN_MAXAGE),
+                maxAge: Number(process.env.STAFF_KEY_TOKEN_MAXAGE),
             });
             const [hostel] = key.split('-');
             req.hostelType = hostel.slice(0, 2);

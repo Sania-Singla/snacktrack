@@ -1,23 +1,22 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
 import { getRollNo, formatTime } from '../../Utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
-import { useSocketContext } from '../../Contexts';
+import { usePopupContext, useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
     const { amount, _id, createdAt, items, studentInfo, packingCharges } =
         order;
-    const rollNo = getRollNo(studentInfo?.userName);
+    const { setShowPopup, setPopupInfo } = usePopupContext();
     const { socket } = useSocketContext();
     const [statusOptions, setStatusOptions] = useState([
         { value: '', label: 'Pending' },
         { value: 'PickedUp', label: 'Picked Up' },
         { value: 'Prepared', label: 'Prepared' },
-        { value: 'Rejected', label: 'Rejected' },
     ]);
     const [status, setStatus] = useState(order.status);
     const navigate = useNavigate();
@@ -35,10 +34,8 @@ export default function ContractorOrderCard({ order, reference }) {
     }
 
     return (
-        <motion.div
+        <div
             ref={reference}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
             className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-visible transition-all hover:shadow-md"
         >
             <div
@@ -60,7 +57,9 @@ export default function ContractorOrderCard({ order, reference }) {
                                 {studentInfo?.fullName}
                             </h3>
                             <div className="flex items-center gap-1 text-xs text-gray-600">
-                                <span>Roll No: {rollNo}</span>
+                                <span>
+                                    Roll No: {getRollNo(studentInfo?.userName)}
+                                </span>
                                 <span>•</span>
                                 <span>
                                     {studentInfo?.phoneNumber || 'No phone'}
@@ -170,6 +169,6 @@ export default function ContractorOrderCard({ order, reference }) {
                     </div>
                 </motion.div>
             )}
-        </motion.div>
+        </div>
     );
 }

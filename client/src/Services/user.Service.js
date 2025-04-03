@@ -123,6 +123,7 @@ class UserService {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key }),
+                credentials: 'include',
             });
 
             const data = await res.json();
@@ -144,6 +145,7 @@ class UserService {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key }),
+                credentials: 'include',
             });
 
             const data = await res.json();

@@ -37,6 +37,7 @@ import AddSnackPopup from './Popups/AddSnack.Popup';
 import AddItemPopup from './Popups/AddItem.Popup';
 import EmailVerificationPopup from './Popups/EmailVerification.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
+import NewOrderPopup from './Popups/NewOrder.Popup';
 import EmptyCart from './Views/EmptyCart';
 import OrderDropdown from './General/OrderDropdown';
 
@@ -61,6 +62,7 @@ export {
     EditCartItemPopup,
     RemoveAllStudentsPopup,
     StudentOrderCard,
+    NewOrderPopup,
     NotificationsPopup,
     EditStudentPopup,
     UpdateAvatarPopup,

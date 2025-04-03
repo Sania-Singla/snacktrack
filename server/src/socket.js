@@ -29,13 +29,8 @@ io.on('connection', async (socket) => {
 
     // new order => notify canteen
     socket.on('newOrder', async (order) => {
-        console.log('new order event received');
         const socketId = await getSocketId(order.canteenId);
-        createMessage({
-            to: order.studentInfo.phoneNumber,
-            text: 'Your Order has been placed successfully',
-            link: process.env.FRONTEND_URL + '/my-orders',
-        });
+        // will send sms on order acceptance
         socket.to(socketId).emit('newOrder', order);
     });
 
@@ -59,6 +54,17 @@ io.on('connection', async (socket) => {
             link: process.env.FRONTEND_URL + '/my-orders',
         });
         socket.to(socketId).emit('orderPrepared', order);
+    });
+
+    // order accepted  => notify student
+    socket.on('orderAccepted', async (order) => {
+        const socketId = await getSocketId(order.studentId);
+        createMessage({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order is accepted and will be begin preparing soon',
+            link: process.env.FRONTEND_URL + '/my-orders',
+        });
+        socket.to(socketId).emit('orderAccepted', order);
     });
 
     // order picked up => notify student

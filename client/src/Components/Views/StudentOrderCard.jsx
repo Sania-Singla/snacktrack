@@ -8,10 +8,8 @@ export default function StudentOrderCard({ order, reference }) {
     const { amount, _id, createdAt, status, items, packingCharges } = order;
 
     return (
-        <motion.div
+        <div
             ref={reference}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
             className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md"
         >
             <div
@@ -111,6 +109,6 @@ export default function StudentOrderCard({ order, reference }) {
                     </div>
                 </motion.div>
             )}
-        </motion.div>
+        </div>
     );
 }
