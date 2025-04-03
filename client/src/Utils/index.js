@@ -5,4 +5,11 @@ import { formatTime } from './formatting';
 import { getRollNo } from './student';
 import { playSound } from './audio';
 
-export { verifyExpression, paginate, fileRestrictions, formatTime, getRollNo, playSound };
+export {
+    verifyExpression,
+    paginate,
+    fileRestrictions,
+    formatTime,
+    getRollNo,
+    playSound,
+};

@@ -1,17 +1,16 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
 import { getRollNo, formatTime } from '../../Utils';
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
-import { usePopupContext, useSocketContext } from '../../Contexts';
+import { useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
     const { amount, _id, createdAt, items, studentInfo, packingCharges } =
         order;
-    const { setShowPopup, setPopupInfo } = usePopupContext();
     const { socket } = useSocketContext();
     const [statusOptions, setStatusOptions] = useState([
         { value: '', label: 'Pending' },
@@ -36,7 +35,7 @@ export default function ContractorOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-visible transition-all hover:shadow-md"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md"
         >
             <div
                 className="p-4 cursor-pointer"
@@ -116,59 +115,71 @@ export default function ContractorOrderCard({ order, reference }) {
                 </div>
             </div>
 
-            {expanded && (
-                <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="px-5 pb-5 border-t border-gray-100"
-                >
-                    <div className="space-y-4 mt-4">
-                        {items.map((item) => (
-                            <div
-                                key={item._id}
-                                className="flex justify-between items-center"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="size-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <div className="size-5 text-gray-400">
-                                            {item.itemType === 'Snack'
-                                                ? icons.snack
-                                                : icons.soda}
+            <AnimatePresence>
+                {expanded && (
+                    <motion.div
+                        initial={{ opacity: 0, maxHeight: 0 }}
+                        animate={{
+                            opacity: 1,
+                            maxHeight: 1000, // Large enough to fit all content
+                        }}
+                        exit={{ opacity: 0, maxHeight: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="px-5 pb-5 border-t border-gray-100">
+                            <div className="space-y-4 mt-4">
+                                {items.map((item) => (
+                                    <div
+                                        key={item._id}
+                                        className="flex justify-between items-center"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                <div className="size-5 text-gray-400">
+                                                    {item.itemType === 'Snack'
+                                                        ? icons.snack
+                                                        : icons.soda}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <h3 className="text-sm font-medium text-gray-800 capitalize">
+                                                    {item.name || item.category}
+                                                </h3>
+                                                <p className="text-xs text-gray-500">
+                                                    Qty: {item.quantity} • ₹
+                                                    {item.price.toFixed(2)} each
+                                                </p>
+                                            </div>
                                         </div>
+                                        <span className="text-sm font-semibold text-gray-900">
+                                            ₹
+                                            {(
+                                                item.price * item.quantity
+                                            ).toFixed(2)}
+                                        </span>
                                     </div>
-                                    <div className="space-y-1">
-                                        <h3 className="text-sm font-medium text-gray-800 capitalize">
-                                            {item.name || item.category}
-                                        </h3>
-                                        <p className="text-xs text-gray-500">
-                                            Qty: {item.quantity} • ₹
-                                            {item.price.toFixed(2)} each
-                                        </p>
-                                    </div>
-                                </div>
-                                <span className="text-sm font-semibold text-gray-900">
-                                    ₹{(item.price * item.quantity).toFixed(2)}
-                                </span>
+                                ))}
                             </div>
-                        ))}
-                    </div>
 
-                    <div className="mt-6 pt-4 border-t border-gray-100">
-                        <div className="flex justify-between text-sm text-gray-600">
-                            <span>Subtotal</span>
-                            <span>₹{amount.toFixed(2)}</span>
+                            <div className="mt-6 pt-4 border-t border-gray-100">
+                                <div className="flex justify-between text-sm text-gray-600">
+                                    <span>Subtotal</span>
+                                    <span>₹{amount.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-sm text-gray-600 mt-1">
+                                    <span>Packing</span>
+                                    <span>₹{packingCharges.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between font-medium text-gray-900 mt-2">
+                                    <span>Total</span>
+                                    <span>₹{amount.toFixed(2)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex justify-between text-sm text-gray-600 mt-1">
-                            <span>Packing</span>
-                            <span>₹{packingCharges.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between font-medium text-gray-900 mt-2">
-                            <span>Total</span>
-                            <span>₹{amount.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </motion.div>
-            )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

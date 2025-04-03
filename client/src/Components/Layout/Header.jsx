@@ -88,15 +88,15 @@ export default function Header() {
                         </div>
                     </div>
                 ) : (
-                    <div className="flex items-center justify-center gap-4">
+                    <div>
                         <Button
                             onClick={() => navigate('/register-student')}
                             btnText={
-                                <div className="flex items-center justify-center gap-2">
-                                    <div className="size-[20px] fill-white">
+                                <div className="flex items-center justify-center gap-[5px]">
+                                    <div className="size-[16px] fill-white">
                                         {icons.plus}
                                     </div>
-                                    <span>Add Student</span>
+                                    <span>Student</span>
                                 </div>
                             }
                             title="Add Student"

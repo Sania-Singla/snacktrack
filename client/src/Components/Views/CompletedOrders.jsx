@@ -7,7 +7,7 @@ import { icons } from '../../Assets/icons';
 import { ContractorOrderCard } from '..';
 
 export default function CompletedOrders() {
-    const [orders, setOrders] = useState();
+    const [orders, setOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();

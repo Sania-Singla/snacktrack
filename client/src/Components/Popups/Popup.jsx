@@ -36,14 +36,20 @@ export default function Popup() {
         </div>
     );
 
+    const WrapperWithoutRef = ({ children }) => (
+        <div className="fixed inset-0 z-[1000] backdrop-blur-sm flex items-center justify-center drop-shadow-md">
+            {children}
+        </div>
+    );
+
     if (!showPopup) return null;
 
     switch (popupInfo.type) {
         case 'newOrder':
             return (
-                <Wrapper>
+                <WrapperWithoutRef>
                     <NewOrderPopup />
-                </Wrapper>
+                </WrapperWithoutRef>
             );
         case 'editCartItem':
             return (

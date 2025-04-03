@@ -15,7 +15,6 @@ export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
     const navigate = useNavigate();
     const { socket } = useSocketContext();
-    const { user } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const [cartItems, setCartItems] = useState(
         JSON.parse(localStorage.getItem('cartItems'))?.map((item) => ({
