@@ -44,7 +44,7 @@ const refreshAccessToken = async (res, refreshToken) => {
     try {
         const user = await validateToken(refreshToken, 'refresh');
         res.cookie(
-            'snackTrack_accessToken',
+            'accessToken',
             await generateAccessToken({ _id: user._id, role: user.role }), // new access token
             {
                 ...COOKIE_OPTIONS,
@@ -75,8 +75,8 @@ const verifyJwt = async (req, res, next) => {
     } catch (err) {
         return res
             .status(FORBIDDEN)
-            .clearCookie('snackTrack_accessToken', COOKIE_OPTIONS)
-            .clearCookie('snackTrack_refreshToken', COOKIE_OPTIONS)
+            .clearCookie('accessToken', COOKIE_OPTIONS)
+            .clearCookie('refreshToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid jwt token',
                 err: err.message,
@@ -99,8 +99,8 @@ const optionalVerifyJwt = async (req, res, next) => {
     } catch (err) {
         return res
             .status(FORBIDDEN)
-            .clearCookie('snackTrack_accessToken', COOKIE_OPTIONS)
-            .clearCookie('snackTrack_refreshToken', COOKIE_OPTIONS)
+            .clearCookie('accessToken', COOKIE_OPTIONS)
+            .clearCookie('refreshToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid jwt token',
                 err: err.message,

@@ -1,7 +1,7 @@
 import { redisClient } from '../server.js';
 
 async function setSocketId(userId, socket) {
-    return await redisClient.setEx(userId, 3600, socket.id); // 1hr exp
+    return await redisClient.setEx(userId, 86400, socket.id); // 1day exp
 }
 
 async function getSocketId(userId) {

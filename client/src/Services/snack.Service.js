@@ -1,11 +1,12 @@
-import { SERVER_ERROR } from '../Constants/constants';
+import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
 
 class SnackService {
     async getSnacks(signal) {
         try {
-            const res = await fetch(`/api/snacks`, {
+            const res = await fetch(`${BASE_BACKEND_URL}/snacks`, {
                 signal,
                 method: 'GET',
+                credentials: 'include',
             });
 
             const data = await res.json();
@@ -27,9 +28,10 @@ class SnackService {
 
     async getPackagedFoodItems(signal) {
         try {
-            const res = await fetch(`/api/snacks/packaged`, {
+            const res = await fetch(`${BASE_BACKEND_URL}/snacks/packaged`, {
                 signal,
                 method: 'GET',
+                credentials: 'include',
             });
 
             const data = await res.json();

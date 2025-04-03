@@ -57,15 +57,16 @@ const login = tryCatch('login as contractor', async (req, res, next) => {
             .lean(),
     ]);
 
+    console.log(Number(process.env.REFRESH_TOKEN_MAXAGE));
     return res
         .status(OK)
-        .cookie('snackTrack_accessToken', accessToken, {
+        .cookie('accessToken', accessToken, {
             ...COOKIE_OPTIONS,
-            maxAge: parseInt(process.env.ACCESS_TOKEN_MAXAGE),
+            maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
         })
-        .cookie('snackTrack_refreshToken', refreshToken, {
+        .cookie('refreshToken', refreshToken, {
             ...COOKIE_OPTIONS,
-            maxAge: parseInt(process.env.REFRESH_TOKEN_MAXAGE),
+            maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
         })
         .json({ ...loggedInUser, role, ...canteen });
 });
@@ -81,8 +82,8 @@ const logout = tryCatch('logout user', async (req, res, next) => {
 
     return res
         .status(OK)
-        .clearCookie('snackTrack_accessToken', COOKIE_OPTIONS)
-        .clearCookie('snackTrack_refreshToken', COOKIE_OPTIONS)
+        .clearCookie('accessToken', COOKIE_OPTIONS)
+        .clearCookie('refreshToken', COOKIE_OPTIONS)
         .json({ message: 'user loggedout successfully' });
 });
 

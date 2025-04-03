@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "format": "prettier --write .",
-        "dev": "npm run format && nodemon src/server.js",
+        "dev": "nodemon src/server.js",
         "start": "node src/server.js"
     },
     "keywords": [],
@@ -28,6 +28,7 @@
         "nanoid": "^5.1.4",
         "nodemailer": "^6.10.0",
         "redis": "^4.7.0",
+        "save-dev": "^0.0.1-security",
         "socket.io": "^4.8.1",
         "twilio": "^5.5.1",
         "uuid": "^11.1.0"

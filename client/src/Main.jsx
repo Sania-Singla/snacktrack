@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import './Styles/index.css';
 
-import { RouterProvider, useNavigate } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { router } from './Router';
 
 import {

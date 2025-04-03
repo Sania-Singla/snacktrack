@@ -1,3 +1,4 @@
+const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api';
 const LIMIT = 20;
 import SANIAIMAGE from '../Assets/images/sania.jpg';
 import LOGO from '../Assets/images/logo.png';
@@ -55,6 +56,7 @@ const CONTRIBUTORS = [
 ];
 
 export {
+    BASE_BACKEND_URL,
     LIMIT,
     LOGO,
     SNACK_PLACEHOLDER_IMAGE,

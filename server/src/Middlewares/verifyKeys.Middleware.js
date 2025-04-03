@@ -20,7 +20,7 @@ const verifyAdminKeyJwt = async (req, res, next) => {
             if (!decodedToken) {
                 return res
                     .status(FORBIDDEN)
-                    .clearCookie('snackTrack_adminKeyToken', COOKIE_OPTIONS)
+                    .clearCookie('adminKeyToken', COOKIE_OPTIONS)
                     .json({ message: 'Invalid admin key token' });
             }
             return next();
@@ -33,7 +33,7 @@ const verifyAdminKeyJwt = async (req, res, next) => {
                 return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
             }
             const adminKeyToken = await generateAdminKeyToken(key);
-            res.cookie('snackTrack_adminKeyToken', adminKeyToken, {
+            res.cookie('adminKeyToken', adminKeyToken, {
                 ...COOKIE_OPTIONS,
                 maxAge: parseInt(process.env.ADMIN_KEY_TOKEN_MAXAGE),
             });
@@ -42,7 +42,7 @@ const verifyAdminKeyJwt = async (req, res, next) => {
     } catch (err) {
         return res
             .status(FORBIDDEN)
-            .clearCookie('snackTrack_adminKeyToken', COOKIE_OPTIONS)
+            .clearCookie('adminKeyToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid admin key jwt token',
                 err: err.message,
@@ -62,7 +62,7 @@ const verifyStaffKeyJwt = async (req, res, next) => {
             if (!decodedToken) {
                 return res
                     .status(FORBIDDEN)
-                    .clearCookie('snackTrack_staffKeyToken', COOKIE_OPTIONS)
+                    .clearCookie('staffKeyToken', COOKIE_OPTIONS)
                     .json({ message: 'Invalid staff key token' });
             }
             const [hostel] = decodedToken.key.split('-');
@@ -79,7 +79,7 @@ const verifyStaffKeyJwt = async (req, res, next) => {
                 return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
             }
             const staffKeyToken = await generateStaffKeyToken(key);
-            res.cookie('snackTrack_staffKeyToken', staffKeyToken, {
+            res.cookie('staffKeyToken', staffKeyToken, {
                 ...COOKIE_OPTIONS,
                 maxAge: parseInt(process.env.STAFF_KEY_TOKEN_MAXAGE),
             });
@@ -91,7 +91,7 @@ const verifyStaffKeyJwt = async (req, res, next) => {
     } catch (err) {
         return res
             .status(FORBIDDEN)
-            .clearCookie('snackTrack_staffKeyToken', COOKIE_OPTIONS)
+            .clearCookie('staffKeyToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid staff key jwt token',
                 err: err.message,

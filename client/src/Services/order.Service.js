@@ -1,9 +1,9 @@
-import { SERVER_ERROR } from '../Constants/constants';
+import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
 
 class OrderService {
     async placeOrder(cartItems, total, packingCharges) {
         try {
-            const res = await fetch('/api/orders', {
+            const res = await fetch(`${BASE_BACKEND_URL}/orders`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -36,10 +36,10 @@ class OrderService {
 
     async updateOrderStatus(orderId, status) {
         try {
-            const res = await fetch(`/api/orders/${orderId}?status=${status}`, {
-                method: 'PATCH',
-                credentials: 'include',
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/orders/${orderId}?status=${status}`,
+                { method: 'PATCH', credentials: 'include' }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -57,12 +57,8 @@ class OrderService {
     async getStudentOrders(studentId, signal, page, limit) {
         try {
             const res = await fetch(
-                `/api/orders/${studentId}?page=${page}&limit=${limit}`,
-                {
-                    method: 'GET',
-                    signal,
-                    credentials: 'include',
-                }
+                `${BASE_BACKEND_URL}/orders/${studentId}?page=${page}&limit=${limit}`,
+                { method: 'GET', signal, credentials: 'include' }
             );
 
             const data = await res.json();
@@ -85,12 +81,8 @@ class OrderService {
     async getCanteenOrders(status, page, limit, signal) {
         try {
             const res = await fetch(
-                `/api/orders?limit=${limit}&page=${page}&status=${status}`,
-                {
-                    method: 'GET',
-                    signal,
-                    credentials: 'include',
-                }
+                `${BASE_BACKEND_URL}/orders?limit=${limit}&page=${page}&status=${status}`,
+                { method: 'GET', signal, credentials: 'include' }
             );
 
             const data = await res.json();

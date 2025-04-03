@@ -10,7 +10,7 @@ const CORS_OPTIONS = {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
     optionsSuccessStatus: 200,
-    allowedHeaders: ['Content-Type', 'authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 export { COOKIE_OPTIONS, CORS_OPTIONS };

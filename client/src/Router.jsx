@@ -74,13 +74,15 @@ export const router = createBrowserRouter(
                             path="orders/:studentId"
                             element={<StudentOrdersPage />}
                         />
-                        <Route
-                            path="register-student"
-                            element={<RegisterStudentPage />}
-                        />
                         <Route path="bills" element={<BillsPage />} />
                         <Route path="students" element={<StudentsPage />} />
                         <Route path="statistics" element={<StatisticsPage />} />
+                    </Route>
+                    <Route
+                        path="register-student"
+                        element={<Layout renderTemplate={false} />}
+                    >
+                        <Route path="" element={<RegisterStudentPage />} />
                     </Route>
                 </Route>
             </Route>
@@ -99,10 +101,12 @@ export const router = createBrowserRouter(
             </Route>
 
             {/* public routes */}
-            <Route path="login" element={<LoginPage />} />
-            <Route path="new-user" element={<NewUserPage />} />
-            <Route path="server-error" element={<ServerErrorPage />} />
-            <Route path="*" element={<NotFoundPage />} />
+            <Route element={<Layout renderTemplate={false} />}>
+                <Route path="login" element={<LoginPage />} />
+                <Route path="new-user" element={<NewUserPage />} />
+                <Route path="server-error" element={<ServerErrorPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+            </Route>
         </Route>
     )
 );

@@ -67,25 +67,21 @@ const generateStaffKeyToken = async (key) => {
 
 /**
  * @param {object} req - The http req object to extract the token from.
- * @param {object} tokenName - Name of the token (snackTrack_accessToken or snackTrack_RefreshToken).
- * @returns Token
+ * @returns all Tokens
  */
 
 const extractTokens = (req) => {
     return {
         accessToken:
-            req.cookies?.snackTrack_accessToken ||
+            req.cookies?.accessToken ||
             req.headers['authorization']?.split(' ')[1],
 
         refreshToken:
-            req.cookies?.snackTrack_refreshToken ||
-            req.headers['x-refresh-token'],
+            req.cookies?.refreshToken || req.headers['x-refresh-token'],
 
-        adminKeyToken:
-            req.cookies?.snackTrack_adminKeyToken || req.headers['x-admin-key'],
+        adminKeyToken: req.cookies?.adminKeyToken || req.headers['x-admin-key'],
 
-        staffKeyToken:
-            req.cookies?.snackTrack_staffKeyToken || req.headers['x-staff-key'],
+        staffKeyToken: req.cookies?.staffKeyToken || req.headers['x-staff-key'],
     };
 };
 

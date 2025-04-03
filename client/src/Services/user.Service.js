@@ -1,10 +1,11 @@
-import { SERVER_ERROR } from '../Constants/constants';
+import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
 
 class UserService {
     async login({ loginInput, password, role }) {
         try {
-            const res = await fetch('/api/users/login', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/login`, {
                 method: 'PATCH',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ loginInput, password, role }),
             });
@@ -24,7 +25,7 @@ class UserService {
 
     async updatePassword({ oldPassword, newPassword }) {
         try {
-            const res = await fetch('/api/users/password', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/password`, {
                 method: 'PATCH',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -52,7 +53,7 @@ class UserService {
             const formData = new FormData();
             formData.append('avatar', avatar);
 
-            const res = await fetch('/api/users/avatar', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/avatar`, {
                 method: 'PATCH',
                 credentials: 'include',
                 body: formData,
@@ -73,7 +74,7 @@ class UserService {
 
     async getCurrentUser(signal) {
         try {
-            const res = await fetch('/api/users/current', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/current`, {
                 method: 'GET',
                 credentials: 'include',
                 signal,
@@ -98,7 +99,7 @@ class UserService {
 
     async logout() {
         try {
-            const res = await fetch('/api/users/logout', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/logout`, {
                 method: 'PATCH',
                 credentials: 'include',
             });
@@ -118,9 +119,8 @@ class UserService {
 
     async getContractors(key = '') {
         try {
-            const res = await fetch('/api/users/contractors', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/contractors`, {
                 method: 'POST',
-                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key }),
             });
@@ -140,9 +140,8 @@ class UserService {
 
     async getOrders(key = '') {
         try {
-            const res = await fetch('/api/users/orders', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/orders`, {
                 method: 'POST',
-                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ key }),
             });
@@ -162,7 +161,7 @@ class UserService {
 
     async getCanteens(signal) {
         try {
-            const res = await fetch('/api/users/canteens', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/canteens`, {
                 method: 'GET',
                 signal,
             });
@@ -180,9 +179,10 @@ class UserService {
         }
     }
 
+    // TODO: NEED TO CREATE BACKEND FUNCTIONALITY
     async resendEmailVerification(email) {
         try {
-            const res = await fetch('/api/users/resend-mail', {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/resend-mail`, {
                 method: 'POST',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },

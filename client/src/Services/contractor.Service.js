@@ -1,4 +1,4 @@
-import { SERVER_ERROR } from '../Constants/constants';
+import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
 
 class ContractorService {
     // personal usage
@@ -13,20 +13,22 @@ class ContractorService {
         hostelName,
     }) {
         try {
-            const res = await fetch(`/api/contractors/register`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fullName,
-                    password,
-                    email,
-                    phoneNumber,
-                    hostelType,
-                    hostelNumber,
-                    hostelName,
-                }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/register`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName,
+                        password,
+                        email,
+                        phoneNumber,
+                        hostelType,
+                        hostelNumber,
+                        hostelName,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -52,21 +54,23 @@ class ContractorService {
         hostelName,
     }) {
         try {
-            const res = await fetch(`/api/contractors/complete-registeration`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fullName,
-                    password,
-                    email,
-                    phoneNumber,
-                    code,
-                    hostelType,
-                    hostelNumber,
-                    hostelName,
-                }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/complete-registeration`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName,
+                        password,
+                        email,
+                        phoneNumber,
+                        code,
+                        hostelType,
+                        hostelNumber,
+                        hostelName,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -83,7 +87,7 @@ class ContractorService {
 
     async updateAccountDetails({ email, phoneNumber, fullName, password }) {
         try {
-            const res = await fetch('/api/contractors/account', {
+            const res = await fetch(`${BASE_BACKEND_URL}/contractors/account`, {
                 method: 'PATCH',
                 credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
@@ -116,7 +120,7 @@ class ContractorService {
     async getStudents(signal, page = 1, limit = 10) {
         try {
             const res = await fetch(
-                `/api/contractors/students?page=${page}&limit=${limit}`,
+                `${BASE_BACKEND_URL}/contractors/students?page=${page}&limit=${limit}`,
                 { method: 'GET', signal, credentials: 'include' }
             );
 
@@ -139,18 +143,21 @@ class ContractorService {
 
     async registerStudent({ fullName, rollNo, password, phoneNumber, email }) {
         try {
-            const res = await fetch('/api/contractors/students', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fullName,
-                    rollNo,
-                    password,
-                    email,
-                    phoneNumber,
-                }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/students`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName,
+                        rollNo,
+                        password,
+                        email,
+                        phoneNumber,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -167,12 +174,15 @@ class ContractorService {
 
     async removeStudent(studentId, password) {
         try {
-            const res = await fetch(`/api/contractors/students/${studentId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/students/${studentId}`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -189,12 +199,15 @@ class ContractorService {
 
     async removeAllStudents(password) {
         try {
-            const res = await fetch(`/api/contractors/students`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/students`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -214,18 +227,21 @@ class ContractorService {
         { fullName, phoneNumber, rollNo, password, contractorPassword }
     ) {
         try {
-            const res = await fetch(`/api/contractors/students/${studentId}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fullName,
-                    phoneNumber,
-                    rollNo,
-                    password,
-                    contractorPassword,
-                }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/students/${studentId}`,
+                {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName,
+                        phoneNumber,
+                        rollNo,
+                        password,
+                        contractorPassword,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -244,12 +260,15 @@ class ContractorService {
 
     async removeSnack(snackId, password) {
         try {
-            const res = await fetch(`/api/contractors/snacks/${snackId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/snacks/${snackId}`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -272,7 +291,7 @@ class ContractorService {
                 formData.append(key, value);
             });
 
-            const res = await fetch('/api/contractors/snacks', {
+            const res = await fetch(`${BASE_BACKEND_URL}/contractors/snacks`, {
                 method: 'POST',
                 credentials: 'include',
                 body: formData,
@@ -300,11 +319,14 @@ class ContractorService {
                 formData.append(key, value);
             });
 
-            const res = await fetch(`/api/contractors/snacks/${snackId}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                body: formData,
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/snacks/${snackId}`,
+                {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    body: formData,
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -322,7 +344,7 @@ class ContractorService {
     async toggleSnackAvailability(snackId) {
         try {
             const res = await fetch(
-                `/api/contractors/snacks/availability/${snackId}`,
+                `${BASE_BACKEND_URL}/contractors/snacks/availability/${snackId}`,
                 {
                     method: 'PATCH',
                     credentials: 'include',
@@ -346,12 +368,15 @@ class ContractorService {
 
     async removeItem(itemId, password) {
         try {
-            const res = await fetch(`/api/contractors/packaged/${itemId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/packaged/${itemId}`,
+                {
+                    method: 'DELETE',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -368,16 +393,19 @@ class ContractorService {
 
     async addItem({ variants, category, password }) {
         try {
-            const res = await fetch('/api/contractors/packaged', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    variants,
-                    category,
-                    password,
-                }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/packaged`,
+                {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        variants,
+                        category,
+                        password,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
@@ -394,16 +422,19 @@ class ContractorService {
 
     async updateItemDetails({ category, variants, password }, itemId) {
         try {
-            const res = await fetch(`/api/contractors/packaged/${itemId}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    variants,
-                    password,
-                    category,
-                }),
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/packaged/${itemId}`,
+                {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        variants,
+                        password,
+                        category,
+                    }),
+                }
+            );
 
             const data = await res.json();
             console.log(data);
