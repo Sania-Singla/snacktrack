@@ -5,13 +5,13 @@
     "type": "module",
     "scripts": {
         "format": "prettier --write .",
-        "dev": "nodemon src/server.js",
+        "dev": "npm run format && nodemon src/server.js",
         "start": "node src/server.js"
     },
     "keywords": [],
-    "author": "",
+    "author": "Sania",
     "license": "ISC",
-    "description": "",
+    "description": "A web application to track your snacks",
     "dependencies": {
         "bcrypt": "^5.1.1",
         "brcypt": "^1.0.1",
@@ -32,5 +32,9 @@
         "socket.io": "^4.8.1",
         "twilio": "^5.5.1",
         "uuid": "^11.1.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.9",
+        "prettier": "^3.5.3"
     }
 }

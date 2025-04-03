@@ -3,19 +3,16 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
-        "client": "cd client && npm i && npm run dev",
-        "server": "cd server && npm i && npm run dev",
+        "client": "cd client && npm run dev",
+        "server": "cd server && npm run dev",
         "dev": "concurrently \"npm run client\" \"npm run server\"",
         "build": "npm i && cd client && npm i && cd ../server && npm i"
     },
     "keywords": [],
-    "author": "Kode Crafts",
+    "author": "Sania",
     "license": "ISC",
     "description": "A web application to track your snacks",
     "dependencies": {
-        "bcrypt": "^5.1.1",
-        "concurrently": "^9.1.2",
-        "nodemon": "^3.1.9",
-        "prettier": "^3.5.3"
+        "concurrently": "^9.1.2"
     }
 }

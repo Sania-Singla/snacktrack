@@ -9,7 +9,8 @@ import { useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
-    const { amount, _id, createdAt, items, studentInfo } = order;
+    const { amount, _id, createdAt, items, studentInfo, packingCharges } =
+        order;
     const rollNo = getRollNo(studentInfo?.userName);
     const { socket } = useSocketContext();
     const [statusOptions, setStatusOptions] = useState([
@@ -160,7 +161,7 @@ export default function ContractorOrderCard({ order, reference }) {
                         </div>
                         <div className="flex justify-between text-sm text-gray-600 mt-1">
                             <span>Packing</span>
-                            <span>₹0.00</span>
+                            <span>₹{packingCharges.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-medium text-gray-900 mt-2">
                             <span>Total</span>
