@@ -66,7 +66,8 @@ export default function verifyExpression(name, value, setError) {
 
             case 'kitchenKey': {
                 // hostelType + hostelNumber + kitchenPassword
-                /^[A-Z]{2}\d{2}[a-zA-Z0-9]{4,12}$/.test(value)
+                // regex needed for kitchenPassword only
+                /^[a-zA-Z0-9]{4,12}$/.test(value)
                     ? setError((prevError) => ({ ...prevError, [name]: '' }))
                     : setError((prevError) => ({
                           ...prevError,

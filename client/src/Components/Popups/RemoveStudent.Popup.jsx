@@ -1,4 +1,4 @@
-import { Button, InputField } from '..';
+import { Button } from '..';
 import { usePopupContext, useStudentContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useNavigate } from 'react-router-dom';
@@ -9,25 +9,24 @@ import toast from 'react-hot-toast';
 
 export default function RemoveStudentPopup() {
     const [loading, setLoading] = useState(false);
-    const { setShowPopup } = usePopupContext();
-    const { setStudents, targetStudent } = useStudentContext();
+    const { setShowPopup, popupInfo } = usePopupContext();
+    const { setStudents } = useStudentContext();
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(false);
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
 
     async function removeStudent() {
         setLoading(true);
         setDisabled(true);
         try {
             const res = await contractorService.removeStudent(
-                targetStudent._id,
-                password
+                popupInfo.student._id
             );
             if (res && res.message === 'account deleted successfully') {
                 setStudents((prev) =>
-                    prev.filter((student) => student._id !== targetStudent._id)
+                    prev.filter(
+                        (student) => student._id !== popupInfo.student._id
+                    )
                 );
                 toast.success('Account Deleted Successfully 😕');
             } else toast.error(res?.message);
@@ -41,8 +40,7 @@ export default function RemoveStudentPopup() {
     }
 
     function onMouseOver() {
-        if (!check || !password) setDisabled(true);
-        else setDisabled(false);
+        setDisabled(!check);
     }
 
     return (
@@ -64,7 +62,7 @@ export default function RemoveStudentPopup() {
                 </p>
                 <p className="text-[15px] text-center">
                     <span className="font-medium">Roll No: </span>
-                    {getRollNo(targetStudent.userName)}
+                    {getRollNo(popupInfo.student.userName)}
                 </p>
 
                 <div className="w-full flex flex-row-reverse gap-3 mt-2 items-start">
@@ -84,21 +82,6 @@ export default function RemoveStudentPopup() {
                     />
                 </div>
 
-                <div className="w-full relative -top-4">
-                    <InputField
-                        field={{
-                            type: showPassword ? 'text' : 'password',
-                            name: 'password',
-                            label: 'Password',
-                            required: true,
-                            placeholder: 'Enter password to confirm delete',
-                        }}
-                        inputs={{ password }}
-                        setShowPassword={setShowPassword}
-                        showPassword={showPassword}
-                        handleChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
                 <Button
                     btnText={
                         loading ? (

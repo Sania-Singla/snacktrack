@@ -16,6 +16,7 @@ export default function ContractorOrderCard({ order, reference }) {
         { value: '', label: 'Pending' },
         { value: 'PickedUp', label: 'Picked Up' },
         { value: 'Prepared', label: 'Prepared' },
+        { value: 'Rejected', label: 'Reject' },
     ]);
     const [status, setStatus] = useState(order.status);
     const navigate = useNavigate();
@@ -129,37 +130,72 @@ export default function ContractorOrderCard({ order, reference }) {
                     >
                         <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="space-y-4 mt-4">
-                                {items.map((item) => (
-                                    <div
-                                        key={item._id}
-                                        className="flex justify-between items-center"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="size-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                                <div className="size-5 text-gray-400">
-                                                    {item.itemType === 'Snack'
-                                                        ? icons.snack
-                                                        : icons.soda}
+                                {items.map(
+                                    ({
+                                        item,
+                                        specialInstructions,
+                                        isPacked,
+                                    }) => (
+                                        <div
+                                            key={item._id}
+                                            className="flex flex-col gap-2 p-3 bg-gray-50 rounded-lg"
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="size-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                        <div className="size-5 text-gray-400">
+                                                            {item.itemType ===
+                                                            'Snack'
+                                                                ? icons.snack
+                                                                : icons.soda}
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <h3 className="text-sm font-medium text-gray-800 capitalize">
+                                                            {item.name ||
+                                                                item.category}
+                                                        </h3>
+                                                        <p className="text-xs text-gray-500">
+                                                            Qty: {item.quantity}{' '}
+                                                            • ₹
+                                                            {item.price.toFixed(
+                                                                2
+                                                            )}{' '}
+                                                            each
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-semibold text-gray-900">
+                                                        ₹
+                                                        {(
+                                                            item.price *
+                                                            item.quantity
+                                                        ).toFixed(2)}
+                                                    </span>
+                                                    <div
+                                                        className={`size-3 rounded-full ${isPacked ? 'bg-green-500' : 'bg-yellow-500'}`}
+                                                        title={
+                                                            isPacked
+                                                                ? 'Packed'
+                                                                : 'Not Packed'
+                                                        }
+                                                    ></div>
                                                 </div>
                                             </div>
-                                            <div className="space-y-1">
-                                                <h3 className="text-sm font-medium text-gray-800 capitalize">
-                                                    {item.name || item.category}
-                                                </h3>
-                                                <p className="text-xs text-gray-500">
-                                                    Qty: {item.quantity} • ₹
-                                                    {item.price.toFixed(2)} each
-                                                </p>
-                                            </div>
+
+                                            {specialInstructions && (
+                                                <div className="mt-1 text-xs text-gray-600 bg-white p-2 rounded border border-gray-200">
+                                                    <span className="font-medium">
+                                                        Special
+                                                        Instructions:{' '}
+                                                    </span>
+                                                    {specialInstructions}
+                                                </div>
+                                            )}
                                         </div>
-                                        <span className="text-sm font-semibold text-gray-900">
-                                            ₹
-                                            {(
-                                                item.price * item.quantity
-                                            ).toFixed(2)}
-                                        </span>
-                                    </div>
-                                ))}
+                                    )
+                                )}
                             </div>
 
                             <div className="mt-6 pt-4 border-t border-gray-100">

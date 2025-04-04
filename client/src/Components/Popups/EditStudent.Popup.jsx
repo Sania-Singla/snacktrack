@@ -8,20 +8,18 @@ import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 
 export default function EditStudentPopup() {
-    const { targetStudent, setStudents } = useStudentContext();
+    const { setShowPopup, popupInfo } = usePopupContext();
+    const { setStudents } = useStudentContext();
     const [inputs, setInputs] = useState({
-        fullName: targetStudent?.fullName || '',
-        rollNo: getRollNo(targetStudent?.userName) || '',
+        fullName: popupInfo.student?.fullName || '',
+        rollNo: getRollNo(popupInfo.student?.userName) || '',
+        phoneNumber: popupInfo.student?.phoneNumber || '',
         password: '',
-        contractorPassword: '',
-        phoneNumber: targetStudent?.phoneNumber || '',
     });
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(false);
-    const { setShowPopup } = usePopupContext();
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
-    const [showContractorPassword, setShowContractorPassword] = useState(false);
     const navigate = useNavigate();
 
     async function handleChange(e) {
@@ -51,20 +49,20 @@ export default function EditStudentPopup() {
         setDisabled(true);
         try {
             const res = await contractorService.updateStudentAccountDetails(
-                targetStudent._id,
+                popupInfo.student._id,
                 inputs
             );
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
                 setStudents((prev) =>
                     prev.map((student) => {
-                        if (student._id === targetStudent._id) {
+                        if (student._id === popupInfo.student._id) {
                             return {
                                 ...student,
                                 fullName: inputs.fullName,
                                 phoneNumber: inputs.phoneNumber,
                                 userName:
-                                    targetStudent.userName.slice(0, 4) +
+                                    popupInfo.student.userName.slice(0, 4) +
                                     inputs.rollNo,
                             };
                         } else return student;
@@ -109,33 +107,18 @@ export default function EditStudentPopup() {
             placeholder: "Enter student's password",
             required: true,
         },
-        {
-            type: showContractorPassword ? 'text' : 'password',
-            name: 'contractorPassword',
-            label: 'Password',
-            placeholder: 'Enter password to confirm update',
-            required: true,
-        },
     ];
 
     const inputElements = inputFields.map((field) =>
-        field.name === 'password' || field.name === 'contractorPassword' ? (
+        field.name === 'password' ? (
             <InputField
                 key={field.name}
                 field={field}
                 handleChange={handleChange}
                 error={error}
                 inputs={inputs}
-                showPassword={
-                    field.name === 'contractorPassword'
-                        ? showContractorPassword
-                        : showPassword
-                }
-                setShowPassword={
-                    field.name === 'contractorPassword'
-                        ? setShowContractorPassword
-                        : setShowPassword
-                }
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
             />
         ) : (
             <div className="w-full" key={field.name}>
@@ -171,7 +154,7 @@ export default function EditStudentPopup() {
             <p className="text-2xl font-bold">Update Student Details</p>
             <p className="text-[15px]">
                 <span className="font-medium">Roll No: </span>
-                {getRollNo(targetStudent.userName)}
+                {getRollNo(popupInfo.student.userName)}
             </p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3 relative -top-2">

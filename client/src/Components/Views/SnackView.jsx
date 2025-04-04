@@ -4,10 +4,12 @@ import { icons } from '../../Assets/icons';
 import {
     usePopupContext,
     useSnackContext,
+    useStudentContext,
     useUserContext,
 } from '../../Contexts';
 import { contractorService } from '../../Services';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function SnackView({ snack, reference }) {
     const { _id, image, name, price, info, isAvailable } = snack;
@@ -16,6 +18,7 @@ export default function SnackView({ snack, reference }) {
     const { setSnacks } = useSnackContext();
     const navigate = useNavigate();
     const { setShowPopup, setPopupInfo } = usePopupContext();
+    const { cartItems, setCartItems } = useStudentContext();
 
     async function toggleAvailability() {
         try {
@@ -39,22 +42,18 @@ export default function SnackView({ snack, reference }) {
 
     function editSnack() {
         setShowPopup(true);
-        setPopupInfo({ type: 'editSnack', target: snack });
+        setPopupInfo({ type: 'editSnack', snack });
     }
 
     function removeSnack() {
         setShowPopup(true);
-        setPopupInfo({ type: 'removeSnack', target: snack });
+        setPopupInfo({ type: 'removeSnack', snack });
     }
 
     function addToCart() {
         setQuantityInCart(1);
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
         const newCartItem = {
-            _id,
-            name,
-            price,
-            image,
+            ...snack,
             type: 'Snack',
             quantity: 1,
             isPacked: false,
@@ -64,21 +63,23 @@ export default function SnackView({ snack, reference }) {
             'cartItems',
             JSON.stringify(cartItems.concat(newCartItem))
         );
+        setCartItems((prev) => prev.concat(newCartItem));
+        toast.success('Added to cart');
     }
 
     function updateQuantity(newQuantity) {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
         const updatedCartItems = cartItems.map((i) =>
             i._id === _id ? { ...i, quantity: newQuantity } : i
         );
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        setCartItems(updatedCartItems);
         setQuantityInCart(newQuantity);
     }
 
     function removeFromCart() {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
         const updatedCartItems = cartItems.filter((i) => i._id !== _id);
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        setCartItems(updatedCartItems);
         setQuantityInCart(0);
     }
 

@@ -3,7 +3,6 @@ import { Button } from '..';
 import { useNavigate } from 'react-router-dom';
 
 export default function EmptyCart() {
-    // variants
     const textAnimation = {
         initial: { y: 20, opacity: 0 },
         animate: {

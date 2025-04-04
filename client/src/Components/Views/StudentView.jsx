@@ -1,24 +1,21 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
-import { usePopupContext, useStudentContext } from '../../Contexts';
+import { usePopupContext } from '../../Contexts';
 import { getRollNo } from '../../Utils';
 
 export default function StudentView({ student, reference }) {
     const { _id, avatar, fullName, userName, email, phoneNumber } = student;
     const { setShowPopup, setPopupInfo } = usePopupContext();
-    const { setTargetStudent } = useStudentContext();
     const navigate = useNavigate();
 
     async function removeStudent() {
-        setTargetStudent(student);
-        setPopupInfo({ type: 'removeStudent' });
+        setPopupInfo({ type: 'removeStudent', student });
         setShowPopup(true);
     }
 
     async function editStudent() {
-        setTargetStudent(student);
-        setPopupInfo({ type: 'editStudent' });
+        setPopupInfo({ type: 'editStudent', student });
         setShowPopup(true);
     }
 

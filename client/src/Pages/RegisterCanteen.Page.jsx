@@ -74,15 +74,13 @@ export default function RegisterCanteenPage() {
         setDisabled(true);
         setError({});
         try {
-            const data = { ...inputs, hostelType };
-
-            const res = await contractorService.register({ hostel, ...data });
+            const res = await contractorService.register({ hostel, ...inputs });
             if (res && res.message === 'Verification code sent') {
                 toast.success('Verification code sent to your email');
                 setShowPopup(true);
                 setPopupInfo({
                     type: 'verifyEmail',
-                    target: { hostel, ...data },
+                    target: { hostel, ...inputs },
                 });
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {

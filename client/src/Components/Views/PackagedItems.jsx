@@ -26,7 +26,7 @@ export default function PackagedItems() {
         setPopupInfo({ type: 'addItem' });
     }
 
-    return itemElements.length > 0 ? (
+    return (
         <div className="relative">
             {user.role === 'contractor' && (
                 <Button
@@ -43,9 +43,13 @@ export default function PackagedItems() {
                     className="absolute z-[1] -top-16 text-white rounded-md w-fit text-nowrap px-3 h-[39px] bg-[#4977ec] hover:bg-[#3b62c2]"
                 />
             )}
-            <div className={`flex flex-col w-full gap-6`}>{itemElements}</div>
+            {itemElements.length > 0 ? (
+                <div className={`flex flex-col w-full gap-6`}>
+                    {itemElements}
+                </div>
+            ) : (
+                <div>No Items Found !!</div>
+            )}
         </div>
-    ) : (
-        <div>No Items Found !!</div>
     );
 }

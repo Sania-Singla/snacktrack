@@ -15,17 +15,15 @@ export default function EditSnackPopup() {
     const { setSnacks } = useSnackContext();
     const { setShowPopup, popupInfo } = usePopupContext();
     const ref = useRef();
-    const [imagePreview, setImagePreview] = useState(popupInfo.target.image);
+    const [imagePreview, setImagePreview] = useState(popupInfo.snack.image);
     const [inputs, setInputs] = useState({
-        name: popupInfo.target.name || '',
-        password: '',
-        price: popupInfo.target.price || '',
+        name: popupInfo.snack.name || '',
+        price: popupInfo.snack.price || '',
         image: null,
     });
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     async function handleChange(e) {
@@ -50,8 +48,8 @@ export default function EditSnackPopup() {
     }
 
     const handleBlur = (e) => {
-        let { name, value, type, files } = e.target;
-        if (value && type !== 'file') verifyExpression(name, value, setError);
+        let { name, value } = e.target;
+        if (value) verifyExpression(name, value, setError);
     };
 
     function onMouseOver() {
@@ -72,13 +70,13 @@ export default function EditSnackPopup() {
         try {
             const res = await contractorService.updateSnackDetails(
                 inputs,
-                popupInfo.target._id
+                popupInfo.snack._id
             );
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
                 setSnacks((prev) =>
                     prev.map((snack) => {
-                        if (snack._id === popupInfo.target._id) {
+                        if (snack._id === popupInfo.snack._id) {
                             return {
                                 ...snack,
                                 name: inputs.name,
@@ -113,43 +111,24 @@ export default function EditSnackPopup() {
             placeholder: 'Enter new Price',
             required: true,
         },
-        {
-            type: showPassword ? 'text' : 'password',
-            name: 'password',
-            label: 'Password',
-            placeholder: 'Enter password to confirm update',
-            required: true,
-        },
     ];
 
-    const inputElements = inputFields.map((field) =>
-        field.name === 'password' ? (
+    const inputElements = inputFields.map((field) => (
+        <div className="w-full" key={field.name}>
             <InputField
-                key={field.name}
                 field={field}
                 handleChange={handleChange}
                 error={error}
                 inputs={inputs}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
+                handleBlur={handleBlur}
             />
-        ) : (
-            <div className="w-full" key={field.name}>
-                <InputField
-                    field={field}
-                    handleChange={handleChange}
-                    error={error}
-                    inputs={inputs}
-                    handleBlur={handleBlur}
-                />
-                {error[field.name] && (
-                    <div className="text-red-500 text-xs font-medium">
-                        {error[field.name]}
-                    </div>
-                )}
-            </div>
-        )
-    );
+            {error[field.name] && (
+                <div className="text-red-500 text-xs font-medium">
+                    {error[field.name]}
+                </div>
+            )}
+        </div>
+    ));
 
     return (
         <div className="relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-3">
@@ -167,7 +146,7 @@ export default function EditSnackPopup() {
             <p className="text-2xl font-bold">Update Snack Details</p>
             <p className="text-[15px]">
                 <span className="font-medium">Name: </span>
-                {popupInfo.target.name}
+                {popupInfo.snack.name}
             </p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3 relative -top-2">

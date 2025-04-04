@@ -45,6 +45,9 @@ const register = tryCatch('register as contractor', async (req, res, next) => {
         return next(new ErrorHandler('Missing fields', BAD_REQUEST));
     }
 
+    req.body.kitchenKey =
+        hostel.hostelType + hostel.hostelNumber + kitchenKey.trim();
+    console.log(fullName, email, phoneNumber, password, hostel, kitchenKey);
     const isValid = [
         'fullName',
         'email',
@@ -64,7 +67,7 @@ const register = tryCatch('register as contractor', async (req, res, next) => {
                 { hostelName: hostel.hostelName.trim() },
                 {
                     $and: [
-                        { hostelNumber: hostel.hostelNumber.trim() },
+                        { hostelNumber: hostel.hostelNumber },
                         { hostelType: hostel.hostelType.trim() },
                     ],
                 },
@@ -125,7 +128,7 @@ const completeRegistration = tryCatch(
         // Now register the contractor & canteen
         const canteen = await Canteen.create({
             hostelName: hostel.hostelName.trim(),
-            hostelNumber: hostel.hostelNumber.trim(),
+            hostelNumber: hostel.hostelNumber,
             hostelType: hostel.hostelType.trim(),
             kitchenKey,
         });

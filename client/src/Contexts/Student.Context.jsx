@@ -4,11 +4,13 @@ const StudentContext = createContext();
 
 const StudentContextProvider = ({ children }) => {
     const [students, setStudents] = useState([]);
-    const [targetStudent, setTargetStudent] = useState({});
+    const [cartItems, setCartItems] = useState(
+        localStorage.getItem('cartItems') || []
+    );
 
     return (
         <StudentContext.Provider
-            value={{ students, setStudents, targetStudent, setTargetStudent }}
+            value={{ students, setStudents, cartItems, setCartItems }}
         >
             {children}
         </StudentContext.Provider>

@@ -61,11 +61,7 @@ export default function HomePage() {
             }
         })();
 
-        return () => {
-            controller.abort();
-            setSnacks([]);
-            setItems([]);
-        };
+        return () => controller.abort();
     }, []);
 
     return (

@@ -1,4 +1,4 @@
-import { Button, InputField } from '..';
+import { Button } from '..';
 import { usePopupContext, useSnackContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useNavigate } from 'react-router-dom';
@@ -13,20 +13,17 @@ export default function RemoveSnackPopup() {
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(false);
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
 
     async function removeSnack() {
         setLoading(true);
         setDisabled(true);
         try {
             const res = await contractorService.removeSnack(
-                popupInfo.target._id,
-                password
+                popupInfo.snack._id
             );
             if (res && res.message === 'snack deleted successfully') {
                 setSnacks((prev) =>
-                    prev.filter((snack) => snack._id !== popupInfo.target._id)
+                    prev.filter((snack) => snack._id !== popupInfo.snack._id)
                 );
                 toast.success('Snack Deleted Successfully 😕');
             } else toast.error(res?.message);
@@ -40,8 +37,7 @@ export default function RemoveSnackPopup() {
     }
 
     function onMouseOver() {
-        if (!check || !password) setDisabled(true);
-        else setDisabled(false);
+        setDisabled(!check);
     }
 
     return (
@@ -61,7 +57,7 @@ export default function RemoveSnackPopup() {
                 <p className="text-2xl font-bold text-center">Remove Snack</p>
                 <p className="text-[15px] text-center">
                     <span className="font-medium">Name: </span>
-                    {popupInfo.target.name}
+                    {popupInfo.snack.name}
                 </p>
 
                 <div className="w-full flex flex-row-reverse gap-3 mt-2 items-start">
@@ -81,21 +77,6 @@ export default function RemoveSnackPopup() {
                     />
                 </div>
 
-                <div className="w-full relative -top-4">
-                    <InputField
-                        field={{
-                            type: showPassword ? 'text' : 'password',
-                            name: 'password',
-                            label: 'Password',
-                            required: true,
-                            placeholder: 'Enter password to confirm delete',
-                        }}
-                        inputs={{ password }}
-                        setShowPassword={setShowPassword}
-                        showPassword={showPassword}
-                        handleChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
                 <Button
                     btnText={
                         loading ? (

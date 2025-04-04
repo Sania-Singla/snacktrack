@@ -8,12 +8,7 @@ const PopupContextProvider = ({ children }) => {
 
     return (
         <PopupContext.Provider
-            value={{
-                showPopup,
-                popupInfo,
-                setPopupInfo,
-                setShowPopup,
-            }}
+            value={{ showPopup, popupInfo, setPopupInfo, setShowPopup }}
         >
             {children}
         </PopupContext.Provider>

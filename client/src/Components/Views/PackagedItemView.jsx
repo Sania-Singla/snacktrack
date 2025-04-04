@@ -1,7 +1,11 @@
 import toast from 'react-hot-toast';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
-import { usePopupContext, useUserContext } from '../../Contexts';
+import {
+    usePopupContext,
+    useStudentContext,
+    useUserContext,
+} from '../../Contexts';
 import { useState } from 'react';
 
 export default function PackagedItemView({ item, reference }) {
@@ -9,25 +13,24 @@ export default function PackagedItemView({ item, reference }) {
     const [variants, setVariants] = useState(item.variants);
     const { user } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
+    const { cartItems, setCartItems } = useStudentContext();
 
     function editItem() {
         setShowPopup(true);
-        setPopupInfo({ type: 'editItem', target: item });
+        setPopupInfo({ type: 'editItem', item });
     }
 
     function removeItem() {
         setShowPopup(true);
-        setPopupInfo({ type: 'removeItem', target: item });
+        setPopupInfo({ type: 'removeItem', item });
     }
 
     function addToCart(price) {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
         setVariants((prev) =>
             prev.map((v) => (v.price === price ? { ...v, quantity: 1 } : v))
         );
         const newCartItem = {
-            _id,
-            category,
+            ...item,
             type: 'PackagedFood',
             price,
             quantity: 1,
@@ -37,6 +40,8 @@ export default function PackagedItemView({ item, reference }) {
             'cartItems',
             JSON.stringify(cartItems.concat(newCartItem))
         );
+        setCartItems((prev) => prev.concat(newCartItem));
+        toast.success('Added to cart');
     }
 
     function updateQuantity(price, newQuantity, availableCount) {
@@ -44,7 +49,6 @@ export default function PackagedItemView({ item, reference }) {
             toast.error('max quantity reached');
             return;
         }
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
         const updatedCartItems = cartItems.map((i) =>
             i._id === _id && i.price === price
                 ? { ...i, quantity: newQuantity }
@@ -56,19 +60,18 @@ export default function PackagedItemView({ item, reference }) {
                 v.price === price ? { ...v, quantity: newQuantity } : v
             )
         );
+        setCartItems(updatedCartItems);
     }
 
     function removeFromCart(price) {
-        const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
-
         const updatedCartItems = cartItems.filter((item) => {
             item._id !== _id && item.price !== price;
         });
-
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
         setVariants((prev) =>
             prev.map((v) => (v.price === price ? { ...v, quantity: 0 } : v))
         );
+        setCartItems(updatedCartItems);
     }
 
     return (

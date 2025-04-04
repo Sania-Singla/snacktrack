@@ -8,9 +8,8 @@ class ContractorService {
         password,
         phoneNumber,
         email,
-        hostelType,
-        hostelNumber,
-        hostelName,
+        hostel,
+        kitchenKey,
     }) {
         try {
             const res = await fetch(
@@ -23,9 +22,8 @@ class ContractorService {
                         password,
                         email,
                         phoneNumber,
-                        hostelType,
-                        hostelNumber,
-                        hostelName,
+                        hostel,
+                        kitchenKey,
                     }),
                 }
             );
@@ -49,9 +47,8 @@ class ContractorService {
         phoneNumber,
         email,
         code,
-        hostelType,
-        hostelNumber,
-        hostelName,
+        hostel,
+        kitchenKey,
     }) {
         try {
             const res = await fetch(
@@ -65,9 +62,8 @@ class ContractorService {
                         email,
                         phoneNumber,
                         code,
-                        hostelType,
-                        hostelNumber,
-                        hostelName,
+                        hostel,
+                        kitchenKey,
                     }),
                 }
             );
@@ -141,7 +137,7 @@ class ContractorService {
         }
     }
 
-    async registerStudent({ fullName, rollNo, password, phoneNumber, email }) {
+    async registerStudent({ fullName, rollNo, phoneNumber, email }) {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/students`,
@@ -152,7 +148,6 @@ class ContractorService {
                     body: JSON.stringify({
                         fullName,
                         rollNo,
-                        password,
                         email,
                         phoneNumber,
                     }),
@@ -172,7 +167,7 @@ class ContractorService {
         }
     }
 
-    async removeStudent(studentId, password) {
+    async removeStudent(studentId) {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/students/${studentId}`,
@@ -180,7 +175,6 @@ class ContractorService {
                     method: 'DELETE',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }),
                 }
             );
 
@@ -224,7 +218,7 @@ class ContractorService {
 
     async updateStudentAccountDetails(
         studentId,
-        { fullName, phoneNumber, rollNo, password, contractorPassword }
+        { fullName, phoneNumber, rollNo, password }
     ) {
         try {
             const res = await fetch(
@@ -238,7 +232,6 @@ class ContractorService {
                         phoneNumber,
                         rollNo,
                         password,
-                        contractorPassword,
                     }),
                 }
             );
@@ -258,7 +251,7 @@ class ContractorService {
 
     // snack management tasks
 
-    async removeSnack(snackId, password) {
+    async removeSnack(snackId) {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/snacks/${snackId}`,
@@ -266,7 +259,6 @@ class ContractorService {
                     method: 'DELETE',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }),
                 }
             );
 
@@ -283,9 +275,9 @@ class ContractorService {
         }
     }
 
-    async addSnack({ image, name, price, password }) {
+    async addSnack({ image, name, price }) {
         try {
-            const inputs = { image, name, price, password };
+            const inputs = { image, name, price };
             const formData = new FormData();
             Object.entries(inputs).forEach(([key, value]) => {
                 formData.append(key, value);
@@ -310,9 +302,9 @@ class ContractorService {
         }
     }
 
-    async updateSnackDetails({ name, price, image, password }, snackId) {
+    async updateSnackDetails({ name, price, image }, snackId) {
         try {
-            const inputs = { image, name, price, password };
+            const inputs = { image, name, price };
             console.log(inputs);
             const formData = new FormData();
             Object.entries(inputs).forEach(([key, value]) => {
@@ -366,7 +358,7 @@ class ContractorService {
 
     // packaged food management tasks
 
-    async removeItem(itemId, password) {
+    async removeItem(itemId) {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/packaged/${itemId}`,
@@ -374,7 +366,6 @@ class ContractorService {
                     method: 'DELETE',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }),
                 }
             );
 
@@ -391,7 +382,7 @@ class ContractorService {
         }
     }
 
-    async addItem({ variants, category, password }) {
+    async addItem({ variants, category }) {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/packaged`,
@@ -402,7 +393,6 @@ class ContractorService {
                     body: JSON.stringify({
                         variants,
                         category,
-                        password,
                     }),
                 }
             );
@@ -420,7 +410,7 @@ class ContractorService {
         }
     }
 
-    async updateItemDetails({ category, variants, password }, itemId) {
+    async updateItemDetails({ category, variants }, itemId) {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/packaged/${itemId}`,
@@ -430,7 +420,6 @@ class ContractorService {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         variants,
-                        password,
                         category,
                     }),
                 }

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { userService } from '../Services';
 import { useNavigate } from 'react-router-dom';
-import { Button, Dropdown, OrderDropdown } from '../Components';
+import { Button, Dropdown } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
-import { getRollNo } from '../Utils';
 import { useUserContext } from '../Contexts';
 
 export default function KitchenPage() {
@@ -19,13 +18,6 @@ export default function KitchenPage() {
     const [hostel, setHostel] = useState({});
     const [hostels, setHostels] = useState([
         { value: '', label: 'Select Hostel' },
-    ]);
-    const [status, setStatus] = useState('');
-    const [statusOptions, setStatusOptions] = useState([
-        { value: '', label: 'Pending' },
-        { value: 'Preparing', label: 'Preparing' },
-        { value: 'Prepared', label: 'Prepared' },
-        { value: 'Rejected', label: 'Rejected' },
     ]);
 
     useEffect(() => {
@@ -57,12 +49,12 @@ export default function KitchenPage() {
                     }
                 }
             } catch (err) {
-                console.log(err);
                 navigate('/server-error');
             } finally {
                 setLoading(false);
             }
         })();
+
         return () => controller.abort();
     }, []);
 
@@ -88,50 +80,18 @@ export default function KitchenPage() {
         }
     };
 
-    function processOrders() {
-        const individualItems = [],
-            itemSummary = {};
-
-        orders.forEach(({ student: { fullName, userName }, items, _id }) => {
-            items.forEach(
-                ({
-                    price,
-                    quantity,
-                    itemType,
-                    name,
-                    itemId,
-                    specialInstructions,
-                    isPacked,
-                }) => {
-                    if (itemType === 'Snack') {
-                        // for left side
-                        individualItems.push({
-                            orderId: _id,
-                            itemId,
-                            fullName,
-                            rollNo: getRollNo(userName),
-                            itemName: name,
-                            quantity,
-                            price,
-                            specialInstructions:
-                                specialInstructions ||
-                                'No special instructions',
-                            isPacked,
-                        });
-
-                        // for right side
-                        itemSummary[name]
-                            ? (itemSummary[name].quantity += quantity)
-                            : (itemSummary[name] = { quantity });
-                    }
+    const itemSummary = {};
+    (function processOrders() {
+        orders.forEach(({ items }) => {
+            items.forEach(({ quantity, itemType, name }) => {
+                if (itemType === 'Snack') {
+                    itemSummary[name]
+                        ? (itemSummary[name].quantity += quantity)
+                        : (itemSummary[name] = { quantity });
                 }
-            );
+            });
         });
-
-        return { individualItems, itemSummary };
-    }
-
-    const { individualItems, itemSummary } = processOrders();
+    })();
 
     return loading ? (
         <div>loading...</div>
@@ -198,117 +158,40 @@ export default function KitchenPage() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Individual Orders Column */}
-                    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div className="p-4 border-b border-gray-200 text-center">
-                            <h2 className="text-xl font-semibold text-gray-800">
-                                Order Details
-                            </h2>
-                            <p className="text-sm text-gray-500">
-                                Individual items from each order
-                            </p>
-                        </div>
-                        <div className="divide-y divide-gray-200 max-h-[calc(100vh-220px)] overflow-y-auto">
-                            {individualItems.length > 0 ? (
-                                individualItems.map(
-                                    ({
-                                        orderId,
-                                        itemId,
-                                        fullName,
-                                        rollNo,
-                                        itemName,
-                                        quantity,
-                                        specialInstructions,
-                                        isPacked,
-                                    }) => (
-                                        <div
-                                            key={orderId + itemId}
-                                            className="p-4 hover:bg-gray-50 transition-colors flex flex-col gap-2"
-                                        >
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium text-gray-900">
-                                                        {fullName}
-                                                    </span>
-                                                    <span className="text-xs text-gray-600">
-                                                        Roll No: {rollNo}
-                                                    </span>
-                                                </div>
-                                                <div className="text-right flex gap-2">
-                                                    <span className="text-gray-800">
-                                                        {itemName}
-                                                    </span>
-                                                    <span className="font-bold text-[#4977ec] block">
-                                                        × {quantity}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="flex justify-between items-center gap-4">
-                                                <div className="space-x-2">
-                                                    {isPacked && (
-                                                        <span className="px-2 pt-[2px] pb-[3px] text-xs font-bold rounded-full bg-yellow-50 text-yellow-700">
-                                                            Pack
-                                                        </span>
-                                                    )}
-                                                    <span className="text-sm text-gray-500 mt-1 italic">
-                                                        {specialInstructions}
-                                                    </span>
-                                                </div>
-
-                                                <div className="w-fit">
-                                                    <OrderDropdown
-                                                        options={statusOptions}
-                                                        setValue={setStatus}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )
-                                )
-                            ) : (
-                                <div className="p-4 text-center text-gray-500">
-                                    No individual orders found
-                                </div>
-                            )}
-                        </div>
+                {/* Item Summary Column */}
+                <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                    <div className="p-4 border-b border-gray-200 text-center">
+                        <h2 className="text-xl font-semibold text-gray-800">
+                            Kitchen Summary
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                            Aggregated items for preparation
+                        </p>
                     </div>
-
-                    {/* Item Summary Column */}
-                    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                        <div className="p-4 border-b border-gray-200 text-center">
-                            <h2 className="text-xl font-semibold text-gray-800">
-                                Kitchen Summary
-                            </h2>
-                            <p className="text-sm text-gray-500">
-                                Aggregated items for preparation
-                            </p>
-                        </div>
-                        <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[calc(100vh-220px)] overflow-y-auto">
-                            {Object.entries(itemSummary).length > 0 ? (
-                                Object.entries(itemSummary).map(
-                                    ([itemName, itemData]) => (
-                                        <div
-                                            key={itemName}
-                                            className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
-                                        >
-                                            <div className="flex gap-4 flex-col items-center text-center">
-                                                <h3 className="font-semibold text-lg text-gray-900 truncate w-full">
-                                                    {itemName}
-                                                </h3>
-                                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[40px] rounded-full font-bold">
-                                                    {itemData.quantity}
-                                                </div>
+                    <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[calc(100vh-220px)] overflow-y-auto">
+                        {Object.entries(itemSummary).length > 0 ? (
+                            Object.entries(itemSummary).map(
+                                ([itemName, itemData]) => (
+                                    <div
+                                        key={itemName}
+                                        className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
+                                    >
+                                        <div className="flex gap-4 flex-col items-center text-center">
+                                            <h3 className="font-semibold text-lg text-gray-900 truncate w-full">
+                                                {itemName}
+                                            </h3>
+                                            <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[40px] rounded-full font-bold">
+                                                {itemData.quantity}
                                             </div>
                                         </div>
-                                    )
+                                    </div>
                                 )
-                            ) : (
-                                <div className="col-span-full p-4 text-center text-gray-500">
-                                    No items summary available
-                                </div>
-                            )}
-                        </div>
+                            )
+                        ) : (
+                            <div className="col-span-full p-4 text-center text-gray-500">
+                                No items summary available
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

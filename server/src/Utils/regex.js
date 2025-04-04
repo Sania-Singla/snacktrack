@@ -36,7 +36,8 @@ export default function verifyRegex(name, value) {
 
             case 'kitchenKey': {
                 // hostelType + hostelNumber + kitchenPassword
-                return /^[A-Z]{2}\d{2}[a-zA-Z0-9]{4,12}$/.test(value);
+                console.log(value);
+                return /^[A-Z]{2}\d{1,2}[a-zA-Z0-9]{4,12}$/.test(value);
             }
 
             case 'phoneNumber': {

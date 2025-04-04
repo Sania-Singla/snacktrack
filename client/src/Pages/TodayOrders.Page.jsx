@@ -1,16 +1,9 @@
 import { useSearchParams } from 'react-router-dom';
-import {
-    CompletedOrders,
-    PendingOrders,
-    Filter,
-    RejectedOrders,
-    PreparedOrders,
-} from '../Components';
+import { PendingOrders, Filter } from '../Components';
 
 export default function TodayOrdersPage() {
     const [searchParams] = useSearchParams();
     const filter = searchParams.get('filter') || 'Pending'; // Default to 'Pending'
-
     const options = [
         { value: 'Pending', label: 'Pending' },
         { value: 'PickedUp', label: 'Completed' },
@@ -27,18 +20,11 @@ export default function TodayOrdersPage() {
                 <Filter options={options} defaultOption={filter} />
             </div>
 
-            {/* Render Based on Filter */}
-            <div className="">
-                {filter === 'Pending' ? (
-                    <PendingOrders />
-                ) : filter === 'Rejected' ? (
-                    <RejectedOrders />
-                ) : filter === 'Prepared' ? (
-                    <PreparedOrders />
-                ) : (
-                    <CompletedOrders />
-                )}
-            </div>
+            {filter === 'Pending' ? (
+                <PendingOrders />
+            ) : (
+                <Orders filter={filter} />
+            )}
         </div>
     );
 }

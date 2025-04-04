@@ -14,9 +14,7 @@ export default function RegisterStudentPage() {
         phoneNumber: '',
         email: '',
         rollNo: '',
-        password: '',
     };
-    const [showPassword, setShowPassword] = useState(false);
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(false);
@@ -30,7 +28,7 @@ export default function RegisterStudentPage() {
 
     const handleBlur = (e) => {
         let { name, value } = e.target;
-        if (value && name !== 'password') {
+        if (value) {
             verifyExpression(name, value, setError);
         }
     };
@@ -62,7 +60,6 @@ export default function RegisterStudentPage() {
         } finally {
             setDisabled(false);
             setLoading(false);
-            setShowPassword(false);
         }
     }
 
@@ -95,13 +92,6 @@ export default function RegisterStudentPage() {
             placeholder: 'Enter Phone Number',
             required: true,
         },
-        {
-            type: showPassword ? 'text' : 'password',
-            name: 'password',
-            label: "Contractor's Password",
-            placeholder: 'Enter password to confirm',
-            required: true,
-        },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -111,8 +101,6 @@ export default function RegisterStudentPage() {
                 handleBlur={handleBlur}
                 handleChange={handleChange}
                 inputs={inputs}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
             />
             {field.name !== 'password' && error[field.name] && (
                 <div className="text-red-500 text-xs font-medium">

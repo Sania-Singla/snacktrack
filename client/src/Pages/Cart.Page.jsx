@@ -8,21 +8,18 @@ import {
     TAX,
 } from '../Constants/constants';
 import { orderService } from '../Services';
-import { usePopupContext, useSocketContext, useUserContext } from '../Contexts';
-import toast from 'react-hot-toast';
+import {
+    usePopupContext,
+    useSocketContext,
+    useStudentContext,
+} from '../Contexts';
 
 export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
     const navigate = useNavigate();
     const { socket } = useSocketContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
-    const [cartItems, setCartItems] = useState(
-        JSON.parse(localStorage.getItem('cartItems'))?.map((item) => ({
-            ...item,
-            pack: item.pack || false,
-            specialInstructions: item.specialInstructions || '',
-        })) || []
-    );
+    const { cartItems, setCartItems } = useStudentContext();
 
     // Calculate charges
     const subtotal = cartItems.reduce(
@@ -45,7 +42,9 @@ export default function CartPage() {
                 ? { ...item, quantity: newQuantity }
                 : item
         );
+        // update local storage
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        // update state
         setCartItems(updatedCartItems);
     }
 
@@ -58,7 +57,9 @@ export default function CartPage() {
                 return !(item._id === _id && item.price === price);
             }
         });
+        // update local storage
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        // update state
         setCartItems(updatedCartItems);
     }
 
@@ -73,10 +74,7 @@ export default function CartPage() {
             if (res && !res.message) {
                 socket.emit('newOrder', res);
                 setShowPopup(true);
-                setPopupInfo({
-                    type: 'orderPlaced',
-                    data: { itemsCount: cartItems.length },
-                });
+                setPopupInfo({ type: 'orderPlaced', count: cartItems.length });
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
             }
@@ -89,16 +87,11 @@ export default function CartPage() {
 
     function editItem(item) {
         setShowPopup(true);
-        setPopupInfo({
-            type: 'editCartItem',
-            item,
-            setCartItems,
-            cartItems,
-        });
+        setPopupInfo({ type: 'editCartItem', item });
     }
 
     const cartItemElements = cartItems.map((item) => {
-        const { price, _id, name, category, type, image, quantity, pack } =
+        const { price, _id, name, category, type, image, quantity, isPacked } =
             item;
         return (
             <div
@@ -122,7 +115,7 @@ export default function CartPage() {
                             </h3>
                             <p className="text-sm text-gray-500">
                                 ₹{price.toFixed(2)}
-                                {pack && (
+                                {isPacked && (
                                     <span className="text-xs text-gray-500 ml-1">
                                         (+₹5 packing)
                                     </span>
@@ -178,7 +171,7 @@ export default function CartPage() {
                             ₹
                             {(
                                 price * quantity +
-                                (pack ? 5 * quantity : 0)
+                                (isPacked ? 5 * quantity : 0)
                             ).toFixed(2)}
                         </p>
                         <Button

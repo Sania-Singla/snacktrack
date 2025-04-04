@@ -148,7 +148,7 @@ export default function OrderPlacedPopup() {
                         }}
                     >
                         <span className="font-semibold">Items:</span>{' '}
-                        {popupInfo.data.itemsCount}
+                        {popupInfo.count}
                     </motion.p>
 
                     <motion.p

@@ -26,7 +26,7 @@ export default function Snacks() {
         setPopupInfo({ type: 'addSnack' });
     }
 
-    return snackElements.length > 0 ? (
+    return (
         <div className="relative">
             {user.role === 'contractor' && (
                 <Button
@@ -43,13 +43,15 @@ export default function Snacks() {
                     className="absolute z-[1] -top-16 text-white rounded-md w-fit text-nowrap px-3 h-[39px] bg-[#4977ec] hover:bg-[#3b62c2]"
                 />
             )}
-            <div
-                className={`grid gap-5 ${snackElements.length <= 2 ? 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,350px))]' : 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))]'}`}
-            >
-                {snackElements}
-            </div>
+            {snackElements.length > 0 ? (
+                <div
+                    className={`grid gap-5 ${snackElements.length <= 2 ? 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,350px))]' : 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))]'}`}
+                >
+                    {snackElements}
+                </div>
+            ) : (
+                <div>No Snacks Found !!</div>
+            )}
         </div>
-    ) : (
-        <div>No Snacks Found !!</div>
     );
 }

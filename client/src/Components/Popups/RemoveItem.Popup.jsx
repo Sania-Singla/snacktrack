@@ -1,4 +1,4 @@
-import { Button, InputField } from '..';
+import { Button } from '..';
 import { usePopupContext, useSnackContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useNavigate } from 'react-router-dom';
@@ -13,20 +13,15 @@ export default function RemoveItemPopup() {
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(false);
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
 
     async function removeItem() {
         setLoading(true);
         setDisabled(true);
         try {
-            const res = await contractorService.removeItem(
-                popupInfo.target._id,
-                password
-            );
+            const res = await contractorService.removeItem(popupInfo.item._id);
             if (res && res.message === 'item deleted successfully') {
                 setItems((prev) =>
-                    prev.filter((item) => item._id !== popupInfo.target._id)
+                    prev.filter((item) => item._id !== popupInfo.item._id)
                 );
                 toast.success('Item Deleted Successfully 😕');
             } else toast.error(res?.message);
@@ -40,8 +35,7 @@ export default function RemoveItemPopup() {
     }
 
     function onMouseOver() {
-        if (!check || !password) setDisabled(true);
-        else setDisabled(false);
+        setDisabled(!check);
     }
 
     return (
@@ -61,7 +55,7 @@ export default function RemoveItemPopup() {
                 <p className="text-2xl font-bold text-center">Remove Item</p>
                 <p className="text-[15px] text-center">
                     <span className="font-medium">Category: </span>
-                    {popupInfo.target.category}
+                    {popupInfo.item.category}
                 </p>
 
                 <div className="w-full flex flex-row-reverse gap-3 mt-2 items-start">
@@ -81,21 +75,6 @@ export default function RemoveItemPopup() {
                     />
                 </div>
 
-                <div className="w-full relative -top-4">
-                    <InputField
-                        field={{
-                            type: showPassword ? 'text' : 'password',
-                            name: 'password',
-                            label: 'Password',
-                            required: true,
-                            placeholder: 'Enter password to confirm delete',
-                        }}
-                        inputs={{ password }}
-                        setShowPassword={setShowPassword}
-                        showPassword={showPassword}
-                        handleChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
                 <Button
                     btnText={
                         loading ? (

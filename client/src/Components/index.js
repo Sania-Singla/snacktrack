@@ -16,7 +16,6 @@ import RemoveStudentPopup from './Popups/RemoveStudent.Popup';
 import RemoveAllStudentsPopup from './Popups/RemoveAllStudents.Popup';
 import EditStudentPopup from './Popups/EditStudent.Popup';
 import UpdateAvatarPopup from './Popups/UpdateAvatar.Popup';
-import NotificationsPopup from './Popups/Notifications.Popup';
 import EditSnackPopup from './Popups/EditSnack.Popup';
 import EditItemPopup from './Popups/EditItem.Popup';
 import RemoveSnackPopup from './Popups/RemoveSnack.Popup';
@@ -28,16 +27,13 @@ import StudentView from './Views/StudentView';
 import Snacks from './Views/Snacks';
 import PackagedItems from './Views/PackagedItems';
 import PendingOrders from './Views/PendingOrders';
-import CompletedOrders from './Views/CompletedOrders';
-import PreparedOrders from './Views/PreparedOrders';
-import RejectedOrders from './Views/RejectedOrders';
+import Orders from './Views/Orders';
 import StudentOrderCard from './Views/StudentOrderCard';
 import ContractorOrderCard from './Views/ContractorOrderCard';
 import AddSnackPopup from './Popups/AddSnack.Popup';
 import AddItemPopup from './Popups/AddItem.Popup';
 import EmailVerificationPopup from './Popups/EmailVerification.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
-import NewOrderPopup from './Popups/NewOrder.Popup';
 import EmptyCart from './Views/EmptyCart';
 import OrderDropdown from './General/OrderDropdown';
 
@@ -62,8 +58,6 @@ export {
     EditCartItemPopup,
     RemoveAllStudentsPopup,
     StudentOrderCard,
-    NewOrderPopup,
-    NotificationsPopup,
     EditStudentPopup,
     UpdateAvatarPopup,
     SnackView,
@@ -72,9 +66,7 @@ export {
     Snacks,
     PackagedItems,
     PendingOrders,
-    CompletedOrders,
-    RejectedOrders,
-    PreparedOrders,
+    Orders,
     RemoveItemPopup,
     RemoveSnackPopup,
     EditItemPopup,

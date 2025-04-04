@@ -3,7 +3,6 @@ import {
     UpdateAvatarPopup,
     RemoveStudentPopup,
     EditStudentPopup,
-    NotificationsPopup,
     RemoveItemPopup,
     RemoveSnackPopup,
     EditItemPopup,
@@ -127,12 +126,6 @@ export default function Popup() {
             return (
                 <Wrapper>
                     <EmailVerificationPopup />
-                </Wrapper>
-            );
-        case 'notifications':
-            return (
-                <Wrapper>
-                    <NotificationsPopup />
                 </Wrapper>
             );
         default:

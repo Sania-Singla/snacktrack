@@ -104,9 +104,9 @@ const getCurrentUser = tryCatch('get current user', async (req, res, next) => {
 
 const updatePassword = tryCatch('update password', async (req, res, next) => {
     const { oldPassword, newPassword } = req.body;
-    const user = req.user;
+    const { password, _id, role } = req.user;
 
-    const isPassValid = bcrypt.compareSync(oldPassword, user.password);
+    const isPassValid = bcrypt.compareSync(oldPassword, password);
     if (!isPassValid) {
         return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
     }
@@ -120,7 +120,7 @@ const updatePassword = tryCatch('update password', async (req, res, next) => {
     const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
 
     const Model = role === 'contractor' ? Contractor : Student;
-    await Model.findByIdAndUpdate(user._id, {
+    await Model.findByIdAndUpdate(_id, {
         $set: { password: hashedNewPassword },
     });
 

@@ -3,18 +3,16 @@ import { Button, Logout, Searchbar } from '..';
 import {
     useUserContext,
     useSideBarContext,
-    usePopupContext,
+    useStudentContext,
 } from '../../Contexts';
 import { LOGO } from '../../Constants/constants';
 import { icons } from '../../Assets/icons';
-import { useState } from 'react';
 
 export default function Header() {
     const { user } = useUserContext();
     const { setShowSideBar } = useSideBarContext();
     const navigate = useNavigate();
-    const { setShowPopup, setPopupInfo } = usePopupContext();
-    const [notifications, setNotifications] = useState([]);
+    const { cartItems } = useStudentContext();
 
     return (
         <header className="drop-shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-4 font-medium flex items-center justify-between gap-4">
@@ -43,18 +41,17 @@ export default function Header() {
                             className="object-cover size-full hover:brightness-95"
                         />
                     </div>
-                    <div className="hover:scale-110 transition-all duration-300">
+                    <p className="hover:scale-110 transition-all duration-300">
                         SnackTrack
-                    </div>
+                    </p>
                 </Link>
             </div>
 
-            {/* search bar */}
             <Searchbar />
 
             <div className="flex gap-4 items-center">
                 {user.role === 'student' ? (
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="relative">
                         <Button
                             btnText={
                                 <div className="size-[20px] group-hover:fill-[#4977ec] fill-[#434343]">
@@ -65,27 +62,12 @@ export default function Header() {
                             onClick={() => navigate('/cart')}
                             className="bg-[#ffffff] p-[9px] group rounded-full drop-shadow-sm w-fit"
                         />
-                        <div className="relative">
-                            <Button
-                                btnText={
-                                    <div className="size-[20px] group-hover:fill-[#4977ec] fill-[#434343]">
-                                        {icons.bell}
-                                    </div>
-                                }
-                                title="Notifications"
-                                onClick={() => {
-                                    setShowPopup(true);
-                                    setPopupInfo({ type: 'notifications' });
-                                }}
-                                className="bg-[#ffffff] p-[9px] group rounded-full drop-shadow-sm w-fit"
-                            />
-                            {/* notifications count */}
-                            {notifications.length > 0 && (
-                                <span className="text-[13px] flex items-center justify-center leading-3 text-white absolute -top-1 -right-1 size-5 bg-red-600 rounded-full">
-                                    {notifications.length}
-                                </span>
-                            )}
-                        </div>
+                        {/* item count */}
+                        {cartItems.length > 0 && (
+                            <span className="text-[13px] flex items-center justify-center leading-3 text-white absolute -top-1 -right-1 size-5 bg-red-600 rounded-full">
+                                {cartItems.length}
+                            </span>
+                        )}
                     </div>
                 ) : (
                     <div>

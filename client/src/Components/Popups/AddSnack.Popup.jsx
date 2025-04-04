@@ -18,14 +18,12 @@ export default function AddSnackPopup() {
     const [imagePreview, setImagePreview] = useState(SNACK_PLACEHOLDER_IMAGE);
     const [inputs, setInputs] = useState({
         name: '',
-        password: '',
         price: 0,
         image: null,
     });
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     async function handleChange(e) {
@@ -52,8 +50,7 @@ export default function AddSnackPopup() {
 
     const handleBlur = (e) => {
         let { name, value, type } = e.target;
-        if (value && type !== 'file' && name !== 'password')
-            verifyExpression(name, value, setError);
+        if (value && type !== 'file') verifyExpression(name, value, setError);
     };
 
     function onMouseOver() {
@@ -106,43 +103,24 @@ export default function AddSnackPopup() {
             placeholder: 'Enter snack Price',
             required: true,
         },
-        {
-            type: showPassword ? 'text' : 'password',
-            name: 'password',
-            label: 'Password',
-            placeholder: 'Enter password to confirm',
-            required: true,
-        },
     ];
 
-    const inputElements = inputFields.map((field) =>
-        field.name === 'password' ? (
+    const inputElements = inputFields.map((field) => (
+        <div className="w-full" key={field.name}>
             <InputField
-                key={field.name}
                 field={field}
                 handleChange={handleChange}
                 error={error}
                 inputs={inputs}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
+                handleBlur={handleBlur}
             />
-        ) : (
-            <div className="w-full" key={field.name}>
-                <InputField
-                    field={field}
-                    handleChange={handleChange}
-                    error={error}
-                    inputs={inputs}
-                    handleBlur={handleBlur}
-                />
-                {error[field.name] && (
-                    <div className="text-red-500 text-xs font-medium">
-                        {error[field.name]}
-                    </div>
-                )}
-            </div>
-        )
-    );
+            {error[field.name] && (
+                <div className="text-red-500 text-xs font-medium">
+                    {error[field.name]}
+                </div>
+            )}
+        </div>
+    ));
 
     return (
         <div className="relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-3">
@@ -225,4 +203,3 @@ export default function AddSnackPopup() {
         </div>
     );
 }
-import React from 'react';

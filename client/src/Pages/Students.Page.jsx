@@ -106,18 +106,11 @@ export default function StudentsPage() {
             )}
 
             {loading ? (
-                page === 1 ? (
-                    <div className="w-full text-center">
-                        loading first batch...
-                        {/* pulses */}
+                <div className="flex justify-center py-12">
+                    <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                        {icons.loading}
                     </div>
-                ) : (
-                    <div className="flex items-center justify-center my-2 w-full">
-                        <div className="size-7 fill-[#4977ec] dark:text-[#f7f7f7]">
-                            {icons.loading}
-                        </div>
-                    </div>
-                )
+                </div>
             ) : (
                 studentElements.length === 0 && <div>No student found !!</div>
             )}

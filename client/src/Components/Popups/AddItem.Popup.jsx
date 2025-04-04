@@ -11,7 +11,6 @@ export default function AddItemPopup() {
     const { setItems } = useSnackContext();
     const [inputs, setInputs] = useState({
         category: '',
-        password: '',
     });
 
     const [variants, setVariants] = useState([]);
@@ -20,7 +19,6 @@ export default function AddItemPopup() {
     const [disabled, setDisabled] = useState(false);
     const { setShowPopup } = usePopupContext();
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     // Check for duplicate prices whenever variants change
@@ -220,22 +218,6 @@ export default function AddItemPopup() {
                             </div>
                         )}
                     </div>
-
-                    <InputField
-                        field={{
-                            type: showPassword ? 'text' : 'password',
-                            name: 'password',
-                            label: 'Password',
-                            placeholder: 'Enter password to confirm',
-                            required: true,
-                        }}
-                        handleChange={handleChange}
-                        error={error}
-                        inputs={inputs}
-                        showPassword={showPassword}
-                        setShowPassword={setShowPassword}
-                        className="relative -top-2"
-                    />
 
                     <div className="w-full">
                         <Button

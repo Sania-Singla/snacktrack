@@ -12,14 +12,12 @@ export default function AddItemPopup() {
     const { setShowPopup, popupInfo } = usePopupContext();
     const [inputs, setInputs] = useState({
         category: popupInfo.target.category || '',
-        password: '',
     });
     const [variants, setVariants] = useState(popupInfo.target.variants);
     const [error, setError] = useState({});
     const [variantErrors, setVariantErrors] = useState({});
     const [disabled, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     // Check for duplicate prices whenever variants change
@@ -227,22 +225,6 @@ export default function AddItemPopup() {
                             </div>
                         )}
                     </div>
-
-                    <InputField
-                        field={{
-                            type: showPassword ? 'text' : 'password',
-                            name: 'password',
-                            label: 'Password',
-                            placeholder: 'Enter password to confirm update',
-                            required: true,
-                        }}
-                        handleChange={handleChange}
-                        error={error}
-                        inputs={inputs}
-                        showPassword={showPassword}
-                        setShowPassword={setShowPassword}
-                        className="relative -top-2"
-                    />
 
                     <div className="w-full">
                         <Button

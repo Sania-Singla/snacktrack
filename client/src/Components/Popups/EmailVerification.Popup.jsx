@@ -41,7 +41,7 @@ export default function EmailVerificationPopup() {
         setDisabled(true);
         try {
             const res = await contractorService.completeRegistration({
-                ...popupInfo.target.data,
+                ...popupInfo.target,
                 code: code.join(''),
             });
             if (res && !res.message) {

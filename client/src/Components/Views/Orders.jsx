@@ -6,7 +6,7 @@ import { orderService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import { ContractorOrderCard } from '..';
 
-export default function PreparedOrders() {
+export default function Orders({ filter }) {
     const [orders, setOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(false);
@@ -23,7 +23,7 @@ export default function PreparedOrders() {
             try {
                 setLoading(true);
                 const res = await orderService.getCanteenOrders(
-                    'Prepared',
+                    filter,
                     page,
                     LIMIT,
                     signal
