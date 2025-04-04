@@ -1,6 +1,15 @@
 import { AUDIO_FILE } from '../Constants/constants';
 
-export function playSound() {
-    const audio = new Audio(AUDIO_FILE);
-    audio.play();
+// Preload the audio
+const audio = new Audio(AUDIO_FILE);
+audio.preload = 'auto';
+
+export async function playSound() {
+    try {
+        // Reset audio to start
+        audio.currentTime = 0;
+        await audio.play();
+    } catch (err) {
+        console.log('Audio play failed:', err);
+    }
 }

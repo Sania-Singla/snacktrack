@@ -41,6 +41,12 @@ export default function Sidebar() {
             show: user.role === 'contractor',
         },
         {
+            path: '/kitchen',
+            name: 'Kitchen',
+            icon: icons.store,
+            show: user.role === 'contractor',
+        },
+        {
             path: '/students',
             name: 'Students',
             icon: icons.user,

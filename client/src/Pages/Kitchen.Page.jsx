@@ -4,10 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Dropdown } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
-import { useUserContext } from '../Contexts';
+import { useOrderContext, useUserContext } from '../Contexts';
 
 export default function KitchenPage() {
-    const [orders, setOrders] = useState([]);
+    const { pendingOrders, setPendingOrders } = useOrderContext();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -29,6 +29,7 @@ export default function KitchenPage() {
                 const res = await userService.getOrders();
                 if (res) {
                     if (res.message) {
+                        // get canteens to show in verify key popup
                         const data = await userService.getCanteens(signal);
                         if (data) {
                             setHostels((prev) => [
@@ -41,11 +42,12 @@ export default function KitchenPage() {
                             setError(true);
                         }
                     } else {
+                        // show orders
                         setUser({
-                            canteenId: res[0].canteenId,
+                            canteenId: res.canteenId,
                             role: 'contractor', // although staff but no issue (non impacting)
                         });
-                        setOrders(res);
+                        setPendingOrders(res.orders);
                     }
                 }
             } catch (err) {
@@ -82,14 +84,34 @@ export default function KitchenPage() {
 
     const itemSummary = {};
     (function processOrders() {
-        orders.forEach(({ items }) => {
-            items.forEach(({ quantity, itemType, name }) => {
-                if (itemType === 'Snack') {
-                    itemSummary[name]
-                        ? (itemSummary[name].quantity += quantity)
-                        : (itemSummary[name] = { quantity });
+        pendingOrders.forEach(({ items }) => {
+            items.forEach(
+                ({ quantity, itemType, name, specialInstructions }) => {
+                    if (itemType === 'Snack') {
+                        if (itemSummary[name]) {
+                            itemSummary[name].quantity += quantity;
+                            if (specialInstructions) {
+                                if (!itemSummary[name].instructions) {
+                                    itemSummary[name].instructions = {};
+                                }
+                                itemSummary[name].instructions[
+                                    specialInstructions
+                                ] =
+                                    (itemSummary[name].instructions[
+                                        specialInstructions
+                                    ] || 0) + quantity;
+                            }
+                        } else {
+                            itemSummary[name] = { quantity };
+                            if (specialInstructions) {
+                                itemSummary[name].instructions = {
+                                    [specialInstructions]: quantity,
+                                };
+                            }
+                        }
+                    }
                 }
-            });
+            );
         });
     })();
 
@@ -153,8 +175,8 @@ export default function KitchenPage() {
                         Kitchen Orders
                     </h1>
                     <p className="bg-[#4977ec]/10 text-[#4977ec] px-3 py-1 rounded-full text-sm font-medium">
-                        {orders.length}{' '}
-                        {orders.length === 1 ? 'Order' : 'Orders'}
+                        {pendingOrders.length}{' '}
+                        {pendingOrders.length === 1 ? 'Order' : 'Orders'}
                     </p>
                 </div>
 
@@ -176,13 +198,47 @@ export default function KitchenPage() {
                                         key={itemName}
                                         className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
                                     >
-                                        <div className="flex gap-4 flex-col items-center text-center">
-                                            <h3 className="font-semibold text-lg text-gray-900 truncate w-full">
-                                                {itemName}
-                                            </h3>
-                                            <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[40px] rounded-full font-bold">
-                                                {itemData.quantity}
+                                        <div className="flex flex-col gap-2">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="font-semibold text-gray-900 text-lg truncate max-w-[120px]">
+                                                    {itemName}
+                                                </h3>
+                                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[30px] rounded-full font-bold text-sm">
+                                                    {itemData.quantity}
+                                                </div>
                                             </div>
+
+                                            {itemData.instructions && (
+                                                <div className="mt-1 space-y-2">
+                                                    <div className="text-sm font-medium text-gray-500 border-b pb-1">
+                                                        Special Requests:
+                                                    </div>
+                                                    {Object.entries(
+                                                        itemData.instructions
+                                                    ).map(
+                                                        ([
+                                                            instruction,
+                                                            count,
+                                                        ]) => (
+                                                            <div
+                                                                key={
+                                                                    instruction
+                                                                }
+                                                                className="flex items-center gap-2 bg-red-50/50 p-2 rounded border border-red-100"
+                                                            >
+                                                                <span className="bg-red-100 text-red-800 p-1 rounded-full text-xs font-bold size-[24px] text-center">
+                                                                    {count}
+                                                                </span>
+                                                                <span className="text-xs mb-[5px] text-gray-700 flex-1">
+                                                                    {
+                                                                        instruction
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )

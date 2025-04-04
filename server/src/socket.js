@@ -30,45 +30,45 @@ io.on('connection', async (socket) => {
     // new order => notify canteen
     socket.on('newOrder', async (order) => {
         const socketId = await getSocketId(order.canteenId);
-        createMessage({
-            to: order.studentInfo.phoneNumber,
-            text: 'Your Order is placed and will be begin preparing soon',
-            link: process.env.FRONTEND_URL + '/my-orders',
-        });
         socket.to(socketId).emit('newOrder', order);
+        // createMessage({
+        //     to: order.studentInfo.phoneNumber,
+        //     text: 'Your Order is placed and will be begin preparing soon',
+        //     link: process.env.FRONTEND_URL + '/my-orders',
+        // });
     });
 
     // order rejected => notify student
     socket.on('orderRejected', async (order) => {
         const socketId = await getSocketId(order.studentId);
-        createMessage({
-            to: order.studentInfo.phoneNumber,
-            text: 'Your Order has been rejected',
-            link: process.env.FRONTEND_URL + '/my-orders',
-        });
         socket.to(socketId).emit('orderRejected', order);
+        // createMessage({
+        //     to: order.studentInfo.phoneNumber,
+        //     text: 'Your Order has been rejected',
+        //     link: process.env.FRONTEND_URL + '/my-orders',
+        // });
     });
 
     // order prepared  => notify student
     socket.on('orderPrepared', async (order) => {
         const socketId = await getSocketId(order.studentId);
-        createMessage({
-            to: order.studentInfo.phoneNumber,
-            text: 'Your Order is ready for pickup',
-            link: process.env.FRONTEND_URL + '/my-orders',
-        });
         socket.to(socketId).emit('orderPrepared', order);
+        // createMessage({
+        //     to: order.studentInfo.phoneNumber,
+        //     text: 'Your Order is ready for pickup',
+        //     link: process.env.FRONTEND_URL + '/my-orders',
+        // });
     });
 
     // order picked up => notify student
     socket.on('orderPickedUp', async (order) => {
         const socketId = await getSocketId(order.studentId);
-        createMessage({
-            to: order.studentInfo.phoneNumber,
-            text: 'Your Order has been picked up',
-            link: process.env.FRONTEND_URL + '/my-orders',
-        });
         socket.to(socketId).emit('orderPickedUp', order);
+        // createMessage({
+        //     to: order.studentInfo.phoneNumber,
+        //     text: 'Your Order has been picked up',
+        //     link: process.env.FRONTEND_URL + '/my-orders',
+        // });
     });
 
     socket.on('disconnect', async () => {

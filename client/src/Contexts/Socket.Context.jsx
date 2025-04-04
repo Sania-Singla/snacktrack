@@ -46,6 +46,7 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'Rejected' } : o
                 )
             );
+            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
         });
 
         socketInstance.on('orderPrepared', (order) => {
@@ -54,6 +55,7 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'Prepared' } : o
                 )
             );
+            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
         });
 
         socketInstance.on('orderPickedUp', (order) => {
@@ -62,11 +64,12 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'PickedUp' } : o
                 )
             );
+            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
         });
 
-        socketInstance.on('newOrder', (order) => {
-            playSound();
-            setPendingOrders((prev) => [...prev, order]);
+        socketInstance.on('newOrder', async (order) => {
+            setPendingOrders((prev) => prev.concat(order));
+            await playSound();
         });
 
         return socketInstance; // optional

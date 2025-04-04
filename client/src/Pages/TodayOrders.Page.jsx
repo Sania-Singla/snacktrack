@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
-import { PendingOrders, Filter } from '../Components';
+import { PendingOrders, Filter, Orders } from '../Components';
 
 export default function TodayOrdersPage() {
     const [searchParams] = useSearchParams();

@@ -12,13 +12,21 @@ export default function ContractorOrderCard({ order, reference }) {
     const { amount, _id, createdAt, items, studentInfo, packingCharges } =
         order;
     const { socket } = useSocketContext();
-    const [statusOptions, setStatusOptions] = useState([
-        { value: '', label: 'Pending' },
-        { value: 'PickedUp', label: 'Picked Up' },
-        { value: 'Prepared', label: 'Prepared' },
-        { value: 'Rejected', label: 'Reject' },
-    ]);
     const [status, setStatus] = useState(order.status);
+    const [statusOptions, setStatusOptions] = useState(
+        status === 'Pending'
+            ? [
+                  { value: '', label: 'Pending' },
+                  { value: 'PickedUp', label: 'Picked Up' },
+                  { value: 'Prepared', label: 'Prepared' },
+                  { value: 'Rejected', label: 'Reject' },
+              ]
+            : [
+                  { value: 'PickedUp', label: 'Picked Up' },
+                  { value: 'PickedUp', label: 'Picked Up' },
+              ]
+    );
+
     const navigate = useNavigate();
 
     async function handleStatusChange(status) {
@@ -36,7 +44,7 @@ export default function ContractorOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-visible transition-all hover:shadow-md"
         >
             <div
                 className="p-4 cursor-pointer"
@@ -47,33 +55,34 @@ export default function ContractorOrderCard({ order, reference }) {
                     <div className="flex items-center gap-3">
                         <div className="size-10 rounded-full overflow-hidden drop-shadow-sm">
                             <img
-                                src={studentInfo?.avatar}
-                                alt={studentInfo?.fullName}
+                                src={studentInfo.avatar}
+                                alt={`${studentInfo.fullName} image`}
                                 className="size-full object-cover"
                             />
                         </div>
                         <div className="flex-1 space-y-[2px]">
                             <h3 className="text-sm font-medium text-gray-800 truncate">
-                                {studentInfo?.fullName}
+                                {studentInfo.fullName}
                             </h3>
                             <div className="flex items-center gap-1 text-xs text-gray-600">
                                 <span>
-                                    Roll No: {getRollNo(studentInfo?.userName)}
+                                    Roll No: {getRollNo(studentInfo.userName)}
                                 </span>
                                 <span>•</span>
                                 <span>
-                                    {studentInfo?.phoneNumber || 'No phone'}
+                                    {studentInfo.phoneNumber || 'No phone'}
                                 </span>
                             </div>
                         </div>
                     </div>
-                    {status === 'Pending' ? (
+                    {status === 'Pending' || status === 'Prepared' ? (
                         <div
                             className="w-fit"
                             onClick={(e) => e.stopPropagation()}
                         >
                             <OrderDropdown
                                 options={statusOptions}
+                                defaultOption={status}
                                 onChange={handleStatusChange}
                             />
                         </div>
@@ -130,7 +139,7 @@ export default function ContractorOrderCard({ order, reference }) {
                     >
                         <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="space-y-4 mt-4">
-                                {items.map(({ item }) => (
+                                {items.map((item) => (
                                     <div key={item._id} className="space-y-2">
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
@@ -139,7 +148,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                     'Snack' ? (
                                                         <img
                                                             src={item.image}
-                                                            alt={`${name} image`}
+                                                            alt={`${item.name} image`}
                                                             className="object-cover size-full"
                                                         />
                                                     ) : (

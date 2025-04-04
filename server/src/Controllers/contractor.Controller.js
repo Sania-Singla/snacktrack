@@ -236,9 +236,9 @@ const registerStudent = tryCatch(
     'register as student',
     async (req, res, next) => {
         const contractor = req.user; // only contractor can register a student
-        const { fullName, rollNo, phoneNumber, email, password } = req.body;
+        const { fullName, rollNo, phoneNumber, email } = req.body;
 
-        if (!fullName || !email || !phoneNumber || !password || !rollNo) {
+        if (!fullName || !email || !phoneNumber || !rollNo) {
             return next(new ErrorHandler('Missing fields', BAD_REQUEST));
         }
 
@@ -248,11 +248,6 @@ const registerStudent = tryCatch(
 
         if (!isValid) {
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
-        }
-
-        const isPassValid = bcrypt.compareSync(password, contractor.password);
-        if (!isPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
         }
 
         const canteen = await Canteen.findById(contractor.canteenId);
@@ -337,12 +332,6 @@ const removeStudent = tryCatch(
     async (req, res, next) => {
         const { studentId } = req.params;
         const contractor = req.user;
-        const { password } = req.body;
-
-        const isPassValid = bcrypt.compareSync(password, contractor.password);
-        if (!isPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
-        }
 
         // a contractor can remove the student only if the student belongs to his canteen
         const student = await Promise.all([
@@ -372,14 +361,7 @@ const updateStudentAccountDetails = tryCatch(
     async (req, res, next) => {
         const contractor = req.user;
         const { studentId } = req.params;
-        const {
-            fullName,
-            phoneNumber,
-            email,
-            rollNo,
-            password,
-            contractorPassword,
-        } = req.body;
+        const { fullName, phoneNumber, email, rollNo, password } = req.body;
 
         const [student] = await Student.aggregate([
             {
@@ -403,17 +385,14 @@ const updateStudentAccountDetails = tryCatch(
             return next(new ErrorHandler('student not found', NOT_FOUND));
         }
 
-        const [isStudentPassValid, isContractorPassValid] = await Promise.all([
-            bcrypt.compare(password, student.password),
-            bcrypt.compare(contractorPassword, contractor.password),
-        ]);
+        const isStudentPassValid = await bcrypt.compare(
+            password,
+            student.password
+        );
         if (!isStudentPassValid) {
             return next(
                 new ErrorHandler('invalid student password', BAD_REQUEST)
             );
-        }
-        if (!isContractorPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
         }
 
         let alreadyExists = null;
@@ -461,16 +440,12 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
     let imageURL;
     try {
         const contractor = req.user;
-        const { name, price, password } = req.body;
+        const { name, price } = req.body;
         let image = req.file?.path;
 
         if (!name || !price) {
             if (image) fs.unlinkSync(image);
             return next(new ErrorHandler('missing fields', BAD_REQUEST));
-        }
-        const isPassValid = bcrypt.compareSync(password, contractor.password);
-        if (!isPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
         }
 
         const alreadyExists = await Snack.findOne({
@@ -505,11 +480,7 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
 const deleteSnack = tryCatch('delete post', async (req, res, next) => {
     const { snackId } = req.params;
     const contractor = req.user;
-    const { password } = req.body;
-    const isPassValid = bcrypt.compareSync(password, contractor.password);
-    if (!isPassValid) {
-        return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
-    }
+
     // to delete a snack that should belong to the contractor's canteen
     const snack = await Snack.findOneAndDelete({
         _id: new Types.ObjectId(snackId),
@@ -529,20 +500,11 @@ const updateSnackDetails = tryCatch(
         try {
             const { snackId } = req.params;
             const contractor = req.user;
-            const { name, price, password } = req.body;
+            const { name, price } = req.body;
             let image = req.file?.path;
 
             if (!name && !price && !image) {
                 return next(new ErrorHandler('missing fields', BAD_REQUEST));
-            }
-            const isPassValid = bcrypt.compareSync(
-                password,
-                contractor.password
-            );
-            if (!isPassValid) {
-                return next(
-                    new ErrorHandler('invalid credentials', BAD_REQUEST)
-                );
             }
 
             const snack = await Snack.findOne({
@@ -607,15 +569,11 @@ const toggleSnackAvailability = tryCatch(
 
 const addItem = tryCatch('add item', async (req, res, next) => {
     const contractor = req.user;
-    const { category, variants, password } = req.body;
+    const { category, variants } = req.body;
 
     // Validate required fields
     if (!category || !variants.length) {
         return next(new ErrorHandler('missing fields', BAD_REQUEST));
-    }
-    const isPassValid = bcrypt.compareSync(password, contractor.password);
-    if (!isPassValid) {
-        return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
     }
 
     const alreadyExists = await PackagedFood.findOne({
@@ -640,11 +598,7 @@ const addItem = tryCatch('add item', async (req, res, next) => {
 const deleteItem = tryCatch('delete item', async (req, res, next) => {
     const { itemId } = req.params;
     const contractor = req.user;
-    const { password } = req.body;
-    const isPassValid = bcrypt.compareSync(password, contractor.password);
-    if (!isPassValid) {
-        return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
-    }
+
     // Find the item and ensure it belongs to the contractor's canteen
     const item = await PackagedFood.findOneAndDelete({
         _id: new Types.ObjectId(itemId),
@@ -662,16 +616,11 @@ const updateItemDetails = tryCatch(
     async (req, res, next) => {
         const { itemId } = req.params;
         const contractor = req.user;
-        const { category, variants, password } = req.body;
+        const { category, variants } = req.body;
 
         // Validate required fields
         if (!category && !variants.length) {
             return next(new ErrorHandler('missing fields', BAD_REQUEST));
-        }
-
-        const isPassValid = bcrypt.compareSync(password, contractor.password);
-        if (!isPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
         }
 
         const item = await PackagedFood.findOne({

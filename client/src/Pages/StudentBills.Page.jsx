@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
-import { useUserContext } from '../Contexts';
 
-export default function MyBillsPage() {
+export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { user } = useUserContext();
+    const { studentId } = useParams();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,7 +14,10 @@ export default function MyBillsPage() {
 
         (async function getBills() {
             try {
-                const res = await billService.getStudentBills(user._id, signal);
+                const res = await billService.getStudentBills(
+                    studentId,
+                    signal
+                );
                 if (res && !res.message) {
                     setBills(res.bills);
                 }
@@ -33,9 +35,7 @@ export default function MyBillsPage() {
         <div>
             <div className="w-full p-4">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        My Bills
-                    </h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Bills</h1>
                 </div>
 
                 {loading ? (

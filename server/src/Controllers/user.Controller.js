@@ -57,7 +57,6 @@ const login = tryCatch('login as contractor', async (req, res, next) => {
             .lean(),
     ]);
 
-    console.log(Number(process.env.REFRESH_TOKEN_MAXAGE));
     return res
         .status(OK)
         .cookie('accessToken', accessToken, {
@@ -270,7 +269,7 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
         { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
     ]);
 
-    return res.status(OK).json(orders);
+    return res.status(OK).json({ canteenId: canteen._id, orders });
 });
 
 export {
