@@ -14,6 +14,12 @@ export default function Header() {
     const navigate = useNavigate();
     const { cartItems } = useStudentContext();
 
+    // Calculate total quantity by summing all item quantities
+    const totalQuantity = cartItems.reduce(
+        (total, item) => total + item.quantity,
+        0
+    );
+
     return (
         <header className="drop-shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-4 font-medium flex items-center justify-between gap-4">
             <div className="flex items-center justify-center gap-4">
@@ -62,10 +68,10 @@ export default function Header() {
                             onClick={() => navigate('/cart')}
                             className="bg-[#ffffff] p-[9px] group rounded-full drop-shadow-sm w-fit"
                         />
-                        {/* item count */}
-                        {cartItems.length > 0 && (
+                        {/* total quantity count */}
+                        {totalQuantity > 0 && (
                             <span className="text-[13px] flex items-center justify-center leading-3 text-white absolute -top-1 -right-1 size-5 bg-red-600 rounded-full">
-                                {cartItems.length}
+                                {totalQuantity}
                             </span>
                         )}
                     </div>

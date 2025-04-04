@@ -5,7 +5,7 @@ const StudentContext = createContext();
 const StudentContextProvider = ({ children }) => {
     const [students, setStudents] = useState([]);
     const [cartItems, setCartItems] = useState(
-        localStorage.getItem('cartItems') || []
+        JSON.parse(localStorage.getItem('cartItems')) || []
     );
 
     return (

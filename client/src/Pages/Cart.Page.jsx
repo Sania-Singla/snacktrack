@@ -101,12 +101,18 @@ export default function CartPage() {
                 <div className="w-full flex items-center gap-4 justify-between">
                     <div className="flex items-center gap-4">
                         {/* image */}
-                        <div className="size-[50px] overflow-hidden border rounded-lg flex items-center justify-center">
-                            <img
-                                src={image || SNACK_PLACEHOLDER_IMAGE}
-                                alt={`${name || category} image`}
-                                className="object-cover size-full"
-                            />
+                        <div className="size-[50px] overflow-hidden border-[0.01rem] border-gray-400 rounded-lg flex items-center justify-center">
+                            {type === 'Snack' ? (
+                                <img
+                                    src={image}
+                                    alt={`${name} image`}
+                                    className="object-cover size-full"
+                                />
+                            ) : (
+                                <div className="size-5 text-gray-400">
+                                    {icons.soda}
+                                </div>
+                            )}
                         </div>
                         {/* info */}
                         <div>

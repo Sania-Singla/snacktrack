@@ -64,31 +64,60 @@ export default function StudentOrderCard({ order, reference }) {
                 >
                     <div className="space-y-4 mt-4">
                         {items.map((item) => (
-                            <div
-                                key={item._id}
-                                className="flex justify-between items-center"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="size-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                                        <div className="size-5 text-gray-400">
-                                            {item.itemType === 'Snack'
-                                                ? icons.snack
-                                                : icons.soda}
+                            <div key={item._id} className="space-y-2">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex items-center gap-3">
+                                        <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
+                                            {item.itemType === 'Snack' ? (
+                                                <img
+                                                    src={item.image}
+                                                    alt={`${name} image`}
+                                                    className="object-cover size-full"
+                                                />
+                                            ) : (
+                                                <div className="size-5 text-gray-400">
+                                                    {icons.soda}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h3 className="text-sm font-medium text-gray-800 capitalize">
+                                                {item.name || item.category}
+                                            </h3>
+                                            <p className="text-xs text-gray-500">
+                                                Qty: {item.quantity} • ₹
+                                                {item.price.toFixed(2)} each
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <h3 className="text-sm font-medium text-gray-800 capitalize">
-                                            {item.name || item.category}
-                                        </h3>
-                                        <p className="text-xs text-gray-500">
-                                            Qty: {item.quantity} • ₹
-                                            {item.price.toFixed(2)} each
-                                        </p>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-semibold text-gray-900">
+                                            ₹
+                                            {(
+                                                item.price * item.quantity
+                                            ).toFixed(2)}
+                                        </span>
+                                        {item.isPacked && (
+                                            <div className="flex items-center gap-1 text-xs">
+                                                <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
+                                                <span className="text-gray-500">
+                                                    Packed
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
-                                <span className="text-sm font-semibold text-gray-900">
-                                    ₹{(item.price * item.quantity).toFixed(2)}
-                                </span>
+
+                                {item.specialInstructions && (
+                                    <div className="ml-13 pl-1">
+                                        <p className="text-xs text-gray-600 italic">
+                                            <span className="font-medium not-italic">
+                                                Note:{' '}
+                                            </span>
+                                            {item.specialInstructions}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

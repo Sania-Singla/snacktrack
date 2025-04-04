@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { PER_ITEM_PACKAGING_CHARGES } from '../../Constants/constants';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
-import { usePopupContext } from '../../Contexts';
+import { usePopupContext, useStudentContext } from '../../Contexts';
 
 export default function EditCartItem() {
     const { popupInfo, setShowPopup } = usePopupContext();
     const item = popupInfo.item;
+    const { cartItems, setCartItems } = useStudentContext();
     const [input, setInput] = useState(item.specialInstructions || '');
     const [pack, setPack] = useState(item.isPacked || false);
 
@@ -66,23 +67,21 @@ export default function EditCartItem() {
                     className="bg-[#4977ec] text-white w-full px-4 py-2 rounded-md"
                     btnText="Save Changes"
                     onClick={() => {
-                        const updatedCartItems = popupInfo.cartItems.map(
-                            (i) => {
-                                if (i._id === item._id) {
-                                    if (
-                                        i.type === 'Snack' ||
-                                        i.price === item.price
-                                    ) {
-                                        return {
-                                            ...i,
-                                            specialInstructions: input,
-                                            isPacked: pack,
-                                        };
-                                    }
-                                } else return i;
-                            }
-                        );
-                        popupInfo.setCartItems(updatedCartItems);
+                        const updatedCartItems = cartItems.map((i) => {
+                            if (i._id === item._id) {
+                                if (
+                                    i.type === 'Snack' ||
+                                    i.price === item.price
+                                ) {
+                                    return {
+                                        ...i,
+                                        specialInstructions: input,
+                                        isPacked: pack,
+                                    };
+                                }
+                            } else return i;
+                        });
+                        setCartItems(updatedCartItems);
                         localStorage.setItem(
                             'cartItems',
                             JSON.stringify(updatedCartItems)
