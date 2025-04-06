@@ -2,12 +2,34 @@ import { OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
 import { Bill, Order } from '../Models/index.js';
 import { Types } from 'mongoose';
+import cron from 'node-cron';
 
 const getStudentBills = tryCatch('get student bills', async (req, res) => {
     const { studentId } = req.params;
-    const bills = await Bill.find({
-        studentId: new Types.ObjectId(studentId),
-    }).sort({ createdAt: -1 });
+    const bills = await Bill.aggregate([
+        { $match: { studentId: new Types.ObjectId(studentId) } },
+        {
+            $lookup: {
+                from: 'students',
+                localField: 'studentId',
+                foreignField: '_id',
+                as: 'studentInfo',
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            userName: 1,
+                            email: 1,
+                            phoneNumber: 1,
+                            avatar: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        { $unwind: '$studentInfo' },
+        { $sort: { createdAt: -1 } },
+    ]);
 
     if (bills.length) {
         return res.status(OK).json(bills);
@@ -18,9 +40,38 @@ const getStudentBills = tryCatch('get student bills', async (req, res) => {
 
 const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
-    const bills = await Bill.find({
-        canteenId: new Types.ObjectId(contractor.canteenId),
-    }).sort({ createdAt: -1 });
+    // get bills of the previous month only
+    
+    const bills = await Bill.aggregate([
+        {
+            $match: {
+                canteenId: new Types.ObjectId(contractor.canteenId),
+                month: new Date().getMonth(), // previous month as 0 indexed
+                year: new Date().getFullYear(),
+            },
+        },
+        {
+            $lookup: {
+                from: 'students',
+                localField: 'studentId',
+                foreignField: '_id',
+                as: 'studentInfo',
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            userName: 1,
+                            email: 1,
+                            phoneNumber: 1,
+                            avatar: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        { $unwind: '$studentInfo' },
+        { $sort: { createdAt: -1 } },
+    ]);
 
     if (bills.length) {
         return res.status(OK).json(bills);
@@ -38,10 +89,7 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
             _id: new Types.ObjectId(billId),
             canteenId: new Types.ObjectId(contractor.canteenId),
         },
-        {
-            paid: true,
-            paidDate: new Date(),
-        },
+        { paid: true, paidDate: new Date() },
         { new: true }
     );
     if (!bill) {
@@ -50,34 +98,74 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
     return res.status(OK).json({ message: 'bill marked as paid' });
 });
 
+// Automatic using cron job
 const generateBill = tryCatch('generate bill', async (req, res) => {
-    const { month, year } = req.body;
-    const { studentId } = req.params;
-    const contractor = req.user;
+    // Get the previous month and year
+    const now = new Date();
+    const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const month = lastMonth.getMonth() + 1; // Months are 0-indexed in JS
+    const year = lastMonth.getFullYear();
 
-    // get that month's orders
-    const orders = await Order.find({
-        studentId: new Types.ObjectId(studentId),
-        status: 'PickedUp',
-        createdAt: {
-            $gte: new Date(`${year}-${month}-01`),
-            $lt: new Date(`${year}-${month}-31`),
+    // Find all students who have orders in the previous month
+    const studentsWithOrders = await Order.aggregate([
+        {
+            $match: {
+                status: 'PickedUp',
+                createdAt: {
+                    $gte: new Date(year, month - 1, 1),
+                    $lt: new Date(year, month, 1),
+                },
+            },
         },
-    }).select('_id amount');
+        {
+            $group: {
+                _id: '$studentId',
+                totalAmount: { $sum: '$amount' },
+                canteenId: { $first: '$canteenId' },
+            },
+        },
+    ]);
 
-    const orderIds = orders.map((o) => o._id);
-    const amount = orders.reduce((acc, o) => acc + o.amount, 0);
+    // Generate bills for each student
+    const billPromises = studentsWithOrders.map(async (student) => {
+        const existingBill = await Bill.findOne({
+            studentId: student._id,
+            month,
+            year,
+        });
 
-    const bill = await Bill.create({
-        studentId,
-        canteenId: contractor.canteenId,
-        month,
-        year,
-        amount,
-        orderIds,
+        if (!existingBill) {
+            return Bill.create({
+                studentId: student._id,
+                canteenId: student.canteenId,
+                month,
+                year,
+                amount: student.totalAmount,
+            });
+        }
+        return null;
     });
 
-    return res.status(OK).json(bill);
+    await Promise.all(billPromises);
+    console.log(`Automated billing completed for ${month}/${year}`);
 });
 
-export { markPaid, generateBill, getBills, getStudentBills };
+// Schedule the cron job to run on the 1st of every month at 12:05 AM
+const startBillingCronJob = () => {
+    // Run at 00:05 on the 1st of every month
+    cron.schedule('5 0 1 * *', generateBill, {
+        scheduled: true,
+        timezone: 'Asia/Kolkata',
+    });
+    console.log(
+        '✨ Billing cron job scheduled to run on the 1st at 12:05 AM of every month'
+    );
+};
+
+export {
+    markPaid,
+    generateBill,
+    getBills,
+    getStudentBills,
+    startBillingCronJob,
+};

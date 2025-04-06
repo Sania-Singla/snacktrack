@@ -10,7 +10,7 @@ export default function StudentOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md"
+            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md h-fit"
         >
             <div
                 className="p-4 cursor-pointer"

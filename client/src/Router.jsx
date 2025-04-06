@@ -18,6 +18,7 @@ import {
     ServerErrorPage,
     NotFoundPage,
     Redirect,
+    BillsPage,
     FAQpage,
     NewUserPage,
     TodayOrdersPage,
@@ -25,7 +26,7 @@ import {
     MyBillsPage,
     MyOrdersPage,
     CartPage,
-    BillsPage,
+    StudentBillsPage,
     KitchenPage,
     StatisticsPage,
     AdminPage,
@@ -74,7 +75,11 @@ export const router = createBrowserRouter(
                             path="orders/:studentId"
                             element={<StudentOrdersPage />}
                         />
-                        <Route path="bills" element={<BillsPage />} />
+                        <Route
+                            path="bills/:studentId"
+                            element={<StudentBillsPage />}
+                        />
+                        <Route path="all-bills" element={<BillsPage />} />
                         <Route path="students" element={<StudentsPage />} />
                         <Route path="statistics" element={<StatisticsPage />} />
                     </Route>

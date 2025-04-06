@@ -1,4 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
+import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 const billSchema = new Schema(
     {
@@ -13,7 +14,7 @@ const billSchema = new Schema(
             required: true,
         },
         month: {
-            type: String,
+            type: Number,
             required: true,
         },
         year: {
@@ -28,19 +29,14 @@ const billSchema = new Schema(
             type: Boolean,
             default: false,
         },
-        paidDate: {
+        paidOn: {
             type: Date,
-            default: null,
+            default: new Date(),
         },
-        orderIds: [
-            {
-                type: Types.ObjectId,
-                ref: 'Order',
-                required: true,
-            },
-        ],
     },
     { timestamps: true }
 );
+
+billSchema.plugin(mongooseAggregatePaginate);
 
 export const Bill = model('Bill', billSchema);

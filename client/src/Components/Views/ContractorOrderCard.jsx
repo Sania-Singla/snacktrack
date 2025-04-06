@@ -1,11 +1,11 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
 import { getRollNo, formatTime } from '../../Utils';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
-import { useSocketContext } from '../../Contexts';
+import { useOrderContext, useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -13,19 +13,24 @@ export default function ContractorOrderCard({ order, reference }) {
         order;
     const { socket } = useSocketContext();
     const [status, setStatus] = useState(order.status);
-    const [statusOptions, setStatusOptions] = useState(
-        status === 'Pending'
-            ? [
-                  { value: '', label: 'Pending' },
-                  { value: 'PickedUp', label: 'Picked Up' },
-                  { value: 'Prepared', label: 'Prepared' },
-                  { value: 'Rejected', label: 'Reject' },
-              ]
-            : [
-                  { value: 'PickedUp', label: 'Picked Up' },
-                  { value: 'PickedUp', label: 'Picked Up' },
-              ]
-    );
+    const [statusOptions, setStatusOptions] = useState([]);
+    const { setPendingOrders } = useOrderContext();
+
+    useEffect(() => {
+        if (status === 'Pending') {
+            setStatusOptions([
+                { value: '', label: 'Pending' },
+                { value: 'PickedUp', label: 'Picked Up' },
+                { value: 'Prepared', label: 'Prepared' },
+                { value: 'Rejected', label: 'Reject' },
+            ]);
+        } else {
+            setStatusOptions([
+                { value: '', label: 'Prepared' },
+                { value: 'PickedUp', label: 'Picked Up' },
+            ]);
+        }
+    }, [status]);
 
     const navigate = useNavigate();
 
@@ -35,6 +40,11 @@ export default function ContractorOrderCard({ order, reference }) {
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
                 socket.emit(`order${status}`, order);
+                if (status === 'Prepared') {
+                    setPendingOrders((prev) =>
+                        prev.filter((o) => o._id !== _id)
+                    );
+                }
             }
         } catch (err) {
             navigate('/server-error');
@@ -44,7 +54,7 @@ export default function ContractorOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-visible transition-all hover:shadow-md"
+            className="h-fit bg-white rounded-xl shadow-sm border border-gray-100 overflow-visible transition-all hover:shadow-md"
         >
             <div
                 className="p-4 cursor-pointer"
@@ -82,7 +92,6 @@ export default function ContractorOrderCard({ order, reference }) {
                         >
                             <OrderDropdown
                                 options={statusOptions}
-                                defaultOption={status}
                                 onChange={handleStatusChange}
                             />
                         </div>

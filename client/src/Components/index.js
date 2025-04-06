@@ -36,6 +36,7 @@ import EmailVerificationPopup from './Popups/EmailVerification.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
 import EmptyCart from './Views/EmptyCart';
 import OrderDropdown from './General/OrderDropdown';
+import BillCard from './Views/BillCard';
 
 export {
     Header,
@@ -62,6 +63,7 @@ export {
     UpdateAvatarPopup,
     SnackView,
     StudentView,
+    BillCard,
     PackagedItemView,
     Snacks,
     PackagedItems,

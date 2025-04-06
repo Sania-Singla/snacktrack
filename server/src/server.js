@@ -3,6 +3,7 @@ import { connectDB } from './DB/connectMongoDB.js';
 import { generateTransporter } from './mailer.js';
 import { http } from './socket.js';
 import { connectRedis } from './DB/connectRedis.js';
+import { startBillingCronJob } from './Controllers/bill.Controller.js';
 // import { seedDatabase } from './seeder.js';
 
 const PORT = process.env.PORT || 4000;
@@ -15,6 +16,9 @@ const redisClient = await connectRedis();
 
 // nodemailer transporter
 const transporter = await generateTransporter();
+
+// cron job to generate bills
+startBillingCronJob();
 
 // await seedDatabase();
 

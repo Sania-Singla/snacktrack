@@ -1,4 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
+import bcrypt from 'bcrypt';
 
 // idea: single canteen has a single contractor
 //       single canteen has multiple snacks & packaged food items (limited: so array would be more efficient)
@@ -43,5 +44,12 @@ const canteenSchema = new Schema(
     },
     { timestamps: true }
 );
+
+// Hash kitchenKey before saving pre hook
+canteenSchema.pre('save', async function (next) {
+    if (!this.isModified('kitchenKey')) return next();
+    this.kitchenKey = bcrypt.hashSync(this.kitchenKey, 10);
+    next();
+});
 
 export const Canteen = new model('Canteen', canteenSchema);

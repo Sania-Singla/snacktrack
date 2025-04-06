@@ -83,11 +83,17 @@ export default function StudentView({ student, reference }) {
                 </div>
             </div>
 
-            <div className="flex justify-end w-full">
+            <div className="flex justify-end w-full gap-2">
                 <Button
                     onClick={() => navigate(`/orders/${_id}`)}
                     btnText="View Orders"
                     title="View Orders"
+                    className="text-white rounded-md text-[15px] w-fit px-3 h-[30px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                />
+                <Button
+                    onClick={() => navigate(`/bills/${_id}`)}
+                    btnText="View Bills"
+                    title="View Bills"
                     className="text-white rounded-md text-[15px] w-fit px-3 h-[30px] bg-[#4977ec] hover:bg-[#3b62c2]"
                 />
             </div>

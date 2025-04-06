@@ -14,16 +14,17 @@ import StudentsPage from './Students.Page';
 import TodayOrdersPage from './TodayOrders.Page';
 import StudentOrdersPage from './StudentOrders.Page';
 import CartPage from './Cart.Page';
-import BillsPage from './Bills.Page';
+import StudentBillsPage from './StudentBills.Page';
 import KitchenPage from './Kitchen.Page';
 import StatisticsPage from './Statistics.Page';
 import MyBillsPage from './MyBills.Page';
 import MyOrdersPage from './MyOrders.Page';
 import AdminPage from './Admin.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
+import BillsPage from './Bills.Page';
 
 export {
-    BillsPage,
+    StudentBillsPage,
     AboutUsPage,
     HomePage,
     LoginPage,
@@ -43,6 +44,7 @@ export {
     KitchenPage,
     StatisticsPage,
     MyBillsPage,
+    BillsPage,
     MyOrdersPage,
     AdminPage,
     RegisterCanteenPage,

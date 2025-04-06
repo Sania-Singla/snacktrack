@@ -5,7 +5,7 @@ const client = twilio(
     process.env.TWILIO_AUTH_TOKEN
 );
 
-export async function createMessage({ to, text, link }) {
+export async function sendSMS({ to, text, link }) {
     try {
         const msg = await client.messages.create({
             from: process.env.TWILIO_PHONE_NUMBER, // Can't be changed in trial mode

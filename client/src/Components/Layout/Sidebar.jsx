@@ -35,7 +35,7 @@ export default function Sidebar() {
             show: user.role === 'contractor',
         },
         {
-            path: '/bills',
+            path: '/all-bills',
             name: 'Bills',
             icon: icons.rupee,
             show: user.role === 'contractor',

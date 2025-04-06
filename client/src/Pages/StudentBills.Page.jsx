@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
+import { BillCard } from '../Components';
 
 export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
@@ -18,9 +19,7 @@ export default function StudentBillsPage() {
                     studentId,
                     signal
                 );
-                if (res && !res.message) {
-                    setBills(res.bills);
-                }
+                if (res && !res.message) setBills(res);
             } catch (err) {
                 navigate('/server-error');
             } finally {
@@ -41,7 +40,11 @@ export default function StudentBillsPage() {
                 {loading ? (
                     <div>Loading...</div>
                 ) : bills.length > 0 ? (
-                    bills.map((bill) => <BillCard key={bill._id} bill={bill} />)
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {bills.map((bill) => (
+                            <BillCard key={bill._id} bill={bill} />
+                        ))}
+                    </div>
                 ) : (
                     <div>No bills found.</div>
                 )}

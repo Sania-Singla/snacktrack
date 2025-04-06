@@ -4,6 +4,7 @@ import {
     Student,
     Snack,
     PackagedFood,
+    Bill,
 } from './Models/index.js';
 import {
     USER_PLACEHOLDER_IMAGE_URL,
@@ -26,12 +27,14 @@ export const seedDatabase = async () => {
             hostelType: 'GH',
             hostelNumber: 8,
             hostelName: 'Florence Nightingale',
+            kitchenKey: 'password',
         });
 
         const canteen2 = await Canteen.create({
             hostelType: 'BH',
             hostelNumber: 2,
             hostelName: 'Mother Teresa',
+            kitchenKey: 'password',
         });
 
         // Seed Contractors
@@ -61,7 +64,7 @@ export const seedDatabase = async () => {
         await canteen2.save();
 
         // Seed Students
-        await Student.create([
+        const students = await Student.create([
             {
                 canteenId: canteen1._id,
                 userName: 'GH8-101',
@@ -97,6 +100,46 @@ export const seedDatabase = async () => {
                 password: password,
                 email: 'student4@email.com',
                 avatar: USER_PLACEHOLDER_IMAGE_URL,
+            },
+        ]);
+
+        const bills = await Bill.create([
+            {
+                studentId: students[0]._id,
+                canteenId: canteen1._id,
+                month: 3,
+                year: 2025,
+                amount: 500,
+                paid: true,
+            },
+            {
+                studentId: students[0]._id,
+                canteenId: canteen1._id,
+                month: 2,
+                year: 2025,
+                amount: 300,
+            },
+            {
+                studentId: students[0]._id,
+                canteenId: canteen1._id,
+                month: 3,
+                year: 2025,
+                amount: 400,
+                paid: true,
+            },
+            {
+                studentId: students[0]._id,
+                canteenId: canteen1._id,
+                month: 3,
+                year: 2025,
+                amount: 400,
+            },
+            {
+                studentId: students[1]._id,
+                canteenId: canteen2._id,
+                month: 1,
+                year: 2025,
+                amount: 600,
             },
         ]);
 

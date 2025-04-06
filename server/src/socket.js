@@ -3,7 +3,7 @@ import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/options.js';
 import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
-import { createMessage } from './sms.js';
+import { sendSMS } from './sms.js';
 
 const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });
@@ -31,7 +31,7 @@ io.on('connection', async (socket) => {
     socket.on('newOrder', async (order) => {
         const socketId = await getSocketId(order.canteenId);
         socket.to(socketId).emit('newOrder', order);
-        // createMessage({
+        // sendSMS({
         //     to: order.studentInfo.phoneNumber,
         //     text: 'Your Order is placed and will be begin preparing soon',
         //     link: process.env.FRONTEND_URL + '/my-orders',
@@ -42,7 +42,7 @@ io.on('connection', async (socket) => {
     socket.on('orderRejected', async (order) => {
         const socketId = await getSocketId(order.studentId);
         socket.to(socketId).emit('orderRejected', order);
-        // createMessage({
+        // sendSMS({
         //     to: order.studentInfo.phoneNumber,
         //     text: 'Your Order has been rejected',
         //     link: process.env.FRONTEND_URL + '/my-orders',
@@ -53,7 +53,7 @@ io.on('connection', async (socket) => {
     socket.on('orderPrepared', async (order) => {
         const socketId = await getSocketId(order.studentId);
         socket.to(socketId).emit('orderPrepared', order);
-        // createMessage({
+        // sendSMS({
         //     to: order.studentInfo.phoneNumber,
         //     text: 'Your Order is ready for pickup',
         //     link: process.env.FRONTEND_URL + '/my-orders',
@@ -64,7 +64,7 @@ io.on('connection', async (socket) => {
     socket.on('orderPickedUp', async (order) => {
         const socketId = await getSocketId(order.studentId);
         socket.to(socketId).emit('orderPickedUp', order);
-        // createMessage({
+        // sendSMS({
         //     to: order.studentInfo.phoneNumber,
         //     text: 'Your Order has been picked up',
         //     link: process.env.FRONTEND_URL + '/my-orders',

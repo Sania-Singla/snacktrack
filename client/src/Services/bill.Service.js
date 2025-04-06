@@ -6,6 +6,7 @@ class BillService {
             const res = await fetch(`${BASE_BACKEND_URL}/bills/${studentId}`, {
                 method: 'GET',
                 signal: signal,
+                credentials: 'include',
             });
             const data = await res.json();
             console.log(data);
@@ -58,11 +59,12 @@ class BillService {
         }
     }
 
-    // TODO: apply cron job to generate bills automatically after a month
+    // For testing purposes only as we are using cron job to generate bills automatically
     async generateBill(studentId, month, year) {
         try {
             const res = await fetch(`${BASE_BACKEND_URL}/bills/${studentId}`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ month, year }),
             });
