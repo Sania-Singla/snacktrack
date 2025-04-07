@@ -45,7 +45,8 @@ export default function KitchenPage() {
                         // show orders
                         setUser({
                             canteenId: res.canteenId,
-                            role: 'contractor', // although staff but no issue (non impacting)
+                            userId: null,
+                            role: 'staff',
                         });
                         setPendingOrders(res.orders);
                     }
@@ -69,11 +70,12 @@ export default function KitchenPage() {
             );
             if (res && !res.message) {
                 setUser({
-                    canteenId: res[0].canteenId,
-                    role: 'contractor', // although staff but no issue (non impacting)
+                    canteenId: res.canteenId,
+                    userId: null,
+                    role: 'staff',
                 });
                 setError(false);
-                setOrders(res);
+                setPendingOrders(res.orders);
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');
@@ -85,33 +87,27 @@ export default function KitchenPage() {
     const itemSummary = {};
     (function processOrders() {
         pendingOrders.forEach(({ items }) => {
-            items.forEach(
-                ({ quantity, itemType, name, specialInstructions }) => {
-                    if (itemType === 'Snack') {
-                        if (itemSummary[name]) {
-                            itemSummary[name].quantity += quantity;
-                            if (specialInstructions) {
-                                if (!itemSummary[name].instructions) {
-                                    itemSummary[name].instructions = {};
-                                }
-                                itemSummary[name].instructions[
-                                    specialInstructions
-                                ] =
-                                    (itemSummary[name].instructions[
-                                        specialInstructions
-                                    ] || 0) + quantity;
-                            }
-                        } else {
-                            itemSummary[name] = { quantity };
-                            if (specialInstructions) {
-                                itemSummary[name].instructions = {
-                                    [specialInstructions]: quantity,
-                                };
-                            }
+            items.forEach(({ quantity, name, specialInstructions }) => {
+                if (itemSummary[name]) {
+                    itemSummary[name].quantity += quantity;
+                    if (specialInstructions) {
+                        if (!itemSummary[name].instructions) {
+                            itemSummary[name].instructions = {};
                         }
+                        itemSummary[name].instructions[specialInstructions] =
+                            (itemSummary[name].instructions[
+                                specialInstructions
+                            ] || 0) + quantity;
+                    }
+                } else {
+                    itemSummary[name] = { quantity };
+                    if (specialInstructions) {
+                        itemSummary[name].instructions = {
+                            [specialInstructions]: quantity,
+                        };
                     }
                 }
-            );
+            });
         });
     })();
 
@@ -190,13 +186,13 @@ export default function KitchenPage() {
                             Aggregated items for preparation
                         </p>
                     </div>
-                    <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[calc(100vh-220px)] overflow-y-auto">
+                    <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto">
                         {Object.entries(itemSummary).length > 0 ? (
                             Object.entries(itemSummary).map(
                                 ([itemName, itemData]) => (
                                     <div
                                         key={itemName}
-                                        className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
+                                        className="bg-gray-50 rounded-lg p-3 h-fit border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
                                     >
                                         <div className="flex flex-col gap-2">
                                             <div className="flex items-center justify-between">

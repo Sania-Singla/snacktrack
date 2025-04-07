@@ -200,6 +200,7 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
     const orders = await Order.aggregate([
         { $match: { canteenId: new Types.ObjectId(canteen._id) } },
         { $unwind: '$items' },
+        { $match: { 'items.itemType': 'Snack' } },
         {
             $lookup: {
                 from: 'snacks',
@@ -207,15 +208,6 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
                 foreignField: '_id',
                 as: 'snackDetails',
                 pipeline: [{ $project: { name: 1, image: 1 } }],
-            },
-        },
-        {
-            $lookup: {
-                from: 'packagedfoods',
-                localField: 'items.itemId',
-                foreignField: '_id',
-                as: 'packagedFoodDetails',
-                pipeline: [{ $project: { category: 1 } }],
             },
         },
         {
@@ -234,39 +226,27 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
                         null,
                     ],
                 },
-                'items.category': {
-                    $cond: [
-                        { $eq: ['$items.itemType', 'PackagedFood'] },
-                        { $arrayElemAt: ['$packagedFoodDetails.category', 0] },
-                        null,
-                    ],
-                },
             },
         },
         {
             $group: {
                 _id: '$_id',
-                amount: { $first: '$amount' },
-                packingCharges: { $first: '$packingCharges' },
                 status: { $first: '$status' },
                 canteenId: { $first: '$canteenId' },
                 studentId: { $first: '$studentId' },
-                items: { $push: '$items' },
                 createdAt: { $first: '$createdAt' },
                 updatedAt: { $first: '$updatedAt' },
+                items: { $push: '$items' },
             },
         },
         {
-            $lookup: {
-                from: 'students',
-                localField: 'studentId',
-                foreignField: '_id',
-                as: 'student',
-                pipeline: [{ $project: { fullName: 1, _id: 1, userName: 1 } }],
+            $project: {
+                snackDetails: 0,
+                'items.itemType': 0,
+                'items.price': 0,
+                'items.isPacked': 0,
             },
         },
-        { $unwind: '$student' },
-        { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
     ]);
 
     return res.status(OK).json({ canteenId: canteen._id, orders });

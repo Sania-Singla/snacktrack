@@ -24,25 +24,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         { $unwind: '$items' },
         {
             $lookup: {
-                from: 'students',
-                localField: 'studentId',
-                foreignField: '_id',
-                as: 'studentInfo',
-                pipeline: [
-                    {
-                        $project: {
-                            fullName: 1,
-                            phoneNumber: 1,
-                            rollNo: 1,
-                            avatar: 1,
-                            userName: 1,
-                        },
-                    },
-                ],
-            },
-        },
-        {
-            $lookup: {
                 from: 'snacks',
                 localField: 'items.itemId',
                 foreignField: '_id',
@@ -97,21 +78,23 @@ const placeOrder = tryCatch('place order', async (req, res) => {
                 items: { $push: '$items' },
                 createdAt: { $first: '$createdAt' },
                 updatedAt: { $first: '$updatedAt' },
-                studentInfo: {
-                    $first: { $arrayElemAt: ['$studentInfo', 0] },
-                },
             },
         },
         { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
     ]);
 
-    return res
-        .status(OK)
-        .json(
-            populatedOrder.length
-                ? populatedOrder[0]
-                : { message: 'Order not found' }
-        );
+    if (populatedOrder.length) {
+        const data = {
+            ...populatedOrder[0],
+            studentInfo: {
+                fullName: student.fullName,
+                phoneNumber: student.phoneNumber,
+                avatar: student.avatar,
+                userName: student.userName,
+            },
+        };
+        return res.status(OK).json(data);
+    } else return res.status(OK).json({ message: 'Order not found' });
 });
 
 // implement something to flush all the orders after 6 months to save space
@@ -350,7 +333,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
         {
             page: parseInt(page),
             limit: parseInt(limit),
-            sort: { createdAt: -1 },
+            sort: { createdAt: 1 },
         }
     );
 

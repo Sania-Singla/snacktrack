@@ -15,9 +15,17 @@ io.on('connection', async (socket) => {
 
     // store its socket id in cache (redis)
     try {
-        role === 'student'
-            ? await setSocketId(userId, socket)
-            : await setSocketId(canteenId, socket);
+        switch (role) {
+            case 'student':
+                await setSocketId(userId, socket);
+                break;
+            case 'contractor':
+                await setSocketId(canteenId, socket);
+                break;
+            default:
+                await setSocketId('staff' + canteenId, socket);
+                break;
+        }
         console.log(
             `socket id of user ${role === 'student' ? userId : canteenId} stored in cache.`
         );
@@ -29,8 +37,12 @@ io.on('connection', async (socket) => {
 
     // new order => notify canteen
     socket.on('newOrder', async (order) => {
-        const socketId = await getSocketId(order.canteenId);
-        socket.to(socketId).emit('newOrder', order);
+        const [contrSocketId, staffSocketId] = await Promise.all([
+            getSocketId(order.canteenId),
+            getSocketId('staff' + order.canteenId),
+        ]);
+        socket.to(contrSocketId).emit('newOrder', order);
+        socket.to(staffSocketId).emit('newOrder', order);
         // sendSMS({
         //     to: order.studentInfo.phoneNumber,
         //     text: 'Your Order is placed and will be begin preparing soon',
@@ -76,8 +88,20 @@ io.on('connection', async (socket) => {
 
         // delete the socket id from cache (redis)
         try {
-            await deleteSocketId(userId);
-            console.log(`socket id of user ${userId} deleted from cache.`);
+            switch (role) {
+                case 'student':
+                    await deleteSocketId(userId);
+                    break;
+                case 'contractor':
+                    await deleteSocketId(canteenId);
+                    break;
+                default:
+                    await deleteSocketId('staff' + canteenId);
+                    break;
+            }
+            console.log(
+                `socket id of user ${role === 'student' ? userId : canteenId} deleted from cache.`
+            );
         } catch (err) {
             return console.error(
                 "Error deleting user's socket id from cache: ",

@@ -41,7 +41,7 @@ const getStudentBills = tryCatch('get student bills', async (req, res) => {
 const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
     // get bills of the previous month only
-    
+
     const bills = await Bill.aggregate([
         {
             $match: {

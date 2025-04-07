@@ -27,14 +27,14 @@ export const seedDatabase = async () => {
             hostelType: 'GH',
             hostelNumber: 8,
             hostelName: 'Florence Nightingale',
-            kitchenKey: 'password',
+            kitchenKey: 'GH8-password',
         });
 
         const canteen2 = await Canteen.create({
             hostelType: 'BH',
             hostelNumber: 2,
             hostelName: 'Mother Teresa',
-            kitchenKey: 'password',
+            kitchenKey: 'BH2-password',
         });
 
         // Seed Contractors

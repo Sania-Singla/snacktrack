@@ -6,6 +6,7 @@ import {
     generateStaffKeyToken,
 } from '../Helpers/index.js';
 import { Canteen } from '../Models/index.js';
+import bcrypt from 'bcrypt';
 
 const verifyAdminKeyJwt = async (req, res, next) => {
     try {
@@ -74,8 +75,13 @@ const verifyStaffKeyJwt = async (req, res, next) => {
             if (!key) {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
-            const record = await Canteen.findOne({ kitchenKey: key });
-            if (!record) {
+            const [hostel] = key.split('-');
+            const hostelType = hostel.slice(0, 2);
+            const hostelNumber = Number(hostel.slice(2));
+
+            const canteen = await Canteen.findOne({ hostelType, hostelNumber });
+            const isValid = bcrypt.compareSync(key, canteen.kitchenKey);
+            if (!isValid) {
                 return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
             }
             const staffKeyToken = await generateStaffKeyToken(key);
@@ -83,9 +89,8 @@ const verifyStaffKeyJwt = async (req, res, next) => {
                 ...COOKIE_OPTIONS,
                 maxAge: Number(process.env.STAFF_KEY_TOKEN_MAXAGE),
             });
-            const [hostel] = key.split('-');
-            req.hostelType = hostel.slice(0, 2);
-            req.hostelNumber = Number(hostel.slice(2));
+            req.hostelType = hostelType;
+            req.hostelNumber = hostelNumber;
             return next();
         }
     } catch (err) {
