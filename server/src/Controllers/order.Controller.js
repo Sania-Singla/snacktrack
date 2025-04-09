@@ -99,12 +99,25 @@ const placeOrder = tryCatch('place order', async (req, res) => {
 
 // implement something to flush all the orders after 6 months to save space
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
-    const { limit = 10, page = 1 } = req.query;
+    const { limit = 10, page = 1, month } = req.query;
     const { studentId } = req.params;
+
+    // get timestamp of the first day of the month in utc
+    const monthIndex = new Date(
+        `${month} 1, ${new Date().getFullYear()}`
+    ).getMonth();
+    const currentYear = new Date().getFullYear();
+    const startDate = new Date(currentYear, monthIndex, 1);
+    const endDate = new Date(currentYear, monthIndex + 1, 0, 23, 59, 59, 999);
 
     const result = await Order.aggregatePaginate(
         [
-            { $match: { studentId: new Types.ObjectId(studentId) } },
+            {
+                $match: {
+                    studentId: new Types.ObjectId(studentId),
+                    createdAt: { $gte: startDate, $lte: endDate },
+                },
+            },
             { $unwind: '$items' },
             {
                 $lookup: {

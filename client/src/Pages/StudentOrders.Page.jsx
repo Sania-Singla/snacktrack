@@ -1,9 +1,9 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { orderService } from '../Services';
 import { useUserContext, useOrderContext } from '../Contexts';
 import { icons } from '../Assets/icons';
-import { Button, StudentOrderCard } from '../Components';
+import { Button, Filter, StudentOrderCard } from '../Components';
 import { paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 
@@ -14,7 +14,23 @@ export default function StudentOrdersPage() {
     const navigate = useNavigate();
     const { studentId } = useParams();
     const [page, setPage] = useState(1);
-
+    const { user } = useUserContext();
+    const [searchParams] = useSearchParams();
+    const filter = searchParams.get('filter') || new Date().getMonth() + 1; // Default to current month
+    const months = [
+        { value: 1, label: 'January' },
+        { value: 2, label: 'February' },
+        { value: 3, label: 'March' },
+        { value: 4, label: 'April' },
+        { value: 5, label: 'May' },
+        { value: 6, label: 'June' },
+        { value: 7, label: 'July' },
+        { value: 8, label: 'August' },
+        { value: 9, label: 'September' },
+        { value: 10, label: 'October' },
+        { value: 11, label: 'November' },
+        { value: 12, label: 'December' },
+    ];
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
     useEffect(() => {
@@ -23,11 +39,13 @@ export default function StudentOrdersPage() {
 
         (async function getOrders() {
             try {
+                setLoading(true);
                 const data = await orderService.getStudentOrders(
-                    user._id,
-                    signal,
+                    studentId,
+                    filter,
                     page,
-                    LIMIT
+                    LIMIT,
+                    signal
                 );
                 if (data && !data.message) {
                     setStudentOrders(data.orders);
@@ -41,26 +59,17 @@ export default function StudentOrdersPage() {
         })();
 
         return () => controller.abort();
-    }, []);
+    }, [page, filter]);
+
+    useEffect(() => setStudentOrders([]), [filter]);
 
     return (
         <div className="w-full p-4">
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
-                {studentOrders.length > 0 && (
-                    <Button
-                        btnText={
-                            <div className="flex items-center gap-2">
-                                <span>Order Again</span>
-                                <div className="size-4 fill-[#4977ec] group-hover:fill-[#3b62c2]">
-                                    {icons.rightArrow}
-                                </div>
-                            </div>
-                        }
-                        onClick={() => navigate('/')}
-                        className="flex items-center gap-2 group font-medium text-[#4977ec] hover:text-[#3b62c2]"
-                    />
-                )}
+                <h1 className="text-3xl font-bold text-gray-900">
+                    {user._id === studentId ? 'My Orders' : 'Orders'}
+                </h1>
+                <Filter options={months} defaultOption={filter} />
             </div>
 
             {studentOrders.length > 0 && (
@@ -98,11 +107,13 @@ export default function StudentOrdersPage() {
                         <p className="text-gray-500 mb-6">
                             Your order history will appear here
                         </p>
-                        <Button
-                            btnText="Order Now"
-                            onClick={() => navigate('/')}
-                            className="px-4 py-2 bg-[#4977ec] hover:bg-[#3b62c2] text-white rounded-lg font-medium"
-                        />
+                        {user._id === studentId && (
+                            <Button
+                                btnText="Order Now"
+                                onClick={() => navigate('/')}
+                                className="px-4 py-2 bg-[#4977ec] hover:bg-[#3b62c2] text-white rounded-lg font-medium"
+                            />
+                        )}
                     </div>
                 )
             )}

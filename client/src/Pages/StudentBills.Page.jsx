@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
 import { BillCard } from '../Components';
+import { useUserContext } from '../Contexts';
 
 export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
     const [loading, setLoading] = useState(true);
     const { studentId } = useParams();
     const navigate = useNavigate();
+    const { user } = useUserContext();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -34,7 +36,9 @@ export default function StudentBillsPage() {
         <div>
             <div className="w-full p-4">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Bills</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                        {user._id === studentId ? 'My Bills' : 'Bills'}
+                    </h1>
                 </div>
 
                 {loading ? (

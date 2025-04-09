@@ -4,21 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Dropdown } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
-import { useOrderContext, useUserContext } from '../Contexts';
+import { useOrderContext, useSocketContext, useUserContext } from '../Contexts';
 
 export default function KitchenPage() {
-    const { pendingOrders, setPendingOrders } = useOrderContext();
+    const { pendingOrders, setPendingOrders, preparedCount } =
+        useOrderContext();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [key, setKey] = useState('');
-    const { setUser } = useUserContext();
+    const { setUser, user } = useUserContext();
     const [verifying, setVerifying] = useState(false);
     const [showKey, setShowKey] = useState(false);
     const [hostel, setHostel] = useState({});
     const [hostels, setHostels] = useState([
         { value: '', label: 'Select Hostel' },
     ]);
+    const { socket } = useSocketContext();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -43,11 +45,13 @@ export default function KitchenPage() {
                         }
                     } else {
                         // show orders
-                        setUser({
-                            canteenId: res.canteenId,
-                            userId: null,
-                            role: 'staff',
-                        });
+                        if (!user) {
+                            setUser({
+                                canteenId: res.canteenId,
+                                userId: null,
+                                role: 'staff',
+                            });
+                        }
                         setPendingOrders(res.orders);
                     }
                 }
@@ -61,19 +65,22 @@ export default function KitchenPage() {
         return () => controller.abort();
     }, []);
 
-    const verifyKey = async () => {
+    async function verifyKey() {
         if (!key || !hostel) return;
+
         setVerifying(true);
         try {
             const res = await userService.getOrders(
                 `${hostel.hostelType}${hostel.hostelNumber}-${key}`
             );
             if (res && !res.message) {
-                setUser({
-                    canteenId: res.canteenId,
-                    userId: null,
-                    role: 'staff',
-                });
+                if (!user) {
+                    setUser({
+                        canteenId: res.canteenId,
+                        userId: null,
+                        role: 'staff',
+                    });
+                }
                 setError(false);
                 setPendingOrders(res.orders);
             } else toast.error('Please Enter a Valid Key');
@@ -82,29 +89,51 @@ export default function KitchenPage() {
         } finally {
             setVerifying(false);
         }
-    };
+    }
+
+    function handleMinus(itemId, orderId, canteenId) {
+        toast.success('Marked as prepared', { duration: 1000 });
+        socket.emit('itemPrepared', { itemId, orderId, canteenId });
+    }
 
     const itemSummary = {};
     (function processOrders() {
-        pendingOrders.forEach(({ items }) => {
-            items.forEach(({ quantity, name, specialInstructions }) => {
-                if (itemSummary[name]) {
-                    itemSummary[name].quantity += quantity;
-                    if (specialInstructions) {
-                        if (!itemSummary[name].instructions) {
-                            itemSummary[name].instructions = {};
-                        }
-                        itemSummary[name].instructions[specialInstructions] =
-                            (itemSummary[name].instructions[
+        pendingOrders.forEach(({ items, _id: orderId, canteenId }) => {
+            items.forEach(({ quantity, name, itemId, specialInstructions }) => {
+                const itemKey = `${itemId}-${orderId}`;
+                const count = preparedCount[itemKey] || 0;
+                const remaining = quantity - count;
+
+                if (remaining > 0) {
+                    if (itemSummary[name]) {
+                        itemSummary[name].quantity += remaining;
+                        itemSummary[name].itemId = itemId;
+                        itemSummary[name].orderId = orderId;
+                        itemSummary[name].canteenId = canteenId;
+
+                        if (specialInstructions) {
+                            if (!itemSummary[name].instructions) {
+                                itemSummary[name].instructions = {};
+                            }
+                            itemSummary[name].instructions[
                                 specialInstructions
-                            ] || 0) + quantity;
-                    }
-                } else {
-                    itemSummary[name] = { quantity };
-                    if (specialInstructions) {
-                        itemSummary[name].instructions = {
-                            [specialInstructions]: quantity,
+                            ] =
+                                (itemSummary[name].instructions[
+                                    specialInstructions
+                                ] || 0) + remaining;
+                        }
+                    } else {
+                        itemSummary[name] = {
+                            quantity: remaining,
+                            itemId,
+                            orderId,
+                            canteenId,
                         };
+                        if (specialInstructions) {
+                            itemSummary[name].instructions = {
+                                [specialInstructions]: remaining,
+                            };
+                        }
                     }
                 }
             });
@@ -236,6 +265,22 @@ export default function KitchenPage() {
                                                 </div>
                                             )}
                                         </div>
+
+                                        {user?.role !== 'contractor' && (
+                                            <div className="flex items-center justify-center mt-3">
+                                                <Button
+                                                    className="rounded-full size-8 text-3xl pb-[6px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
+                                                    onClick={() =>
+                                                        handleMinus(
+                                                            itemData.itemId,
+                                                            itemData.orderId,
+                                                            itemData.canteenId
+                                                        )
+                                                    }
+                                                    btnText="-"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
                                 )
                             )

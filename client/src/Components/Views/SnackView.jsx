@@ -197,7 +197,7 @@ export default function SnackView({ snack, reference }) {
                                     </div>
                                 }
                                 onClick={addToCart}
-                                className="rounded-md px-3 py-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md transition-colors duration-300"
+                                className="rounded-md px-3 py-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
                             />
                         ))
                     ) : (

@@ -23,8 +23,6 @@ import {
     NewUserPage,
     TodayOrdersPage,
     StudentOrdersPage,
-    MyBillsPage,
-    MyOrdersPage,
     CartPage,
     StudentBillsPage,
     KitchenPage,
@@ -46,6 +44,14 @@ export const router = createBrowserRouter(
                         <Route path="" element={<UpdateAccountDetails />} />
                         <Route path="password" element={<UpdatePassword />} />
                     </Route>
+                    <Route
+                        path="orders/:studentId"
+                        element={<StudentOrdersPage />}
+                    />
+                    <Route
+                        path="bills/:studentId"
+                        element={<StudentBillsPage />}
+                    />
                     <Route path="support" element={<SupportPage />} />
                     <Route path="about-us" element={<AboutUsPage />} />
                     <Route path="contact-us" element={<ContactUsPage />} />
@@ -58,8 +64,6 @@ export const router = createBrowserRouter(
                     {/* who => who can access the page */}
                     <Route element={<Layout />}>
                         <Route path="cart" element={<CartPage />} />
-                        <Route path="my-bills" element={<MyBillsPage />} />
-                        <Route path="my-orders" element={<MyOrdersPage />} />
                     </Route>
                 </Route>
 
@@ -70,14 +74,6 @@ export const router = createBrowserRouter(
                         <Route
                             path="today-orders"
                             element={<TodayOrdersPage />}
-                        />
-                        <Route
-                            path="orders/:studentId"
-                            element={<StudentOrdersPage />}
-                        />
-                        <Route
-                            path="bills/:studentId"
-                            element={<StudentBillsPage />}
                         />
                         <Route path="all-bills" element={<BillsPage />} />
                         <Route path="students" element={<StudentsPage />} />

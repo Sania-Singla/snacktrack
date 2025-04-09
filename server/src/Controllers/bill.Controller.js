@@ -40,41 +40,55 @@ const getStudentBills = tryCatch('get student bills', async (req, res) => {
 
 const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
+    const { page = 1, limit = 10 } = req.query;
+
     // get bills of the previous month only
-
-    const bills = await Bill.aggregate([
-        {
-            $match: {
-                canteenId: new Types.ObjectId(contractor.canteenId),
-                month: new Date().getMonth(), // previous month as 0 indexed
-                year: new Date().getFullYear(),
+    const bills = await Bill.aggregatePaginate(
+        [
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(contractor.canteenId),
+                    month: new Date().getMonth(), // previous month as 0 indexed
+                    year: new Date().getFullYear(),
+                },
             },
-        },
-        {
-            $lookup: {
-                from: 'students',
-                localField: 'studentId',
-                foreignField: '_id',
-                as: 'studentInfo',
-                pipeline: [
-                    {
-                        $project: {
-                            fullName: 1,
-                            userName: 1,
-                            email: 1,
-                            phoneNumber: 1,
-                            avatar: 1,
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: 'studentId',
+                    foreignField: '_id',
+                    as: 'studentInfo',
+                    pipeline: [
+                        {
+                            $project: {
+                                fullName: 1,
+                                userName: 1,
+                                email: 1,
+                                phoneNumber: 1,
+                                avatar: 1,
+                            },
                         },
-                    },
-                ],
+                    ],
+                },
             },
-        },
-        { $unwind: '$studentInfo' },
-        { $sort: { createdAt: -1 } },
-    ]);
+            { $unwind: '$studentInfo' },
+        ],
+        {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            sort: { createdAt: -1 },
+        }
+    );
 
-    if (bills.length) {
-        return res.status(OK).json(bills);
+    if (bills.docs.length) {
+        return res.status(OK).json({
+            bills: bills.docs,
+            billsInfo: {
+                totalPages: bills.totalPages,
+                hasNextPage: bills.hasNextPage,
+                hasPrevPage: bills.hasPrevPage,
+            },
+        });
     } else {
         return res.status(OK).json({ message: 'no bills found' });
     }

@@ -40,7 +40,7 @@ export default function Orders({ filter }) {
         })();
 
         return () => controller.abort();
-    }, [page, navigate, filter]);
+    }, [page, filter]);
 
     useEffect(() => setOrders([]), [filter]);
 

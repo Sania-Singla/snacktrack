@@ -1,15 +1,15 @@
 import { redisClient } from '../server.js';
 
-async function setSocketId(userId, socket) {
-    return await redisClient.setEx(userId, 86400, socket.id); // 1day exp
+async function setSocketId(id, socket) {
+    return await redisClient.setEx(id, 86400, socket.id); // 1day exp
 }
 
-async function getSocketId(userId) {
-    return await redisClient.get(userId);
+async function getSocketId(id) {
+    return await redisClient.get(id);
 }
 
-async function deleteSocketId(userId) {
-    return await redisClient.del(userId);
+async function deleteSocketId(id) {
+    return await redisClient.del(id);
 }
 
 export { setSocketId, getSocketId, deleteSocketId };

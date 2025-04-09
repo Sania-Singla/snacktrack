@@ -21,13 +21,16 @@ class BillService {
         }
     }
 
-    async getBills(signal) {
+    async getBills(page, limit, signal) {
         try {
-            const res = await fetch(`${BASE_BACKEND_URL}/bills`, {
-                method: 'GET',
-                signal: signal,
-                credentials: 'include',
-            });
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/bills?page=${page}&limit=${limit}`,
+                {
+                    method: 'GET',
+                    signal: signal,
+                    credentials: 'include',
+                }
+            );
             const data = await res.json();
             console.log(data);
 
@@ -40,6 +43,7 @@ class BillService {
             throw err;
         }
     }
+    
     async markPaid(billId) {
         try {
             const res = await fetch(`${BASE_BACKEND_URL}/bills/${billId}`, {

@@ -11,13 +11,13 @@ export default function Sidebar() {
     const items = [
         { path: '/', name: 'Home', icon: icons.home, show: true },
         {
-            path: '/my-orders',
+            path: `/orders/${user._id}`,
             name: 'My Orders',
             icon: icons.clock,
             show: user.role === 'student',
         },
         {
-            path: '/my-bills',
+            path: `/bills/${user._id}`,
             name: 'My Bills',
             icon: icons.rupee,
             show: user.role === 'student',

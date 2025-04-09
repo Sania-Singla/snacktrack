@@ -2,11 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
-import { usePopupContext } from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 
 export default function OrderPlacedPopup() {
     const { setShowPopup, popupInfo } = usePopupContext();
     const navigate = useNavigate();
+    const { user } = useUserContext();
 
     const containerVariants = {
         hidden: { opacity: 0, scale: 0.95 },
@@ -176,7 +177,7 @@ export default function OrderPlacedPopup() {
                             btnText="View My Orders"
                             onClick={() => {
                                 setShowPopup(false);
-                                navigate('/my-orders');
+                                navigate(`/orders/${user._id}`);
                             }}
                             className="text-white rounded-md py-2 flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                         />

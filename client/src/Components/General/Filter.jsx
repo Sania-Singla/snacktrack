@@ -11,17 +11,26 @@ export default function Filter({
     const filter = searchParams.get(queryParamName) || defaultOption;
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const buttonRef = useRef(null);
+    const [dropdownWidth, setDropdownWidth] = useState('auto');
 
     const handleOptionClick = (value) => {
         const params = new URLSearchParams(searchParams);
         if (value === defaultOption) {
-            params.delete(queryParamName); // Remove query param if default option is selected
+            params.delete(queryParamName);
         } else {
-            params.set(queryParamName, value); // Set query param for valid selections
+            params.set(queryParamName, value);
         }
         setSearchParams(params);
         setIsDropdownOpen(false);
     };
+
+    // Calculate dropdown width based on button width
+    useEffect(() => {
+        if (buttonRef.current) {
+            setDropdownWidth(`${buttonRef.current.offsetWidth}px`);
+        }
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (e) => {
@@ -44,30 +53,31 @@ export default function Filter({
         };
     }, [isDropdownOpen]);
 
+    // Find current selected option
+    const selectedOption = options.find((opt) => opt.value == filter); // losse comparison for month (number)
+
     return (
-        <div className="w-fit">
-            <div className="relative inline-block w-full" ref={dropdownRef}>
+        <div>
+            <div className="relative w-full" ref={dropdownRef}>
                 {/* Dropdown Button */}
                 <button
+                    ref={buttonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full flex items-center cursor-pointer justify-between gap-2 bg-white border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg shadow-sm text-lg text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200"
+                    className="flex items-center justify-between w-full gap-2 bg-white border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg shadow-sm text-lg text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200 min-w-[120px]"
                 >
-                    <div className="flex items-center gap-[10px]">
-                        {options.find((opt) => opt.value === filter)?.icon && (
-                            <div className="size-[16px] fill-gray-900">
-                                {
-                                    options.find((opt) => opt.value === filter)
-                                        ?.icon
-                                }
+                    <div className="flex items-center gap-2.5 overflow-hidden">
+                        {selectedOption?.icon && (
+                            <div className="shrink-0 size-4 fill-gray-900">
+                                {selectedOption.icon}
                             </div>
                         )}
-                        <span>
-                            {options.find((opt) => opt.value === filter)?.label}
+                        <span className="truncate">
+                            {selectedOption?.label}
                         </span>
                     </div>
                     <div
-                        className={`size-[14px] fill-gray-800 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`shrink-0 size-3.5 fill-gray-800 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
                     >
                         {icons.arrowDown}
                     </div>
@@ -75,7 +85,13 @@ export default function Filter({
 
                 {/* Dropdown Options */}
                 {isDropdownOpen && (
-                    <div className="absolute z-10 mt-2 w-full cursor-pointer bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+                    <div
+                        className="absolute z-10 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden"
+                        style={{
+                            width: dropdownWidth,
+                            minWidth: 'max-content',
+                        }}
+                    >
                         {options.map(
                             (option) =>
                                 option.value !== filter && (
@@ -84,14 +100,16 @@ export default function Filter({
                                         onClick={() =>
                                             handleOptionClick(option.value)
                                         }
-                                        className="flex items-center gap-[10px] px-3 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                                        className="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
                                     >
                                         {option.icon && (
-                                            <div className="size-[16px] fill-gray-900">
+                                            <div className="shrink-0 size-4 fill-gray-900">
                                                 {option.icon}
                                             </div>
                                         )}
-                                        <span>{option.label}</span>
+                                        <span className="truncate">
+                                            {option.label}
+                                        </span>
                                     </div>
                                 )
                         )}

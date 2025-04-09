@@ -17,7 +17,7 @@ export default function StudentOrderCard({ order, reference }) {
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="flex flex-row justify-between items-center w-full">
-                    <div className="flex flex-col items-center gap-1">
+                    <div className="flex flex-col gap-1">
                         <h2 className="text-sm font-medium text-gray-800 mb-1">
                             ORDER #{_id.slice(-8).toUpperCase()}
                         </h2>

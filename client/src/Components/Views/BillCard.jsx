@@ -3,20 +3,29 @@ import { formatTime, getRollNo } from '../../Utils';
 import { icons } from '../../Assets/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { Button } from '..';
+import { useNavigate } from 'react-router-dom';
+import { billService } from '../../Services';
 
 export default function BillCard({ bill }) {
-    const { _id, studentInfo, month, year, amount, paid, paidOn } = bill;
+    const { _id, studentInfo, month, year, amount } = bill;
+    const [paid, setPaid] = useState(bill.paid);
+    const [paidOn, setPaidOn] = useState(bill.paidOn);
     const { user } = useUserContext();
     const [expanded, setExpanded] = useState(false);
+    const navigate = useNavigate();
 
-    // Format month and year with ordinal (e.g., "January '23")
-    const formattedDate = new Date(`${month} 1, ${year}`).toLocaleDateString(
-        'en-US',
-        {
-            month: 'long',
-            year: '2-digit',
+    async function markPaid() {
+        try {
+            const res = await billService.markPaid(_id);
+            if (res && res.message === 'bill marked as paid') {
+                setPaid(true);
+                setPaidOn(new Date());
+            }
+        } catch (err) {
+            navigate('/server-error');
         }
-    );
+    }
 
     return (
         <motion.div
@@ -35,20 +44,23 @@ export default function BillCard({ bill }) {
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-11 rounded-lg flex items-center justify-center border border-blue-400">
                             <div className="text-center">
                                 <p className="text-xs font-bold text-blue-800 leading-none">
-                                    {month}
+                                    {new Date(month).toLocaleDateString(
+                                        'default',
+                                        { month: 'short' }
+                                    )}
                                 </p>
-                                <p className="text-sm font-bold text-blue-800 mt-[2px]">
+                                <p className="text-xs font-bold text-blue-800 mt-[2px]">
                                     {year}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-[5px] mb-1">
-                            <h3 className="text-[14px] font-medium text-gray-800">
-                                {formattedDate} Bill
-                            </h3>
+                        <div className="flex flex-col gap-1 mb-1">
+                            <h2 className="text-xs font-medium text-gray-800">
+                                BILL
+                            </h2>
                             <p className="text-xs text-gray-500">
-                                #{_id.slice(-6).toUpperCase()}
+                                #{_id.slice(-8).toUpperCase()}
                             </p>
                         </div>
                     </div>
@@ -90,10 +102,10 @@ export default function BillCard({ bill }) {
                     >
                         <div className="p-3 pt-0 border-t border-gray-100">
                             {/* Student Details (only if different user) */}
-                            {bill.studentInfo._id === user._id && (
+                            {bill.studentInfo._id !== user._id && (
                                 <div className="mt-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <div className="size-[55px] rounded-full drop-shadow-md overflow-hidden flex items-center justify-center">
+                                        <div className="size-[55px] rounded-full drop-shadow-sm overflow-hidden flex items-center justify-center">
                                             <img
                                                 src={studentInfo.avatar}
                                                 alt={studentInfo.fullName}
@@ -136,8 +148,8 @@ export default function BillCard({ bill }) {
                                     </span>
                                 </div>
 
-                                {paid && paidOn && (
-                                    <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+                                {paid ? (
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
                                         <div className="flex items-center gap-2 text-sm text-gray-600">
                                             <div className="size-4 fill-green-600">
                                                 {icons.check}
@@ -147,6 +159,23 @@ export default function BillCard({ bill }) {
                                         <span className="text-sm text-gray-600">
                                             {formatTime(paidOn)}
                                         </span>
+                                    </div>
+                                ) : (
+                                    <div className="flex justify-end gap-2 items-center pt-3 border-t border-gray-100">
+                                        <Button
+                                            btnText="Get Orders"
+                                            className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/orders/${studentInfo._id}`
+                                                )
+                                            }
+                                        />
+                                        <Button
+                                            btnText="Mark Paid"
+                                            className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                                            onClick={markPaid}
+                                        />
                                     </div>
                                 )}
                             </div>

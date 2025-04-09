@@ -9,7 +9,19 @@ const SocketContext = createContext();
 const SocketContextProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const { user } = useUserContext();
-    const { setStudentOrders, setPendingOrders } = useOrderContext();
+    const {
+        setStudentOrders,
+        setPendingOrders,
+        preparedCount,
+        setPreparedCount,
+    } = useOrderContext();
+
+    function updateOrderStatus(order, status) {
+        setStudentOrders((prev) =>
+            prev.map((o) => (o._id === order._id ? { ...o, status } : o))
+        );
+        setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+    }
 
     function connectSocket() {
         if (!user || socket) return;
@@ -31,31 +43,25 @@ const SocketContextProvider = ({ children }) => {
         // Error Handling
         socketInstance.on('connect_error', (err) => {
             console.error('Socket connection error:', err);
-            console.log(err);
         });
 
         socketInstance.on('error', (err) => {
             console.error('Socket error:', err);
-            console.log(err);
         });
 
         // Events
+
+        socketInstance.on('newOrder', async (order) => {
+            setPendingOrders((prev) => prev.concat(order));
+            await playSound();
+        });
+
         socketInstance.on('orderRejected', (order) => {
-            setStudentOrders((prev) =>
-                prev.map((o) =>
-                    o._id === order._id ? { ...o, status: 'Rejected' } : o
-                )
-            );
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+            updateOrderStatus(order, 'Rejected');
         });
 
         socketInstance.on('orderPrepared', (order) => {
-            setStudentOrders((prev) =>
-                prev.map((o) =>
-                    o._id === order._id ? { ...o, status: 'Prepared' } : o
-                )
-            );
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+            updateOrderStatus(order, 'Prepared');
         });
 
         socketInstance.on('orderPickedUp', (order) => {
@@ -64,12 +70,25 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'PickedUp' } : o
                 )
             );
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+
+            const updatedCount = Object.fromEntries(
+                Object.entries(preparedCount).filter(
+                    ([key]) => !key.endsWith(order._id)
+                )
+            );
+
+            localStorage.setItem('preparedCount', JSON.stringify(updatedCount));
+            setPreparedCount(updatedCount);
         });
 
-        socketInstance.on('newOrder', async (order) => {
-            setPendingOrders((prev) => prev.concat(order));
-            await playSound();
+        socketInstance.on('itemPrepared', ({ itemId, orderId }) => {
+            const itemKey = `${itemId}-${orderId}`;
+            setPreparedCount((prev) => {
+                const newCount = (prev[itemKey] || 0) + 1;
+                const newState = { ...prev, [itemKey]: newCount };
+                localStorage.setItem('preparedCount', JSON.stringify(newState));
+                return newState;
+            });
         });
 
         return socketInstance; // optional

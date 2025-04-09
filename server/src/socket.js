@@ -43,44 +43,65 @@ io.on('connection', async (socket) => {
         ]);
         socket.to(contrSocketId).emit('newOrder', order);
         socket.to(staffSocketId).emit('newOrder', order);
-        // sendSMS({
-        //     to: order.studentInfo.phoneNumber,
-        //     text: 'Your Order is placed and will be begin preparing soon',
-        //     link: process.env.FRONTEND_URL + '/my-orders',
-        // });
+        sendSMS({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order is placed and will be begin preparing soon',
+            link: process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+        });
+    });
+
+    // new order => notify canteen
+    socket.on('itemPrepared', async ({ itemId, orderId, canteenId }) => {
+        const [contrSocketId, staffSocketId] = await Promise.all([
+            getSocketId(canteenId),
+            getSocketId('staff' + canteenId),
+        ]);
+        socket.to(contrSocketId).emit('itemPrepared', { itemId, orderId });
+        io.to(staffSocketId).emit('itemPrepared', { itemId, orderId }); // to send event to itself use io instead of socket
     });
 
     // order rejected => notify student
     socket.on('orderRejected', async (order) => {
         const socketId = await getSocketId(order.studentId);
         socket.to(socketId).emit('orderRejected', order);
-        // sendSMS({
-        //     to: order.studentInfo.phoneNumber,
-        //     text: 'Your Order has been rejected',
-        //     link: process.env.FRONTEND_URL + '/my-orders',
-        // });
+        sendSMS({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order has been rejected',
+            link: process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+        });
     });
 
     // order prepared  => notify student
     socket.on('orderPrepared', async (order) => {
-        const socketId = await getSocketId(order.studentId);
-        socket.to(socketId).emit('orderPrepared', order);
-        // sendSMS({
-        //     to: order.studentInfo.phoneNumber,
-        //     text: 'Your Order is ready for pickup',
-        //     link: process.env.FRONTEND_URL + '/my-orders',
-        // });
+        const [studentSocketId, contrSocketId] = await Promise.all([
+            getSocketId(order.studentId),
+            getSocketId(order.canteenId),
+        ]);
+        io.to(contrSocketId).emit('orderPrepared', order); // to send event to itself use io instead of socket
+        socket.to(studentSocketId).emit('orderPrepared', order);
+        sendSMS({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order is ready for pickup',
+            link: process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+        });
     });
 
     // order picked up => notify student
     socket.on('orderPickedUp', async (order) => {
-        const socketId = await getSocketId(order.studentId);
-        socket.to(socketId).emit('orderPickedUp', order);
-        // sendSMS({
-        //     to: order.studentInfo.phoneNumber,
-        //     text: 'Your Order has been picked up',
-        //     link: process.env.FRONTEND_URL + '/my-orders',
-        // });
+        const [studentSocketId, staffSocketId, contrSocketId] =
+            await Promise.all([
+                getSocketId(order.studentId),
+                getSocketId('staff' + order.canteenId),
+                getSocketId(order.canteenId),
+            ]);
+        io.to(contrSocketId).emit('orderPickedUp', order); // to send event to itself use io instead of socket
+        socket.to(staffSocketId).emit('orderPickedUp', order);
+        socket.to(studentSocketId).emit('orderPickedUp', order);
+        sendSMS({
+            to: order.studentInfo.phoneNumber,
+            text: 'Your Order has been picked up',
+            link: process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+        });
     });
 
     socket.on('disconnect', async () => {

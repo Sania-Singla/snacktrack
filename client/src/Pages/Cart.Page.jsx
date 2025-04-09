@@ -72,8 +72,10 @@ export default function CartPage() {
                 packingCharges
             );
             if (res && !res.message) {
+                let count = 0;
+                cartItems.forEach((i) => (count += i.quantity));
                 setShowPopup(true);
-                setPopupInfo({ type: 'orderPlaced', count: cartItems.length });
+                setPopupInfo({ type: 'orderPlaced', count });
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
                 socket.emit('newOrder', res);

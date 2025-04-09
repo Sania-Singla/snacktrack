@@ -54,10 +54,10 @@ class OrderService {
         }
     }
 
-    async getStudentOrders(studentId, signal, page, limit) {
+    async getStudentOrders(studentId, month, page, limit, signal) {
         try {
             const res = await fetch(
-                `${BASE_BACKEND_URL}/orders/${studentId}?page=${page}&limit=${limit}`,
+                `${BASE_BACKEND_URL}/orders/${studentId}?month=${month}&page=${page}&limit=${limit}`,
                 { method: 'GET', signal, credentials: 'include' }
             );
 

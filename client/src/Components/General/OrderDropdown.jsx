@@ -12,6 +12,7 @@ export default function OrderDropdown({
 
     const handleOptionClick = (value) => {
         onChange(value);
+        setIsDropdownOpen(false);
     };
 
     useEffect(() => {

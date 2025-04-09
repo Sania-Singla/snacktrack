@@ -41,7 +41,7 @@ export default function PendingOrders() {
         })();
 
         return () => controller.abort();
-    }, [page, navigate]);
+    }, [page]);
 
     return (
         <div className="w-full p-4">

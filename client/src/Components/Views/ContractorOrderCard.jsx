@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
-import { useOrderContext, useSocketContext } from '../../Contexts';
+import { useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -14,13 +14,11 @@ export default function ContractorOrderCard({ order, reference }) {
     const { socket } = useSocketContext();
     const [status, setStatus] = useState(order.status);
     const [statusOptions, setStatusOptions] = useState([]);
-    const { setPendingOrders } = useOrderContext();
 
     useEffect(() => {
         if (status === 'Pending') {
             setStatusOptions([
                 { value: '', label: 'Pending' },
-                { value: 'PickedUp', label: 'Picked Up' },
                 { value: 'Prepared', label: 'Prepared' },
                 { value: 'Rejected', label: 'Reject' },
             ]);
@@ -40,11 +38,6 @@ export default function ContractorOrderCard({ order, reference }) {
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
                 socket.emit(`order${status}`, order);
-                if (status === 'Prepared') {
-                    setPendingOrders((prev) =>
-                        prev.filter((o) => o._id !== _id)
-                    );
-                }
             }
         } catch (err) {
             navigate('/server-error');
@@ -109,7 +102,7 @@ export default function ContractorOrderCard({ order, reference }) {
                 </div>
 
                 <div className="flex flex-row justify-between items-center w-full">
-                    <div className="flex flex-col items-center gap-1">
+                    <div className="flex flex-col gap-1">
                         <h2 className="text-sm font-medium text-gray-800">
                             ORDER #{_id.slice(-8).toUpperCase()}
                         </h2>

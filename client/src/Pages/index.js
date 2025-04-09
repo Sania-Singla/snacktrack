@@ -17,8 +17,6 @@ import CartPage from './Cart.Page';
 import StudentBillsPage from './StudentBills.Page';
 import KitchenPage from './Kitchen.Page';
 import StatisticsPage from './Statistics.Page';
-import MyBillsPage from './MyBills.Page';
-import MyOrdersPage from './MyOrders.Page';
 import AdminPage from './Admin.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
 import BillsPage from './Bills.Page';
@@ -43,9 +41,7 @@ export {
     CartPage,
     KitchenPage,
     StatisticsPage,
-    MyBillsPage,
     BillsPage,
-    MyOrdersPage,
     AdminPage,
     RegisterCanteenPage,
 };
