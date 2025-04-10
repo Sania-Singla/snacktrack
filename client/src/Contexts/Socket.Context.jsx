@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 import { useOrderContext } from './Order.Context';
 import { useUserContext } from './User.Context';
 import { playSound } from '../Utils';
+import { useSnackContext } from './Snack.Context';
 
 const SocketContext = createContext();
 
@@ -15,13 +16,7 @@ const SocketContextProvider = ({ children }) => {
         preparedCount,
         setPreparedCount,
     } = useOrderContext();
-
-    function updateOrderStatus(order, status) {
-        setStudentOrders((prev) =>
-            prev.map((o) => (o._id === order._id ? { ...o, status } : o))
-        );
-        setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
-    }
+    const { setSnacks } = useSnackContext();
 
     function connectSocket() {
         if (!user || socket) return;
@@ -57,11 +52,19 @@ const SocketContextProvider = ({ children }) => {
         });
 
         socketInstance.on('orderRejected', (order) => {
-            updateOrderStatus(order, 'Rejected');
+            setStudentOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'Rejected' } : o
+                )
+            );
         });
 
         socketInstance.on('orderPrepared', (order) => {
-            updateOrderStatus(order, 'Prepared');
+            setStudentOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'Prepared' } : o
+                )
+            );
         });
 
         socketInstance.on('orderPickedUp', (order) => {
@@ -71,17 +74,18 @@ const SocketContextProvider = ({ children }) => {
                 )
             );
 
+            // remove the prepared items from localStorage
             const updatedCount = Object.fromEntries(
                 Object.entries(preparedCount).filter(
                     ([key]) => !key.endsWith(order._id)
                 )
             );
-
             localStorage.setItem('preparedCount', JSON.stringify(updatedCount));
             setPreparedCount(updatedCount);
         });
 
         socketInstance.on('itemPrepared', ({ itemId, orderId }) => {
+            // set the item to local storage
             const itemKey = `${itemId}-${orderId}`;
             setPreparedCount((prev) => {
                 const newCount = (prev[itemKey] || 0) + 1;

@@ -28,10 +28,8 @@ export default function SnackView({ snack, reference }) {
                 res.message === 'snack availability toggled successfully'
             ) {
                 setSnacks((prev) =>
-                    prev.map((snack) =>
-                        snack._id === _id
-                            ? { ...snack, isAvailable: !snack.isAvailable }
-                            : snack
+                    prev.map((s) =>
+                        s._id === _id ? { ...s, isAvailable: !isAvailable } : s
                     )
                 );
             }

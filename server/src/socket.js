@@ -4,6 +4,7 @@ import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/options.js';
 import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
 import { sendSMS } from './sms.js';
+import { Student } from './Models/index.js';
 
 const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });
@@ -35,14 +36,13 @@ io.on('connection', async (socket) => {
 
     // EVENT LISTENERS
 
-    // new order => notify canteen
     socket.on('newOrder', async (order) => {
         const [contrSocketId, staffSocketId] = await Promise.all([
-            getSocketId(order.canteenId),
-            getSocketId('staff' + order.canteenId),
+            getSocketId(canteenId),
+            getSocketId('staff' + canteenId),
         ]);
-        socket.to(contrSocketId).emit('newOrder', order);
-        socket.to(staffSocketId).emit('newOrder', order);
+        socket.to(contrSocketId).to(staffSocketId).emit('newOrder', order);
+
         sendSMS({
             to: order.studentInfo.phoneNumber,
             text: 'Your Order is placed and will be begin preparing soon',
@@ -50,20 +50,10 @@ io.on('connection', async (socket) => {
         });
     });
 
-    // new order => notify canteen
-    socket.on('itemPrepared', async ({ itemId, orderId, canteenId }) => {
-        const [contrSocketId, staffSocketId] = await Promise.all([
-            getSocketId(canteenId),
-            getSocketId('staff' + canteenId),
-        ]);
-        socket.to(contrSocketId).emit('itemPrepared', { itemId, orderId });
-        io.to(staffSocketId).emit('itemPrepared', { itemId, orderId }); // to send event to itself use io instead of socket
-    });
-
-    // order rejected => notify student
     socket.on('orderRejected', async (order) => {
         const socketId = await getSocketId(order.studentId);
         socket.to(socketId).emit('orderRejected', order);
+
         sendSMS({
             to: order.studentInfo.phoneNumber,
             text: 'Your Order has been rejected',
@@ -71,14 +61,10 @@ io.on('connection', async (socket) => {
         });
     });
 
-    // order prepared  => notify student
     socket.on('orderPrepared', async (order) => {
-        const [studentSocketId, contrSocketId] = await Promise.all([
-            getSocketId(order.studentId),
-            getSocketId(order.canteenId),
-        ]);
-        io.to(contrSocketId).emit('orderPrepared', order); // to send event to itself use io instead of socket
+        const studentSocketId = await getSocketId(order.studentId);
         socket.to(studentSocketId).emit('orderPrepared', order);
+
         sendSMS({
             to: order.studentInfo.phoneNumber,
             text: 'Your Order is ready for pickup',
@@ -86,22 +72,28 @@ io.on('connection', async (socket) => {
         });
     });
 
-    // order picked up => notify student
     socket.on('orderPickedUp', async (order) => {
-        const [studentSocketId, staffSocketId, contrSocketId] =
-            await Promise.all([
-                getSocketId(order.studentId),
-                getSocketId('staff' + order.canteenId),
-                getSocketId(order.canteenId),
-            ]);
-        io.to(contrSocketId).emit('orderPickedUp', order); // to send event to itself use io instead of socket
-        socket.to(staffSocketId).emit('orderPickedUp', order);
-        socket.to(studentSocketId).emit('orderPickedUp', order);
+        const [studentSocketId, staffSocketId] = await Promise.all([
+            getSocketId(order.studentId),
+            getSocketId('staff' + canteenId),
+        ]);
+        io.to(socket.id).emit('orderPickedUp', order); // to send event to itself use io instead of socket
+        socket
+            .to(staffSocketId)
+            .to(studentSocketId)
+            .emit('orderPickedUp', order);
+
         sendSMS({
             to: order.studentInfo.phoneNumber,
             text: 'Your Order has been picked up',
             link: process.env.FRONTEND_URL + `/orders/${order.studentId}`,
         });
+    });
+
+    socket.on('itemPrepared', async ({ itemId, orderId }) => {
+        const contrSocketId = await getSocketId(canteenId);
+        socket.to(contrSocketId).emit('itemPrepared', { itemId, orderId });
+        io.to(socket.id).emit('itemPrepared', { itemId, orderId }); // to send event to itself use io instead of socket
     });
 
     socket.on('disconnect', async () => {

@@ -29,18 +29,6 @@ const canteenSchema = new Schema(
             type: String,
             required: true,
         },
-        snacks: [
-            {
-                type: Types.ObjectId,
-                ref: 'Snack',
-            },
-        ],
-        packagedItems: [
-            {
-                type: Types.ObjectId,
-                ref: 'PackagedFood',
-            },
-        ],
     },
     { timestamps: true }
 );

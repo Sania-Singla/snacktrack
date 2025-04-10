@@ -34,6 +34,7 @@ import AddSnackPopup from './Popups/AddSnack.Popup';
 import AddItemPopup from './Popups/AddItem.Popup';
 import EmailVerificationPopup from './Popups/EmailVerification.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
+import OrderUnavailablePopup from './Popups/OrderUnavailable.Popup';
 import EmptyCart from './Views/EmptyCart';
 import OrderDropdown from './General/OrderDropdown';
 import BillCard from './Views/BillCard';
@@ -41,6 +42,7 @@ import BillCard from './Views/BillCard';
 export {
     Header,
     Footer,
+    OrderUnavailablePopup,
     Sidebar,
     Filter,
     Dropdown,

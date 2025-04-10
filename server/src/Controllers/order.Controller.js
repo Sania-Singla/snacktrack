@@ -1,6 +1,6 @@
 import { OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
-import { Order } from '../Models/index.js';
+import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 
 // only student can do
@@ -17,6 +17,16 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         items: cartItems,
         packingCharges,
     });
+
+    // update inventory for packaged Items
+    const packagedItems = cartItems.filter((item) => item.type !== 'Snack');
+
+    for (const item of packagedItems) {
+        await PackagedFood.updateOne(
+            { _id: item._id, 'variants.price': item.price },
+            { $inc: { 'variants.$.availableCount': -item.quantity } }
+        );
+    }
 
     // Now, populate the items just like in getCanteenOrders
     const populatedOrder = await Order.aggregate([
@@ -236,16 +246,15 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     const { limit = 10, page = 1, status = 'Pending' } = req.query;
     const canteenId = req.user.canteenId; // contractor
 
-    // Get current date in UTC
     const now = new Date();
-    const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
 
-    // Set hours in UTC
-    const startOfDay = new Date(utcNow);
-    startOfDay.setUTCHours(8, 0, 0, 0); // 8 AM UTC
+    // Set start time (8 AM)
+    const startOfDay = new Date(now);
+    startOfDay.setHours(8, 0, 0, 0);
 
-    const endOfDay = new Date(utcNow);
-    endOfDay.setUTCHours(22, 0, 0, 999); // 10 PM UTC
+    // Set end time (10 PM)
+    const endOfDay = new Date(now);
+    endOfDay.setHours(22, 0, 0, 999);
 
     // Fetch today's orders from this canteen
     const result = await Order.aggregatePaginate(
@@ -364,4 +373,51 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     );
 });
 
-export { getStudentOrders, getCanteenOrders, placeOrder, updateOrderStatus };
+const checkAvailability = tryCatch('check availability', async (req, res) => {
+    const { cartItems } = req.body;
+
+    const [snacks, packagedItems] = await Promise.all([
+        Snack.find({
+            _id: {
+                $in: cartItems
+                    .filter((i) => i.type === 'Snack')
+                    .map((i) => i._id),
+            },
+            isAvailable: true,
+        }),
+        PackagedFood.find({
+            _id: {
+                $in: cartItems
+                    .filter((i) => i.type !== 'Snack')
+                    .map((i) => i._id),
+            },
+        }),
+    ]);
+
+    // Filter available items
+    const availableItems = cartItems.filter((i) => {
+        if (i.type === 'Snack') {
+            return snacks.some((s) => s._id.equals(i._id));
+        } else {
+            const item = packagedItems.find((p) => p._id.equals(i._id));
+            if (!item) return false;
+
+            const variant = item.variants.find((v) => v.price === i.price);
+            if (variant && variant.availableCount > 0) {
+                i.availableCount = variant.availableCount; // Added availableCount to response
+                return true;
+            }
+            return false;
+        }
+    });
+
+    return res.status(OK).json(availableItems);
+});
+
+export {
+    getStudentOrders,
+    getCanteenOrders,
+    placeOrder,
+    updateOrderStatus,
+    checkAvailability,
+};

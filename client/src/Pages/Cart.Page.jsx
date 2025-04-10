@@ -1,12 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import {
-    PER_ITEM_PACKAGING_CHARGES,
-    SNACK_PLACEHOLDER_IMAGE,
-    TAX,
-} from '../Constants/constants';
+import { PER_ITEM_PACKAGING_CHARGES, TAX } from '../Constants/constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
@@ -20,6 +16,41 @@ export default function CartPage() {
     const { socket } = useSocketContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
+    const [loading, setLoading] = useState(true);
+
+    async function checkAvailability() {
+        try {
+            const res = await orderService.checkAvailability(cartItems);
+            if (res && !res.message) {
+                const updatedCartItems = cartItems.map((item) => {
+                    const foundItem = res.find(
+                        (i) => i._id === item._id && i.price === item.price
+                    );
+
+                    if (item.type === 'Snack') {
+                        return { ...item, isAvailable: !!foundItem };
+                    } else {
+                        return {
+                            ...item,
+                            availableCount: foundItem?.availableCount || 0,
+                        };
+                    }
+                });
+                setCartItems(updatedCartItems);
+                return updatedCartItems;
+            }
+        } catch (err) {
+            navigate('/server-error');
+        }
+    }
+
+    useEffect(() => {
+        (async function () {
+            setLoading(true);
+            await checkAvailability();
+            setLoading(false);
+        })();
+    }, []);
 
     // Calculate charges
     const subtotal = cartItems.reduce(
@@ -32,6 +63,7 @@ export default function CartPage() {
             (item.isPacked ? PER_ITEM_PACKAGING_CHARGES * item.quantity : 0),
         0
     );
+
     const tax = (subtotal + packingCharges) * TAX; // 5% tax on subtotal + packing
     const total = subtotal + packingCharges + tax;
 
@@ -66,6 +98,19 @@ export default function CartPage() {
     async function placeOrder() {
         try {
             setOrdering(true);
+            const items = await checkAvailability();
+            const hasUnavailableItems = items.some((i) => {
+                if (i.type === 'Snack') {
+                    return !i.isAvailable;
+                } else {
+                    return i.quantity > i.availableCount;
+                }
+            });
+            if (hasUnavailableItems) {
+                setShowPopup(true);
+                setPopupInfo({ type: 'orderUnavailable' });
+                return;
+            }
             const res = await orderService.placeOrder(
                 cartItems,
                 total,
@@ -93,13 +138,41 @@ export default function CartPage() {
     }
 
     const cartItemElements = cartItems.map((item) => {
-        const { price, _id, name, category, type, image, quantity, isPacked } =
-            item;
+        const {
+            price,
+            _id,
+            name,
+            category,
+            type,
+            image,
+            quantity,
+            isPacked,
+            isAvailable,
+            availableCount,
+        } = item;
+
+        const isUnavailable =
+            type === 'Snack' ? !isAvailable : availableCount < quantity;
+
         return (
             <div
                 key={`${_id}-${price}`}
-                className="w-full flex flex-col sm:flex-row items-end sm:items-center justify-between border-b border-gray-200 py-4"
+                className="w-full flex flex-col sm:flex-row items-end px-3 sm:items-center justify-between border-b border-gray-200 py-4 relative"
             >
+                {/* Gray overlay for unavailable items */}
+                {isUnavailable && (
+                    <>
+                        <div className="absolute inset-0 bg-gray-300 opacity-50 rounded-lg pointer-events-none"></div>
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <span className="bg-white px-2 py-1 rounded-md text-sm font-medium text-red-600 shadow-sm">
+                                {type === 'Snack'
+                                    ? 'Not Available'
+                                    : `Only ${availableCount} left`}
+                            </span>
+                        </div>
+                    </>
+                )}
+
                 <div className="w-full flex items-center gap-4 justify-between">
                     <div className="flex items-center gap-4">
                         {/* image */}
@@ -206,16 +279,22 @@ export default function CartPage() {
         );
     });
 
-    return cartItems.length > 0 ? (
+    return loading ? (
+        <div className="flex justify-center py-12">
+            <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                {icons.loading}
+            </div>
+        </div>
+    ) : cartItems.length > 0 ? (
         <div className="bg-gray-100 rounded-xl drop-shadow-sm w-full py-10 px-4 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Cart</h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Product List */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                <div className="lg:col-span-2 bg-white rounded-lg shadow-md pb-3">
+                    <h2 className="text-xl font-semibold text-gray-900 p-6">
                         Cart Items
                     </h2>
-                    {cartItemElements}
+                    <div className="px-3">{cartItemElements}</div>
                 </div>
 
                 {/* Order Summary */}

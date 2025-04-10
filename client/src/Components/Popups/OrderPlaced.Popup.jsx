@@ -51,7 +51,7 @@ export default function OrderPlacedPopup() {
                 <div className="flex flex-col items-center gap-4 py-8 relative">
                     {/* Animated Checkmark */}
                     <motion.div
-                        className="relative size-14 p-[5px] bg-green-100 mb-1 rounded-full z-10"
+                        className="relative size-13 p-[5px] bg-green-100 mb-1 rounded-full z-10"
                         initial={{ scale: 0 }}
                         animate={{
                             scale: 1,

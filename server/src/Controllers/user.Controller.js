@@ -197,16 +197,15 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
 
     const canteen = await Canteen.findOne({ hostelType, hostelNumber });
 
-    // Get current date in UTC
     const now = new Date();
-    const utcNow = new Date(now.getTime() + now.getTimezoneOffset() * 60000);
 
-    // Set hours in UTC
-    const startOfDay = new Date(utcNow);
-    startOfDay.setUTCHours(8, 0, 0, 0); // 8 AM UTC
+    // Set start time (8 AM)
+    const startOfDay = new Date(now);
+    startOfDay.setHours(8, 0, 0, 0);
 
-    const endOfDay = new Date(utcNow);
-    endOfDay.setUTCHours(22, 0, 0, 999); // 10 PM UTC
+    // Set end time (10 PM)
+    const endOfDay = new Date(now);
+    endOfDay.setHours(22, 0, 0, 999);
 
     // Fetch today's orders from this canteen
     const orders = await Order.aggregate([
@@ -214,7 +213,6 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
             $match: {
                 canteenId: new Types.ObjectId(canteen._id),
                 createdAt: { $gte: startOfDay, $lt: endOfDay },
-
                 status: 'Pending',
             },
         },

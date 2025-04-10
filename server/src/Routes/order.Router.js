@@ -7,9 +7,12 @@ import {
     getCanteenOrders,
     placeOrder,
     updateOrderStatus,
+    checkAvailability,
 } from '../Controllers/order.Controller.js';
 
 orderRouter.use(verifyJwt);
+
+orderRouter.route('/availability').post(checkAvailability);
 
 orderRouter.route('/:orderId').patch(updateOrderStatus);
 

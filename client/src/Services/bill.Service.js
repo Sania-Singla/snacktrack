@@ -43,7 +43,7 @@ class BillService {
             throw err;
         }
     }
-    
+
     async markPaid(billId) {
         try {
             const res = await fetch(`${BASE_BACKEND_URL}/bills/${billId}`, {

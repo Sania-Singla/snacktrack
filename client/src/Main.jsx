@@ -20,8 +20,8 @@ function Root() {
         <UserContextProvider>
             <OrderContextProvider>
                 <PopupContextProvider>
-                    <SocketContextProvider>
-                        <SnackContextProvider>
+                    <SnackContextProvider>
+                        <SocketContextProvider>
                             <StudentContextProvider>
                                 <SideBarContextProvider>
                                     <SearchContextProvider>
@@ -29,8 +29,8 @@ function Root() {
                                     </SearchContextProvider>
                                 </SideBarContextProvider>
                             </StudentContextProvider>
-                        </SnackContextProvider>
-                    </SocketContextProvider>
+                        </SocketContextProvider>{' '}
+                    </SnackContextProvider>
                 </PopupContextProvider>
             </OrderContextProvider>
         </UserContextProvider>

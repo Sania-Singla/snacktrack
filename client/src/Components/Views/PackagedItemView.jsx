@@ -29,8 +29,9 @@ export default function PackagedItemView({ item, reference }) {
         setVariants((prev) =>
             prev.map((v) => (v.price === price ? { ...v, quantity: 1 } : v))
         );
+        const { variants, ...rest } = item;
         const newCartItem = {
-            ...item,
+            ...rest,
             type: 'PackagedFood',
             price,
             quantity: 1,

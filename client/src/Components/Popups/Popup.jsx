@@ -13,6 +13,7 @@ import {
     EmailVerificationPopup,
     OrderPlacedPopup,
     EditCartItemPopup,
+    OrderUnavailablePopup,
 } from '..';
 import { usePopupContext } from '../../Contexts';
 
@@ -30,12 +31,6 @@ export default function Popup() {
             ref={ref}
             onClick={close}
         >
-            {children}
-        </div>
-    );
-
-    const WrapperWithoutRef = ({ children }) => (
-        <div className="fixed inset-0 z-[1000] backdrop-blur-sm flex items-center justify-center drop-shadow-md">
             {children}
         </div>
     );
@@ -113,6 +108,12 @@ export default function Popup() {
             return (
                 <Wrapper>
                     <OrderPlacedPopup />
+                </Wrapper>
+            );
+        case 'orderUnavailable':
+            return (
+                <Wrapper>
+                    <OrderUnavailablePopup />
                 </Wrapper>
             );
         case 'verifyEmail':
