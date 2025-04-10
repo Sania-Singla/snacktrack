@@ -9,9 +9,9 @@ class OrderService {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     cartItems: cartItems.map((i) => ({
-                        itemId: i._id,
+                        _id: i._id,
                         quantity: i.quantity,
-                        itemType: i.type,
+                        type: i.type,
                         price: i.price,
                         specialInstructions: i.specialInstructions,
                         isPacked: i.isPacked,

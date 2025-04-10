@@ -44,10 +44,13 @@ export default function BillCard({ bill }) {
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-11 rounded-lg flex items-center justify-center border border-blue-400">
                             <div className="text-center">
                                 <p className="text-xs font-bold text-blue-800 leading-none">
-                                    {new Date(month).toLocaleDateString(
-                                        'default',
-                                        { month: 'short' }
-                                    )}
+                                    {new Date(
+                                        year,
+                                        month - 1,
+                                        1
+                                    ).toLocaleDateString('default', {
+                                        month: 'short',
+                                    })}
                                 </p>
                                 <p className="text-xs font-bold text-blue-800 mt-[2px]">
                                     {year}
@@ -167,15 +170,17 @@ export default function BillCard({ bill }) {
                                             className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
                                             onClick={() =>
                                                 navigate(
-                                                    `/orders/${studentInfo._id}`
+                                                    `/orders/${studentInfo._id}?filter=${month}`
                                                 )
                                             }
                                         />
-                                        <Button
-                                            btnText="Mark Paid"
-                                            className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                                            onClick={markPaid}
-                                        />
+                                        {user.role === 'contractor' && (
+                                            <Button
+                                                btnText="Mark Paid"
+                                                className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                                                onClick={markPaid}
+                                            />
+                                        )}
                                     </div>
                                 )}
                             </div>

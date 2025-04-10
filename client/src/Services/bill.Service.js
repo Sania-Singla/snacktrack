@@ -25,11 +25,7 @@ class BillService {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/bills?page=${page}&limit=${limit}`,
-                {
-                    method: 'GET',
-                    signal: signal,
-                    credentials: 'include',
-                }
+                { method: 'GET', signal: signal, credentials: 'include' }
             );
             const data = await res.json();
             console.log(data);

@@ -1,10 +1,20 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Header, Footer, Sidebar, Popup } from '..';
 import { Toaster } from 'react-hot-toast';
+import { useEffect, useRef } from 'react';
 
 export default function Layout({ renderTemplate = true }) {
+    const { pathname } = useLocation();
+    const layoutRef = useRef(null);
+
+    useEffect(() => {
+        // scrolling both window and layout container to the top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        layoutRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [pathname]);
+
     return renderTemplate ? (
-        <div className="overflow-y-scroll h-full w-full">
+        <div ref={layoutRef} className="overflow-y-scroll h-full w-full">
             <Header />
             <hr className="w-full" />
             <Sidebar />
@@ -17,7 +27,7 @@ export default function Layout({ renderTemplate = true }) {
             <Toaster />
         </div>
     ) : (
-        <div className="overflow-y-scroll h-full w-full">
+        <div ref={layoutRef} className="overflow-y-scroll h-full w-full">
             <Outlet />
             <Popup />
             <Toaster />

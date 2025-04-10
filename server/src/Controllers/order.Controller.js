@@ -9,12 +9,21 @@ const placeOrder = tryCatch('place order', async (req, res) => {
     const { cartItems, amount, packingCharges } = req.body;
     const student = req.user;
 
+    const updatedCartItems = cartItems.map((i) => ({
+        itemId: i._id,
+        quantity: i.quantity,
+        itemType: i.type,
+        price: i.price,
+        specialInstructions: i.specialInstructions,
+        isPacked: i.isPacked,
+    }));
+
     // Create a new order
     const order = await Order.create({
         studentId: student._id,
         canteenId: student.canteenId,
         amount,
-        items: cartItems,
+        items: updatedCartItems,
         packingCharges,
     });
 

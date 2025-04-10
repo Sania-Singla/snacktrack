@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
 import { BillCard } from '../Components';
-import { useUserContext } from '../Contexts';
+import { useSearchContext, useUserContext } from '../Contexts';
+import { icons } from '../Assets/icons';
 
 export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
@@ -10,6 +11,7 @@ export default function StudentBillsPage() {
     const { studentId } = useParams();
     const navigate = useNavigate();
     const { user } = useUserContext();
+    const { search } = useSearchContext();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -32,6 +34,14 @@ export default function StudentBillsPage() {
         return () => controller.abort();
     }, []);
 
+    const billElements = bills
+        .filter(
+            (b) =>
+                !search ||
+                b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
+        )
+        .map((bill) => <BillCard key={bill._id} bill={bill} />);
+
     return (
         <div>
             <div className="w-full p-4">
@@ -42,12 +52,14 @@ export default function StudentBillsPage() {
                 </div>
 
                 {loading ? (
-                    <div>Loading...</div>
-                ) : bills.length > 0 ? (
+                    <div className="flex justify-center py-12">
+                        <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                            {icons.loading}
+                        </div>
+                    </div>
+                ) : billElements.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {bills.map((bill) => (
-                            <BillCard key={bill._id} bill={bill} />
-                        ))}
+                        {billElements}
                     </div>
                 ) : (
                     <div>No bills found.</div>

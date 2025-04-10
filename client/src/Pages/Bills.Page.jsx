@@ -4,6 +4,8 @@ import { billService } from '../Services';
 import { BillCard } from '../Components';
 import { paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
+import { icons } from '../Assets/icons';
+import { useSearchContext } from '../Contexts';
 
 export default function BillsPage() {
     const [bills, setBills] = useState([]);
@@ -11,6 +13,7 @@ export default function BillsPage() {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [billsInfo, setBillsInfo] = useState({});
+    const { search } = useSearchContext();
 
     const paginateRef = paginate(billsInfo?.hasNextPage, loading, setPage);
 
@@ -22,7 +25,7 @@ export default function BillsPage() {
             try {
                 const res = await billService.getBills(page, LIMIT, signal);
                 if (res && !res.message) {
-                    setBills(res.bills);
+                    setBills((prev) => prev.concat(res.bills));
                     setBillsInfo(res.billsInfo);
                 }
             } catch (err) {
@@ -34,6 +37,30 @@ export default function BillsPage() {
 
         return () => controller.abort();
     }, [page]);
+
+    const billElements = bills
+        .filter(
+            (b) =>
+                !search ||
+                b.studentInfo.fullName
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                b.studentInfo.userName
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
+        )
+        .map((bill, i) => (
+            <BillCard
+                reference={
+                    i + 1 === bills.length && billsInfo?.hasNextPage
+                        ? paginateRef
+                        : null
+                }
+                key={bill._id}
+                bill={bill}
+            />
+        ));
 
     return (
         <div>
@@ -47,25 +74,20 @@ export default function BillsPage() {
                     </div>
                 </div>
 
-                {loading ? (
-                    <div>Loading...</div>
-                ) : bills.length > 0 ? (
+                {billElements.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {bills.map((bill, i) => (
-                            <BillCard
-                                reference={
-                                    i + 1 === bills.length &&
-                                    billsInfo?.hasNextPage
-                                        ? paginateRef
-                                        : null
-                                }
-                                key={bill._id}
-                                bill={bill}
-                            />
-                        ))}
+                        {billElements}
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="flex justify-center py-12">
+                        <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                            {icons.loading}
+                        </div>
                     </div>
                 ) : (
-                    <div>No bills found.</div>
+                    billElements.length === 0 && <div>No bills found</div>
                 )}
             </div>
         </div>

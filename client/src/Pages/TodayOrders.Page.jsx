@@ -21,7 +21,7 @@ export default function TodayOrdersPage() {
             </div>
 
             {filter === 'Pending' ? (
-                <PendingOrders />
+                <PendingOrders filter={filter} />
             ) : (
                 <Orders filter={filter} />
             )}

@@ -64,7 +64,7 @@ export default function Filter({
                     ref={buttonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center justify-between w-full gap-2 bg-white border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg shadow-sm text-lg text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200 min-w-[120px]"
+                    className="flex cursor-pointer items-center justify-between w-full gap-2 bg-white border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg shadow-sm text-lg text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200 min-w-[120px]"
                 >
                     <div className="flex items-center gap-2.5 overflow-hidden">
                         {selectedOption?.icon && (
@@ -86,7 +86,7 @@ export default function Filter({
                 {/* Dropdown Options */}
                 {isDropdownOpen && (
                     <div
-                        className="absolute z-10 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden"
+                        className="absolute z-10 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden w-full"
                         style={{
                             width: dropdownWidth,
                             minWidth: 'max-content',
@@ -100,7 +100,7 @@ export default function Filter({
                                         onClick={() =>
                                             handleOptionClick(option.value)
                                         }
-                                        className="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
+                                        className="cursor-pointer flex items-center gap-2.5 px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
                                     >
                                         {option.icon && (
                                             <div className="shrink-0 size-4 fill-gray-900">

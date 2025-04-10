@@ -48,7 +48,7 @@ export default function StudentOrdersPage() {
                     signal
                 );
                 if (data && !data.message) {
-                    setStudentOrders(data.orders);
+                    setStudentOrders((prev) => prev.concat(data.orders));
                     setOrdersInfo(data.ordersInfo);
                 }
             } catch (err) {
@@ -61,7 +61,9 @@ export default function StudentOrdersPage() {
         return () => controller.abort();
     }, [page, filter]);
 
-    useEffect(() => setStudentOrders([]), [filter]);
+    useEffect(() => {
+        setStudentOrders([]), setPage(1);
+    }, [filter]);
 
     return (
         <div className="w-full p-4">

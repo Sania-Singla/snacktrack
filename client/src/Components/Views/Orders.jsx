@@ -5,6 +5,7 @@ import { paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import { ContractorOrderCard } from '..';
+import { useSearchContext } from '../../Contexts';
 
 export default function Orders({ filter }) {
     const [orders, setOrders] = useState([]);
@@ -12,6 +13,7 @@ export default function Orders({ filter }) {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
+    const { search } = useSearchContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
@@ -29,7 +31,7 @@ export default function Orders({ filter }) {
                     signal
                 );
                 if (res && !res.message) {
-                    setOrders(res.orders);
+                    setOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
                 }
             } catch (err) {
@@ -42,24 +44,38 @@ export default function Orders({ filter }) {
         return () => controller.abort();
     }, [page, filter]);
 
-    useEffect(() => setOrders([]), [filter]);
+    useEffect(() => {
+        setOrders([]), setPage(1);
+    }, [filter]);
 
+    const orderElements = orders
+        .filter(
+            (o) =>
+                !search ||
+                o.studentInfo.fullName
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                o.studentInfo.userName
+                    .toLowerCase()
+                    .includes(search.toLowerCase()) ||
+                o._id.slice(-8).toLowerCase().includes(search.toLowerCase())
+        )
+        .map((order, i) => (
+            <ContractorOrderCard
+                order={order}
+                key={order._id}
+                reference={
+                    i + 1 === orders.length && ordersInfo?.hasNextPage
+                        ? paginateRef
+                        : null
+                }
+            />
+        ));
     return (
         <div className="w-full p-4">
-            {orders.length > 0 && (
+            {orderElements.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {orders.map((order, i) => (
-                        <ContractorOrderCard
-                            order={order}
-                            key={order._id}
-                            reference={
-                                i + 1 === orders.length &&
-                                ordersInfo?.hasNextPage
-                                    ? paginateRef
-                                    : null
-                            }
-                        />
-                    ))}
+                    {orderElements}
                 </div>
             )}
 
@@ -70,7 +86,7 @@ export default function Orders({ filter }) {
                     </div>
                 </div>
             ) : (
-                orders.length === 0 && <div>No orders found</div>
+                orderElements.length === 0 && <div>No orders found</div>
             )}
         </div>
     );

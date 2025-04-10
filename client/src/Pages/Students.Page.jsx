@@ -36,7 +36,7 @@ export default function StudentsPage() {
                     LIMIT
                 );
                 if (res && !res.message) {
-                    setStudents((prev) => [...prev, ...res.students]);
+                    setStudents((prev) => prev.concat(res.students));
                     setStudentsInfo(res.studentsInfo);
                 }
             } catch (err) {

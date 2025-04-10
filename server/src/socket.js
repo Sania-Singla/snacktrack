@@ -4,7 +4,6 @@ import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/options.js';
 import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
 import { sendSMS } from './sms.js';
-import { Student } from './Models/index.js';
 
 const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });
