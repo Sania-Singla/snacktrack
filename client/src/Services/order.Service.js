@@ -102,6 +102,31 @@ class OrderService {
         }
     }
 
+    async getStatistics(signal) {
+        try {
+            const res = await fetch(`${BASE_BACKEND_URL}/orders/statistics`, {
+                method: 'GET',
+                signal,
+                credentials: 'include',
+            });
+
+            const data = await res.json();
+            console.log(data);
+
+            if (res.status === SERVER_ERROR) {
+                throw new Error(data.message);
+            }
+            return data;
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                console.log('getStatistics request aborted.');
+            } else {
+                console.error('error in getStatistics service', err);
+                throw err;
+            }
+        }
+    }
+
     async checkAvailability(cartItems) {
         try {
             const res = await fetch(`${BASE_BACKEND_URL}/orders/availability`, {

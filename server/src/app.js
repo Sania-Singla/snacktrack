@@ -21,14 +21,14 @@ import {
 } from './Routes/index.js';
 import { errorMiddleware } from './Middlewares/index.js';
 
-app.use('/api/users', userRouter); 
+app.use('/api/users', userRouter);
 app.use('/api/snacks', snackRouter);
 app.use('/api/contractors', contractorRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/bills', billRouter);
 
 app.get('/', (req, res) => {
-    res.status(OK).send('Welcome to the Snack Track!');
+    res.status(OK).json({ message: 'Welcome to Snack Track!' });
 });
 
 app.use(errorMiddleware);

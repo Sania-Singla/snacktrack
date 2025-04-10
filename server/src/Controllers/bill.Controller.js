@@ -164,13 +164,14 @@ const generateBill = tryCatch('generate bill', async (req, res) => {
     console.log(`Automated billing completed for ${month}/${year}`);
 });
 
-// Schedule the cron job to run on the 1st of every month at 12:05 AM
+// Scheduled cron job to run on the 1st of every month at 12:05 AM
 const startBillingCronJob = () => {
     // Run at 00:05 on the 1st of every month
     cron.schedule('5 0 1 * *', generateBill, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
+
     console.log(
         '✨ Billing cron job scheduled to run on the 1st at 12:05 AM of every month'
     );

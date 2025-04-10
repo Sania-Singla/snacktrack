@@ -8,11 +8,14 @@ import {
     placeOrder,
     updateOrderStatus,
     checkAvailability,
+    getStatistics,
 } from '../Controllers/order.Controller.js';
 
 orderRouter.use(verifyJwt);
 
 orderRouter.route('/availability').post(checkAvailability);
+
+orderRouter.route('/statistics').get(getStatistics);
 
 orderRouter.route('/:orderId').patch(updateOrderStatus);
 

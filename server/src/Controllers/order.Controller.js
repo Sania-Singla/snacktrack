@@ -423,10 +423,134 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
     return res.status(OK).json(availableItems);
 });
 
+const getStatistics = tryCatch('get statistics', async (req, res) => {
+    const { canteenId } = req.user;
+    const currentYear = new Date().getFullYear();
+
+    const monthlySales = await Order.aggregate([
+        {
+            $match: {
+                canteenId: new Types.ObjectId(canteenId),
+                createdAt: {
+                    $gte: new Date(`${currentYear}-01-01`),
+                    $lt: new Date(`${currentYear + 1}-01-01`),
+                },
+                status: 'PickedUp',
+            },
+        },
+        { $unwind: '$items' },
+        {
+            $lookup: {
+                from: 'snacks',
+                localField: 'items.itemId',
+                foreignField: '_id',
+                as: 'snackData',
+            },
+        },
+        {
+            $lookup: {
+                from: 'packagedfoods',
+                localField: 'items.itemId',
+                foreignField: '_id',
+                as: 'packagedFoodData',
+            },
+        },
+        {
+            $addFields: {
+                itemDetails: {
+                    $cond: [
+                        { $eq: ['$items.itemType', 'Snack'] },
+                        { $arrayElemAt: ['$snackData', 0] },
+                        { $arrayElemAt: ['$packagedFoodData', 0] },
+                    ],
+                },
+            },
+        },
+        {
+            $project: {
+                month: { $month: '$createdAt' },
+                itemId: '$items.itemId',
+                itemType: '$items.itemType',
+                itemName: {
+                    $cond: [
+                        { $eq: ['$items.itemType', 'Snack'] },
+                        '$itemDetails.name',
+                        '$itemDetails.category',
+                    ],
+                },
+                price: '$items.price',
+                quantity: '$items.quantity',
+                revenue: { $multiply: ['$items.price', '$items.quantity'] },
+            },
+        },
+        {
+            $group: {
+                _id: {
+                    month: '$month',
+                    itemId: '$itemId',
+                    itemType: '$itemType',
+                },
+                itemName: { $first: '$itemName' },
+                itemPrice: { $first: '$price' },
+                totalQuantity: { $sum: '$quantity' },
+                totalRevenue: { $sum: '$revenue' },
+            },
+        },
+        {
+            $group: {
+                _id: '$_id.month',
+                month: { $first: '$_id.month' },
+                monthlyTotal: { $sum: '$totalRevenue' },
+                items: {
+                    $push: {
+                        itemId: '$_id.itemId',
+                        itemType: '$_id.itemType',
+                        itemName: '$itemName',
+                        itemPrice: '$itemPrice',
+                        totalQuantity: '$totalQuantity',
+                        totalRevenue: '$totalRevenue',
+                    },
+                },
+            },
+        },
+        { $project: { _id: 0, month: 1, items: 1, monthlyTotal: 1 } },
+        { $sort: { month: 1 } },
+    ]);
+
+    const yearlyStats = {
+        totalRevenue: monthlySales.reduce(
+            (sum, month) => sum + month.monthlyTotal,
+            0
+        ),
+        totalItemsSold: monthlySales.reduce((sum, month) => {
+            return (
+                sum +
+                month.items.reduce(
+                    (itemSum, item) => itemSum + item.totalQuantity,
+                    0
+                )
+            );
+        }, 0),
+    };
+
+    // Then add average calculation
+    yearlyStats.averageMonthlyRevenue =
+        monthlySales.length > 0
+            ? yearlyStats.totalRevenue / monthlySales.length
+            : 0;
+
+    return res.status(200).json({
+        year: currentYear,
+        monthlySales,
+        yearlySummary: yearlyStats, // Use the pre-calculated object
+    });
+});
+
 export {
     getStudentOrders,
     getCanteenOrders,
     placeOrder,
     updateOrderStatus,
     checkAvailability,
+    getStatistics,
 };
