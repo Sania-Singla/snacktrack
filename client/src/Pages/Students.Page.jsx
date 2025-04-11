@@ -27,7 +27,7 @@ export default function StudentsPage() {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getStudents() {
+        (async function () {
             try {
                 setLoading(true);
                 const res = await contractorService.getStudents(

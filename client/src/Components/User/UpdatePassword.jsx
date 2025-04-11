@@ -21,7 +21,6 @@ export default function UpdatePassword() {
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const { user } = useUserContext();
 
     async function handleChange(e) {
         const { name, value } = e.target;
@@ -35,16 +34,22 @@ export default function UpdatePassword() {
         }
     }
 
-    async function onMouseOver() {
+    function handleDisable() {
         if (Object.values(inputs).some((value) => !value)) {
-            setDisabled(true);
-        } else {
-            setDisabled(false);
-        }
+            return true;
+        } else return false;
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         setError({});

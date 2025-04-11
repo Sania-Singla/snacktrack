@@ -1,20 +1,25 @@
 import { model, Schema } from 'mongoose';
 
-const emailVerificationSchema = new Schema({
-    email: {
-        type: String,
-        required: true,
+const emailVerificationSchema = new Schema(
+    {
+        email: {
+            type: String,
+            required: true,
+        },
+        code: {
+            type: String,
+            required: true,
+        },
+        expiresAt: {
+            type: Date,
+            default: new Date(Date.now() + 60 * 1000), // 60 seconds from now
+        },
     },
-    code: {
-        type: String,
-        required: true,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now(),
-        expires: 60, // Automatically deletes the document after 60 seconds (1 minute)
-    },
-});
+    { timestamps: true }
+);
+
+// TTL index (but it could lead to delay in deletion so needed explicit expiresAt field)
+emailVerificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 });
 
 export const EmailVerification = model(
     'EmailVerification',

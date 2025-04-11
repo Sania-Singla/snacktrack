@@ -21,8 +21,9 @@ export default function BillsPage() {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getBills() {
+        (async function () {
             try {
+                setLoading(true);
                 const res = await billService.getBills(page, LIMIT, signal);
                 if (res && !res.message) {
                     setBills((prev) => prev.concat(res.bills));

@@ -16,13 +16,16 @@ async function sendVerificationEmail(email) {
     return await EmailVerification.create({ email, code: randomCode });
 }
 
-async function verifyEmail(email, code, next) {
-    const record = await EmailVerification.findOne({ email, code });
+async function verifyEmail(email, code) {
+    const record = await EmailVerification.findOne({ email, code }).sort({
+        createdAt: -1,
+    });
 
-    if (!record) return false;
+    if (!record || record.expiresAt < new Date()) return false;
 
     // email verified, delete the record from the database
-    return await EmailVerification.deleteMany({ email });
+    await EmailVerification.deleteMany({ email });
+    return true;
 }
 
 export { sendVerificationEmail, verifyEmail };

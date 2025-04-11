@@ -53,7 +53,7 @@ export default function AddSnackPopup() {
         if (value && type !== 'file') verifyExpression(name, value, setError);
     };
 
-    function onMouseOver() {
+    function handleDisable() {
         if (
             Object.entries(inputs).some(
                 ([key, value]) => !value && key !== 'image'
@@ -62,12 +62,20 @@ export default function AddSnackPopup() {
                 ([key, value]) => value && key !== 'root'
             )
         ) {
-            setDisabled(true);
-        } else setDisabled(false);
+            return true;
+        } else return false;
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         setError({});

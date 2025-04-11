@@ -16,6 +16,10 @@ export default function RemoveStudentPopup() {
     const [disabled, setDisabled] = useState(false);
 
     async function removeStudent() {
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         try {
@@ -39,8 +43,12 @@ export default function RemoveStudentPopup() {
         }
     }
 
+    function handleDisable() {
+        return !check;
+    }
+
     function onMouseOver() {
-        setDisabled(!check);
+        setDisabled(handleDisable());
     }
 
     return (

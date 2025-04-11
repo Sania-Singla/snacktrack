@@ -21,7 +21,7 @@ export default function PendingOrders({ filter }) {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getOrders() {
+        (async function () {
             try {
                 setLoading(true);
                 const res = await orderService.getCanteenOrders(

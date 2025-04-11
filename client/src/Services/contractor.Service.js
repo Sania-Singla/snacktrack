@@ -81,6 +81,30 @@ class ContractorService {
         }
     }
 
+    async resendEmailVerification(email) {
+        try {
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/resend-code`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                }
+            );
+
+            const data = await res.json();
+            console.log(data);
+
+            if (res.status === SERVER_ERROR) {
+                throw new Error(data.message);
+            }
+            return data;
+        } catch (err) {
+            console.error('error in resendEmailVerification service', err);
+            throw err;
+        }
+    }
+
     async updateAccountDetails({ email, phoneNumber, fullName, password }) {
         try {
             const res = await fetch(`${BASE_BACKEND_URL}/contractors/account`, {

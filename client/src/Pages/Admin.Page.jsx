@@ -15,7 +15,7 @@ export default function AdminPage() {
     const [showKey, setShowKey] = useState(false);
 
     useEffect(() => {
-        (async function getCanteens() {
+        (async function () {
             try {
                 const res = await userService.getContractors();
                 if (res) {

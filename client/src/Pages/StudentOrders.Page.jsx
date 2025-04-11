@@ -37,7 +37,7 @@ export default function StudentOrdersPage() {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getOrders() {
+        (async function () {
             try {
                 setLoading(true);
                 const data = await orderService.getStudentOrders(

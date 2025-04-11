@@ -69,7 +69,7 @@ export default function AddItemPopup() {
         if (value) verifyExpression(name, value, setError);
     };
 
-    function onMouseOver() {
+    function handleDisable() {
         if (
             Object.values(inputs).some((value) => !value) ||
             variants.some(
@@ -80,12 +80,20 @@ export default function AddItemPopup() {
             ) ||
             Object.values(variantErrors).some((error) => error)
         ) {
-            setDisabled(true);
-        } else setDisabled(false);
+            return true;
+        } else return false;
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         if (!variants.length) {
             toast.error('At least one variant is required.');
             return;

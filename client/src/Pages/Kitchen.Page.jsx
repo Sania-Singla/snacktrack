@@ -26,7 +26,7 @@ export default function KitchenPage() {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getOrders() {
+        (async function () {
             try {
                 const res = await userService.getOrders();
                 if (res) {

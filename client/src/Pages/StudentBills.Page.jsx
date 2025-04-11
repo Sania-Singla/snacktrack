@@ -17,8 +17,9 @@ export default function StudentBillsPage() {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getBills() {
+        (async function () {
             try {
+                setLoading(true);
                 const res = await billService.getStudentBills(
                     studentId,
                     signal

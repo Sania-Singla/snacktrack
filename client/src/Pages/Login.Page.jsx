@@ -31,22 +31,26 @@ export default function LoginPage() {
         setInputs((prev) => ({ ...prev, [name]: value }));
     }
 
-    function onMouseOver() {
+    function handleDisable() {
         if (
             !inputs.loginInput ||
             !inputs.password ||
             !role ||
             (role === 'student' && !hostel)
         ) {
-            setDisabled(true);
-        } else setDisabled(false);
+            return true;
+        } else return false;
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
     }
 
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getCanteens() {
+        (async function () {
             try {
                 const res = await userService.getCanteens(signal);
                 if (res && !res.message) {
@@ -74,6 +78,10 @@ export default function LoginPage() {
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         try {

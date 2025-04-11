@@ -18,13 +18,13 @@ export default function HomePage() {
     ];
 
     useEffect(() => {
-        setLoading(true);
-
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function getSnacks() {
+        (async function () {
             try {
+                setLoading(true);
+
                 const [snacks, items, cartItems] = await Promise.all([
                     snackService.getSnacks(signal),
                     snackService.getPackagedFoodItems(signal),

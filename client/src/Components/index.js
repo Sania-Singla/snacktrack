@@ -7,7 +7,7 @@ import Filter from './General/Filter';
 import Dropdown from './General/Dropdown';
 import Button from './General/Button';
 import InputField from './General/InputField';
-import ContributorCard from './General/ContributorCard';
+import ContributorCard from './Views/ContributorCard';
 import Popup from './Popups/Popup';
 import Logout from './User/Logout';
 import UpdateAccountDetails from './User/UpdateAccountDetails';

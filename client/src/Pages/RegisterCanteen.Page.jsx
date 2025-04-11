@@ -39,7 +39,7 @@ export default function RegisterCanteenPage() {
     };
 
     useEffect(() => {
-        (async function getHostels() {
+        (async function () {
             try {
                 const res = await userService.getCanteens();
                 if (res)
@@ -56,7 +56,7 @@ export default function RegisterCanteenPage() {
         })();
     }, []);
 
-    function onMouseOver() {
+    function handleDisable() {
         if (
             Object.values(inputs).some((value) => !value) ||
             !hostel ||
@@ -64,12 +64,20 @@ export default function RegisterCanteenPage() {
                 ([key, value]) => value && key !== 'root'
             )
         ) {
-            setDisabled(true);
-        } else setDisabled(false);
+            return true;
+        } else return false;
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         setError({});

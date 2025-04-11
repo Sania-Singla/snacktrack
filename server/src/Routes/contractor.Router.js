@@ -6,6 +6,7 @@ import {
     getStudents,
     register,
     completeRegistration,
+    resendVerificationCode,
     updateAccountDetails,
     registerStudent,
     removeAllStudents,
@@ -23,6 +24,8 @@ import {
 contractorRouter.route('/register').post(register);
 
 contractorRouter.route('/complete-registeration').post(completeRegistration);
+
+contractorRouter.route('/resend-code').post(resendVerificationCode);
 
 contractorRouter.use(verifyJwt);
 

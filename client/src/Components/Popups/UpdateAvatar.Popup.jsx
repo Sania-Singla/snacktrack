@@ -41,13 +41,21 @@ export default function UpdateAvatarPopup() {
         }
     }
 
+    function handleDisable() {
+        if (error || !avatar) return true;
+        else return false;
+    }
+
     function onMouseOver() {
-        if (error || !avatar) setDisabled(true);
-        else setDisabled(false);
+        setDisabled(handleDisable());
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         try {

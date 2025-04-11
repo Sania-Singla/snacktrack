@@ -47,7 +47,7 @@ const register = tryCatch('register as contractor', async (req, res, next) => {
 
     req.body.kitchenKey =
         hostel.hostelType + hostel.hostelNumber + kitchenKey.trim();
-    console.log(fullName, email, phoneNumber, password, hostel, kitchenKey);
+
     const isValid = [
         'fullName',
         'email',
@@ -148,6 +148,18 @@ const completeRegistration = tryCatch(
         await canteen.save();
 
         return res.status(CREATED).json(contractor);
+    }
+);
+
+const resendVerificationCode = tryCatch(
+    'resend verification code',
+    async (req, res, next) => {
+        const { email } = req.body;
+
+        // Send email verification
+        await sendVerificationEmail(email.trim());
+
+        return res.status(OK).json({ message: 'Verification code resent' });
     }
 );
 
@@ -652,6 +664,7 @@ const updateItemDetails = tryCatch(
 export {
     register,
     completeRegistration,
+    resendVerificationCode,
     updateAccountDetails,
     getStudents,
     registerStudent,

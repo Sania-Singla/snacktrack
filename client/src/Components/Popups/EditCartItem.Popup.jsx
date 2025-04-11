@@ -11,6 +11,19 @@ export default function EditCartItem() {
     const [input, setInput] = useState(item.specialInstructions || '');
     const [pack, setPack] = useState(item.isPacked || false);
 
+    function handleEdit() {
+        const updatedCartItems = cartItems.map((i) => {
+            if (i._id === item._id) {
+                if (i.type === 'Snack' || i.price === item.price) {
+                    return { ...i, specialInstructions: input, isPacked: pack };
+                }
+            } else return i;
+        });
+        setCartItems(updatedCartItems);
+        localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
+        setShowPopup(false);
+    }
+
     return (
         <div className="overflow-hidden relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl text-black p-5 flex flex-col items-center justify-center gap-3">
             <Button
@@ -66,28 +79,7 @@ export default function EditCartItem() {
                 <Button
                     className="bg-[#4977ec] text-white w-full px-4 py-2 rounded-md"
                     btnText="Save Changes"
-                    onClick={() => {
-                        const updatedCartItems = cartItems.map((i) => {
-                            if (i._id === item._id) {
-                                if (
-                                    i.type === 'Snack' ||
-                                    i.price === item.price
-                                ) {
-                                    return {
-                                        ...i,
-                                        specialInstructions: input,
-                                        isPacked: pack,
-                                    };
-                                }
-                            } else return i;
-                        });
-                        setCartItems(updatedCartItems);
-                        localStorage.setItem(
-                            'cartItems',
-                            JSON.stringify(updatedCartItems)
-                        );
-                        setShowPopup(false);
-                    }}
+                    onClick={handleEdit}
                 />
             </div>
         </div>

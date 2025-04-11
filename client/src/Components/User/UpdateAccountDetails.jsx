@@ -34,7 +34,7 @@ export default function UpdateAccountDetails() {
         }
     }
 
-    function onMouseOver() {
+    function handleDisable() {
         if (
             Object.values(inputs).some((value) => !value) ||
             Object.entries(error).some(
@@ -45,14 +45,22 @@ export default function UpdateAccountDetails() {
                     value !== initialInputs[key] && key !== 'password'
             )
         ) {
-            setDisabled(true);
+            return true;
         } else {
-            setDisabled(false);
+            return false;
         }
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
+        if (!handleDisable()) {
+            toast.error('Please fill all fields correctly');
+            return;
+        }
         setLoading(true);
         setDisabled(true);
         setError({});
