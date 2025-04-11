@@ -21,8 +21,17 @@ export default function RemoveAllStudentsPopup() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
+    function handleDisable() {
+        if (!check || !password) return true;
+        else return false;
+    }
+
+    function onMouseOver() {
+        setDisabled(handleDisable());
+    }
+
     async function removeStudents() {
-        if (!handleDisable()) {
+        if (handleDisable()) {
             toast.error('Please fill all fields correctly');
             return;
         }
@@ -41,15 +50,6 @@ export default function RemoveAllStudentsPopup() {
             setLoading(false);
             setShowPopup(false);
         }
-    }
-
-    function handleDisable() {
-        if (!check || !password) return true;
-        else return false;
-    }
-
-    function onMouseOver() {
-        setDisabled(handleDisable());
     }
 
     return (

@@ -15,6 +15,7 @@ import {
 import { Canteen, Student, Contractor, Order } from '../Models/index.js';
 import bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
+import { sendMail } from '../mailer.js';
 
 const login = tryCatch('login as contractor', async (req, res, next) => {
     const { loginInput, password, role } = req.body;
@@ -269,6 +270,29 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
     return res.status(OK).json({ canteenId: canteen._id, orders });
 });
 
+const sendQuery = tryCatch('send query to admin', async (req, res, next) => {
+    const { subject, message } = req.body;
+    const { email, fullName, phoneNumber } = req.user;
+
+    if (!subject || !message) {
+        return next(new ErrorHandler('missing fields', BAD_REQUEST));
+    }
+
+    await sendMail({
+        from: email,
+        to: process.env.ADMIN_EMAIL,
+        subject,
+        html: `
+                <p><b>Subject:</b> ${subject}</p>
+                <p><b>Message:</b> ${message}</p>
+                <p><b>From:</b> ${fullName}</p>
+                <p><b>Phone Number:</b> ${phoneNumber}</p>
+            `,
+    });
+
+    return res.status(OK).json({ message: 'query sent successfully' });
+});
+
 export {
     getCurrentUser,
     login,
@@ -278,4 +302,5 @@ export {
     updateAvatar,
     getCanteens,
     getKitchenOrders,
+    sendQuery,
 };

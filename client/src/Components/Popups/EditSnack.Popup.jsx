@@ -69,7 +69,7 @@ export default function EditSnackPopup() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        if (!handleDisable()) {
+        if (handleDisable()) {
             toast.error('Please fill all fields correctly');
             return;
         }

@@ -1,12 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { icons } from '../../Assets/icons';
 import { Button } from '..';
 import { useState } from 'react';
 import { CONTRIBUTORS, LOGO } from '../../Constants/constants';
 import toast from 'react-hot-toast';
+import { userService } from '../../Services';
 
 export default function Footer() {
-    const [feedback, setFeedback] = useState({ content: '', email: '' });
+    const [inputs, setInputs] = useState({ subject: '', message: '' });
+    const [sending, setSending] = useState(false);
+    const navigate = useNavigate();
 
     // Social media icons
     const socialElements = Object.entries(CONTRIBUTORS[0].socials).map(
@@ -18,6 +21,27 @@ export default function Footer() {
             </Link>
         )
     );
+
+    function handleChange(e) {
+        const { name, value } = e.target;
+        setInputs((prev) => ({ ...prev, [name]: value }));
+    }
+
+    async function submitQuery(e) {
+        e.preventDefault();
+        setSending(true);
+        try {
+            const res = await userService.sendQuery(inputs);
+            if (res && res.message === 'query sent successfully') {
+                setInputs({ message: '', subject: '' });
+                toast.success('Query Submitted Successfully 🤗');
+            } else toast.error('Error in submitting query');
+        } catch (err) {
+            navigate('/server-error');
+        } finally {
+            setSending(false);
+        }
+    }
 
     // Footer links
     const links = [
@@ -37,18 +61,6 @@ export default function Footer() {
             </Link>
         </p>
     ));
-
-    function handleChange() {
-        const { name, value } = e.target;
-        setFeedback((prev) => ({ ...prev, [name]: value }));
-    }
-
-    // Submit feedback
-    function submitFeedback(e) {
-        e.preventDefault();
-        setFeedback('');
-        toast.success('Feedback Submitted Successfully 🤗');
-    }
 
     return (
         <footer className="p-6 bg-[#f9f9f9]">
@@ -84,7 +96,7 @@ export default function Footer() {
 
                 {/* Feedback Form */}
                 <form
-                    onSubmit={submitFeedback}
+                    onSubmit={submitQuery}
                     className="flex flex-col gap-4 max-w-[350px] w-full"
                 >
                     <p className="text-black text-center font-semibold text-[18px] underline underline-offset-2">
@@ -95,24 +107,38 @@ export default function Footer() {
                             <input
                                 type="text"
                                 placeholder="Your Feedback..."
-                                value={feedback.content}
+                                value={inputs.message}
                                 onChange={handleChange}
+                                name="message"
+                                required
                                 className="flex-1 bg-white shadow-sm border border-gray-300 rounded-lg px-3 h-[32px] text-sm focus:border-[#4977ec] focus:outline-none"
                             />
                         </div>
                         <div>
                             <input
-                                type="email"
-                                placeholder="Your Email"
-                                value={feedback.email}
+                                type="subject"
+                                placeholder="Your Query Subject..."
+                                value={inputs.subject}
                                 onChange={handleChange}
+                                name="subject"
+                                required
                                 className="flex-1 bg-white shadow-sm border border-gray-300 rounded-lg px-3 h-[32px] text-sm focus:border-[#4977ec] focus:outline-none"
                             />
                         </div>
                         <Button
-                            btnText="Submit"
+                            btnText={
+                                sending ? (
+                                    <div className="w-full flex items-center justify-center">
+                                        <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                            {icons.loading}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    'Submit'
+                                )
+                            }
                             type="submit"
-                            className="bg-[#4977ec] hover:bg-[#3b62c2] text-white px-3 w-fit h-[32px] rounded-md transition-colors duration-300"
+                            className="bg-[#4977ec] hover:bg-[#3b62c2] text-white w-[80px] h-[32px] rounded-md transition-colors duration-300"
                         />
                     </div>
                 </form>

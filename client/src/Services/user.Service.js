@@ -181,14 +181,13 @@ class UserService {
         }
     }
 
-    // TODO: NEED TO CREATE BACKEND FUNCTIONALITY
-    async resendEmailVerification(email) {
+    async sendQuery({ subject, message }) {
         try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/resend-mail`, {
+            const res = await fetch(`${BASE_BACKEND_URL}/users/query`, {
                 method: 'POST',
-                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ subject, message }),
+                credentials: 'include',
             });
 
             const data = await res.json();
@@ -199,7 +198,7 @@ class UserService {
             }
             return data;
         } catch (err) {
-            console.error('error in resendVerificationEmail service', err);
+            console.error('error in sendQuery service', err);
             throw err;
         }
     }

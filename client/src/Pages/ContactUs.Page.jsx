@@ -1,22 +1,35 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../Components';
 import { useState } from 'react';
 import { icons } from '../Assets/icons';
 import { EMAIL, CONTACTNUMBER } from '../Constants/constants';
 import toast from 'react-hot-toast';
+import { userService } from '../Services';
 
 export default function ContactUsPage() {
-    const [inputs, setInputs] = useState({ email: '', feedback: '' });
+    const [inputs, setInputs] = useState({ subject: '', message: '' });
+    const [sending, setSending] = useState(false);
+    const navigate = useNavigate();
 
     function handleChange(e) {
         const { name, value } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
     }
 
-    function submitFeedback(e) {
+    async function submitQuery(e) {
         e.preventDefault();
-        setInputs({ feedback: '', email: '' });
-        toast.success('Feedback Submitted Successfully 🤗');
+        setSending(true);
+        try {
+            const res = await userService.sendQuery(inputs);
+            if (res && res.message === 'query sent successfully') {
+                setInputs({ message: '', subject: '' });
+                toast.success('Query Submitted Successfully 🤗');
+            } else toast.error('Error in submitting query');
+        } catch (err) {
+            navigate('/server-error');
+        } finally {
+            setSending(false);
+        }
     }
 
     function copyEmail() {
@@ -124,7 +137,7 @@ export default function ContactUsPage() {
                 <div>
                     <div className="bg-white shadow-md p-6 rounded-xl">
                         <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                            🌟 Feedback & Suggestions
+                            🌟 Feedback & Queries
                         </h2>
                         <p className="text-gray-700">
                             Have ideas on how we can improve? We'd love to hear
@@ -141,45 +154,44 @@ export default function ContactUsPage() {
 
                     {/* Feedback Form */}
                     <form
-                        onSubmit={submitFeedback}
+                        onSubmit={submitQuery}
                         className="mt-6 bg-white px-6 py-5 pt-2 rounded-xl shadow-md"
                     >
-                        {/* Email Input */}
+                        {/* Subject Input */}
                         <div className="mb-1">
                             <div className="bg-white z-[1] ml-2 px-2 w-fit relative top-3 font-medium">
-                                <label htmlFor="email">
+                                <label htmlFor="subject">
                                     <span className="text-red-500">*</span>{' '}
-                                    Email
+                                    Subject
                                 </label>
                             </div>
                             <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={inputs.email}
+                                type="subject"
+                                id="subject"
+                                name="subject"
+                                value={inputs.subject}
                                 onChange={handleChange}
-                                placeholder="Enter your email"
+                                placeholder="Enter query subject"
                                 className="shadow-md py-3 rounded-md indent-3 w-full border-[0.01rem] border-gray-500 bg-transparent"
                                 required
                             />
                             <p className="text-sm text-gray-500 mt-1">
-                                This email will be sent along with your
-                                feedback.
+                                Your email will be sent along with the query.
                             </p>
                         </div>
 
-                        {/* Feedback Input */}
+                        {/* Message Input */}
                         <div className="mb-4">
                             <div className="bg-white z-[1] ml-2 px-2 w-fit relative top-3 font-medium">
-                                <label htmlFor="feedback">
+                                <label htmlFor="message">
                                     <span className="text-red-500">*</span>{' '}
-                                    Feedback / Suggestion
+                                    Query / Feedback
                                 </label>
                             </div>
                             <textarea
-                                name="feedback"
-                                id="feedback"
-                                value={inputs.feedback}
+                                name="message"
+                                id="message"
+                                value={inputs.message}
                                 onChange={handleChange}
                                 placeholder="Let us know how we're doing!"
                                 className="shadow-md py-3 rounded-md indent-3 w-full border-[0.01rem] border-gray-500 bg-transparent"
@@ -189,9 +201,20 @@ export default function ContactUsPage() {
                         </div>
 
                         <Button
-                            btnText="Submit"
+                            btnText={
+                                sending ? (
+                                    <div className="w-full flex items-center justify-center">
+                                        <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                            {icons.loading}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    'Submit'
+                                )
+                            }
                             type="submit"
-                            className="w-full bg-[#4977ec] hover:bg-[#3b62c2] text-white py-2 rounded-md"
+                            disabled={sending}
+                            className="w-full bg-[#4977ec] hover:bg-[#3b62c2] text-white h-[40px] rounded-md"
                         />
                     </form>
                 </div>

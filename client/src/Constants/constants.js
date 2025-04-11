@@ -6,8 +6,9 @@ import AUDIO_FILE from '../Assets/audios/notification.wav';
 
 const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api';
 const LIMIT = 10;
-const EMAIL = 'snacktrack@gmail.com';
-const CONTACTNUMBER = 'xxxxxxxxxx';
+const DISCORD_LINK = import.meta.env.VITE_DISCORD_LINK;
+const EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+const CONTACTNUMBER = import.meta.env.VITE_ADMIN_CONTACT_NUMBER;
 const MAX_FILE_SIZE = 5;
 const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 const SERVER_ERROR = 500;
@@ -47,4 +48,5 @@ export {
     SERVER_ERROR,
     BAD_REQUEST,
     TAX,
+    DISCORD_LINK,
 };

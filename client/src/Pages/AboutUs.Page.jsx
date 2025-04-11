@@ -1,4 +1,4 @@
-import { CONTRIBUTORS } from '../Constants/constants';
+import { CONTRIBUTORS, DISCORD_LINK } from '../Constants/constants';
 import { Link } from 'react-router-dom';
 
 function FeatureCard({ title, description }) {
@@ -160,7 +160,7 @@ export default function AboutUsPage() {
                     For inquiries or assistance, reach out to our support team
                     via{' '}
                     <Link
-                        to="https://discord.gg/example"
+                        to={DISCORD_LINK}
                         target="_blank"
                         className="text-blue-500 font-medium hover:underline"
                     >

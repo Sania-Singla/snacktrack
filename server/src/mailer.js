@@ -7,8 +7,8 @@ async function generateTransporter() {
             service: 'gmail',
             secure: true,
             auth: {
-                user: process.env.MAIL_SENDER_EMAIL,
-                pass: process.env.MAIL_SENDER_PASSWORD,
+                user: process.env.ADMIN_EMAIL,
+                pass: process.env.ADMIN_EMAIL_PASSWORD,
             },
         });
 
@@ -22,21 +22,38 @@ async function generateTransporter() {
 }
 
 async function sendMail({
+    from = '',
     to = '',
     subject = 'No particular subject', // to avoid spam mails
     text = '',
     html = '',
+    replyTo = '',
 }) {
     if (!transporter) throw new Error('❌ Transporter not initialized.');
 
     try {
-        return await transporter.sendMail({
-            from: `Snack Track <${process.env.MAIL_SENDER_EMAIL}>`,
+        const mailOptions = {
+            from: from
+                ? `${from} <${process.env.ADMIN_EMAIL}>`
+                : `Snack Track <${process.env.ADMIN_EMAIL}>`,
             to,
             subject,
             text,
             html,
-        });
+            replyTo: replyTo || from || process.env.ADMIN_EMAIL,
+        };
+
+        // Headers to allow custom from address
+        mailOptions.headers = {
+            'X-Entity-Ref-ID': new Date().getTime().toString(),
+            ...(from && {
+                From: from,
+                Sender: process.env.ADMIN_EMAIL,
+                'Reply-To': replyTo || from,
+            }),
+        };
+
+        return await transporter.sendMail(mailOptions);
     } catch (err) {
         throw new Error(`❌ Error sending mail: ${err.message}`);
     }

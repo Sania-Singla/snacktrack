@@ -16,11 +16,7 @@ export default function AddSnackPopup() {
     const { setShowPopup } = usePopupContext();
     const ref = useRef();
     const [imagePreview, setImagePreview] = useState(SNACK_PLACEHOLDER_IMAGE);
-    const [inputs, setInputs] = useState({
-        name: '',
-        price: 0,
-        image: null,
-    });
+    const [inputs, setInputs] = useState({ name: '', price: 0, image: null });
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -72,7 +68,7 @@ export default function AddSnackPopup() {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        if (!handleDisable()) {
+        if (handleDisable()) {
             toast.error('Please fill all fields correctly');
             return;
         }
