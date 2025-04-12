@@ -31,7 +31,12 @@ import {
     RegisterCanteenPage,
 } from './Pages';
 
-import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
+import {
+    UpdateAccountDetails,
+    UpdatePassword,
+    UpdateKitchenKey,
+    Layout,
+} from './Components';
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -43,6 +48,10 @@ export const router = createBrowserRouter(
                     <Route path="settings" element={<SettingsPage />}>
                         <Route path="" element={<UpdateAccountDetails />} />
                         <Route path="password" element={<UpdatePassword />} />
+                        <Route
+                            path="kitchen-key"
+                            element={<UpdateKitchenKey />}
+                        />
                     </Route>
                     <Route
                         path="orders/:studentId"

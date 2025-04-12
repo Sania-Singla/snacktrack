@@ -75,12 +75,12 @@ const verifyStaffKeyJwt = async (req, res, next) => {
             if (!key) {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
-            const [hostel] = key.split('-');
+            const [hostel, actualKey] = key.split('-');
             const hostelType = hostel.slice(0, 2);
             const hostelNumber = Number(hostel.slice(2));
 
             const canteen = await Canteen.findOne({ hostelType, hostelNumber });
-            const isValid = bcrypt.compareSync(key, canteen.kitchenKey);
+            const isValid = bcrypt.compareSync(actualKey, canteen.kitchenKey);
             if (!isValid) {
                 return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
             }

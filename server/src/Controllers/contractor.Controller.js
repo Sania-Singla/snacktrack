@@ -213,6 +213,35 @@ const updateAccountDetails = tryCatch(
     }
 );
 
+const updateKitchenKey = tryCatch(
+    'update kitchen key',
+    async (req, res, next) => {
+        const { password, newKey } = req.body;
+
+        const isPassValid = bcrypt.compareSync(password, req.user.password);
+        if (!isPassValid) {
+            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
+        }
+
+        const canteen = await Canteen.findById(req.user.canteenId);
+        const key = canteen.hostelType + canteen.hostelNumber + newKey.trim();
+
+        const isValid = verifyExpression('kitchenKey', key);
+        if (!isValid) {
+            return next(new ErrorHandler('invalid kitchen key', BAD_REQUEST));
+        }
+
+        // hash new key
+        const hashedNewKey = bcrypt.hashSync(newKey, 10);
+
+        await Canteen.findByIdAndUpdate(req.user.canteenId, {
+            $set: { kitchenKey: hashedNewKey },
+        });
+
+        return res.status(OK).json({ message: 'key updated successfully' });
+    }
+);
+
 // student management tasks
 
 const getStudents = tryCatch('get students', async (req, res) => {
@@ -668,6 +697,7 @@ export {
     updateAccountDetails,
     getStudents,
     registerStudent,
+    updateKitchenKey,
     removeAllStudents,
     removeStudent,
     updateStudentAccountDetails,

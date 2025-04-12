@@ -5,18 +5,27 @@ import { useState } from 'react';
 import { CONTRIBUTORS, LOGO } from '../../Constants/constants';
 import toast from 'react-hot-toast';
 import { userService } from '../../Services';
+import { useUserContext } from '../../Contexts';
 
 export default function Footer() {
     const [inputs, setInputs] = useState({ subject: '', message: '' });
     const [sending, setSending] = useState(false);
     const navigate = useNavigate();
+    const { user } = useUserContext();
 
-    // Social media icons
+    // Enhanced social icons with hover effects
     const socialElements = Object.entries(CONTRIBUTORS[0].socials).map(
         ([platform, url]) => (
-            <Link key={platform} to={url} target="_blank">
-                <div className="bg-white p-[6px] rounded-full drop-shadow-sm hover:bg-[#d4d4d4] transition-colors duration-300 w-fit">
-                    <div className="size-[18px]">{icons[platform]}</div>
+            <Link
+                key={platform}
+                to={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Visit our ${platform} page`}
+                className="bg-white p-[5px] rounded-full shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[#4977ec] hover:text-white group"
+            >
+                <div className="size-4 text-gray-600 group-hover:text-white">
+                    {icons[platform]}
                 </div>
             </Link>
         )
@@ -32,10 +41,12 @@ export default function Footer() {
         setSending(true);
         try {
             const res = await userService.sendQuery(inputs);
-            if (res && res.message === 'query sent successfully') {
+            if (res?.message === 'query sent successfully') {
                 setInputs({ message: '', subject: '' });
-                toast.success('Query Submitted Successfully 🤗');
-            } else toast.error('Error in submitting query');
+                toast.success('Thank you for your feedback!');
+            } else {
+                toast.error('Failed to submit. Please try again.');
+            }
         } catch (err) {
             navigate('/server-error');
         } finally {
@@ -43,116 +54,135 @@ export default function Footer() {
         }
     }
 
-    // Footer links
-    const links = [
-        { path: '/', name: 'Home' },
-        { path: '/support', name: 'Support' },
-        { path: '/about-us', name: 'About Us' },
-        { path: '/contact-us', name: 'Contact Us' },
+    // Organized footer links
+    const footerLinks = [
+        {
+            title: 'Navigation',
+            links: [
+                { path: '/', name: 'Home' },
+                { path: `/bills/${user._id}`, name: 'Bills' },
+                { path: `/orders/${user._id}`, name: 'My Orders' },
+            ],
+        },
+        {
+            title: 'Company',
+            links: [
+                { path: '/about-us', name: 'About Us' },
+                { path: '/contact-us', name: 'Contact Us' },
+                { path: '/support', name: 'Support' },
+                { path: '/faqs', name: 'FAQs' },
+            ],
+        },
     ];
 
-    const linkElements = links.map((link) => (
-        <p key={link.name} className="text-center">
-            <Link
-                to={link.path}
-                className="hover:text-[#4977ec] text-[15px] hover:underline transition-colors duration-300"
-            >
-                {link.name}
-            </Link>
-        </p>
+    const footerLinkElements = footerLinks.map((section) => (
+        <div key={section.title} className="space-y-2">
+            <h3 className="text-gray-800 font-semibold underline underline-offset-2 text-sm uppercase tracking-wider">
+                {section.title}
+            </h3>
+            <ul className="space-y-[5px]">
+                {section.links.map((link) => (
+                    <li key={link.name}>
+                        <Link
+                            to={link.path}
+                            className="text-gray-600 hover:text-[#4977ec] text-sm hover:underline hover:underline-offset-4"
+                        >
+                            {link.name}
+                        </Link>
+                    </li>
+                ))}
+            </ul>
+        </div>
     ));
 
     return (
-        <footer className="p-6 bg-[#f9f9f9]">
-            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:gap-12">
-                {/* Logo and Tagline */}
-                <div className="flex flex-col gap-4">
-                    <Link to="/" className="flex items-center gap-3">
-                        <div className="size-[50px] rounded-full overflow-hidden drop-shadow-sm">
+        <footer className="bg-[#f5f5f5] border-t border-gray-200 w-full">
+            <div className="max-w-7xl mx-auto py-6 px-8 flex flex-col lg:flex-row gap-8 justify-between">
+                {/* Brand Column */}
+                <div className="space-y-4 w-full lg:w-[40%]">
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="w-12 h-12 rounded-full overflow-hidden shadow-md group-hover:shadow-lg transition duration-300">
                             <img
                                 src={LOGO}
                                 alt="Snack Track Logo"
-                                className="object-cover size-full"
+                                className="w-full h-full object-cover"
                             />
                         </div>
-                        <div className="text-black font-semibold text-xl">
+                        <h2 className="text-xl font-bold text-gray-800 group-hover:text-[#4977ec] transition duration-300">
                             Snack Track
-                        </div>
+                        </h2>
                     </Link>
-                    <p className="text-gray-600 text-sm max-w-[250px]">
-                        Generalized, Transparent & Secure.
+                    <p className="text-gray-600 text-sm max-w-xs">
+                        Your campus food companion. Fast, reliable, and
+                        delicious.
                     </p>
                 </div>
 
-                {/* Quick Links */}
-                <div className="flex flex-col gap-4">
-                    <p className="text-center text-black font-semibold text-[18px] underline underline-offset-2">
-                        Quick Links
-                    </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {linkElements}
+                <div className="flex flex-row justify-between gap-8 w-full pt-[10px]">
+                    {/* Footer Links Columns */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full">
+                        {footerLinkElements}
                     </div>
-                </div>
 
-                {/* Feedback Form */}
-                <form
-                    onSubmit={submitQuery}
-                    className="flex flex-col gap-4 max-w-[350px] w-full"
-                >
-                    <p className="text-black text-center font-semibold text-[18px] underline underline-offset-2">
-                        Provide Feedback
-                    </p>
-                    <div className="flex flex-col items-center w-full gap-2">
-                        <div>
-                            <input
-                                type="text"
-                                placeholder="Your Feedback..."
-                                value={inputs.message}
-                                onChange={handleChange}
-                                name="message"
-                                required
-                                className="flex-1 bg-white shadow-sm border border-gray-300 rounded-lg px-3 h-[32px] text-sm focus:border-[#4977ec] focus:outline-none"
-                            />
-                        </div>
-                        <div>
-                            <input
-                                type="subject"
-                                placeholder="Your Query Subject..."
-                                value={inputs.subject}
-                                onChange={handleChange}
-                                name="subject"
-                                required
-                                className="flex-1 bg-white shadow-sm border border-gray-300 rounded-lg px-3 h-[32px] text-sm focus:border-[#4977ec] focus:outline-none"
-                            />
-                        </div>
-                        <Button
-                            btnText={
-                                sending ? (
-                                    <div className="w-full flex items-center justify-center">
-                                        <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                            {icons.loading}
+                    {/* Contact Form Column */}
+                    <div className="space-y-3 w-full">
+                        <h3 className="text-gray-800 underline underline-offset-2 font-semibold text-sm uppercase tracking-wider">
+                            Get In Touch
+                        </h3>
+                        <form
+                            onSubmit={submitQuery}
+                            className="space-y-3 w-full"
+                        >
+                            <div>
+                                <input
+                                    type="text"
+                                    name="subject"
+                                    value={inputs.subject}
+                                    onChange={handleChange}
+                                    required
+                                    placeholder="Subject"
+                                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-transparent"
+                                />
+                            </div>
+                            <div>
+                                <textarea
+                                    name="message"
+                                    value={inputs.message}
+                                    onChange={handleChange}
+                                    required
+                                    rows={3}
+                                    placeholder="Your message..."
+                                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-transparent"
+                                />
+                            </div>
+                            <Button
+                                type="submit"
+                                disabled={sending}
+                                className="w-full bg-[#4977ec] hover:bg-[#3a5fc8] text-white py-2 px-4 rounded-lg text-sm font-medium"
+                                btnText={
+                                    sending ? (
+                                        <div className="flex items-center justify-center">
+                                            <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                                {icons.loading}
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    'Submit'
-                                )
-                            }
-                            type="submit"
-                            className="bg-[#4977ec] hover:bg-[#3b62c2] text-white w-[80px] h-[32px] rounded-md transition-colors duration-300"
-                        />
+                                    ) : (
+                                        'Send Message'
+                                    )
+                                }
+                            />
+                        </form>
                     </div>
-                </form>
+                </div>
             </div>
 
-            {/* Divider */}
-            <hr className="my-6 border-gray-300" />
-
-            {/* Copyright and Social Links */}
-            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-gray-600 text-sm text-center">
-                    &copy; 2024 Snack Track. All rights reserved.
+            {/* Bottom Bar */}
+            <div className="px-6 mx-2 border-t py-3 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-gray-500 text-xs sm:text-sm">
+                    &copy; {new Date().getFullYear()} Snack Track. All rights
+                    reserved.
                 </p>
-                <div className="flex items-center gap-4">{socialElements}</div>
+                <div className="flex gap-3">{socialElements}</div>
             </div>
         </footer>
     );

@@ -8,26 +8,34 @@ export default function SettingsPage() {
     const { setShowPopup, setPopupInfo } = usePopupContext();
 
     const tabOptions = [
-        { name: 'Personal Information', path: '' },
-        { name: 'Change Password', path: 'password' },
+        { name: 'Personal Information', path: '', show: true },
+        { name: 'Change Password', path: 'password', show: true },
+        {
+            name: 'Change Kitchen Key',
+            path: 'kitchen-key',
+            show: user.role === 'contractor',
+        },
     ];
 
-    const tabElements = tabOptions.map((option) => (
-        <NavLink
-            end
-            key={option.name}
-            to={option.path}
-            className={({ isActive }) =>
-                `${isActive ? 'border-b-[#4977ec] bg-[#4977ec] text-white' : 'border-b-black bg-white text-black'} text-ellipsis drop-shadow-sm hover:backdrop-brightness-90 rounded-t-md p-[3px] border-b-[0.1rem] w-full text-center text-lg font-medium`
-            }
-        >
-            <div>{option.name}</div>
-        </NavLink>
-    ));
+    const tabElements = tabOptions.map(
+        (option) =>
+            option.show && (
+                <NavLink
+                    end
+                    key={option.name}
+                    to={option.path}
+                    className={({ isActive }) =>
+                        `${isActive ? 'border-b-[#4977ec] bg-[#4977ec] text-white' : 'border-b-black bg-white text-black'} text-ellipsis drop-shadow-sm hover:backdrop-brightness-90 rounded-t-md p-[3px] border-b-[0.1rem] w-full text-center text-lg font-medium`
+                    }
+                >
+                    <div>{option.name}</div>
+                </NavLink>
+            )
+    );
 
     return (
-        <div className="w-full h-full overflow-scroll">
-            <div className="w-full mb-8">
+        <div className="w-full h-full overflow-scroll py-4 space-y-8">
+            <div className="w-full px-4">
                 {/* avatar */}
                 <div className="flex gap-4 items-center justify-start">
                     <div className="relative">
@@ -66,13 +74,13 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-evenly w-full gap-4">
+            <div className="flex items-center justify-evenly w-full gap-4 px-4">
                 {tabElements}
             </div>
 
-            <hr className="mt-4 mb-2" />
-
-            <Outlet />
+            <div className="border-t py-3 border-gray-400 px-4">
+                <Outlet />
+            </div>
         </div>
     );
 }

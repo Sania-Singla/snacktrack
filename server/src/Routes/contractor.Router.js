@@ -19,6 +19,7 @@ import {
     addItem,
     deleteItem,
     updateItemDetails,
+    updateKitchenKey,
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.route('/register').post(register);
@@ -31,6 +32,8 @@ contractorRouter.use(verifyJwt);
 
 // personal usage
 contractorRouter.route('/account').patch(updateAccountDetails);
+
+contractorRouter.route('/kitchen-key').patch(updateKitchenKey);
 
 // student management tasks
 contractorRouter

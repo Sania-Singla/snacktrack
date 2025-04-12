@@ -1,26 +1,25 @@
 import { useState } from 'react';
 import { verifyExpression } from '../../Utils';
 import { useNavigate } from 'react-router-dom';
-import { userService } from '../../Services';
+import { contractorService } from '../../Services';
 import { Button, InputField } from '..';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 
 export default function UpdatePassword() {
     const initialInputs = {
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: '',
+        newKey: '',
+        confirmKey: '',
+        password: '',
     };
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const [loading, setLoading] = useState(false);
-    const [resetting, setResetting] = useState(false);
     const [disabled, setDisabled] = useState(false);
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
-    const [showNewPassword, setShowNewPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showNewKey, setShowNewKey] = useState(false);
+    const [showConfirmKey, setShowConfirmKey] = useState(false);
 
     async function handleChange(e) {
         const { name, value } = e.target;
@@ -29,7 +28,7 @@ export default function UpdatePassword() {
 
     async function handleBlur(e) {
         const { name, value } = e.target;
-        if (value && name === 'newPassword') {
+        if (value && name === 'newKey') {
             verifyExpression(name, value, setError);
         }
     }
@@ -52,28 +51,25 @@ export default function UpdatePassword() {
         setDisabled(true);
         setError({});
         try {
-            if (inputs.newPassword !== inputs.confirmPassword) {
+            if (inputs.newKey !== inputs.confirmKey) {
                 setError((prevError) => ({
                     ...prevError,
-                    confirmPassword:
-                        'confirm password should match new password',
-                }));
-            } else if (inputs.oldPassword === inputs.newPassword) {
-                setError((prevError) => ({
-                    ...prevError,
-                    newPassword: 'new password should not match old password',
+                    confirmKey: 'confirm key should match new key',
                 }));
             } else {
-                const res = await userService.updatePassword({
-                    oldPassword: inputs.oldPassword,
-                    newPassword: inputs.newPassword,
+                const res = await contractorService.updateKitchenKey({
+                    password: inputs.password,
+                    newKey: inputs.newKey,
                 });
 
-                if (res && res.message === 'password updated successfully') {
+                if (res && res.message === 'key updated successfully') {
                     setInputs(initialInputs);
-                    toast.success('Password updated successfully');
+                    toast.success('Key updated successfully');
                 } else {
-                    setError((prev) => ({ ...prev, oldPassword: res.message }));
+                    setError((prevError) => ({
+                        ...prevError,
+                        password: 'Invalid credentials',
+                    }));
                 }
             }
         } catch (err) {
@@ -82,51 +78,37 @@ export default function UpdatePassword() {
             setDisabled(false);
             setLoading(false);
             setShowPassword(false);
-            setShowNewPassword(false);
-            setShowConfirmPassword(false);
-        }
-    }
-
-    async function resetPassword() {
-        setResetting(true);
-        try {
-            const res = await userService.resetPassword();
-            if (res && res.message === 'new password sent to email') {
-                toast.success('New password sent to your email');
-            }
-        } catch (err) {
-            navigate('/server-error');
-        } finally {
-            setResetting(false);
+            setShowNewKey(false);
+            setShowConfirmKey(false);
         }
     }
 
     const inputFields = [
         {
-            name: 'oldPassword',
+            name: 'newKey',
+            type: showNewKey ? 'text' : 'password',
+            placeholder: 'Create new key',
+            label: 'New Key',
+            required: true,
+        },
+        {
+            name: 'confirmKey',
+            type: showConfirmKey ? 'text' : 'password',
+            placeholder: 'Confirm new key',
+            label: 'Confirm Key',
+            required: true,
+        },
+        {
+            name: 'password',
             type: showPassword ? 'text' : 'password',
-            placeholder: 'Enter current Password',
-            label: 'Old Password',
-            required: true,
-        },
-        {
-            name: 'newPassword',
-            type: showNewPassword ? 'text' : 'password',
-            placeholder: 'Create new password',
-            label: 'New Password',
-            required: true,
-        },
-        {
-            name: 'confirmPassword',
-            type: showConfirmPassword ? 'text' : 'password',
-            placeholder: 'Confirm new password',
-            label: 'Confirm Password',
+            placeholder: 'Enter your password',
+            label: 'Password',
             required: true,
         },
     ];
 
     const inputElements = inputFields.map((field) =>
-        field.name === 'oldPassword' ? (
+        field.name === 'password' ? (
             <div className="w-full" key={field.name}>
                 <InputField
                     field={field}
@@ -147,18 +129,16 @@ export default function UpdatePassword() {
                     handleChange={handleChange}
                     inputs={inputs}
                     showPassword={
-                        field.name === 'newPassword'
-                            ? showNewPassword
-                            : showConfirmPassword
+                        field.name === 'newKey' ? showNewKey : showConfirmKey
                     }
                     setShowPassword={
-                        field.name === 'newPassword'
-                            ? setShowNewPassword
-                            : setShowConfirmPassword
+                        field.name === 'newKey'
+                            ? setShowNewKey
+                            : setShowConfirmKey
                     }
                 />
-                {!error.newPassword && field.name === 'newPassword' && (
-                    <p className="text-xs">Password must be 8-12 characters.</p>
+                {!error.newKey && field.name === 'newKey' && (
+                    <p className="text-xs">Key must be 8-12 characters.</p>
                 )}
                 {error[field.name] && (
                     <p className="text-red-500 font-medium text-xs">
@@ -173,29 +153,11 @@ export default function UpdatePassword() {
         <div className="w-full p-2">
             <div className="rounded-xl drop-shadow-md flex flex-col sm:flex-row bg-white px-8 py-6 sm:gap-14">
                 <div className="w-full py-4">
-                    <h3 className="text-2xl font-bold">Change Password</h3>
+                    <h3 className="text-2xl font-bold">Change Kitchen Key</h3>
                     <p className="mt-2">
-                        Update your password to secure your account. Changes are
-                        final once saved and cannot be undone.
+                        Update your kitchen key to secure your kitchen controls.
+                        Changes are final once saved and cannot be undone.
                     </p>
-                    <div className="mt-4">
-                        <Button
-                            btnText={
-                                resetting ? (
-                                    <div className="flex items-center justify-center w-full">
-                                        <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                            {icons.loading}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    'Reset Password'
-                                )
-                            }
-                            onClick={resetPassword}
-                            disabled={resetting || loading}
-                            className="text-white rounded-md h-[40px] text-lg w-fit px-4 bg-[#4977ec] hover:bg-[#3b62c2]"
-                        />
-                    </div>
                 </div>
                 <form onSubmit={handleSubmit} className="w-full max-w-[600px]">
                     <div className="flex flex-col gap-2">{inputElements}</div>

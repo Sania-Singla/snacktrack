@@ -22,6 +22,8 @@ export default function InputField({
         'newPassword',
         'confirmPassword',
         'contractorPassword',
+        'newKey',
+        'confirmKey',
     ];
     return (
         <div key={field.name} className={`w-full ${className}`}>

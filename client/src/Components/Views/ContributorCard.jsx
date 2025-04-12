@@ -10,7 +10,7 @@ export default function ContributorCard({ contributor }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 200, damping: 12 }}
-            className="relative bg-white/20 backdrop-blur-lg border border-white/40 shadow-xl rounded-2xl overflow-hidden p-6 flex flex-col items-center gap-4 max-w-sm"
+            className="relative bg-white/20 backdrop-blur-lg border border-white/40 shadow-md rounded-2xl overflow-hidden p-6 flex flex-col items-center gap-4 max-w-xs"
         >
             {/* Profile Image */}
             <div className="w-32 h-32 overflow-hidden rounded-full border-4 border-gray-300 shadow-md">

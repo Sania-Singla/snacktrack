@@ -7,8 +7,8 @@ export default function Layout({ renderTemplate = true }) {
     const { pathname } = useLocation();
     const layoutRef = useRef(null);
 
+    // scrolling both window and layout container to the top
     useEffect(() => {
-        // scrolling both window and layout container to the top
         window.scrollTo({ top: 0, behavior: 'smooth' });
         layoutRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }, [pathname]);

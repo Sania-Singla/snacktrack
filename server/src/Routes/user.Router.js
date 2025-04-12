@@ -16,6 +16,7 @@ import {
     getContractors,
     getKitchenOrders,
     sendQuery,
+    resetPassword,
 } from '../Controllers/user.Controller.js';
 
 userRouter.route('/canteens').get(getCanteens);
@@ -29,6 +30,8 @@ userRouter.route('/orders').post(verifyStaffKeyJwt, getKitchenOrders);
 userRouter.use(verifyJwt);
 
 userRouter.route('/password').patch(updatePassword);
+
+userRouter.route('/reset-password').patch(resetPassword);
 
 userRouter.route('/avatar').patch(upload.single('avatar'), updateAvatar);
 

@@ -16,6 +16,7 @@ import RemoveStudentPopup from './Popups/RemoveStudent.Popup';
 import RemoveAllStudentsPopup from './Popups/RemoveAllStudents.Popup';
 import EditStudentPopup from './Popups/EditStudent.Popup';
 import UpdateAvatarPopup from './Popups/UpdateAvatar.Popup';
+import UpdateKitchenKey from './User/UpdateKitchenKey';
 import EditSnackPopup from './Popups/EditSnack.Popup';
 import EditItemPopup from './Popups/EditItem.Popup';
 import RemoveSnackPopup from './Popups/RemoveSnack.Popup';
@@ -54,6 +55,7 @@ export {
     OrderDropdown,
     ContributorCard,
     UpdateAccountDetails,
+    UpdateKitchenKey,
     ContractorOrderCard,
     UpdatePassword,
     Popup,

@@ -48,6 +48,26 @@ class UserService {
         }
     }
 
+    async resetPassword() {
+        try {
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/users/reset-password`,
+                { method: 'PATCH', credentials: 'include' }
+            );
+
+            const data = await res.json();
+            console.log(data);
+
+            if (res.status === SERVER_ERROR) {
+                throw new Error(data.message);
+            }
+            return data;
+        } catch (err) {
+            console.error('error in user resetPassword service', err);
+            throw err;
+        }
+    }
+
     async updateAvatar(avatar) {
         try {
             const formData = new FormData();

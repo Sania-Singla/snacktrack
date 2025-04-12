@@ -53,13 +53,13 @@ export default function FAQpage() {
     ];
 
     return (
-        <div className="w-full flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#f9f9f9] to-[#f2f2f2] rounded-xl">
+        <div className="w-full flex flex-col items-center justify-center p-4">
             {/* Page Header */}
             <motion.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
-                className="text-4xl font-bold text-gray-900 text-center"
+                transition={{ duration: 0.2 }}
+                className="text-3xl font-bold text-gray-900 text-center"
             >
                 Frequently Asked Questions
             </motion.h1>
@@ -67,7 +67,7 @@ export default function FAQpage() {
             <motion.p
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.3 }}
+                transition={{ delay: 0.1, duration: 0.2 }}
                 className="text-lg text-gray-600 text-center mt-2 max-w-2xl"
             >
                 Find answers to the most commonly asked questions about our
@@ -75,14 +75,14 @@ export default function FAQpage() {
             </motion.p>
 
             {/* FAQ List */}
-            <div className="w-full max-w-3xl mt-8 space-y-4">
+            <div className="w-full max-w-4xl mt-8 space-y-4">
                 {faqs.map((faq, index) => (
                     <motion.div
                         key={index}
-                        className="bg-white/50 backdrop-blur-lg border border-gray-200 shadow-lg p-5 rounded-lg cursor-pointer transition-transform hover:scale-[1.02]"
+                        className="bg-white/50 backdrop-blur-lg border border-gray-200 shadow-sm p-5 rounded-lg cursor-pointer transition-transform hover:scale-[1.02]"
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        transition={{ duration: 0.1, delay: index * 0.1 }}
                         onClick={() => toggleExpand(index)}
                     >
                         <div className="flex items-center justify-between">
@@ -95,9 +95,9 @@ export default function FAQpage() {
                                     rotate: expanded === index ? -45 : 0,
                                 }}
                                 transition={{ duration: 0.1 }}
-                                className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition"
+                                className="bg-[#f6f6f6] p-2 rounded-full hover:bg-[#f1f1f1] transition"
                             >
-                                <div className="size-[16px]">{icons.plus}</div>
+                                <div className="size-4">{icons.plus}</div>
                             </motion.div>
                         </div>
 

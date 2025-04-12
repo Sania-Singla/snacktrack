@@ -461,6 +461,31 @@ class ContractorService {
             throw err;
         }
     }
+
+    async updateKitchenKey({ password, newKey }) {
+        try {
+            const res = await fetch(
+                `${BASE_BACKEND_URL}/contractors/kitchen-key`,
+                {
+                    method: 'PATCH',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, newKey }),
+                }
+            );
+
+            const data = await res.json();
+            console.log(data);
+
+            if (res.status === SERVER_ERROR) {
+                throw new Error(data.message);
+            }
+            return data;
+        } catch (err) {
+            console.error('error in user updateKitchenKey service', err);
+            throw err;
+        }
+    }
 }
 
 export const contractorService = new ContractorService();

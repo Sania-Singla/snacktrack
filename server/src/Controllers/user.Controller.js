@@ -16,6 +16,7 @@ import { Canteen, Student, Contractor, Order } from '../Models/index.js';
 import bcrypt from 'bcrypt';
 import { Types } from 'mongoose';
 import { sendMail } from '../mailer.js';
+import { nanoid } from 'nanoid';
 
 const login = tryCatch('login as contractor', async (req, res, next) => {
     const { loginInput, password, role } = req.body;
@@ -125,6 +126,29 @@ const updatePassword = tryCatch('update password', async (req, res, next) => {
     });
 
     return res.status(OK).json({ message: 'password updated successfully' });
+});
+
+const resetPassword = tryCatch('reset password', async (req, res, next) => {
+    const { _id, role, email, fullName } = req.user;
+
+    const randomPassword = nanoid(8);
+
+    // hash new password
+    const hashedNewPassword = bcrypt.hashSync(randomPassword, 10);
+
+    const Model = role === 'contractor' ? Contractor : Student;
+    await Model.findByIdAndUpdate(_id, {
+        $set: { password: hashedNewPassword },
+    });
+
+    // send this password on student's email
+    await sendMail({
+        to: email,
+        subject: 'Welcome to SnackTrack',
+        html: `Hello ${fullName}, <br> Your temporary password is ${randomPassword}, You can update it anytime after logging in from settings.`,
+    });
+
+    return res.status(OK).json({ message: 'new password sent to email' });
 });
 
 const updateAvatar = tryCatch('update avatar', async (req, res, next) => {
@@ -303,4 +327,5 @@ export {
     getCanteens,
     getKitchenOrders,
     sendQuery,
+    resetPassword,
 };
