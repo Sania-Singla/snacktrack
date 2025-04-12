@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { icons } from '../Assets/icons';
+import { icons } from '../../Assets/icons';
 
 export default function NotFoundPage() {
     return (

@@ -1,8 +1,8 @@
-import { CONTRIBUTORS, EMAIL } from '../Constants/constants';
-import { ContributorCard } from '../Components';
+import { CONTRIBUTORS, EMAIL } from '../../Constants/constants';
+import { ContributorCard } from '../../Components';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { icons } from '../Assets/icons';
+import { icons } from '../../Assets/icons';
 
 const contributorElements = CONTRIBUTORS?.map((contributor) => (
     <ContributorCard key={contributor.name} contributor={contributor} />

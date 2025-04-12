@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../Components';
+import { Button } from '../../Components';
 
 export default function NewUserPage() {
     const navigate = useNavigate();

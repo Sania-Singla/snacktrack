@@ -1,4 +1,4 @@
-import { CONTRIBUTORS, DISCORD_LINK } from '../Constants/constants';
+import { CONTRIBUTORS, DISCORD_LINK } from '../../Constants/constants';
 import { Link } from 'react-router-dom';
 
 function FeatureCard({ title, description }) {
@@ -27,7 +27,7 @@ export default function AboutUsPage() {
                 <h1 className="text-[35px] font-bold text-gray-900">
                     About Us
                 </h1>
-                <p className="mt-4 text-lg text-gray-700 max-w-3xl">
+                <p className="mt-4 text-gray-700">
                     Welcome to <strong>Hostel Canteen Management</strong>, a
                     platform designed to enhance transparency, efficiency, and
                     security in hostel dining services. Our goal is to provide

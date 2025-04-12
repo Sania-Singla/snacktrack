@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../Components';
+import { Button } from '../../Components';
 import { useState } from 'react';
-import { icons } from '../Assets/icons';
-import { EMAIL, CONTACTNUMBER } from '../Constants/constants';
+import { icons } from '../../Assets/icons';
+import { EMAIL, CONTACTNUMBER } from '../../Constants/constants';
 import toast from 'react-hot-toast';
-import { userService } from '../Services';
+import { userService } from '../../Services';
 
 export default function ContactUsPage() {
     const [inputs, setInputs] = useState({ subject: '', message: '' });
@@ -41,8 +41,10 @@ export default function ContactUsPage() {
         <div className="w-full min-h-screen">
             {/* Hero Section */}
             <section className="w-full bg-white shadow-md rounded-xl py-10 px-8 md:px-16">
-                <h1 className="text-4xl font-bold text-gray-900">Contact Us</h1>
-                <p className="mt-4 text-lg text-gray-700 max-w-3xl">
+                <h1 className="text-[35px] font-bold text-gray-900">
+                    Contact Us
+                </h1>
+                <p className="mt-4 text-gray-700">
                     We're here to help! Whether you need support, have feedback,
                     or suggestions, feel free to reach out. Our team is ready to
                     assist you!
@@ -50,9 +52,9 @@ export default function ContactUsPage() {
             </section>
 
             {/* Grid Layout for Content */}
-            <div className="w-full px-8 md:px-16 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="w-full px-8 md:px-12 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Left Section - Contact Info & Support */}
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6">
                     {/* Technical Support */}
                     <div className="bg-white shadow-md p-6 rounded-xl">
                         <h2 className="text-2xl font-bold text-gray-900 mb-3">
@@ -90,30 +92,31 @@ export default function ContactUsPage() {
                             >
                                 FAQ page
                             </Link>{' '}
-                            for quick answers.
+                            for quick answers. You might find the solution
+                            without having to reach out!
                         </p>
                     </div>
 
                     {/* Contact Information */}
                     <div className="bg-white shadow-md p-6 rounded-xl">
-                        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
                             Contact Information
                         </h2>
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3">
                             {/* Email */}
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <div className="p-2 bg-gray-100 rounded-full">
-                                    <div className="size-5 fill-black">
+                                    <div className="size-4 fill-black">
                                         {icons.email}
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1">
                                     <p className="text-gray-700">{EMAIL}</p>
                                     <button
                                         onClick={copyEmail}
                                         className="p-1 hover:bg-gray-100 rounded-full group"
                                     >
-                                        <div className="size-5 fill-[#4977ec] group-hover:fill-[#3b62c2]">
+                                        <div className="size-4 fill-[#4977ec] group-hover:fill-[#3b62c2]">
                                             {icons.clipboard}
                                         </div>
                                     </button>
@@ -121,9 +124,9 @@ export default function ContactUsPage() {
                             </div>
 
                             {/* Phone */}
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <div className="p-2 bg-gray-100 rounded-full">
-                                    <div className="size-5 fill-black">
+                                    <div className="size-4 fill-black">
                                         {icons.contact}
                                     </div>
                                 </div>
