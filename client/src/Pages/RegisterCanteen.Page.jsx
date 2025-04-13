@@ -3,6 +3,8 @@ import { contractorService, userService } from '../Services';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Dropdown, InputField } from '../Components';
 import { verifyExpression } from '../Utils';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import { usePopupContext } from '../Contexts';
 import { LOGO } from '../Constants/constants';
 import { motion } from 'framer-motion';
@@ -28,15 +30,20 @@ export default function RegisterCanteenPage() {
     const [hostel, setHostel] = useState({});
     const [hostels, setHostels] = useState([]);
 
-    async function handleChange(e) {
+    function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
     }
 
-    const handleBlur = (e) => {
+    function handlePhoneChange(value, country, e, formattedValue) {
+        const name = e.target.name || 'phoneNumber'; // because when flag changes the name = undefiend
+        setInputs((prev) => ({ ...prev, [name]: formattedValue }));
+    }
+
+    function handleBlur(e) {
         let { name, value } = e.target;
         if (value) verifyExpression(name, value, setError);
-    };
+    }
 
     useEffect(() => {
         (async function () {
@@ -112,13 +119,6 @@ export default function RegisterCanteenPage() {
             name: 'email',
             label: 'Email',
             placeholder: 'Enter Email',
-            required: true,
-        },
-        {
-            type: 'text',
-            name: 'phoneNumber',
-            label: 'Phone Number',
-            placeholder: 'Enter Phone Number',
             required: true,
         },
         {
@@ -201,6 +201,37 @@ export default function RegisterCanteenPage() {
 
                     <div className="w-full flex flex-col gap-1">
                         {inputElements}
+
+                        {/* phone number field */}
+                        <div className="w-full shadow-md shadow-[#f8f0eb]">
+                            <div className="bg-white z-[10] text-[15px] ml-2 px-1 w-fit relative top-3 font-medium">
+                                <label htmlFor="phoneNumber">
+                                    <span className="text-red-500">* </span>
+                                    Phone Number
+                                </label>
+                            </div>
+                            <div className="w-full">
+                                <PhoneInput
+                                    countryCodeEditable={false}
+                                    country={'in'}
+                                    value={inputs.phoneNumber}
+                                    onChange={handlePhoneChange}
+                                    onBlur={handleBlur}
+                                    inputProps={{
+                                        name: 'phoneNumber',
+                                        required: true,
+                                        id: 'phoneNumber',
+                                    }}
+                                    inputClass="!w-full !h-[42px] !indent-2 !rounded-md !shadow-sm !border-[0.01rem] !border-[#858585] !outline-[#f68533] !bg-transparent"
+                                    buttonClass="!h-[42px] !w-[45px] !bg-white !hover:bg-white !z-[1] !rounded-r-none !rounded-md !border-[0.01rem] !border-[#858585] !outline-[#f68533]"
+                                />
+                            </div>
+                            {error.phoneNumber && (
+                                <div className="text-red-500 text-xs font-medium">
+                                    {error.phoneNumber}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     <div className="w-full">

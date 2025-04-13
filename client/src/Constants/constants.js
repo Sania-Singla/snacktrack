@@ -5,14 +5,13 @@ import USER_PLACEHOLDER_IMAGE from '../Assets/images/user.png';
 import AUDIO_FILE from '../Assets/audios/notification.wav';
 
 const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api';
-const LIMIT = 10;
 const DISCORD_LINK = import.meta.env.VITE_DISCORD_LINK;
 const EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 const CONTACTNUMBER = import.meta.env.VITE_ADMIN_CONTACT_NUMBER;
 const MAX_FILE_SIZE = 5;
+const LIMIT = 10; // Pagination limit
 const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 const SERVER_ERROR = 500;
-const BAD_REQUEST = 400;
 const PER_ITEM_PACKAGING_CHARGES = 0.5;
 const TAX = 0.05; // 5% tax on total amount
 
@@ -46,7 +45,6 @@ export {
     EMAIL,
     CONTACTNUMBER,
     SERVER_ERROR,
-    BAD_REQUEST,
     TAX,
     DISCORD_LINK,
 };

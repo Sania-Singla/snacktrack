@@ -30,6 +30,7 @@ const contractorSchema = new Schema(
             type: String,
             required: true,
             unique: true,
+            trim: true,
         },
         refreshToken: {
             type: String,

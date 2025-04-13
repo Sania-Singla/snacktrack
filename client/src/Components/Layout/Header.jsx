@@ -80,9 +80,9 @@ export default function Header() {
                         <Button
                             onClick={() => navigate('/register-student')}
                             btnText={
-                                <div className="flex items-center justify-center gap-[5px]">
+                                <div className="flex items-center justify-center gap-2">
                                     <div className="size-[16px] fill-white">
-                                        {icons.plus}
+                                        {icons.memberAdd}
                                     </div>
                                     <span>Student</span>
                                 </div>

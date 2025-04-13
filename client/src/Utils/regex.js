@@ -1,3 +1,8 @@
+import {
+    parsePhoneNumberFromString,
+    isValidPhoneNumber,
+} from 'libphonenumber-js';
+
 /**
  * Generic Utility to validate the regular expressions
  * @param {String} name - Key name to validate.
@@ -5,7 +10,7 @@
  * @param {Function} setError - State function to set the corresponding error or an empty string "".
  */
 
-export default function verifyExpression(name, value, setError) {
+export function verifyExpression(name, value, setError) {
     if (value) {
         switch (name) {
             case 'email': {
@@ -43,12 +48,13 @@ export default function verifyExpression(name, value, setError) {
             }
 
             case 'phoneNumber': {
-                /^[0-9]{10}$/.test(value)
-                    ? setError((prevError) => ({ ...prevError, [name]: '' }))
-                    : setError((prevError) => ({
-                          ...prevError,
-                          [name]: `Enter a valid phone number.`,
-                      }));
+                const phoneNumber = parsePhoneNumberFromString(value);
+                if (!phoneNumber || !isValidPhoneNumber(phoneNumber.number)) {
+                    setError((prevError) => ({
+                        ...prevError,
+                        [name]: 'Enter a valid phone number',
+                    }));
+                } else setError((prevError) => ({ ...prevError, [name]: '' }));
                 break;
             }
 

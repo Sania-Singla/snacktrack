@@ -80,13 +80,15 @@ export default function EmailVerificationPopup() {
     useEffect(() => {
         if (!expiryTime) return;
 
-        (function updateTimer() {
+        function updateTimer() {
             const now = Date.now();
             const remaining = Math.max(0, Math.ceil((expiryTime - now) / 1000));
             setTimeLeft(remaining);
 
             if (remaining <= 0) clearInterval(timerRef.current);
-        })();
+        }
+
+        updateTimer();
 
         // Set up interval
         timerRef.current = setInterval(updateTimer, 200); // Update more frequently for smoother countdown

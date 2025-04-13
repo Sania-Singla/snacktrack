@@ -52,7 +52,7 @@ export default function ContactUsPage() {
             </section>
 
             {/* Grid Layout for Content */}
-            <div className="w-full px-8 md:px-12 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="w-full px-8 lg:px-12 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Left Section - Contact Info & Support */}
                 <div className="flex flex-col gap-6">
                     {/* Technical Support */}
@@ -158,8 +158,12 @@ export default function ContactUsPage() {
                     {/* Feedback Form */}
                     <form
                         onSubmit={submitQuery}
-                        className="mt-6 bg-white px-6 py-5 pt-2 rounded-xl shadow-md"
+                        className="mt-6 bg-white p-6 rounded-xl shadow-md"
                     >
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            📩 Contact Form
+                        </h2>
+
                         {/* Subject Input */}
                         <div className="mb-1">
                             <div className="bg-white z-[1] ml-2 px-2 w-fit relative top-3 font-medium">
@@ -175,7 +179,7 @@ export default function ContactUsPage() {
                                 value={inputs.subject}
                                 onChange={handleChange}
                                 placeholder="Enter query subject"
-                                className="shadow-md py-3 rounded-md indent-3 w-full border-[0.01rem] border-gray-500 bg-transparent"
+                                className="shadow-md py-[10px] rounded-md indent-3 w-full border-[0.01rem] border-gray-500 bg-transparent"
                                 required
                             />
                             <p className="text-sm text-gray-500 mt-1">
@@ -197,7 +201,7 @@ export default function ContactUsPage() {
                                 value={inputs.message}
                                 onChange={handleChange}
                                 placeholder="Let us know how we're doing!"
-                                className="shadow-md py-3 rounded-md indent-3 w-full border-[0.01rem] border-gray-500 bg-transparent"
+                                className="shadow-md py-[10px] rounded-md indent-3 w-full border-[0.01rem] border-gray-500 bg-transparent"
                                 rows="4"
                                 required
                             />

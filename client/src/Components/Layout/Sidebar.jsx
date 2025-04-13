@@ -49,7 +49,7 @@ export default function Sidebar() {
         {
             path: '/students',
             name: 'Students',
-            icon: icons.user,
+            icon: icons.group,
             show: user.role === 'contractor',
         },
     ];

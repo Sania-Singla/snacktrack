@@ -5,7 +5,7 @@
  * @example - Mon, Mar 31, 02:49 PM
  */
 
-function formatTime(timeStamp) {
+export function formatTime(timeStamp) {
     return new Date(timeStamp).toLocaleDateString('en-US', {
         weekday: 'short',
         month: 'short',
@@ -15,5 +15,3 @@ function formatTime(timeStamp) {
         minute: '2-digit',
     });
 }
-
-export { formatTime };

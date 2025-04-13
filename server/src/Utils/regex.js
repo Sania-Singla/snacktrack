@@ -1,5 +1,9 @@
 import fs from 'fs';
 import { MAX_FILE_SIZE, ALLOWED_EXT } from '../Constants/index.js';
+import {
+    parsePhoneNumberFromString,
+    isValidPhoneNumber,
+} from 'libphonenumber-js';
 
 /**
  * Generic Utility to validate the regular expressions
@@ -7,6 +11,7 @@ import { MAX_FILE_SIZE, ALLOWED_EXT } from '../Constants/index.js';
  * @param {String} value - Value/File for the key.
  * @returns {Boolean} Boolean.
  */
+
 export default function verifyRegex(name, value) {
     if (value) {
         switch (name) {
@@ -40,7 +45,8 @@ export default function verifyRegex(name, value) {
             }
 
             case 'phoneNumber': {
-                return /^[0-9]{10}$/.test(value);
+                const phoneNumber = parsePhoneNumberFromString(value);
+                return isValidPhoneNumber(phoneNumber.number);
             }
 
             case 'file': {

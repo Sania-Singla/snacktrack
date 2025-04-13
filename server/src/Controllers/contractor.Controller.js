@@ -34,7 +34,7 @@ const register = tryCatch('register as contractor', async (req, res, next) => {
     const { fullName, email, phoneNumber, password, hostel, kitchenKey } =
         req.body;
 
-    if (
+        if (
         !fullName ||
         !email ||
         !phoneNumber ||
@@ -153,7 +153,7 @@ const completeRegistration = tryCatch(
 
 const resendVerificationCode = tryCatch(
     'resend verification code',
-    async (req, res, next) => {
+    async (req, res) => {
         const { email } = req.body;
 
         // Send email verification

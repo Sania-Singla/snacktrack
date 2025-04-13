@@ -8,7 +8,7 @@ import { useCallback } from 'react';
  * @returns {Function} A useCallback method to perform the page updation operation.
  */
 
-export default function paginate(hasNextPage, loading, setPage) {
+export function paginate(hasNextPage, loading, setPage) {
     let observer;
     return useCallback(
         (node) => {
