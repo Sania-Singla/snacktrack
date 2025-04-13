@@ -34,7 +34,7 @@ const register = tryCatch('register as contractor', async (req, res, next) => {
     const { fullName, email, phoneNumber, password, hostel, kitchenKey } =
         req.body;
 
-        if (
+    if (
         !fullName ||
         !email ||
         !phoneNumber ||
