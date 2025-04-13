@@ -28,6 +28,9 @@ export default function AddSnackPopup() {
             ...prev,
             [name]: type === 'file' ? files[0] : value,
         }));
+        if (value && type !== 'file') verifyExpression(name, value, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
+        
         if (type === 'file') {
             const file = files[0];
 
@@ -44,22 +47,15 @@ export default function AddSnackPopup() {
         }
     }
 
-    const handleBlur = (e) => {
-        let { name, value, type } = e.target;
-        if (value && type !== 'file') verifyExpression(name, value, setError);
-    };
-
     function handleDisable() {
-        if (
+        return (
             Object.entries(inputs).some(
                 ([key, value]) => !value && key !== 'image'
             ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             )
-        ) {
-            return true;
-        } else return false;
+        ) 
     }
 
     function onMouseOver() {
@@ -116,7 +112,6 @@ export default function AddSnackPopup() {
                 handleChange={handleChange}
                 error={error}
                 inputs={inputs}
-                handleBlur={handleBlur}
             />
             {error[field.name] && (
                 <div className="text-red-500 text-xs font-medium">

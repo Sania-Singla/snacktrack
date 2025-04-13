@@ -11,9 +11,9 @@ export default function AddItemPopup() {
     const { setItems } = useSnackContext();
     const { setShowPopup, popupInfo } = usePopupContext();
     const [inputs, setInputs] = useState({
-        category: popupInfo.target.category || '',
+        category: popupInfo.item.category || '',
     });
-    const [variants, setVariants] = useState(popupInfo.target.variants);
+    const [variants, setVariants] = useState(popupInfo.item.variants);
     const [error, setError] = useState({});
     const [variantErrors, setVariantErrors] = useState({});
     const [disabled, setDisabled] = useState(false);
@@ -42,6 +42,8 @@ export default function AddItemPopup() {
     async function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
+        if (value) verifyExpression(name, value, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
     }
 
     const handleVariantChange = (i, e) => {
@@ -62,11 +64,6 @@ export default function AddItemPopup() {
     const removeVariant = (index) => {
         const updatedVariants = variants.filter((_, i) => i !== index);
         setVariants(updatedVariants);
-    };
-
-    const handleBlur = (e) => {
-        let { name, value } = e.target;
-        if (value) verifyExpression(name, value, setError);
     };
 
     function handleDisable() {
@@ -106,13 +103,13 @@ export default function AddItemPopup() {
                     ...inputs,
                     variants,
                 },
-                popupInfo.target._id
+                popupInfo.item._id
             );
             if (res && !res.message) {
                 toast.success('Item details updated successfully 👍');
                 setItems((prev) =>
                     prev.map((item) =>
-                        item._id === popupInfo.target._id ? res : item
+                        item._id === popupInfo.item._id ? res : item
                     )
                 );
                 setShowPopup(false);
@@ -205,7 +202,6 @@ export default function AddItemPopup() {
                                 placeholder: 'Enter Item category',
                                 required: true,
                             }}
-                            handleBlur={handleBlur}
                             handleChange={handleChange}
                             error={error}
                             inputs={inputs}

@@ -40,13 +40,15 @@ export default function AddItemPopup() {
     async function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
+        if (value) verifyExpression(name, value, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
     }
 
     const handleVariantChange = (i, e) => {
         const { name, value } = e.target;
         setVariants((prev) =>
             prev.map((variant, index) =>
-                index === i ? { ...variant, [name]: Number(value) } : variant
+                index === i ? { ...variant, [name]: value } : variant
             )
         );
     };
@@ -62,13 +64,8 @@ export default function AddItemPopup() {
         setVariants(updatedVariants);
     };
 
-    const handleBlur = (e) => {
-        let { name, value } = e.target;
-        if (value) verifyExpression(name, value, setError);
-    };
-
     function handleDisable() {
-        if (
+        return (
             Object.values(inputs).some((value) => !value) ||
             variants.some(
                 (variant) => !variant.price || !variant.availableCount
@@ -77,9 +74,7 @@ export default function AddItemPopup() {
                 ([key, value]) => value && key !== 'root'
             ) ||
             Object.values(variantErrors).some((error) => error)
-        ) {
-            return true;
-        } else return false;
+        );
     }
 
     function onMouseOver() {
@@ -196,7 +191,6 @@ export default function AddItemPopup() {
                                 placeholder: 'Enter Item category',
                                 required: true,
                             }}
-                            handleBlur={handleBlur}
                             handleChange={handleChange}
                             error={error}
                             inputs={inputs}

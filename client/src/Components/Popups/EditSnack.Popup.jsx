@@ -32,6 +32,8 @@ export default function EditSnackPopup() {
             ...prev,
             [name]: type === 'file' ? files[0] : value,
         }));
+        if (value) verifyExpression(name, value, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
         if (type === 'file') {
             const file = files[0];
             if (!fileRestrictions(files[0])) {
@@ -46,11 +48,6 @@ export default function EditSnackPopup() {
             }
         }
     }
-
-    const handleBlur = (e) => {
-        let { name, value } = e.target;
-        if (value) verifyExpression(name, value, setError);
-    };
 
     function handleDisable() {
         if (
@@ -128,7 +125,6 @@ export default function EditSnackPopup() {
                 handleChange={handleChange}
                 error={error}
                 inputs={inputs}
-                handleBlur={handleBlur}
             />
             {error[field.name] && (
                 <div className="text-red-500 text-xs font-medium">

@@ -31,7 +31,6 @@ const billSchema = new Schema(
         },
         paidOn: {
             type: Date,
-            default: new Date(),
         },
     },
     { timestamps: true }

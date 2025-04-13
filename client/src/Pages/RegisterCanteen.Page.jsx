@@ -33,16 +33,15 @@ export default function RegisterCanteenPage() {
     function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
+        if (value) verifyExpression(name, value, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
     }
 
     function handlePhoneChange(value, country, e, formattedValue) {
         const name = e.target.name || 'phoneNumber'; // because when flag changes the name = undefiend
         setInputs((prev) => ({ ...prev, [name]: formattedValue }));
-    }
-
-    function handleBlur(e) {
-        let { name, value } = e.target;
-        if (value) verifyExpression(name, value, setError);
+        if (value) verifyExpression(name, formattedValue, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
     }
 
     useEffect(() => {
@@ -64,15 +63,13 @@ export default function RegisterCanteenPage() {
     }, []);
 
     function handleDisable() {
-        if (
+        return (
             Object.values(inputs).some((value) => !value) ||
             !hostel ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             )
-        ) {
-            return true;
-        } else return false;
+        );
     }
 
     function onMouseOver() {
@@ -141,7 +138,6 @@ export default function RegisterCanteenPage() {
         <div className="w-full" key={field.name}>
             <InputField
                 field={field}
-                handleBlur={handleBlur}
                 handleChange={handleChange}
                 inputs={inputs}
                 showPassword={
@@ -216,7 +212,6 @@ export default function RegisterCanteenPage() {
                                     country={'in'}
                                     value={inputs.phoneNumber}
                                     onChange={handlePhoneChange}
-                                    onBlur={handleBlur}
                                     inputProps={{
                                         name: 'phoneNumber',
                                         required: true,

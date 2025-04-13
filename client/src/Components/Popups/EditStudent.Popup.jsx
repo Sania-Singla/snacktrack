@@ -25,12 +25,9 @@ export default function EditStudentPopup() {
     async function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-    }
-
-    const handleBlur = (e) => {
-        let { name, value } = e.target;
         if (value) verifyExpression(name, value, setError);
-    };
+        else setError((prev) => ({ ...prev, [name]: '' }));
+    }
 
     function handleDisable() {
         if (
@@ -135,7 +132,6 @@ export default function EditStudentPopup() {
                     handleChange={handleChange}
                     error={error}
                     inputs={inputs}
-                    handleBlur={handleBlur}
                 />
                 {error[field.name] && (
                     <div className="text-red-500 text-xs font-medium">
