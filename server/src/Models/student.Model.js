@@ -10,7 +10,7 @@ const studentSchema = new Schema(
             ref: 'Canteen',
         },
         userName: {
-            // ex: GH8-75  GH8 describes the hostel and 75 is the roll no
+            // ex: GH8-75
             type: String,
             unique: true,
             required: true,

@@ -1,9 +1,6 @@
 import { Schema, Types, model } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-// idea: single canteen has a single contractor
-//       single canteen has multiple snacks & packaged food items (limited: so array would be more efficient)
-//       single canteen belongs to a single hostel
 const canteenSchema = new Schema(
     {
         contractorId: {
@@ -12,7 +9,7 @@ const canteenSchema = new Schema(
         },
         hostelType: {
             type: String,
-            enum: ['GH', 'BH', 'IH'],
+            enum: ['GH', 'BH', 'IH', 'WWH'],
             required: true,
         },
         hostelName: {
