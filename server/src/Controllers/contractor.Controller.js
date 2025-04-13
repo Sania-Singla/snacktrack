@@ -573,7 +573,7 @@ const updateSnackDetails = tryCatch(
                 imageURL = (await uploadOnCloudinary(image))?.secure_url;
             }
             snack.image = imageURL || snack.image;
-            snack.name = name || snack.name;
+            snack.name = name.trim() || snack.name;
             snack.price = price || snack.price;
             await snack.save();
 
@@ -683,7 +683,7 @@ const updateItemDetails = tryCatch(
                 );
             }
         }
-        item.category = category || item.category;
+        item.category = category.trim() || item.category;
         item.variants = variants || item.variants;
         await item.save();
         return res.status(OK).json(item);

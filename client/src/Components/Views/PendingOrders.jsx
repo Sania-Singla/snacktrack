@@ -58,6 +58,15 @@ export default function PendingOrders({ filter }) {
                 o.studentInfo.userName
                     .toLowerCase()
                     .includes(search.toLowerCase()) ||
+                o.items.some(
+                    (item) =>
+                        item.name
+                            ?.toLowerCase()
+                            .includes(search.toLowerCase()) ||
+                        item.category
+                            ?.toLowerCase()
+                            .includes(search.toLowerCase())
+                ) ||
                 o._id.slice(-8).toLowerCase().includes(search.toLowerCase())
         )
         .map((order, i) => (

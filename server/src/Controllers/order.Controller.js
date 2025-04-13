@@ -259,11 +259,11 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
 
     // Set start time (8 AM)
     const startOfDay = new Date(now);
-    startOfDay.setHours(8, 0, 0, 0);
+    startOfDay.setHours(0, 0, 0, 0);
 
     // Set end time (10 PM)
     const endOfDay = new Date(now);
-    endOfDay.setHours(22, 0, 0, 999);
+    endOfDay.setHours(23, 59, 59, 999);
 
     // Fetch today's orders from this canteen
     const result = await Order.aggregatePaginate(

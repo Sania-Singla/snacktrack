@@ -3,7 +3,10 @@ import { connectDB } from './DB/connectMongoDB.js';
 import { generateTransporter } from './mailer.js';
 import { http } from './socket.js';
 import { connectRedis } from './DB/connectRedis.js';
-import { startBillingCronJob } from './Controllers/bill.Controller.js';
+import {
+    startBillingCronJob,
+    startCleanupCronJob,
+} from './Controllers/bill.Controller.js';
 // import { seedDatabase } from './seeder.js';
 
 const PORT = process.env.PORT || 4000;
@@ -17,8 +20,10 @@ const redisClient = await connectRedis();
 // nodemailer transporter
 const transporter = await generateTransporter();
 
-// cron job to generate bills
+// cron job to generate bills every month at 12:05 AM
 startBillingCronJob();
+// cron job to delete bills & orders every 6 months (july & jan) at 12:05 AM
+startCleanupCronJob();
 
 // await seedDatabase();
 

@@ -117,7 +117,7 @@ const generateBill = tryCatch('generate bill', async (req, res) => {
     // Get the previous month and year
     const now = new Date();
     const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const month = lastMonth.getMonth() + 1; // Months are 0-indexed in JS
+    const month = lastMonth.getMonth(); // Months are 0-indexed in JS
     const year = lastMonth.getFullYear();
 
     // Find all students who have orders in the previous month
@@ -161,7 +161,7 @@ const generateBill = tryCatch('generate bill', async (req, res) => {
     });
 
     await Promise.all(billPromises);
-    console.log(`Automated billing completed for ${month}/${year}`);
+    console.log(`👍Automated billing completed for ${month}/${year}`);
 });
 
 // Scheduled cron job to run on the 1st of every month at 12:05 AM
@@ -177,10 +177,79 @@ const startBillingCronJob = () => {
     );
 };
 
+const cleanupOldBillsAndOrders = tryCatch(
+    'cleanup old bills and orders',
+    async () => {
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // Format for logging
+        const cleanupDate = sixMonthsAgo.toISOString().split('T')[0];
+
+        // All paid bills older than 6 months
+        const oldBills = await Bill.find({
+            paid: true,
+            paidDate: { $lt: sixMonthsAgo },
+        }).lean();
+
+        if (!oldBills.length) {
+            console.log(
+                `No paid bills older than ${cleanupDate} found for cleanup`
+            );
+            return;
+        }
+
+        // Get the month/year ranges from these bills
+        const monthYearRanges = oldBills.reduce((acc, bill) => {
+            const key = `${bill.month}-${bill.year}`;
+            if (!acc.includes(key)) {
+                acc.push(key);
+            }
+            return acc;
+        }, []);
+
+        // Delete corresponding orders for these months
+        const orderDeletePromises = monthYearRanges.map(async (range) => {
+            const [month, year] = range.split('-').map(Number);
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 1);
+
+            return Order.deleteMany({
+                createdAt: { $gte: startDate, $lt: endDate },
+            });
+        });
+
+        // Delete the bills themselves
+        const billDeleteResult = await Bill.deleteMany({
+            _id: { $in: oldBills.map((bill) => bill._id) },
+        });
+
+        await Promise.all(orderDeletePromises);
+
+        console.log(
+            `🧹 Cleanup completed: Deleted ${billDeleteResult.deletedCount} paid bills and their corresponding orders older than ${cleanupDate}`
+        );
+    }
+);
+
+const startCleanupCronJob = () => {
+    // Run at 12:05 AM on January 1st and July 1st each year
+    cron.schedule('5 0 1 1,7 *', cleanupOldBillsAndOrders, {
+        scheduled: true,
+        timezone: 'Asia/Kolkata',
+    });
+
+    console.log(
+        '🧹 Cleanup cron job scheduled to run at 12:05 AM on Jan 1st and July 1st each year'
+    );
+};
+
 export {
     markPaid,
     generateBill,
     getBills,
     getStudentBills,
     startBillingCronJob,
+    startCleanupCronJob,
+    cleanupOldBillsAndOrders,
 };

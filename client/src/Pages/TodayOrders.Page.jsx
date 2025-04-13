@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PendingOrders, Filter, Orders, Button } from '../Components';
 import { toggleAudio, getAudioState, subscribeToAudioChanges } from '../Utils';
+import { useUserContext } from '../Contexts';
 
 export default function TodayOrdersPage() {
     const [searchParams] = useSearchParams();
-    const [audioEnabled, setAudioEnabled] = useState(false);
+    const { audioEnabled, setAudioEnabled } = useUserContext();
     const filter = searchParams.get('filter') || 'Pending';
 
     useEffect(() => {
