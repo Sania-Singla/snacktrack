@@ -12,18 +12,10 @@ export default function RemoveItemPopup() {
     const { setItems } = useSnackContext();
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
-    const [disabled, setDisabled] = useState(false);
-
-    function handleDisable() {
-        return !check;
-    }
-
-    function onMouseOver() {
-        setDisabled(handleDisable());
-    }
+    const [disabled, setDisabled] = useState(true);
 
     async function removeItem() {
-        if (handleDisable()) {
+        if (!check) {
             toast.error('Please fill all fields correctly');
             return;
         }
@@ -79,7 +71,10 @@ export default function RemoveItemPopup() {
                         checked={check}
                         id="delete item"
                         className="cursor-pointer"
-                        onChange={(e) => setCheck(e.target.checked)}
+                        onChange={(e) => {
+                            setCheck(e.target.checked);
+                            setDisabled(!e.target.checked);
+                        }}
                     />
                 </div>
 
@@ -96,9 +91,12 @@ export default function RemoveItemPopup() {
                         )
                     }
                     onClick={removeItem}
-                    onMouseOver={onMouseOver}
                     disabled={disabled}
-                    className="text-white relative -top-2 rounded-md w-full py-2 px-3 bg-red-700 hover:bg-red-800"
+                    className={`text-white relative -top-2 rounded-md py-2 px-3 flex items-center justify-center w-full bg-red-700 hover:bg-red-800 transition-all duration-200 ${
+                        disabled
+                            ? 'bg-gray-400 cursor-not-allowed opacity-50 grayscale-[30%] saturate-50'
+                            : 'bg-red-700 hover:bg-red-800 hover:shadow-md active:scale-[98%]'
+                    }`}
                 />
             </div>
         </div>

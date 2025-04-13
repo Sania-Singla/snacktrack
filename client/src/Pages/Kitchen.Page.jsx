@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useOrderContext, useSocketContext, useUserContext } from '../Contexts';
 
 export default function KitchenPage() {
-    const [orders, setOrders] = useState([]);
+    const { pendingOrders, setPendingOrders } = useOrderContext();
     const { preparedCount } = useOrderContext();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function KitchenPage() {
                                 role: 'staff',
                             });
                         }
-                        setOrders(res.orders);
+                        setPendingOrders(res.orders);
                     }
                 }
             } catch (err) {
@@ -82,7 +82,7 @@ export default function KitchenPage() {
                     });
                 }
                 setError(false);
-                setOrders(res.orders);
+                setPendingOrders(res.orders);
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');
@@ -98,7 +98,7 @@ export default function KitchenPage() {
 
     const itemSummary = {};
     (function processOrders() {
-        orders.forEach(({ items, _id: orderId }) => {
+        pendingOrders.forEach(({ items, _id: orderId }) => {
             items.forEach(({ quantity, name, itemId, specialInstructions }) => {
                 const itemKey = `${itemId}-${orderId}`;
                 const count = preparedCount[itemKey] || 0;
@@ -139,7 +139,11 @@ export default function KitchenPage() {
     })();
 
     return loading ? (
-        <div>loading...</div>
+        <div className="flex justify-center py-12">
+            <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                {icons.loading}
+            </div>
+        </div>
     ) : error ? (
         // verify staff key
         <div className="w-full h-full flex items-center justify-center bg-gray-100">
@@ -198,8 +202,8 @@ export default function KitchenPage() {
                         Kitchen Orders
                     </h1>
                     <p className="bg-[#4977ec]/10 text-[#4977ec] px-3 py-1 rounded-full text-sm font-medium">
-                        {orders.length}{' '}
-                        {orders.length === 1 ? 'Order' : 'Orders'}
+                        {pendingOrders.length}{' '}
+                        {pendingOrders.length === 1 ? 'Order' : 'Orders'}
                     </p>
                 </div>
 

@@ -3,7 +3,15 @@ import { paginate } from './paginate';
 import { fileRestrictions } from './files';
 import { formatTime } from './formatting';
 import { getRollNo } from './student';
-import { playSound } from './audio';
+import {
+    enableAudio,
+    disableAudio,
+    toggleAudio,
+    getAudioState,
+    subscribeToAudioChanges,
+    playSound,
+    audioAllowed,
+} from './audio';
 
 export {
     verifyExpression,
@@ -11,5 +19,11 @@ export {
     fileRestrictions,
     formatTime,
     getRollNo,
+    enableAudio,
+    disableAudio,
+    toggleAudio,
+    getAudioState,
+    subscribeToAudioChanges,
     playSound,
+    audioAllowed,
 };

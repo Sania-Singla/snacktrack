@@ -67,8 +67,11 @@ const verifyStaffKeyJwt = async (req, res, next) => {
                     .json({ message: 'Invalid staff key token' });
             }
             const [hostel] = decodedToken.key.split('-');
-            req.hostelType = hostel.slice(0, 2);
-            req.hostelNumber = Number(hostel.slice(2));
+            const match = hostel.match(/([A-Za-z]+)(\d+)/);
+            if (match) {
+                req.hostelType = match[1]; // The alphabetic part (e.g., "GH", "WWH")
+                req.hostelNumber = Number(match[2]); // The numeric part (e.g., 10)
+            }
             return next();
         } else {
             const { key } = req.body;
@@ -76,8 +79,12 @@ const verifyStaffKeyJwt = async (req, res, next) => {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
             const [hostel, actualKey] = key.split('-');
-            const hostelType = hostel.slice(0, 2);
-            const hostelNumber = Number(hostel.slice(2));
+            const match = hostel.match(/([A-Za-z]+)(\d+)/);
+            let hostelType, hostelNumber;
+            if (match) {
+                hostelType = match[1]; // The alphabetic part (e.g., "GH", "WWH")
+                hostelNumber = Number(match[2]); // The numeric part (e.g., 10)
+            }
 
             const canteen = await Canteen.findOne({ hostelType, hostelNumber });
             const isValid = bcrypt.compareSync(actualKey, canteen.kitchenKey);

@@ -17,7 +17,7 @@ export default function EditStudentPopup() {
         password: '',
     });
     const [error, setError] = useState({});
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
@@ -25,22 +25,26 @@ export default function EditStudentPopup() {
     async function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-        if (value) verifyExpression(name, value, setError);
-        else setError((prev) => ({ ...prev, [name]: '' }));
+        if (name !== 'password') {
+            value
+                ? verifyExpression(name, value, setError)
+                : setError((prev) => ({ ...prev, [name]: '' }));
+        }
+        onMouseOver();
     }
 
     function handleDisable() {
-        if (
+        return (
             Object.values(inputs).some((value) => !value) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             )
-        ) {
-            return true;
-        } else return false;
+        );
     }
 
     function onMouseOver() {
+        console.log(handleDisable());
+        console.log(inputs);
         setDisabled(handleDisable());
     }
 
@@ -120,7 +124,6 @@ export default function EditStudentPopup() {
                 key={field.name}
                 field={field}
                 handleChange={handleChange}
-                error={error}
                 inputs={inputs}
                 showPassword={showPassword}
                 setShowPassword={setShowPassword}
@@ -177,7 +180,11 @@ export default function EditStudentPopup() {
                     <div className="w-full">
                         <Button
                             type="submit"
-                            className="text-white rounded-md py-2 mt-4 h-[45px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                                disabled
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
+                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
+                            }`}
                             disabled={disabled}
                             onMouseOver={onMouseOver}
                             btnText={

@@ -46,11 +46,7 @@ export default function StudentsPage() {
             }
         })();
 
-        return () => {
-            controller.abort();
-            setStudents([]);
-            setStudentsInfo({});
-        };
+        return () => controller.abort();
     }, [page]);
 
     const studentElements = students

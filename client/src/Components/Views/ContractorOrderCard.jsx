@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
-import { useOrderContext, useSocketContext } from '../../Contexts';
+import { useSocketContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -14,7 +14,6 @@ export default function ContractorOrderCard({ order, reference }) {
     const { socket } = useSocketContext();
     const [status, setStatus] = useState(order.status);
     const [statusOptions, setStatusOptions] = useState([]);
-    const { setPendingOrders } = useOrderContext();
 
     useEffect(() => {
         if (status === 'Pending') {
@@ -38,7 +37,6 @@ export default function ContractorOrderCard({ order, reference }) {
             const res = await orderService.updateOrderStatus(_id, status);
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
-                setPendingOrders((prev) => prev.filter((o) => o._id !== _id));
                 socket.emit(`order${status}`, order);
             }
         } catch (err) {

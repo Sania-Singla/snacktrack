@@ -17,9 +17,10 @@ export default function RegisterStudentPage() {
         email: '',
         rollNo: '',
     };
+    const [phoneKey, setPhoneKey] = useState(0);
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -28,6 +29,7 @@ export default function RegisterStudentPage() {
         setInputs((prev) => ({ ...prev, [name]: value }));
         if (value) verifyExpression(name, value, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
+        onMouseOver();
     }
 
     function handlePhoneChange(value, country, e, formattedValue) {
@@ -35,6 +37,7 @@ export default function RegisterStudentPage() {
         setInputs((prev) => ({ ...prev, [name]: formattedValue }));
         if (value) verifyExpression(name, formattedValue, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
+        onMouseOver();
     }
 
     function handleDisable() {
@@ -65,6 +68,7 @@ export default function RegisterStudentPage() {
             if (res && !res.message) {
                 toast.success('Account created successfully');
                 setInputs(initialInputs);
+                setPhoneKey((prev) => prev + 1);
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
             navigate('/server-error');
@@ -163,6 +167,7 @@ export default function RegisterStudentPage() {
                             </div>
                             <div className="w-full">
                                 <PhoneInput
+                                    key={phoneKey}
                                     countryCodeEditable={false}
                                     country={'in'}
                                     value={inputs.phoneNumber}
@@ -187,7 +192,11 @@ export default function RegisterStudentPage() {
                     <div className="w-full">
                         <Button
                             type="submit"
-                            className="text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                                disabled
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
+                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
+                            }`}
                             disabled={disabled}
                             onMouseOver={onMouseOver}
                             btnText={

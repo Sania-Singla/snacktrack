@@ -9,7 +9,7 @@ export async function sendSMS({ to, text, link }) {
     try {
         const msg = await client.messages.create({
             from: process.env.TWILIO_PHONE_NUMBER, // Can't be changed in trial mode
-            to: '+91' + to,
+            to,
             body: `📢 Snack Track \n${text} \n🔗 Click here: ${link}`,
         });
         console.log('🔥 Message sent successfully');

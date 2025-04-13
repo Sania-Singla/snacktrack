@@ -217,8 +217,7 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
 
 // for kitchen page
 const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
-    const hostelType = req.hostelType;
-    const hostelNumber = req.hostelNumber;
+    const { hostelType, hostelNumber } = req;
 
     const canteen = await Canteen.findOne({ hostelType, hostelNumber });
 

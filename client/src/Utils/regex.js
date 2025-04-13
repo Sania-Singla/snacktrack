@@ -25,6 +25,16 @@ export function verifyExpression(name, value, setError) {
                 break;
             }
 
+            case 'price': {
+                value != 0
+                    ? setError((prevError) => ({ ...prevError, [name]: '' }))
+                    : setError((prevError) => ({
+                          ...prevError,
+                          [name]: `price cannot be 0.`,
+                      }));
+                break;
+            }
+
             case 'fullName':
             case 'name':
             case 'category': {

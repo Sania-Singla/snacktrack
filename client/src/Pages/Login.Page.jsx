@@ -13,7 +13,7 @@ export default function LoginPage() {
     const [role, setRole] = useState('');
     const [hostel, setHostel] = useState('');
     const [loading, setLoading] = useState(false);
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const { setUser } = useUserContext();
     const navigate = useNavigate();
@@ -29,6 +29,7 @@ export default function LoginPage() {
     function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
+        onMouseOver();
     }
 
     function handleDisable() {
@@ -187,7 +188,11 @@ export default function LoginPage() {
 
                     <div>
                         <Button
-                            className="text-white rounded-md py-2 mt-2 h-[40px] text-lg w-full flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                                disabled
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
+                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
+                            }`}
                             onMouseOver={onMouseOver}
                             type="submit"
                             btnText={

@@ -17,7 +17,7 @@ export default function RemoveAllStudentsPopup() {
     const navigate = useNavigate();
     const { user } = useUserContext();
     const [check, setCheck] = useState(false);
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
@@ -87,7 +87,10 @@ export default function RemoveAllStudentsPopup() {
                         checked={check}
                         id="delete student"
                         className="cursor-pointer"
-                        onChange={(e) => setCheck(e.target.checked)}
+                        onChange={(e) => {
+                            setCheck(e.target.checked);
+                            setDisabled(!e.target.checked || !password);
+                        }}
                     />
                 </div>
 
@@ -103,7 +106,10 @@ export default function RemoveAllStudentsPopup() {
                         inputs={{ password }}
                         setShowPassword={setShowPassword}
                         showPassword={showPassword}
-                        handleChange={(e) => setPassword(e.target.value)}
+                        handleChange={(e) => {
+                            setPassword(e.target.value);
+                            setDisabled(!e.target.value || !check);
+                        }}
                     />
                 </div>
                 <Button
@@ -121,7 +127,11 @@ export default function RemoveAllStudentsPopup() {
                     onClick={removeStudents}
                     onMouseOver={onMouseOver}
                     disabled={disabled}
-                    className="text-white relative -top-2 rounded-md w-full py-2 px-3 bg-red-700 hover:bg-red-800"
+                    className={`text-white relative -top-2 rounded-md py-2 px-3 flex items-center justify-center w-full bg-red-700 hover:bg-red-800 transition-all duration-200 ${
+                        disabled
+                            ? 'bg-gray-400 cursor-not-allowed opacity-50 grayscale-[30%] saturate-50'
+                            : 'bg-red-700 hover:bg-red-800 hover:shadow-md active:scale-[98%]'
+                    }`}
                 />
             </div>
         </div>

@@ -40,7 +40,8 @@ io.on('connection', async (socket) => {
             getSocketId(canteenId),
             getSocketId('staff' + canteenId),
         ]);
-        socket.to(contrSocketId).to(staffSocketId).emit('newOrder', order);
+        socket.to(contrSocketId).emit('newOrder', order);
+        socket.to(staffSocketId).emit('newOrder', order);
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -50,8 +51,13 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('orderRejected', async (order) => {
-        const socketId = await getSocketId(order.studentId);
-        socket.to(socketId).emit('orderRejected', order);
+        const [studentSocketId, staffSocketId] = await Promise.all([
+            getSocketId(order.studentId),
+            getSocketId('staff' + canteenId),
+        ]);
+        socket.to(studentSocketId).emit('orderRejected', order);
+        socket.to(staffSocketId).emit('orderRejected', order);
+        io.to(socket.id).emit('orderRejected', order); // to send event to itself use io instead of socket
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -63,6 +69,7 @@ io.on('connection', async (socket) => {
     socket.on('orderPrepared', async (order) => {
         const studentSocketId = await getSocketId(order.studentId);
         socket.to(studentSocketId).emit('orderPrepared', order);
+        io.to(socket.id).emit('orderPrepared', order); // to send event to itself use io instead of socket
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -77,10 +84,8 @@ io.on('connection', async (socket) => {
             getSocketId('staff' + canteenId),
         ]);
         io.to(socket.id).emit('orderPickedUp', order); // to send event to itself use io instead of socket
-        socket
-            .to(staffSocketId)
-            .to(studentSocketId)
-            .emit('orderPickedUp', order);
+        socket.to(staffSocketId).emit('orderPickedUp', order);
+        socket.to(studentSocketId).emit('orderPickedUp', order);
 
         sendSMS({
             to: order.studentInfo.phoneNumber,

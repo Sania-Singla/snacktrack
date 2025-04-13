@@ -22,7 +22,7 @@ export default function RegisterCanteenPage() {
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const { setPopupInfo, setShowPopup } = usePopupContext();
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
     const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -35,6 +35,7 @@ export default function RegisterCanteenPage() {
         setInputs((prev) => ({ ...prev, [name]: value }));
         if (value) verifyExpression(name, value, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
+        onMouseOver();
     }
 
     function handlePhoneChange(value, country, e, formattedValue) {
@@ -42,6 +43,7 @@ export default function RegisterCanteenPage() {
         setInputs((prev) => ({ ...prev, [name]: formattedValue }));
         if (value) verifyExpression(name, formattedValue, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
+        onMouseOver();
     }
 
     useEffect(() => {
@@ -232,7 +234,11 @@ export default function RegisterCanteenPage() {
                     <div className="w-full">
                         <Button
                             type="submit"
-                            className="text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                                disabled
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
+                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
+                            }`}
                             disabled={disabled}
                             onMouseOver={onMouseOver}
                             btnText={

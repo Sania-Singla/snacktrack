@@ -13,7 +13,7 @@ export default function AddItemPopup() {
     const [variants, setVariants] = useState([]);
     const [error, setError] = useState({});
     const [variantErrors, setVariantErrors] = useState({});
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const { setShowPopup } = usePopupContext();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -23,14 +23,18 @@ export default function AddItemPopup() {
         const prices = variants.map((variant) => variant.price);
         const newVariantErrors = {};
 
-        variants.forEach((variant, index) => {
+        variants.forEach((variant, i) => {
             if (
                 prices.filter((price) => price === variant.price).length > 1 &&
                 variant.price !== 0
             ) {
-                newVariantErrors[index] = 'Price already exists';
+                newVariantErrors[i] = 'Price already exists';
+            } else if (variant.price == 0) {
+                newVariantErrors[i] = 'Price cannot be 0';
+            } else if (variant.availableCount == 0) {
+                newVariantErrors[i] = 'Count cannot be 0';
             } else {
-                newVariantErrors[index] = '';
+                newVariantErrors[i] = '';
             }
         });
 
@@ -42,6 +46,8 @@ export default function AddItemPopup() {
         setInputs((prev) => ({ ...prev, [name]: value }));
         if (value) verifyExpression(name, value, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
+
+        onMouseOver();
     }
 
     const handleVariantChange = (i, e) => {
@@ -51,6 +57,8 @@ export default function AddItemPopup() {
                 index === i ? { ...variant, [name]: value } : variant
             )
         );
+
+        onMouseOver();
     };
 
     const addVariant = () => {
@@ -68,7 +76,11 @@ export default function AddItemPopup() {
         return (
             Object.values(inputs).some((value) => !value) ||
             variants.some(
-                (variant) => !variant.price || !variant.availableCount
+                (variant) =>
+                    !variant.price ||
+                    !variant.availableCount ||
+                    variant.availableCount == 0 ||
+                    variant.price == 0
             ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
@@ -222,7 +234,11 @@ export default function AddItemPopup() {
                     <div className="w-full">
                         <Button
                             type="submit"
-                            className="text-white rounded-md py-2 flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                                disabled
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
+                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
+                            }`}
                             disabled={disabled}
                             onMouseOver={onMouseOver}
                             btnText={

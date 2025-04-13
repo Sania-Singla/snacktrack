@@ -34,6 +34,7 @@ export default function EditSnackPopup() {
         }));
         if (value) verifyExpression(name, value, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
+
         if (type === 'file') {
             const file = files[0];
             if (!fileRestrictions(files[0])) {
@@ -47,17 +48,19 @@ export default function EditSnackPopup() {
                 setError((prev) => ({ ...prev, image: '' }));
             }
         }
+
+        onMouseOver();
     }
 
     function handleDisable() {
-        if (
-            Object.values(inputs).some((value) => !value) ||
+        return (
+            Object.entries(inputs).some(
+                ([key, value]) => !value && key !== 'image'
+            ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             )
-        ) {
-            return true;
-        } else return false;
+        );
     }
 
     function onMouseOver() {
@@ -198,7 +201,11 @@ export default function EditSnackPopup() {
                     <div className="w-full">
                         <Button
                             type="submit"
-                            className="text-white rounded-md py-2 mt-4 h-[45px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                                disabled
+                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
+                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
+                            }`}
                             disabled={disabled}
                             onMouseOver={onMouseOver}
                             btnText={

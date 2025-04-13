@@ -6,7 +6,7 @@ import {
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function PackagedItemView({ item, reference }) {
     const { _id, category } = item;
@@ -14,6 +14,8 @@ export default function PackagedItemView({ item, reference }) {
     const { user } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
+
+    useEffect(() => setVariants(item.variants), [item]);
 
     function editItem() {
         setShowPopup(true);

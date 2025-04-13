@@ -1,15 +1,65 @@
+// audioUtils.js
 import { AUDIO_FILE } from '../Constants/constants';
 
-// Preload the audio
-const audio = new Audio(AUDIO_FILE);
-audio.preload = 'auto';
+let audio = null;
+let audioAllowed = false;
+let audioListeners = [];
 
-export async function playSound() {
+// Notify all listeners when audio state changes
+function notifyListeners() {
+    audioListeners.forEach((cb) => cb(audioAllowed));
+}
+
+function enableAudio() {
+    if (!audio) {
+        audio = new Audio(AUDIO_FILE);
+        audio.preload = 'auto';
+    }
+    audioAllowed = true;
+    notifyListeners();
+}
+
+function disableAudio() {
+    audioAllowed = false;
+    notifyListeners();
+}
+
+function toggleAudio() {
+    if (audioAllowed) {
+        disableAudio();
+    } else {
+        enableAudio();
+    }
+}
+
+function getAudioState() {
+    return audioAllowed;
+}
+
+function subscribeToAudioChanges(callback) {
+    audioListeners.push(callback);
+    return () => {
+        audioListeners = audioListeners.filter((cb) => cb !== callback);
+    };
+}
+
+async function playSound() {
+    if (!audioAllowed || !audio) return;
     try {
-        // Reset audio to start
         audio.currentTime = 0;
         await audio.play();
     } catch (err) {
         console.log('Audio play failed:', err);
+        disableAudio();
     }
 }
+
+export {
+    enableAudio,
+    disableAudio,
+    toggleAudio,
+    getAudioState,
+    subscribeToAudioChanges,
+    playSound,
+    audioAllowed,
+};
