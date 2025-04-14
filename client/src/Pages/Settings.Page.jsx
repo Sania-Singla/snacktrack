@@ -9,9 +9,9 @@ export default function SettingsPage() {
 
     const tabOptions = [
         { name: 'Personal Information', path: '', show: true },
-        { name: 'Change Password', path: 'password', show: true },
+        { name: 'Update Password', path: 'password', show: true },
         {
-            name: 'Change Kitchen Key',
+            name: 'Update Kitchen Key',
             path: 'kitchen-key',
             show: user.role === 'contractor',
         },
@@ -25,7 +25,7 @@ export default function SettingsPage() {
                     key={option.name}
                     to={option.path}
                     className={({ isActive }) =>
-                        `${isActive ? 'border-b-[#4977ec] bg-[#4977ec] text-white' : 'border-b-black bg-white text-black'} text-ellipsis drop-shadow-sm hover:backdrop-brightness-90 rounded-t-md p-[3px] border-b-[0.1rem] w-full text-center text-lg font-medium`
+                        `${isActive ? 'border-b-[#4977ec] bg-[#4977ec] text-white' : 'border-b-black bg-white text-black'} text-ellipsis drop-shadow-sm hover:backdrop-brightness-90 rounded-t-md p-2 border-b-[0.1rem] w-full text-center md:text-lg font-medium`
                     }
                 >
                     <div>{option.name}</div>
@@ -35,7 +35,7 @@ export default function SettingsPage() {
 
     return (
         <div className="w-full h-full overflow-scroll py-4 space-y-8">
-            <div className="w-full px-4">
+            <div className="w-full px-2 md:px-4">
                 {/* avatar */}
                 <div className="flex gap-4 items-center justify-start">
                     <div className="relative">
@@ -74,11 +74,11 @@ export default function SettingsPage() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-evenly w-full gap-4 px-4">
+            <div className="flex items-center justify-evenly w-full gap-4 md:px-4">
                 {tabElements}
             </div>
 
-            <div className="border-t py-3 border-gray-400 px-4">
+            <div className="border-t py-4 border-gray-400 md:px-4">
                 <Outlet />
             </div>
         </div>

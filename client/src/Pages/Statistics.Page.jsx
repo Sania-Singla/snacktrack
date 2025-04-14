@@ -54,8 +54,8 @@ export default function StatisticsPage() {
     }
 
     return (
-        <div className="p-6 w-full">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800">
+        <div className="p-2 md:p-4 w-full">
+            <h1 className="text-3xl font-bold mb-6 text-gray-800">
                 Sales Statistics for {data.year}
             </h1>
 

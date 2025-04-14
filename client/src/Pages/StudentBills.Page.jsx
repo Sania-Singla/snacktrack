@@ -45,7 +45,7 @@ export default function StudentBillsPage() {
 
     return (
         <div>
-            <div className="w-full p-4">
+            <div className="w-full p-2 md:p-4">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">
                         {user._id === studentId ? 'My Bills' : 'Bills'}

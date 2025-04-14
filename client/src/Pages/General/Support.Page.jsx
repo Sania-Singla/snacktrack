@@ -38,9 +38,13 @@ export default function SupportPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, staggerChildren: 0.1 }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-7xl mx-auto"
+                className="flex mt-12 w-full justify-center"
             >
-                {contributorElements}
+                <div className="flex flex-wrap justify-evenly gap-12 max-w-7xl mx-auto">
+                    {contributorElements}
+                    {contributorElements}
+                    {contributorElements}
+                </div>
             </motion.div>
 
             {/* Enhanced Support Options Section */}

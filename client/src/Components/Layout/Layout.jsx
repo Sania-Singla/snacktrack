@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { Header, Footer, Sidebar, Popup } from '..';
+import { Header, Footer, Sidebar, Popup, Searchbar } from '..';
 import { Toaster } from 'react-hot-toast';
 import { useEffect, useRef } from 'react';
 
@@ -19,6 +19,9 @@ export default function Layout({ renderTemplate = true }) {
             <hr className="w-full" />
             <Sidebar />
             <main className="mt-[60px] p-4 min-h-[calc(100%-60px)] w-full bg-[#f9f9f9]">
+                <div className="mb-6 mt-2 w-full sm:hidden">
+                    <Searchbar />
+                </div>
                 <Outlet />
             </main>
             <hr className="border-gray-300" />

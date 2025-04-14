@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useOrderContext, useSocketContext, useUserContext } from '../Contexts';
 
 export default function KitchenPage() {
-    const { pendingOrders, setPendingOrders } = useOrderContext();
+    const { kitchenOrders, setKitchenOrders } = useOrderContext();
     const { preparedCount } = useOrderContext();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function KitchenPage() {
                                 role: 'staff',
                             });
                         }
-                        setPendingOrders(res.orders);
+                        setKitchenOrders(res.orders);
                     }
                 }
             } catch (err) {
@@ -82,7 +82,7 @@ export default function KitchenPage() {
                     });
                 }
                 setError(false);
-                setPendingOrders(res.orders);
+                setKitchenOrders(res.orders);
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');
@@ -98,7 +98,7 @@ export default function KitchenPage() {
 
     const itemSummary = {};
     (function processOrders() {
-        pendingOrders.forEach(({ items, _id: orderId }) => {
+        kitchenOrders.forEach(({ items, _id: orderId }) => {
             items.forEach(({ quantity, name, itemId, specialInstructions }) => {
                 const itemKey = `${itemId}-${orderId}`;
                 const count = preparedCount[itemKey] || 0;
@@ -202,8 +202,8 @@ export default function KitchenPage() {
                         Kitchen Orders
                     </h1>
                     <p className="bg-[#4977ec]/10 text-[#4977ec] px-3 py-1 rounded-full text-sm font-medium">
-                        {pendingOrders.length}{' '}
-                        {pendingOrders.length === 1 ? 'Order' : 'Orders'}
+                        {kitchenOrders.length}{' '}
+                        {kitchenOrders.length === 1 ? 'Order' : 'Orders'}
                     </p>
                 </div>
 

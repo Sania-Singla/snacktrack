@@ -53,7 +53,9 @@ export default function Header() {
                 </Link>
             </div>
 
-            <Searchbar />
+            <div className="max-w-[400px] w-full hidden sm:block ">
+                <Searchbar />
+            </div>
 
             <div className="flex gap-4 items-center">
                 {user.role === 'student' ? (

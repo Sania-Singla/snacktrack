@@ -101,7 +101,7 @@ export default function Searchbar() {
     };
 
     return (
-        <div className="w-full max-w-[500px] hidden sm:block group drop-shadow-sm relative">
+        <div className="w-full group drop-shadow-sm relative">
             <input
                 type="text"
                 placeholder={placeholder || ''}

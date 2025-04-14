@@ -9,8 +9,12 @@ const SocketContext = createContext();
 const SocketContextProvider = ({ children }) => {
     const [socket, setSocket] = useState(null);
     const { user } = useUserContext();
-    const { setStudentOrders, setPendingOrders, setPreparedCount } =
-        useOrderContext();
+    const {
+        setStudentOrders,
+        setPendingOrders,
+        setPreparedCount,
+        setKitchenOrders,
+    } = useOrderContext();
 
     function connectSocket() {
         if (!user || socket) return;
@@ -42,11 +46,13 @@ const SocketContextProvider = ({ children }) => {
 
         socketInstance.on('newOrder', async (order) => {
             setPendingOrders((prev) => prev.concat(order));
+            setKitchenOrders((prev) => prev.concat(order));
             await playSound();
         });
 
         socketInstance.on('orderRejected', (order) => {
             setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+            setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
             setStudentOrders((prev) =>
                 prev.map((o) =>
                     o._id === order._id ? { ...o, status: 'Rejected' } : o
@@ -56,6 +62,7 @@ const SocketContextProvider = ({ children }) => {
 
         socketInstance.on('orderPrepared', (order) => {
             setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+            setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
             setStudentOrders((prev) =>
                 prev.map((o) =>
                     o._id === order._id ? { ...o, status: 'Prepared' } : o
@@ -65,6 +72,7 @@ const SocketContextProvider = ({ children }) => {
 
         socketInstance.on('orderPickedUp', (order) => {
             setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
+            setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
             setStudentOrders((prev) =>
                 prev.map((o) =>
                     o._id === order._id ? { ...o, status: 'PickedUp' } : o

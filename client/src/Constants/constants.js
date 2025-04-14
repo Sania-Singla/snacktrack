@@ -5,9 +5,11 @@ import USER_PLACEHOLDER_IMAGE from '../Assets/images/user.png';
 import AUDIO_FILE from '../Assets/audios/notification.wav';
 
 const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api';
-const DISCORD_LINK = import.meta.env.VITE_DISCORD_LINK;
-const EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
-const CONTACTNUMBER = import.meta.env.VITE_ADMIN_CONTACT_NUMBER;
+
+const DISCORD_LINK = 'https://discord.com/channels/@sania_singla';
+const EMAIL = 'snacktrack@gmail.com';
+const CONTACTNUMBER = '+91 1234567890';
+const ADDRESS = 'UIET, Panjab University, Chandigarh, India';
 const MAX_FILE_SIZE = 5;
 const LIMIT = 10; // Pagination limit
 const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
@@ -44,6 +46,7 @@ export {
     CONTRIBUTORS,
     EMAIL,
     CONTACTNUMBER,
+    ADDRESS,
     SERVER_ERROR,
     TAX,
     DISCORD_LINK,

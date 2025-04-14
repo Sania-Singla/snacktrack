@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { PendingOrders, Filter, Orders, Button } from '../Components';
 import { toggleAudio, getAudioState, subscribeToAudioChanges } from '../Utils';
 import { useUserContext } from '../Contexts';
+import toast from 'react-hot-toast';
 
 export default function TodayOrdersPage() {
     const [searchParams] = useSearchParams();
@@ -24,12 +25,12 @@ export default function TodayOrdersPage() {
     ];
 
     return (
-        <div className="w-full p-4">
+        <div className="w-full p-2 md:p-4">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold text-gray-900">
                     Today's Orders
                 </h1>
-                <div className="flex items-center justify-center gap-5">
+                <div className="flex items-center justify-center gap-4">
                     <div className="relative">
                         <Button
                             btnText="🔔"
@@ -39,7 +40,12 @@ export default function TodayOrdersPage() {
                             className={`bg-[#ffffff] size-[40px] text-lg group rounded-full drop-shadow-sm ${
                                 !audioEnabled ? 'opacity-70' : ''
                             }`}
-                            onClick={toggleAudio}
+                            onClick={() => {
+                                toggleAudio();
+                                audioEnabled
+                                    ? toast.error('Audio Disabled')
+                                    : toast.success('Audio Enabled');
+                            }}
                         />
                         {!audioEnabled && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

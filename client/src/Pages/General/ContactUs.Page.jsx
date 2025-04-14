@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
 import { useState } from 'react';
 import { icons } from '../../Assets/icons';
-import { EMAIL, CONTACTNUMBER } from '../../Constants/constants';
+import { EMAIL, CONTACTNUMBER, ADDRESS } from '../../Constants/constants';
 import toast from 'react-hot-toast';
 import { userService } from '../../Services';
 
@@ -38,7 +38,7 @@ export default function ContactUsPage() {
     }
 
     return (
-        <div className="w-full min-h-screen">
+        <div className="w-full min-h-screen p-2 md:p-4">
             {/* Hero Section */}
             <section className="w-full bg-white shadow-md rounded-xl py-10 px-8 md:px-16">
                 <h1 className="text-[35px] font-bold text-gray-900">
@@ -52,7 +52,7 @@ export default function ContactUsPage() {
             </section>
 
             {/* Grid Layout for Content */}
-            <div className="w-full px-8 lg:px-12 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="w-full px-2 sm:px-4 md:px-6 lg:px-8 py-10 grid grid-cols-1 md:grid-cols-2 gap-12">
                 {/* Left Section - Contact Info & Support */}
                 <div className="flex flex-col gap-6">
                     {/* Technical Support */}
@@ -131,6 +131,16 @@ export default function ContactUsPage() {
                                     </div>
                                 </div>
                                 <p className="text-gray-700">{CONTACTNUMBER}</p>
+                            </div>
+
+                            {/* Address */}
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-gray-100 rounded-full">
+                                    <div className="size-4 fill-black">
+                                        {icons.home}
+                                    </div>
+                                </div>
+                                <p className="text-gray-700">{ADDRESS}</p>
                             </div>
                         </div>
                     </div>

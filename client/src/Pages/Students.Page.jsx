@@ -74,7 +74,7 @@ export default function StudentsPage() {
     }
 
     return (
-        <div className="sm:p-8 pt-4 sm:pt-4">
+        <div className="sm:p-4 pt-4">
             {studentElements.length > 0 && (
                 <div className="w-full">
                     <div className=" w-full flex justify-center mb-8">

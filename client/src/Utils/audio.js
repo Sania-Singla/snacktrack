@@ -1,4 +1,3 @@
-// audioUtils.js
 import { AUDIO_FILE } from '../Constants/constants';
 
 let audio = null;
@@ -25,11 +24,7 @@ function disableAudio() {
 }
 
 function toggleAudio() {
-    if (audioAllowed) {
-        disableAudio();
-    } else {
-        enableAudio();
-    }
+    audioAllowed ? disableAudio() : enableAudio();
 }
 
 function getAudioState() {
