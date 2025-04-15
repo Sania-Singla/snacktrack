@@ -97,7 +97,7 @@ export default function Footer() {
 
     return (
         <footer className="bg-[#f5f5f5] border-t border-gray-200 w-full">
-            <div className="max-w-7xl mx-auto py-6 px-8 flex flex-col lg:flex-row gap-8 justify-between">
+            <div className="max-w-7xl mx-auto p-6 flex flex-col lg:flex-row gap-8 justify-between">
                 {/* Brand Column */}
                 <div className="space-y-4 w-full lg:w-[40%]">
                     <Link to="/" className="flex items-center gap-3 group">
@@ -120,7 +120,7 @@ export default function Footer() {
 
                 <div className="flex flex-row justify-between gap-8 w-full pt-[10px]">
                     {/* Footer Links Columns */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 w-full">
+                    <div className="grid grid-cols-1 h-fit sm:grid-cols-2 gap-8 w-full">
                         {footerLinkElements}
                     </div>
 
@@ -177,7 +177,7 @@ export default function Footer() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="px-6 mx-2 border-t py-3 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="px-4 mx-2 border-t py-3 border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <p className="text-gray-500 text-xs sm:text-sm">
                     &copy; {new Date().getFullYear()} Snack Track. All rights
                     reserved.

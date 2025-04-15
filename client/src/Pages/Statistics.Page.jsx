@@ -33,28 +33,30 @@ export default function StatisticsPage() {
         return () => controller.abort();
     }, []);
 
-    const toggleMonthExpand = (monthIndex) => {
-        setExpandedMonth(expandedMonth === monthIndex ? null : monthIndex);
+    const toggleMonthExpand = (i) => {
+        setExpandedMonth(expandedMonth === i ? null : i);
     };
 
     const monthlyItemSales =
         data.monthlySales?.map((month) => ({
             ...month,
+            monthName: new Date(2000, month.month - 1).toLocaleString(
+                'default',
+                {
+                    month: 'long',
+                }
+            ),
             items: month.items.sort((a, b) => b.totalRevenue - a.totalRevenue),
         })) || [];
 
-    if (loading) {
-        return (
-            <div className="flex justify-center py-12">
-                <div className="size-[25px] fill-[#4977ec] animate-spin">
-                    {icons.loading}
-                </div>
+    return loading ? (
+        <div className="flex justify-center py-12">
+            <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                {icons.loading}
             </div>
-        );
-    }
-
-    return (
-        <div className="p-2 md:p-4 w-full">
+        </div>
+    ) : (
+        <div className="sm:p-4 w-full">
             <h1 className="text-3xl font-bold mb-6 text-gray-800">
                 Sales Statistics for {data.year}
             </h1>
@@ -105,7 +107,7 @@ export default function StatisticsPage() {
 
             {/* Monthly Sales Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {monthlyItemSales.map((month, monthIndex) => (
+                {monthlyItemSales.map((month, i) => (
                     <div
                         key={month.month}
                         className="bg-white h-fit rounded-xl border border-gray-200 shadow-sm overflow-hidden"
@@ -113,7 +115,7 @@ export default function StatisticsPage() {
                         {/* Clickable Header */}
                         <div
                             className="p-4 cursor-pointer flex justify-between items-center"
-                            onClick={() => toggleMonthExpand(monthIndex)}
+                            onClick={() => toggleMonthExpand(i)}
                         >
                             <div>
                                 <h3 className="text-lg font-semibold text-gray-800">
@@ -128,7 +130,7 @@ export default function StatisticsPage() {
                                     ₹{month.monthlyTotal.toLocaleString()}
                                 </span>
                                 <div
-                                    className={`transition-transform ${expandedMonth === monthIndex ? 'rotate-180' : ''}`}
+                                    className={`transition-transform ${expandedMonth === i ? 'rotate-180' : ''}`}
                                 >
                                     <div className="size-4 fill-gray-500">
                                         {icons.arrowDown}
@@ -139,7 +141,7 @@ export default function StatisticsPage() {
 
                         {/* Expandable Content */}
                         <AnimatePresence>
-                            {expandedMonth === monthIndex && (
+                            {expandedMonth === i && (
                                 <motion.div
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}

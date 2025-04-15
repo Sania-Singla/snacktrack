@@ -94,7 +94,7 @@ export default function AdminPage() {
     ) : error ? (
         // verify admin key
         <div className="w-full h-full flex items-center justify-center bg-gray-100">
-            <div className="sm:px-8 drop-shadow-md relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-4">
+            <div className="sm:px-8 drop-shadow-md relative w-[350px] sm:w-[450px] bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-4">
                 <p className="text-2xl font-bold text-center mb-2">
                     Verify Admin Key
                 </p>

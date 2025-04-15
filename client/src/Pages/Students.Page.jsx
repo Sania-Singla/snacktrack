@@ -15,13 +15,15 @@ export default function StudentsPage() {
     const { students, setStudents } = useStudentContext();
     const { setPopupInfo, setShowPopup } = usePopupContext();
     const [studentsInfo, setStudentsInfo] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
     const navigate = useNavigate();
 
     // pagination
     const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
+
+    useEffect(() => setStudents([]), []);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -74,7 +76,7 @@ export default function StudentsPage() {
     }
 
     return (
-        <div className="sm:p-4 pt-4">
+        <div className="sm:p-4 pt-2">
             {studentElements.length > 0 && (
                 <div className="w-full">
                     <div className=" w-full flex justify-center mb-8">

@@ -10,7 +10,7 @@ const contributorElements = CONTRIBUTORS?.map((contributor) => (
 
 export default function SupportPage() {
     return (
-        <div className="w-full min-h-screen p-4">
+        <div className="w-full min-h-screen sm:p-4">
             {/* Header Section */}
             <motion.div
                 initial={{ opacity: 0, y: -50 }}
@@ -41,8 +41,6 @@ export default function SupportPage() {
                 className="flex mt-12 w-full justify-center"
             >
                 <div className="flex flex-wrap justify-evenly gap-12 max-w-7xl mx-auto">
-                    {contributorElements}
-                    {contributorElements}
                     {contributorElements}
                 </div>
             </motion.div>

@@ -53,7 +53,7 @@ export default function FAQpage() {
     ];
 
     return (
-        <div className="w-full flex flex-col items-center justify-center p-4">
+        <div className="w-full flex flex-col items-center justify-center sm:p-4">
             {/* Page Header */}
             <motion.h1
                 initial={{ opacity: 0, y: -20 }}

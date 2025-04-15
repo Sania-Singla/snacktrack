@@ -73,7 +73,11 @@ export default function HomePage() {
             {/* Render Based on Filter */}
             <div className="sm:px-4 pb-8">
                 {loading ? (
-                    <div className="w-full text-center">loading...</div>
+                    <div className="flex justify-center py-12">
+                        <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                            {icons.loading}
+                        </div>
+                    </div>
                 ) : filter === 'snacks' ? (
                     <Snacks />
                 ) : (

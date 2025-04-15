@@ -64,17 +64,17 @@ export default function ContractorOrderCard({ order, reference }) {
                             />
                         </div>
                         <div className="flex-1 space-y-[2px]">
-                            <h3 className="text-sm font-medium text-gray-800 truncate">
-                                {studentInfo.fullName}
-                            </h3>
-                            <div className="flex items-center gap-1 text-xs text-gray-600">
-                                <span>
+                            <h3 className="flex items-center gap-1">
+                                <span className="font-medium text-sm text-gray-800 truncate">
+                                    {studentInfo.fullName}
+                                </span>
+                                <span className="text-xs text-gray-600">•</span>
+                                <span className="text-xs text-gray-600">
                                     Roll No: {getRollNo(studentInfo.userName)}
                                 </span>
-                                <span>•</span>
-                                <span>
-                                    {studentInfo.phoneNumber || 'No phone'}
-                                </span>
+                            </h3>
+                            <div className="flex items-center gap-1 text-xs text-gray-600">
+                                {studentInfo.phoneNumber}
                             </div>
                         </div>
                     </div>

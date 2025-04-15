@@ -13,13 +13,24 @@ export default function Layout({ renderTemplate = true }) {
         layoutRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }, [pathname]);
 
+    const staticPages = [
+        '/about-us',
+        '/contact-us',
+        '/support',
+        '/settings',
+        '/faqs',
+        '/statistics',
+    ];
+
     return renderTemplate ? (
         <div ref={layoutRef} className="overflow-y-scroll h-full w-full">
             <Header />
             <hr className="w-full" />
             <Sidebar />
             <main className="mt-[60px] p-4 min-h-[calc(100%-60px)] w-full bg-[#f9f9f9]">
-                <div className="mb-6 mt-2 w-full sm:hidden">
+                <div
+                    className={`mb-6 mt-2 w-full sm:hidden ${staticPages.includes(pathname) && 'hidden'}`}
+                >
                     <Searchbar />
                 </div>
                 <Outlet />

@@ -38,7 +38,7 @@ export default function ContactUsPage() {
     }
 
     return (
-        <div className="w-full min-h-screen p-2 md:p-4">
+        <div className="w-full min-h-screen sm:p-4">
             {/* Hero Section */}
             <section className="w-full bg-white shadow-md rounded-xl py-10 px-8 md:px-16">
                 <h1 className="text-[35px] font-bold text-gray-900">
