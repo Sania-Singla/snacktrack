@@ -361,10 +361,7 @@ class ContractorService {
         try {
             const res = await fetch(
                 `${BASE_BACKEND_URL}/contractors/snacks/availability/${snackId}`,
-                {
-                    method: 'PATCH',
-                    credentials: 'include',
-                }
+                { method: 'PATCH', credentials: 'include' }
             );
 
             const data = await res.json();

@@ -23,19 +23,18 @@ import {
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.route('/register').post(register);
-
 contractorRouter.route('/complete-registeration').post(completeRegistration);
-
 contractorRouter.route('/resend-code').post(resendVerificationCode);
 
 contractorRouter.use(verifyJwt);
 
 // personal usage
-contractorRouter.route('/account').patch(updateAccountDetails);
 
+contractorRouter.route('/account').patch(updateAccountDetails);
 contractorRouter.route('/kitchen-key').patch(updateKitchenKey);
 
 // student management tasks
+
 contractorRouter
     .route('/students')
     .get(getStudents)
@@ -47,6 +46,7 @@ contractorRouter
     .patch(updateStudentAccountDetails);
 
 // snack management tasks
+
 contractorRouter.route('/snacks').post(upload.single('image'), addSnack);
 contractorRouter
     .route('/snacks/:snackId')
@@ -57,6 +57,7 @@ contractorRouter
     .patch(toggleSnackAvailability);
 
 // packaged food management tasks
+
 contractorRouter.route('/packaged').post(addItem);
 contractorRouter
     .route('/packaged/:itemId')

@@ -92,12 +92,11 @@ class UserService {
         }
     }
 
-    async getCurrentUser(signal) {
+    async getCurrentUser() {
         try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/current`, {
+            const res = await fetch(`${BASE_BACKEND_URL}/users`, {
                 method: 'GET',
                 credentials: 'include',
-                signal,
             });
 
             const data = await res.json();
@@ -108,12 +107,8 @@ class UserService {
             }
             return data;
         } catch (err) {
-            if (err.name === 'AbortError') {
-                console.log('fetch current user request aborted');
-            } else {
-                console.error('error in getCurrentUser service', err);
-                throw err;
-            }
+            console.error('error in getCurrentUser service', err);
+            throw err;
         }
     }
 

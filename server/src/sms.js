@@ -8,7 +8,7 @@ const client = twilio(
 export async function sendSMS({ to, text, link }) {
     try {
         const msg = await client.messages.create({
-            from: process.env.TWILIO_PHONE_NUMBER, // Can't be changed in trial mode
+            from: process.env.TWILIO_PHONE_NUMBER,
             to,
             body: `📢 Snack Track \n${text} \n🔗 Click here: ${link}`,
         });

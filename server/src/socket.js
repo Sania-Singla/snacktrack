@@ -1,7 +1,7 @@
 import { app } from './app.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-import { CORS_OPTIONS } from './Constants/options.js';
+import { CORS_OPTIONS } from './Constants/index.js';
 import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
 import { sendSMS } from './sms.js';
 
@@ -40,8 +40,7 @@ io.on('connection', async (socket) => {
             getSocketId(canteenId),
             getSocketId('staff' + canteenId),
         ]);
-        socket.to(contrSocketId).emit('newOrder', order);
-        socket.to(staffSocketId).emit('newOrder', order);
+        socket.to(contrSocketId).to(staffSocketId).emit('newOrder', order);
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -55,8 +54,10 @@ io.on('connection', async (socket) => {
             getSocketId(order.studentId),
             getSocketId('staff' + canteenId),
         ]);
-        socket.to(studentSocketId).emit('orderRejected', order);
-        socket.to(staffSocketId).emit('orderRejected', order);
+        socket
+            .to(studentSocketId)
+            .to(staffSocketId)
+            .emit('orderRejected', order);
         io.to(socket.id).emit('orderRejected', order); // to send event to itself use io instead of socket
 
         sendSMS({
@@ -84,8 +85,10 @@ io.on('connection', async (socket) => {
             getSocketId('staff' + canteenId),
         ]);
         io.to(socket.id).emit('orderPickedUp', order); // to send event to itself use io instead of socket
-        socket.to(staffSocketId).emit('orderPickedUp', order);
-        socket.to(studentSocketId).emit('orderPickedUp', order);
+        socket
+            .to(staffSocketId)
+            .to(studentSocketId)
+            .emit('orderPickedUp', order);
 
         sendSMS({
             to: order.studentInfo.phoneNumber,

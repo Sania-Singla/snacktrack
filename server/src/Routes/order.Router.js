@@ -14,11 +14,7 @@ import {
 orderRouter.use(verifyJwt);
 
 orderRouter.route('/availability').post(checkAvailability);
-
 orderRouter.route('/statistics').get(getStatistics);
-
 orderRouter.route('/:orderId').patch(updateOrderStatus);
-
 orderRouter.route('/:studentId').get(getStudentOrders);
-
 orderRouter.route('/').get(getCanteenOrders).post(placeOrder);

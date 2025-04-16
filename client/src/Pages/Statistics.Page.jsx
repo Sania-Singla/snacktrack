@@ -20,7 +20,6 @@ export default function StatisticsPage() {
 
         (async function () {
             try {
-                setLoading(true);
                 const res = await orderService.getStatistics(signal);
                 if (res && !res.message) setData(res);
             } catch (err) {
@@ -42,9 +41,7 @@ export default function StatisticsPage() {
             ...month,
             monthName: new Date(2000, month.month - 1).toLocaleString(
                 'default',
-                {
-                    month: 'long',
-                }
+                { month: 'long' }
             ),
             items: month.items.sort((a, b) => b.totalRevenue - a.totalRevenue),
         })) || [];

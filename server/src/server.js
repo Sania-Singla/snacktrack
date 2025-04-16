@@ -11,19 +11,12 @@ import {
 
 const PORT = process.env.PORT || 4000;
 
-// MongoDB connection
-await connectDB();
+await connectDB(); // MongoDB connection
+const redisClient = await connectRedis(); // Redis connection
+const transporter = await generateTransporter(); // nodemailer transporter
 
-// Redis connection
-const redisClient = await connectRedis();
-
-// nodemailer transporter
-const transporter = await generateTransporter();
-
-// cron job to generate bills every month at 12:05 AM
-startBillingCronJob();
-// cron job to delete bills & orders every 6 months (july & jan) at 12:05 AM
-startCleanupCronJob();
+startBillingCronJob(); // cron job to generate bills every month at 12:05 AM
+startCleanupCronJob(); // cron job to delete bills & orders every 6 months (july & jan) at 12:05 AM
 
 // await seedDatabase();
 

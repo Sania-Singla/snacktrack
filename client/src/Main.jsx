@@ -29,7 +29,7 @@ function Root() {
                                     </SearchContextProvider>
                                 </SideBarContextProvider>
                             </StudentContextProvider>
-                        </SocketContextProvider>{' '}
+                        </SocketContextProvider>
                     </SnackContextProvider>
                 </PopupContextProvider>
             </OrderContextProvider>
@@ -38,7 +38,7 @@ function Root() {
 }
 
 createRoot(document.getElementById('root')).render(
-    // <StrictMode>
-    <Root />
-    // </StrictMode>,
+    <StrictMode>
+        <Root />
+    </StrictMode>
 );

@@ -12,15 +12,10 @@ export default function App() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // get current user
     useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
-
         (async function currentUser() {
             try {
-                setLoading(true);
-                const res = await userService.getCurrentUser(signal);
+                const res = await userService.getCurrentUser();
                 if (res && !res.message) setUser(res);
                 else setUser(null);
             } catch (err) {
@@ -29,11 +24,6 @@ export default function App() {
                 setLoading(false);
             }
         })();
-
-        return () => {
-            controller.abort();
-            setUser(null);
-        };
     }, []);
 
     // Close sidebar & popups on window resize and location change

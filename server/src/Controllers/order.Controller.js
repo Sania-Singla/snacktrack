@@ -116,7 +116,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
     } else return res.status(OK).json({ message: 'Order not found' });
 });
 
-// implement something to flush all the orders after 6 months to save space
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     const { limit = 10, page = 1, month } = req.query;
     const { studentId } = req.params;
