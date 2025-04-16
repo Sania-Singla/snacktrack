@@ -256,11 +256,11 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
 
     const now = new Date();
 
-    // Set start time (8 AM)
+    // Set start time
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
 
-    // Set end time (10 PM)
+    // Set end time
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
 

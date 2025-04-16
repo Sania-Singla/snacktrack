@@ -223,13 +223,13 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
 
     const now = new Date();
 
-    // Set start time (8 AM)
+    // Set start time
     const startOfDay = new Date(now);
-    startOfDay.setHours(8, 0, 0, 0);
+    startOfDay.setHours(0, 0, 0, 0);
 
-    // Set end time (10 PM)
+    // Set end time
     const endOfDay = new Date(now);
-    endOfDay.setHours(22, 0, 0, 999);
+    endOfDay.setHours(23, 59, 59, 999);
 
     // Fetch today's orders from this canteen
     const orders = await Order.aggregate([
