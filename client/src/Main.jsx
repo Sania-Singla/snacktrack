@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './Styles/index.css';
 
@@ -39,7 +38,5 @@ function Root() {
 }
 
 createRoot(document.getElementById('root')).render(
-    <StrictMode>
-        <Root />
-    </StrictMode>
+    <Root />
 );

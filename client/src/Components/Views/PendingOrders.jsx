@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useFetcher, useNavigate } from 'react-router-dom';
 import { LIMIT } from '../../Constants/constants';
 import { paginate } from '../../Utils';
 import { orderService } from '../../Services';
@@ -10,12 +10,16 @@ import { icons } from '../../Assets/icons';
 export default function PendingOrders({ filter }) {
     const { pendingOrders, setPendingOrders } = useOrderContext();
     const [ordersInfo, setOrdersInfo] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
+
+    useEffect(() => {
+        setPendingOrders([]), setPage(1);
+    }, [filter]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -43,10 +47,6 @@ export default function PendingOrders({ filter }) {
 
         return () => controller.abort();
     }, [page]);
-
-    useEffect(() => {
-        setPendingOrders([]), setPage(1);
-    }, [filter]);
 
     const orderElements = pendingOrders
         .filter(

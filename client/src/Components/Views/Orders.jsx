@@ -10,13 +10,17 @@ import { useSearchContext } from '../../Contexts';
 export default function Orders({ filter }) {
     const [orders, setOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
+    useEffect(() => {
+        setOrders([]), setPage(1);
+    }, [filter]);
+    
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
@@ -44,9 +48,7 @@ export default function Orders({ filter }) {
         return () => controller.abort();
     }, [page, filter]);
 
-    useEffect(() => {
-        setOrders([]), setPage(1);
-    }, [filter]);
+ 
 
     const orderElements = orders
         .filter(
