@@ -20,6 +20,7 @@ export default function Layout({ renderTemplate = true }) {
         '/settings',
         '/faqs',
         '/statistics',
+        '/cart',
     ];
 
     return renderTemplate ? (
