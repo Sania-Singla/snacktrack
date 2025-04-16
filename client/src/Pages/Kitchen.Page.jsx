@@ -23,7 +23,7 @@ export default function KitchenPage() {
     const { socket } = useSocketContext();
 
     useEffect(() => setKitchenOrders([]), []);
-    
+
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;

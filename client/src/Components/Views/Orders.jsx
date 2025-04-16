@@ -20,7 +20,7 @@ export default function Orders({ filter }) {
     useEffect(() => {
         setOrders([]), setPage(1);
     }, [filter]);
-    
+
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
@@ -47,8 +47,6 @@ export default function Orders({ filter }) {
 
         return () => controller.abort();
     }, [page, filter]);
-
- 
 
     const orderElements = orders
         .filter(

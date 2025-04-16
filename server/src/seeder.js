@@ -5,6 +5,8 @@ import {
     Snack,
     PackagedFood,
     Bill,
+    EmailVerification,
+    Order,
 } from './Models/index.js';
 import {
     USER_PLACEHOLDER_IMAGE_URL,
@@ -18,7 +20,10 @@ export const seedDatabase = async () => {
         await Contractor.deleteMany();
         await Student.deleteMany();
         await Snack.deleteMany();
-        await PackagedFood.deleteMany(); // Clear packaged food items
+        await PackagedFood.deleteMany();
+        await Bill.deleteMany();
+        await EmailVerification.deleteMany();
+        await Order.deleteMany();
 
         console.log('Existing data cleared');
 
