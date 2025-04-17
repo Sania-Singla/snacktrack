@@ -10,17 +10,24 @@ export async function fetchWrapper({
     type = 'json',
 }) {
     try {
-        const headers =
-            body && type !== 'formData'
-                ? { 'Content-Type': 'application/json' }
-                : {};
-        const res = await fetch(BASE_BACKEND_URL + endPoint, {
-            signal,
-            method,
-            credentials,
-            headers,
-            body: type === 'json' ? JSON.stringify(body) : body,
-        });
+        const options = body
+            ? {
+                  signal,
+                  method,
+                  credentials,
+                  headers:
+                      type !== 'formData'
+                          ? { 'Content-Type': 'application/json' }
+                          : null,
+                  body: type === 'json' ? JSON.stringify(body) : body,
+              }
+            : {
+                  signal,
+                  method,
+                  credentials,
+              };
+
+        const res = await fetch(BASE_BACKEND_URL + endPoint, options);
 
         const data = await res.json();
         console.log(data);

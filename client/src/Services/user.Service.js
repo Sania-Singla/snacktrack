@@ -1,3 +1,5 @@
+import { fetchWrapper } from '../Utils';
+
 class UserService {
     async login({ loginInput, password, role }) {
         return await fetchWrapper({

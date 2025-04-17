@@ -1,3 +1,5 @@
+import { fetchWrapper } from '../Utils';
+
 class ContractorService {
     // personal usage
 

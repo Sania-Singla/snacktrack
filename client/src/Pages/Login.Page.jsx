@@ -70,6 +70,7 @@ export default function LoginPage() {
                     ]);
                 }
             } catch (err) {
+                console.log(err);
                 navigate('/server-error');
             }
         })();

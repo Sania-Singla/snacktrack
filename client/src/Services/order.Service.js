@@ -1,3 +1,5 @@
+import { fetchWrapper } from '../Utils';
+
 class OrderService {
     async placeOrder(cartItems, total, packingCharges) {
         return await fetchWrapper({

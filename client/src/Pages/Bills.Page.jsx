@@ -67,7 +67,7 @@ export default function BillsPage() {
     return (
         <div>
             <div className="w-full pt-2 sm:p-4">
-                <div className="flex items-center gap-4 mb-8">
+                <div className="flex items-center gap-3 mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">Bills</h1>
                     <div className="px-3 py-[3px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                         {new Date().toLocaleDateString('default', {

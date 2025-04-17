@@ -1,3 +1,5 @@
+import { fetchWrapper } from '../Utils';
+
 class BillService {
     async getStudentBills(studentId, signal) {
         return await fetchWrapper({
