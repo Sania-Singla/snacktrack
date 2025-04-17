@@ -53,7 +53,7 @@ export default function Header() {
                 </Link>
             </div>
 
-            <div className="max-w-[400px] w-full hidden sm:block ">
+            <div className="max-w-[400px] lg:max-w-[500px] w-full hidden sm:block ">
                 <Searchbar />
             </div>
 
