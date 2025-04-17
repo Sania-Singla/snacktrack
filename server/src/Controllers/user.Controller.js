@@ -232,65 +232,61 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
     endOfDay.setHours(23, 59, 59, 999);
 
     // Fetch today's orders from this canteen
-    const orders = await Order.aggregate([
-        {
-            $match: {
-                canteenId: new Types.ObjectId(canteen._id),
-                createdAt: { $gte: startOfDay, $lt: endOfDay },
-                status: 'Pending',
-            },
-        },
-        { $unwind: '$items' },
-        { $match: { 'items.itemType': 'Snack' } },
-        {
-            $lookup: {
-                from: 'snacks',
-                localField: 'items.itemId',
-                foreignField: '_id',
-                as: 'snackDetails',
-                pipeline: [{ $project: { name: 1, image: 1 } }],
-            },
-        },
-        {
-            $addFields: {
-                'items.name': {
-                    $cond: [
-                        { $eq: ['$items.itemType', 'Snack'] },
-                        { $arrayElemAt: ['$snackDetails.name', 0] },
-                        null,
-                    ],
-                },
-                'items.image': {
-                    $cond: [
-                        { $eq: ['$items.itemType', 'Snack'] },
-                        { $arrayElemAt: ['$snackDetails.image', 0] },
-                        null,
-                    ],
+    const orders = await Order.aggregatePaginate(
+        [
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(canteen._id),
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
+                    status: 'Pending',
                 },
             },
-        },
-        {
-            $group: {
-                _id: '$_id',
-                status: { $first: '$status' },
-                canteenId: { $first: '$canteenId' },
-                studentId: { $first: '$studentId' },
-                createdAt: { $first: '$createdAt' },
-                updatedAt: { $first: '$updatedAt' },
-                items: { $push: '$items' },
+            { $unwind: '$items' },
+            { $match: { 'items.itemType': 'Snack' } },
+            {
+                $lookup: {
+                    from: 'snacks',
+                    localField: 'items.itemId',
+                    foreignField: '_id',
+                    as: 'snackDetails',
+                    pipeline: [{ $project: { name: 1, image: 1 } }],
+                },
             },
-        },
-        {
-            $project: {
-                snackDetails: 0,
-                'items.itemType': 0,
-                'items.price': 0,
-                'items.isPacked': 0,
+            {
+                $addFields: {
+                    'items.name': {
+                        $cond: [
+                            { $eq: ['$items.itemType', 'Snack'] },
+                            { $arrayElemAt: ['$snackDetails.name', 0] },
+                            null,
+                        ],
+                    },
+                    'items.image': {
+                        $cond: [
+                            { $eq: ['$items.itemType', 'Snack'] },
+                            { $arrayElemAt: ['$snackDetails.image', 0] },
+                            null,
+                        ],
+                    },
+                },
             },
-        },
-    ]);
-
-    return res.status(OK).json({ canteenId: canteen._id, orders });
+            {
+                $group: {
+                    _id: '$_id',
+                    status: { $first: '$status' },
+                    canteenId: { $first: '$canteenId' },
+                    studentId: { $first: '$studentId' },
+                    items: { $push: '$items' },
+                    createdAt: { $first: '$createdAt' },
+                    updatedAt: { $first: '$updatedAt' },
+                },
+            },
+            { $project: { snackDetails: 0 } },
+        ],
+        { sort: { createdAt: 1 } }
+    );
+    
+    return res.status(OK).json({ canteenId: canteen._id, orders: orders.docs });
 });
 
 const sendQuery = tryCatch('send query to admin', async (req, res, next) => {

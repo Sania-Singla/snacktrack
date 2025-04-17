@@ -2,7 +2,7 @@ import { app } from './app.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/index.js';
-import { getSocketId, deleteSocketId, setSocketId } from './Utils/index.js';
+import { deleteSocketId, addSocketId } from './Utils/index.js';
 import { sendSMS } from './sms.js';
 
 const http = createServer(app);
@@ -15,17 +15,20 @@ io.on('connection', async (socket) => {
 
     // store its socket id in cache (redis)
     try {
+        let room;
         switch (role) {
             case 'student':
-                await setSocketId(userId, socket);
+                room = `student_${userId}`;
                 break;
             case 'contractor':
-                await setSocketId(canteenId, socket);
+                room = `contractor_${canteenId}`;
                 break;
             default:
-                await setSocketId('staff' + canteenId, socket);
+                room = `staff_${canteenId}`;
                 break;
         }
+        socket.join(room);
+        await addSocketId(room, socket.id);
         console.log(
             `socket id of user ${role === 'student' ? userId : canteenId} stored in cache.`
         );
@@ -36,11 +39,9 @@ io.on('connection', async (socket) => {
     // EVENT LISTENERS
 
     socket.on('newOrder', async (order) => {
-        const [contrSocketId, staffSocketId] = await Promise.all([
-            getSocketId(canteenId),
-            getSocketId('staff' + canteenId),
-        ]);
-        socket.to(contrSocketId).to(staffSocketId).emit('newOrder', order);
+        io.to(`contractor_${canteenId}`)
+            .to(`staff_${canteenId}`)
+            .emit('newOrder', order);
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -50,15 +51,10 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('orderRejected', async (order) => {
-        const [studentSocketId, staffSocketId] = await Promise.all([
-            getSocketId(order.studentId),
-            getSocketId('staff' + canteenId),
-        ]);
-        socket
-            .to(studentSocketId)
-            .to(staffSocketId)
+        io.to(`student_${order.studentId}`)
+            .to(`staff_${canteenId}`)
+            .to(`contractor_${canteenId}`)
             .emit('orderRejected', order);
-        io.to(socket.id).emit('orderRejected', order); // to send event to itself use io instead of socket
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -68,9 +64,10 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('orderPrepared', async (order) => {
-        const studentSocketId = await getSocketId(order.studentId);
-        socket.to(studentSocketId).emit('orderPrepared', order);
-        io.to(socket.id).emit('orderPrepared', order); // to send event to itself use io instead of socket
+        io.to(`student_${order.studentId}`)
+            .to(`contractor_${canteenId}`)
+            .to(`staff_${canteenId}`)
+            .emit('orderPrepared', order);
 
         sendSMS({
             to: order.studentInfo.phoneNumber,
@@ -80,14 +77,9 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('orderPickedUp', async (order) => {
-        const [studentSocketId, staffSocketId] = await Promise.all([
-            getSocketId(order.studentId),
-            getSocketId('staff' + canteenId),
-        ]);
-        io.to(socket.id).emit('orderPickedUp', order); // to send event to itself use io instead of socket
-        socket
-            .to(staffSocketId)
-            .to(studentSocketId)
+        io.to(`contractor_${canteenId}`)
+            .to(`staff_${canteenId}`)
+            .to(`student_${order.studentId}`)
             .emit('orderPickedUp', order);
 
         sendSMS({
@@ -98,9 +90,9 @@ io.on('connection', async (socket) => {
     });
 
     socket.on('itemPrepared', async ({ itemId, orderId }) => {
-        const contrSocketId = await getSocketId(canteenId);
-        socket.to(contrSocketId).emit('itemPrepared', { itemId, orderId });
-        io.to(socket.id).emit('itemPrepared', { itemId, orderId }); // to send event to itself use io instead of socket
+        io.to(`contractor_${canteenId}`)
+            .to(`staff_${canteenId}`)
+            .emit('itemPrepared', { itemId, orderId });
     });
 
     socket.on('disconnect', async () => {
@@ -108,17 +100,19 @@ io.on('connection', async (socket) => {
 
         // delete the socket id from cache (redis)
         try {
+            let room;
             switch (role) {
                 case 'student':
-                    await deleteSocketId(userId);
+                    room = `student_${userId}`;
                     break;
                 case 'contractor':
-                    await deleteSocketId(canteenId);
+                    room = `contractor_${canteenId}`;
                     break;
                 default:
-                    await deleteSocketId('staff' + canteenId);
+                    room = `staff_${canteenId}`;
                     break;
             }
+            await deleteSocketId(room, socket.id);
             console.log(
                 `socket id of user ${role === 'student' ? userId : canteenId} deleted from cache.`
             );

@@ -1,15 +1,13 @@
 import { redisClient } from '../server.js';
 
-async function setSocketId(id, socket) {
-    return await redisClient.setEx(id, 86400, socket.id); // 1day exp
+// Add a socket ID to a room's set
+async function addSocketId(room, socketId) {
+    await redisClient.sAdd(room, socketId);
 }
 
-async function getSocketId(id) {
-    return await redisClient.get(id);
+// Remove a socket ID from a room
+async function deleteSocketId(room, socketId) {
+    await redisClient.sRem(room, socketId);
 }
 
-async function deleteSocketId(id) {
-    return await redisClient.del(id);
-}
-
-export { setSocketId, getSocketId, deleteSocketId };
+export { addSocketId, deleteSocketId };
