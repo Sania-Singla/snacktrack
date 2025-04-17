@@ -146,12 +146,12 @@ export default function ContractorOrderCard({ order, reference }) {
                                     <div key={item._id} className="space-y-2">
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
-                                                <div className="size-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
                                                     {item.itemType ===
                                                     'Snack' ? (
                                                         <img
                                                             src={item.image}
-                                                            alt={`${item.name} image`}
+                                                            alt={`${name} image`}
                                                             className="object-cover size-full"
                                                         />
                                                     ) : (
