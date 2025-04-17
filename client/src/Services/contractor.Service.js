@@ -137,6 +137,7 @@ class ContractorService {
 
     async addSnack({ image, name, price }) {
         const formData = new FormData();
+
         Object.entries({ image, name, price }).forEach(([key, value]) => {
             formData.append(key, value);
         });
@@ -147,6 +148,7 @@ class ContractorService {
             credentials: 'include',
             aim: 'addSnack',
             body: formData,
+            type: 'formData',
         });
     }
 
@@ -161,6 +163,7 @@ class ContractorService {
             method: 'PATCH',
             credentials: 'include',
             body: formData,
+            type: 'formData',
             aim: 'updateSnackDetails',
         });
     }

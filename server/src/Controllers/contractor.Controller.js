@@ -484,6 +484,8 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
         const { name, price } = req.body;
         let image = req.file?.path;
 
+        console.log(name, price, image);
+
         if (!name || !price) {
             if (image) fs.unlinkSync(image);
             return next(new ErrorHandler('missing fields', BAD_REQUEST));

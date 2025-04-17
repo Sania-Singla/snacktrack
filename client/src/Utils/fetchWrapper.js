@@ -11,16 +11,20 @@ export async function fetchWrapper({
 }) {
     try {
         const options = body
-            ? {
-                  signal,
-                  method,
-                  credentials,
-                  headers:
-                      type !== 'formData'
-                          ? { 'Content-Type': 'application/json' }
-                          : null,
-                  body: type === 'json' ? JSON.stringify(body) : body,
-              }
+            ? type === 'formData'
+                ? {
+                      signal,
+                      method,
+                      credentials,
+                      body,
+                  }
+                : {
+                      signal,
+                      method,
+                      credentials,
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify(body),
+                  }
             : {
                   signal,
                   method,
@@ -40,7 +44,7 @@ export async function fetchWrapper({
         if (err.name === 'AbortError') {
             console.log(`${aim} request aborted.`);
         } else {
-            console.error(`error in ${aim} service`, err);
+            console.error(`error in ${aim} service`, err.message);
             throw err;
         }
     }
