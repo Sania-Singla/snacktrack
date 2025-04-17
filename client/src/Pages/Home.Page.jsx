@@ -2,14 +2,16 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Snacks, PackagedItems, Filter } from '../Components';
 import { icons } from '../Assets/icons';
 import { useEffect, useState } from 'react';
-import { useSnackContext } from '../Contexts';
+import { useSnackContext, useUserContext } from '../Contexts';
 import { snackService } from '../Services';
+import { checkTokenExpired } from '../Utils';
 
 export default function HomePage() {
     const [searchParams] = useSearchParams();
     const filter = searchParams.get('filter') || 'snacks'; // Default to 'snacks'
     const { setSnacks, setItems } = useSnackContext();
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
     const [loading, setLoading] = useState(true);
 
     const options = [
@@ -30,6 +32,10 @@ export default function HomePage() {
                     snackService.getPackagedFoodItems(signal),
                     JSON.parse(localStorage.getItem('cartItems')) || [],
                 ]);
+
+                checkTokenExpired(snacks, setUser);
+                checkTokenExpired(PackagedItems, setUser);
+
                 if (snacks && !snacks.message)
                     setSnacks(
                         snacks.map((snack) => ({

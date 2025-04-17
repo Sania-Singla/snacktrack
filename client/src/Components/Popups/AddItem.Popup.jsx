@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
 import { contractorService } from '../../Services';
-import { usePopupContext, useSnackContext } from '../../Contexts';
+import {
+    usePopupContext,
+    useSnackContext,
+    useUserContext,
+} from '../../Contexts';
 import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
-import { verifyExpression } from '../../Utils';
+import { checkTokenExpired, verifyExpression } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 
@@ -17,6 +21,7 @@ export default function AddItemPopup() {
     const { setShowPopup } = usePopupContext();
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     // Check for duplicate prices whenever variants change
     useEffect(() => {
@@ -116,7 +121,9 @@ export default function AddItemPopup() {
                 toast.success('Item added successfully 👍');
                 setItems((prev) => [res, ...prev]);
                 setShowPopup(false);
-            } else setError((prev) => ({ ...prev, root: res.message }));
+            } else if (res && res.message !== 'tokens missing') {
+                setError((prev) => ({ ...prev, root: res.message }));
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

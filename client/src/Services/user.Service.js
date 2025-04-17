@@ -1,221 +1,102 @@
-import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
-
 class UserService {
     async login({ loginInput, password, role }) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/login`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ loginInput, password, role }),
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in user login service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/login`,
+            method: 'PATCH',
+            credentials: 'include',
+            body: { loginInput, password, role },
+            aim: 'login',
+        });
     }
 
     async updatePassword({ oldPassword, newPassword }) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/password`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    newPassword,
-                    oldPassword,
-                }),
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in user updatePassword service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/password`,
+            method: 'PATCH',
+            credentials: 'include',
+            body: { newPassword, oldPassword },
+            aim: 'updatePassword',
+        });
     }
 
     async resetPassword() {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/users/reset-password`,
-                { method: 'PATCH', credentials: 'include' }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in user resetPassword service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/reset-password`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'resetPassword',
+        });
     }
 
     async updateAvatar(avatar) {
-        try {
-            const formData = new FormData();
-            formData.append('avatar', avatar);
+        const formData = new FormData();
+        formData.append('avatar', avatar);
 
-            const res = await fetch(`${BASE_BACKEND_URL}/users/avatar`, {
-                method: 'PATCH',
-                credentials: 'include',
-                body: formData,
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in user updateAvatar service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/avatar`,
+            method: 'PATCH',
+            credentials: 'include',
+            body: formData,
+            aim: 'updateAvatar',
+            type: 'formData',
+        });
     }
 
     async getCurrentUser() {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users`, {
-                method: 'GET',
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in getCurrentUser service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users`,
+            method: 'GET',
+            credentials: 'include',
+            aim: 'getCurrentUser',
+        });
     }
 
     async logout() {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/logout`, {
-                method: 'PATCH',
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in logout service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/logout`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'logout',
+        });
     }
 
     async getContractors(key = '') {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/contractors`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key }),
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in getContractors service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/contractors`,
+            method: 'POST',
+            credentials: 'include',
+            body: { key },
+            aim: 'getContractors',
+        });
     }
 
     async getOrders(key = '') {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/orders`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ key }),
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in getOrders service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/orders`,
+            method: 'POST',
+            credentials: 'include',
+            body: { key },
+            aim: 'getOrders',
+        });
     }
 
     async getCanteens(signal) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/canteens`, {
-                method: 'GET',
-                signal,
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in getCanteens service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/canteens`,
+            method: 'GET',
+            signal,
+            aim: 'getCanteens',
+        });
     }
 
     async sendQuery({ subject, message }) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/users/query`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subject, message }),
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in sendQuery service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/users/query`,
+            method: 'POST',
+            credentials: 'include',
+            body: { subject, message },
+            aim: 'sendQuery',
+        });
     }
 }
 

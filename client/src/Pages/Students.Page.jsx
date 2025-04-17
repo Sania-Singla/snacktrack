@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { contractorService } from '../Services';
-import { paginate } from '../Utils';
+import { paginate, checkTokenExpired } from '../Utils';
 import { useNavigate } from 'react-router-dom';
 import {
     useStudentContext,
     usePopupContext,
     useSearchContext,
+    useUserContext,
 } from '../Contexts';
 import { LIMIT } from '../Constants/constants';
 import { Button, StudentView } from '../Components';
@@ -19,6 +20,7 @@ export default function StudentsPage() {
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     // pagination
     const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
@@ -40,7 +42,7 @@ export default function StudentsPage() {
                 if (res && !res.message) {
                     setStudents((prev) => prev.concat(res.students));
                     setStudentsInfo(res.studentsInfo);
-                }
+                } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

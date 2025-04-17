@@ -1,11 +1,11 @@
 import { icons } from '../../Assets/icons';
 import { OrderDropdown } from '..';
-import { getRollNo, formatTime } from '../../Utils';
+import { getRollNo, formatTime, checkTokenExpired } from '../../Utils';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
-import { useSocketContext } from '../../Contexts';
+import { useSocketContext, useUserContext } from '../../Contexts';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -13,6 +13,7 @@ export default function ContractorOrderCard({ order, reference }) {
         order;
     const { socket } = useSocketContext();
     const [status, setStatus] = useState(order.status);
+    const { setUser } = useUserContext();
     const [statusOptions, setStatusOptions] = useState([]);
 
     useEffect(() => {
@@ -38,7 +39,7 @@ export default function ContractorOrderCard({ order, reference }) {
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
                 socket.emit(`order${status}`, order);
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         }

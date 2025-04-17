@@ -1,5 +1,3 @@
-import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
-
 class ContractorService {
     // personal usage
 
@@ -11,34 +9,19 @@ class ContractorService {
         hostel,
         kitchenKey,
     }) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/register`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fullName,
-                        password,
-                        email,
-                        phoneNumber,
-                        hostel,
-                        kitchenKey,
-                    }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in register service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/register`,
+            method: 'POST',
+            aim: 'register',
+            body: {
+                fullName,
+                password,
+                email,
+                phoneNumber,
+                hostel,
+                kitchenKey,
+            },
+        });
     }
 
     async completeRegistration({
@@ -50,438 +33,184 @@ class ContractorService {
         hostel,
         kitchenKey,
     }) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/complete-registeration`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fullName,
-                        password,
-                        email,
-                        phoneNumber,
-                        code,
-                        hostel,
-                        kitchenKey,
-                    }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in completeRegistration service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/complete-registeration`,
+            method: 'POST',
+            aim: 'completeRegistration',
+            body: {
+                fullName,
+                password,
+                email,
+                phoneNumber,
+                code,
+                hostel,
+                kitchenKey,
+            },
+        });
     }
 
     async resendEmailVerification(email) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/resend-code`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in resendEmailVerification service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/resend-code`,
+            method: 'POST',
+            aim: 'resendEmailVerification',
+            body: { email },
+        });
     }
 
     async updateAccountDetails({ email, phoneNumber, fullName, password }) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/contractors/account`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email,
-                    phoneNumber,
-                    fullName,
-                    password,
-                }),
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error(
-                'error in contractor updateAccountDetails service',
-                err
-            );
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/account`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'updateAccountDetails',
+            body: { email, phoneNumber, fullName, password },
+        });
     }
 
     // student management tasks
 
     async getStudents(signal, page = 1, limit = 10) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/students?page=${page}&limit=${limit}`,
-                { method: 'GET', signal, credentials: 'include' }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            if (err.name === 'AbortError') {
-                console.log('getStudents request aborted.');
-            } else {
-                console.error('error in getStudents service', err);
-                throw err;
-            }
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/students?page=${page}&limit=${limit}`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getStudents',
+        });
     }
 
     async registerStudent({ fullName, rollNo, phoneNumber, email }) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/students`,
-                {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fullName,
-                        rollNo,
-                        email,
-                        phoneNumber,
-                    }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in registerStudent service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/students`,
+            method: 'POST',
+            credentials: 'include',
+            aim: 'registerStudent',
+            body: { fullName, rollNo, email, phoneNumber },
+        });
     }
 
     async removeStudent(studentId) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/students/${studentId}`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in removeStudent service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/students/${studentId}`,
+            method: 'DELETE',
+            credentials: 'include',
+            aim: 'removeStudent',
+        });
     }
 
     async removeAllStudents(password) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/students`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in removeAllStudents service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/students`,
+            method: 'DELETE',
+            credentials: 'include',
+            aim: 'removeAllStudents',
+            body: { password },
+        });
     }
 
     async updateStudentAccountDetails(
         studentId,
         { fullName, phoneNumber, rollNo, password }
     ) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/students/${studentId}`,
-                {
-                    method: 'PATCH',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fullName,
-                        phoneNumber,
-                        rollNo,
-                        password,
-                    }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in updateStudentAccountDetails service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/students/${studentId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'updateStudentAccountDetails',
+            body: { fullName, phoneNumber, rollNo, password },
+        });
     }
 
     // snack management tasks
 
     async removeSnack(snackId) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/snacks/${snackId}`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in deleteSnack service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/snacks/${snackId}`,
+            method: 'DELETE',
+            credentials: 'include',
+            aim: 'removeSnack',
+        });
     }
 
     async addSnack({ image, name, price }) {
-        try {
-            const inputs = { image, name, price };
-            const formData = new FormData();
-            Object.entries(inputs).forEach(([key, value]) => {
-                formData.append(key, value);
-            });
+        const formData = new FormData();
+        Object.entries({ image, name, price }).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
 
-            const res = await fetch(`${BASE_BACKEND_URL}/contractors/snacks`, {
-                method: 'POST',
-                credentials: 'include',
-                body: formData,
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in addSnack service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/snacks`,
+            method: 'POST',
+            credentials: 'include',
+            aim: 'addSnack',
+            body: formData,
+        });
     }
 
     async updateSnackDetails({ name, price, image }, snackId) {
-        try {
-            const inputs = { image, name, price };
-            console.log(inputs);
-            const formData = new FormData();
-            Object.entries(inputs).forEach(([key, value]) => {
-                formData.append(key, value);
-            });
+        const formData = new FormData();
+        Object.entries({ image, name, price }).forEach(([key, value]) => {
+            formData.append(key, value);
+        });
 
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/snacks/${snackId}`,
-                {
-                    method: 'PATCH',
-                    credentials: 'include',
-                    body: formData,
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in updateSnackDetails service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/snacks/${snackId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            body: formData,
+            aim: 'updateSnackDetails',
+        });
     }
 
     async toggleSnackAvailability(snackId) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/snacks/availability/${snackId}`,
-                { method: 'PATCH', credentials: 'include' }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in toggleSnackAvailability service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/snacks/availability/${snackId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'toggleSnackAvailability',
+        });
     }
 
     // packaged food management tasks
 
     async removeItem(itemId) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/packaged/${itemId}`,
-                {
-                    method: 'DELETE',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in deleteItem service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/packaged/${itemId}`,
+            method: 'DELETE',
+            credentials: 'include',
+            aim: 'removeItem',
+        });
     }
 
     async addItem({ variants, category }) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/packaged`,
-                {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        variants,
-                        category,
-                    }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in addItem service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/packaged`,
+            method: 'POST',
+            credentials: 'include',
+            aim: 'addItem',
+            body: { variants, category },
+        });
     }
 
     async updateItemDetails({ category, variants }, itemId) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/packaged/${itemId}`,
-                {
-                    method: 'PATCH',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        variants,
-                        category,
-                    }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in updateItemDetails service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/packaged/${itemId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'updateItemDetails',
+            body: { variants, category },
+        });
     }
 
     async updateKitchenKey({ password, newKey }) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/contractors/kitchen-key`,
-                {
-                    method: 'PATCH',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password, newKey }),
-                }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in user updateKitchenKey service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/contractors/kitchen-key`,
+            method: 'PATCH',
+            aim: 'updateKitchenKey',
+            credentials: 'include',
+            body: { password, newKey },
+        });
     }
 }
 

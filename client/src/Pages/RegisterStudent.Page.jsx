@@ -4,11 +4,12 @@ import 'react-phone-input-2/lib/style.css';
 import { contractorService } from '../Services';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, InputField } from '../Components';
-import { verifyExpression } from '../Utils';
+import { verifyExpression, checkTokenExpired } from '../Utils';
 import { LOGO } from '../Constants/constants';
 import { motion } from 'framer-motion';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
+import { useUserContext } from '../Contexts';
 
 export default function RegisterStudentPage() {
     const initialInputs = {
@@ -23,6 +24,7 @@ export default function RegisterStudentPage() {
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     function handleChange(e) {
         const { value, name } = e.target;
@@ -69,7 +71,9 @@ export default function RegisterStudentPage() {
                 toast.success('Account created successfully');
                 setInputs(initialInputs);
                 setPhoneKey((prev) => prev + 1);
-            } else setError((prev) => ({ ...prev, root: res.message }));
+            } else if (res && res.message !== 'tokens missing') {
+                setError((prev) => ({ ...prev, root: res.message }));
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

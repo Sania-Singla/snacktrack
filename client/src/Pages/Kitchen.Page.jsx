@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { userService } from '../Services';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button, Dropdown } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
 import { useOrderContext, useSocketContext, useUserContext } from '../Contexts';
+import { LOGO } from '../Constants/constants';
 
 export default function KitchenPage() {
     const { kitchenOrders, setKitchenOrders } = useOrderContext();
@@ -200,9 +201,22 @@ export default function KitchenPage() {
         <div className="min-h-screen bg-gray-100 p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                        Kitchen Orders
-                    </h1>
+                    {/* logo */}
+                    <Link
+                        to={'/'}
+                        className="flex items-center justify-center gap-3 text-nowrap font-medium text-xl"
+                    >
+                        <div className="overflow-hidden rounded-full size-[38px] drop-shadow-sm hover:scale-110 transition-all duration-300">
+                            <img
+                                src={LOGO}
+                                alt="Snack Track Logo"
+                                className="object-cover size-full hover:brightness-95"
+                            />
+                        </div>
+                        <p className="hover:scale-110 transition-all duration-300">
+                            SnackTrack
+                        </p>
+                    </Link>
                     <p className="bg-[#4977ec]/10 text-[#4977ec] px-3 py-1 rounded-full text-sm font-medium">
                         {kitchenOrders.length}{' '}
                         {kitchenOrders.length === 1 ? 'Order' : 'Orders'}

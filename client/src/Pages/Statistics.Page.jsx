@@ -5,6 +5,8 @@ import { icons } from '../Assets/icons';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
 import CountUp from 'react-countup';
+import { useUserContext } from '../Contexts';
+import { checkTokenExpired } from '../Utils';
 
 const COLORS = ['#4977ec', '#4CAF50', '#FFC107', '#FF5722', '#9C27B0'];
 
@@ -13,6 +15,7 @@ export default function StatisticsPage() {
     const [loading, setLoading] = useState(true);
     const [expandedMonth, setExpandedMonth] = useState(null);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -22,6 +25,7 @@ export default function StatisticsPage() {
             try {
                 const res = await orderService.getStatistics(signal);
                 if (res && !res.message) setData(res);
+                else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

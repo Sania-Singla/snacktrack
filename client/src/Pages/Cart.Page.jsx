@@ -8,7 +8,9 @@ import {
     usePopupContext,
     useSocketContext,
     useStudentContext,
+    useUserContext,
 } from '../Contexts';
+import { checkTokenExpired } from '../Utils';
 
 export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
@@ -17,6 +19,7 @@ export default function CartPage() {
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
     const [loading, setLoading] = useState(true);
+    const { setUser } = useUserContext();
 
     async function checkAvailability() {
         try {
@@ -38,7 +41,7 @@ export default function CartPage() {
                 });
                 setCartItems(updatedCartItems);
                 return updatedCartItems;
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         }
@@ -124,7 +127,7 @@ export default function CartPage() {
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
                 socket.emit('newOrder', res);
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

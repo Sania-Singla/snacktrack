@@ -4,7 +4,7 @@ import { orderService } from '../Services';
 import { useUserContext, useOrderContext } from '../Contexts';
 import { icons } from '../Assets/icons';
 import { Button, Filter, StudentOrderCard } from '../Components';
-import { paginate } from '../Utils';
+import { paginate, checkTokenExpired } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 
 export default function StudentOrdersPage() {
@@ -14,7 +14,7 @@ export default function StudentOrdersPage() {
     const navigate = useNavigate();
     const { studentId } = useParams();
     const [page, setPage] = useState(1);
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [searchParams] = useSearchParams();
     const filter = searchParams.get('filter') || new Date().getMonth() + 1; // Default to current month
     const months = [
@@ -50,7 +50,7 @@ export default function StudentOrdersPage() {
                 if (data && !data.message) {
                     setStudentOrders((prev) => prev.concat(data.orders));
                     setOrdersInfo(data.ordersInfo);
-                }
+                } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

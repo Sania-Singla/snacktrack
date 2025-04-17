@@ -1,10 +1,15 @@
 import { Button } from '..';
-import { usePopupContext, useSnackContext } from '../../Contexts';
+import {
+    usePopupContext,
+    useSnackContext,
+    useUserContext,
+} from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useNavigate } from 'react-router-dom';
 import { contractorService } from '../../Services';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { checkTokenExpired } from '../../Utils';
 
 export default function RemoveItemPopup() {
     const [loading, setLoading] = useState(false);
@@ -13,6 +18,7 @@ export default function RemoveItemPopup() {
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(true);
+    const { setUser } = useUserContext();
 
     async function removeItem() {
         if (!check) {
@@ -28,7 +34,9 @@ export default function RemoveItemPopup() {
                     prev.filter((item) => item._id !== popupInfo.item._id)
                 );
                 toast.success('Item Deleted Successfully 😕');
-            } else toast.error(res?.message);
+            } else if (res && res.message !== 'tokens missing') {
+                toast.error(res?.message);
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

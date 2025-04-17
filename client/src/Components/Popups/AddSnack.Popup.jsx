@@ -1,9 +1,17 @@
 import { useState, useRef } from 'react';
 import { contractorService } from '../../Services';
-import { usePopupContext, useSnackContext } from '../../Contexts';
+import {
+    usePopupContext,
+    useSnackContext,
+    useUserContext,
+} from '../../Contexts';
 import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
-import { verifyExpression, fileRestrictions } from '../../Utils';
+import {
+    verifyExpression,
+    fileRestrictions,
+    checkTokenExpired,
+} from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 import {
@@ -21,6 +29,7 @@ export default function AddSnackPopup() {
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     async function handleChange(e) {
         const { value, name, files, type } = e.target;
@@ -82,9 +91,9 @@ export default function AddSnackPopup() {
                 toast.success('Snack added successfully 👍');
                 setSnacks((prev) => [res, ...prev]);
                 setShowPopup(false);
-            } else {
+            } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

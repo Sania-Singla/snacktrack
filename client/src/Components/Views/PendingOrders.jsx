@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
-import { useFetcher, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { LIMIT } from '../../Constants/constants';
-import { paginate } from '../../Utils';
+import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { ContractorOrderCard } from '..';
-import { useOrderContext, useSearchContext } from '../../Contexts';
+import {
+    useOrderContext,
+    useSearchContext,
+    useUserContext,
+} from '../../Contexts';
 import { icons } from '../../Assets/icons';
 
 export default function PendingOrders({ filter }) {
@@ -13,6 +17,7 @@ export default function PendingOrders({ filter }) {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
+    const { setUser } = useUserContext();
     const { search } = useSearchContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
@@ -37,7 +42,7 @@ export default function PendingOrders({ filter }) {
                 if (res && !res.message) {
                     setPendingOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
-                }
+                } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

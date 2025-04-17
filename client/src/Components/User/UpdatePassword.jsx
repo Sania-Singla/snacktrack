@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { verifyExpression } from '../../Utils';
+import { checkTokenExpired, verifyExpression } from '../../Utils';
 import { useNavigate } from 'react-router-dom';
 import { userService } from '../../Services';
 import { Button, InputField } from '..';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
+import { useUserContext } from '../../Contexts';
 
 export default function UpdatePassword() {
     const initialInputs = {
@@ -18,6 +19,7 @@ export default function UpdatePassword() {
     const [resetting, setResetting] = useState(false);
     const [disabled, setDisabled] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
     const [showPassword, setShowPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -72,9 +74,9 @@ export default function UpdatePassword() {
                 if (res && res.message === 'password updated successfully') {
                     setInputs(initialInputs);
                     toast.success('Password updated successfully');
-                } else {
+                } else if (res && res.message !== 'tokens missing') {
                     setError((prev) => ({ ...prev, oldPassword: res.message }));
-                }
+                } else checkTokenExpired(res, setUser);
             }
         } catch (err) {
             navigate('/server-error');
@@ -93,7 +95,7 @@ export default function UpdatePassword() {
             const res = await userService.resetPassword();
             if (res && res.message === 'new password sent to email') {
                 toast.success('New password sent to your email');
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

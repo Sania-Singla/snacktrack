@@ -285,7 +285,7 @@ const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
         ],
         { sort: { createdAt: 1 } }
     );
-    
+
     return res.status(OK).json({ canteenId: canteen._id, orders: orders.docs });
 });
 

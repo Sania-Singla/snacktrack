@@ -5,11 +5,14 @@ import { icons } from '../../Assets/icons';
 import { EMAIL, CONTACTNUMBER, ADDRESS } from '../../Constants/constants';
 import toast from 'react-hot-toast';
 import { userService } from '../../Services';
+import { checkTokenExpired } from '../../Utils';
+import { useUserContext } from '../../Contexts';
 
 export default function ContactUsPage() {
     const [inputs, setInputs] = useState({ subject: '', message: '' });
     const [sending, setSending] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -24,7 +27,9 @@ export default function ContactUsPage() {
             if (res && res.message === 'query sent successfully') {
                 setInputs({ message: '', subject: '' });
                 toast.success('Query Submitted Successfully 🤗');
-            } else toast.error('Error in submitting query');
+            } else if (res && res.message !== 'tokens missing') {
+                toast.error('Error in submitting query');
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

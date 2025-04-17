@@ -3,6 +3,7 @@ import { paginate } from './paginate';
 import { fileRestrictions } from './files';
 import { formatTime } from './formatting';
 import { getRollNo } from './student';
+import { checkTokenExpired } from './tokenExpired';
 import {
     enableAudio,
     disableAudio,
@@ -12,6 +13,7 @@ import {
     playSound,
     audioAllowed,
 } from './audio';
+import { fetchWrapper } from './fetchWrapper';
 
 export {
     verifyExpression,
@@ -20,10 +22,12 @@ export {
     formatTime,
     getRollNo,
     enableAudio,
+    checkTokenExpired,
     disableAudio,
     toggleAudio,
     getAudioState,
     subscribeToAudioChanges,
     playSound,
     audioAllowed,
+    fetchWrapper,
 };

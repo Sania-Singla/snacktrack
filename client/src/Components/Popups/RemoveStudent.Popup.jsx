@@ -1,9 +1,13 @@
 import { Button } from '..';
-import { usePopupContext, useStudentContext } from '../../Contexts';
+import {
+    usePopupContext,
+    useStudentContext,
+    useUserContext,
+} from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useNavigate } from 'react-router-dom';
 import { contractorService } from '../../Services';
-import { getRollNo } from '../../Utils';
+import { checkTokenExpired, getRollNo } from '../../Utils';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -14,6 +18,7 @@ export default function RemoveStudentPopup() {
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(true);
+    const { setUser } = useUserContext();
 
     async function removeStudent() {
         if (!check) {
@@ -33,7 +38,9 @@ export default function RemoveStudentPopup() {
                     )
                 );
                 toast.success('Account Deleted Successfully 😕');
-            } else toast.error(res?.message);
+            } else if (res && res.message !== 'tokens missing') {
+                toast.error(res?.message);
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

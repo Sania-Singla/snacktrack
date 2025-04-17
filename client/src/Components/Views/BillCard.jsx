@@ -1,5 +1,5 @@
 import { useUserContext } from '../../Contexts';
-import { formatTime, getRollNo } from '../../Utils';
+import { checkTokenExpired, formatTime, getRollNo } from '../../Utils';
 import { icons } from '../../Assets/icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ export default function BillCard({ bill }) {
     const { _id, studentInfo, month, year, amount } = bill;
     const [paid, setPaid] = useState(bill.paid);
     const [paidOn, setPaidOn] = useState(bill.paidOn);
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ export default function BillCard({ bill }) {
             if (res && res.message === 'bill marked as paid') {
                 setPaid(true);
                 setPaidOn(new Date());
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         }

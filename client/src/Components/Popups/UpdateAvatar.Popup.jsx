@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePopupContext, useUserContext } from '../../Contexts';
-import { fileRestrictions } from '../../Utils';
+import { checkTokenExpired, fileRestrictions } from '../../Utils';
 import { userService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import {
@@ -63,7 +63,7 @@ export default function UpdateAvatarPopup() {
             if (res && !res.message) {
                 setUser({ ...user, avatar: res.newAvatar });
                 toast.success('Avatar updated successfully');
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

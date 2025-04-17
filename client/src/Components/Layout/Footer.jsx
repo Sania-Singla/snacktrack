@@ -6,12 +6,13 @@ import { CONTRIBUTORS, LOGO } from '../../Constants/constants';
 import toast from 'react-hot-toast';
 import { userService } from '../../Services';
 import { useUserContext } from '../../Contexts';
+import { checkTokenExpired } from '../../Utils';
 
 export default function Footer() {
     const [inputs, setInputs] = useState({ subject: '', message: '' });
     const [sending, setSending] = useState(false);
     const navigate = useNavigate();
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
 
     // Enhanced social icons with hover effects
     const socialElements = Object.entries(CONTRIBUTORS[0].socials).map(
@@ -44,9 +45,9 @@ export default function Footer() {
             if (res?.message === 'query sent successfully') {
                 setInputs({ message: '', subject: '' });
                 toast.success('Thank you for your feedback!');
-            } else {
+            } else if (res && res.message !== 'tokens missing') {
                 toast.error('Failed to submit. Please try again.');
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

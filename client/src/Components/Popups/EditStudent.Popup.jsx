@@ -1,9 +1,13 @@
 import { useState } from 'react';
 import { contractorService } from '../../Services';
-import { usePopupContext, useStudentContext } from '../../Contexts';
+import {
+    usePopupContext,
+    useStudentContext,
+    useUserContext,
+} from '../../Contexts';
 import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
-import { verifyExpression, getRollNo } from '../../Utils';
+import { verifyExpression, getRollNo, checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 
@@ -21,6 +25,7 @@ export default function EditStudentPopup() {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     async function handleChange(e) {
         const { value, name } = e.target;
@@ -78,7 +83,9 @@ export default function EditStudentPopup() {
                     })
                 );
                 setShowPopup(false);
-            } else setError((prev) => ({ ...prev, root: res.message }));
+            } else if (res && res.message !== 'tokens missing') {
+                setError((prev) => ({ ...prev, root: res.message }));
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

@@ -35,7 +35,7 @@ export default function UpdateAccountDetails() {
     }
 
     function handleDisable() {
-        if (
+        return (
             Object.values(inputs).some((value) => !value) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'password'
@@ -44,11 +44,7 @@ export default function UpdateAccountDetails() {
                 ([key, value]) =>
                     value !== initialInputs[key] && key !== 'password'
             )
-        ) {
-            return true;
-        } else {
-            return false;
-        }
+        );
     }
 
     function onMouseOver() {
@@ -78,9 +74,9 @@ export default function UpdateAccountDetails() {
                 }));
                 setInputs((prev) => ({ ...prev, password: '' }));
                 toast.success('Account details updated successfully');
-            } else {
+            } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, password: res.message }));
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

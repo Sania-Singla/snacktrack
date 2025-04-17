@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { verifyExpression } from '../../Utils';
+import { checkTokenExpired, verifyExpression } from '../../Utils';
 import { useNavigate } from 'react-router-dom';
 import { contractorService } from '../../Services';
 import { Button, InputField } from '..';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
+import { useUserContext } from '../../Contexts';
 
 export default function UpdatePassword() {
     const initialInputs = {
@@ -17,6 +18,7 @@ export default function UpdatePassword() {
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
     const navigate = useNavigate();
+    const { setUser } = useUserContext();
     const [showPassword, setShowPassword] = useState(false);
     const [showNewKey, setShowNewKey] = useState(false);
     const [showConfirmKey, setShowConfirmKey] = useState(false);
@@ -65,12 +67,12 @@ export default function UpdatePassword() {
                 if (res && res.message === 'key updated successfully') {
                     setInputs(initialInputs);
                     toast.success('Key updated successfully');
-                } else {
+                } else if (res && res.message !== 'tokens missing') {
                     setError((prevError) => ({
                         ...prevError,
                         password: 'Invalid credentials',
                     }));
-                }
+                } else checkTokenExpired(res, setUser);
             }
         } catch (err) {
             navigate('/server-error');

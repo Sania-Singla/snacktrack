@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LIMIT } from '../../Constants/constants';
-import { paginate } from '../../Utils';
+import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import { ContractorOrderCard } from '..';
-import { useSearchContext } from '../../Contexts';
+import { useSearchContext, useUserContext } from '../../Contexts';
 
 export default function Orders({ filter }) {
     const [orders, setOrders] = useState([]);
@@ -14,6 +14,7 @@ export default function Orders({ filter }) {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
+    const { setUser } = useUserContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
@@ -37,7 +38,7 @@ export default function Orders({ filter }) {
                 if (res && !res.message) {
                     setOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
-                }
+                } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

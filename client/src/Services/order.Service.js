@@ -1,152 +1,72 @@
-import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
-
 class OrderService {
     async placeOrder(cartItems, total, packingCharges) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/orders`, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    cartItems: cartItems.map((i) => ({
-                        _id: i._id,
-                        quantity: i.quantity,
-                        type: i.type,
-                        price: i.price,
-                        specialInstructions: i.specialInstructions,
-                        isPacked: i.isPacked,
-                    })),
-                    amount: total,
-                    packingCharges,
-                }),
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in placeOrder service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/orders`,
+            method: 'POST',
+            credentials: 'include',
+            body: {
+                cartItems: cartItems.map((i) => ({
+                    _id: i._id,
+                    quantity: i.quantity,
+                    type: i.type,
+                    price: i.price,
+                    specialInstructions: i.specialInstructions,
+                    isPacked: i.isPacked,
+                })),
+                amount: total,
+                packingCharges,
+            },
+            aim: 'placeOrder',
+        });
     }
 
     async updateOrderStatus(orderId, status) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/orders/${orderId}?status=${status}`,
-                { method: 'PATCH', credentials: 'include' }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in updateOrderStatus service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/orders/${orderId}?status=${status}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'updateOrderStatus',
+        });
     }
 
     async getStudentOrders(studentId, month, page, limit, signal) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/orders/${studentId}?month=${month}&page=${page}&limit=${limit}`,
-                { method: 'GET', signal, credentials: 'include' }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            if (err.name === 'AbortError') {
-                console.log('getStudentOrders request aborted.');
-            } else {
-                console.error('error in getStudentOrders service', err);
-                throw err;
-            }
-        }
+        return await fetchWrapper({
+            endPoint: `/orders/${studentId}?month=${month}&page=${page}&limit=${limit}`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getStudentOrders',
+        });
     }
 
     async getCanteenOrders(status, page, limit, signal) {
-        try {
-            const res = await fetch(
-                `${BASE_BACKEND_URL}/orders?limit=${limit}&page=${page}&status=${status}`,
-                { method: 'GET', signal, credentials: 'include' }
-            );
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            if (err.name === 'AbortError') {
-                console.log('getCanteenOrders request aborted.');
-            } else {
-                console.error('error in getCanteenOrders service', err);
-                throw err;
-            }
-        }
+        return await fetchWrapper({
+            endPoint: `/orders?limit=${limit}&page=${page}&status=${status}`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getCanteenOrders',
+        });
     }
 
     async getStatistics(signal) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/orders/statistics`, {
-                method: 'GET',
-                signal,
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            if (err.name === 'AbortError') {
-                console.log('getStatistics request aborted.');
-            } else {
-                console.error('error in getStatistics service', err);
-                throw err;
-            }
-        }
+        return await fetchWrapper({
+            endPoint: `/orders/statistics`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getStatistics',
+        });
     }
 
     async checkAvailability(cartItems) {
-        try {
-            const res = await fetch(`${BASE_BACKEND_URL}/orders/availability`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cartItems }),
-                credentials: 'include',
-            });
-
-            const data = await res.json();
-            console.log(data);
-
-            if (res.status === SERVER_ERROR) {
-                throw new Error(data.message);
-            }
-            return data;
-        } catch (err) {
-            console.error('error in checkAvailability service', err);
-            throw err;
-        }
+        return await fetchWrapper({
+            endPoint: `/orders/availability`,
+            method: 'POST',
+            credentials: 'include',
+            body: { cartItems },
+            aim: 'checkAvailability',
+        });
     }
 }
 

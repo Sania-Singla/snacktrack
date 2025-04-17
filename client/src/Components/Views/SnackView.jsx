@@ -10,11 +10,12 @@ import {
 import { contractorService } from '../../Services';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { checkTokenExpired } from '../../Utils';
 
 export default function SnackView({ snack, reference }) {
     const { _id, image, name, price, info, isAvailable } = snack;
     const [quantityInCart, setQuantityInCart] = useState(snack.quantity);
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const { setSnacks } = useSnackContext();
     const navigate = useNavigate();
     const { setShowPopup, setPopupInfo } = usePopupContext();
@@ -32,7 +33,7 @@ export default function SnackView({ snack, reference }) {
                         s._id === _id ? { ...s, isAvailable: !isAvailable } : s
                     )
                 );
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         }

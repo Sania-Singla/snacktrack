@@ -4,6 +4,7 @@ import { icons } from '../../Assets/icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../Contexts';
+import { checkTokenExpired } from '../../Utils';
 
 export default function Logout() {
     const [loading, setLoading] = useState(false);
@@ -17,7 +18,7 @@ export default function Logout() {
             if (res && res.message === 'user loggedout successfully') {
                 setUser(null);
                 toast.success('Logged out Successfully 🙂');
-            }
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

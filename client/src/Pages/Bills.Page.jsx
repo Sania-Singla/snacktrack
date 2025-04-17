@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { billService } from '../Services';
 import { BillCard } from '../Components';
-import { paginate } from '../Utils';
+import { checkTokenExpired, paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 import { icons } from '../Assets/icons';
-import { useSearchContext } from '../Contexts';
+import { useSearchContext, useUserContext } from '../Contexts';
 
 export default function BillsPage() {
     const [bills, setBills] = useState([]);
@@ -14,6 +14,7 @@ export default function BillsPage() {
     const [page, setPage] = useState(1);
     const [billsInfo, setBillsInfo] = useState({});
     const { search } = useSearchContext();
+    const { setUser } = useUserContext();
 
     const paginateRef = paginate(billsInfo?.hasNextPage, loading, setPage);
 
@@ -28,7 +29,7 @@ export default function BillsPage() {
                 if (res && !res.message) {
                     setBills((prev) => prev.concat(res.bills));
                     setBillsInfo(res.billsInfo);
-                }
+                } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

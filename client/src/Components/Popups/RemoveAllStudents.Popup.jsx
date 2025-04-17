@@ -9,13 +9,14 @@ import { useNavigate } from 'react-router-dom';
 import { contractorService } from '../../Services';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { checkTokenExpired } from '../../Utils';
 
 export default function RemoveAllStudentsPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup } = usePopupContext();
     const { setStudents } = useStudentContext();
     const navigate = useNavigate();
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(true);
     const [password, setPassword] = useState('');
@@ -42,7 +43,9 @@ export default function RemoveAllStudentsPopup() {
             if (res && res.message === 'all students removed successfully') {
                 setStudents([]);
                 toast.success('All students removed successfully');
-            } else toast.error(res?.message);
+            } else if (res && res.message !== 'tokens missing') {
+                toast.error(res?.message);
+            } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
         } finally {

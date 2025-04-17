@@ -4,13 +4,14 @@ import { billService } from '../Services';
 import { BillCard } from '../Components';
 import { useSearchContext, useUserContext } from '../Contexts';
 import { icons } from '../Assets/icons';
+import { checkTokenExpired } from '../Utils';
 
 export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
     const [loading, setLoading] = useState(true);
     const { studentId } = useParams();
     const navigate = useNavigate();
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
 
     useEffect(() => {
@@ -25,6 +26,7 @@ export default function StudentBillsPage() {
                     signal
                 );
                 if (res && !res.message) setBills(res);
+                else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {
