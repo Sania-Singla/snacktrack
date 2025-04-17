@@ -198,7 +198,7 @@ export default function Sidebar() {
                                     {itemElements}
                                 </div>
                                 <div className="w-full flex flex-col gap-1 items-start justify-start">
-                                    <hr className="w-full border-gray-300" />
+                                    <hr className="w-full border-gray-300 mb-1" />
                                     {systemItemElements}
                                 </div>
                             </div>
