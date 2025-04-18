@@ -40,16 +40,16 @@ export default function StudentOrdersPage() {
         (async function () {
             try {
                 setLoading(true);
-                const data = await orderService.getStudentOrders(
+                const res = await orderService.getStudentOrders(
                     studentId,
                     filter,
                     page,
                     LIMIT,
                     signal
                 );
-                if (data && !data.message) {
-                    setStudentOrders((prev) => prev.concat(data.orders));
-                    setOrdersInfo(data.ordersInfo);
+                if (res && !res.message) {
+                    setStudentOrders((prev) => prev.concat(res.orders));
+                    setOrdersInfo(res.ordersInfo);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
