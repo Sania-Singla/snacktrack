@@ -218,7 +218,7 @@ const cleanupOldBillsAndOrders = tryCatch(
 // Scheduled cron job to run on the 1st of every month at 12:05 AM
 const startBillingCronJob = () => {
     // Run at 00:05 on the 1st of every month
-    cron.schedule('* * * * *', generateBills, {
+    cron.schedule('5 0 1 * *', generateBills, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
@@ -230,7 +230,7 @@ const startBillingCronJob = () => {
 
 const startCleanupCronJob = () => {
     // Run at 12:05 AM on January 1st and July 1st each year
-    cron.schedule('*/2 * * * *', cleanupOldBillsAndOrders, {
+    cron.schedule('5 0 1 1,7 *', cleanupOldBillsAndOrders, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
