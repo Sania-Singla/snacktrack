@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
 import { BillCard } from '../Components';
@@ -37,13 +37,15 @@ export default function StudentBillsPage() {
         return () => controller.abort();
     }, []);
 
-    const billElements = bills
-        .filter(
-            (b) =>
-                !search ||
-                b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
-        )
-        .map((bill) => <BillCard key={bill._id} bill={bill} />);
+    const billElements = useMemo(() => {
+        return bills
+            .filter(
+                (b) =>
+                    !search ||
+                    b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
+            )
+            .map((bill) => <BillCard key={bill._id} bill={bill} />);
+    }, [bills, search]);
 
     return (
         <div>

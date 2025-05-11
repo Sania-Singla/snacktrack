@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { billService } from '../Services';
-import { BillCard } from '../Components';
+import { BillCard, Button } from '../Components';
 import { checkTokenExpired, paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 import { icons } from '../Assets/icons';
 import { useSearchContext, useUserContext } from '../Contexts';
+import toast from 'react-hot-toast';
 
 export default function BillsPage() {
     const [bills, setBills] = useState([]);
@@ -15,6 +16,7 @@ export default function BillsPage() {
     const [billsInfo, setBillsInfo] = useState({});
     const { search } = useSearchContext();
     const { setUser } = useUserContext();
+    const [generatingBills, setGeneratingBills] = useState(false);
 
     const paginateRef = paginate(billsInfo?.hasNextPage, loading, setPage);
 
@@ -40,40 +42,84 @@ export default function BillsPage() {
         return () => controller.abort();
     }, [page]);
 
-    const billElements = bills
-        .filter(
-            (b) =>
-                !search ||
-                b.studentInfo.fullName
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                b.studentInfo.userName
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
-        )
-        .map((bill, i) => (
-            <BillCard
-                reference={
-                    i + 1 === bills.length && billsInfo?.hasNextPage
-                        ? paginateRef
-                        : null
-                }
-                key={bill._id}
-                bill={bill}
-            />
-        ));
+    async function generateBills() {
+        try {
+            setGeneratingBills(true);
+            const res = await billService.generateBills();
+            if (res && res.message === 'bills generated') {
+                toast.success('Bills generated successfully, please refresh');
+            } else checkTokenExpired(res, setUser);
+        } catch (err) {
+            navigate('/server-error');
+        } finally {
+            setGeneratingBills(false);
+        }
+    }
+
+    const billElements = useMemo(() => {
+        return bills
+            .filter(
+                (b) =>
+                    !search ||
+                    b.studentInfo.fullName
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                    b.studentInfo.userName
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                    b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
+            )
+            .map((bill, i) => (
+                <BillCard
+                    reference={
+                        i + 1 === bills.length && billsInfo?.hasNextPage
+                            ? paginateRef
+                            : null
+                    }
+                    key={bill._id}
+                    bill={bill}
+                />
+            ));
+    }, [bills, search, billsInfo?.hasNextPage, paginateRef]);
+
+    const totalAmount = useMemo(() => {
+        return bills.reduce((total, bill) => total + (bill.amount || 0), 0);
+    }, [bills]);
 
     return (
         <div>
             <div className="w-full pt-2 sm:p-4">
-                <div className="flex items-center gap-3 mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">Bills</h1>
-                    <div className="px-3 py-[3px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
-                        {new Date().toLocaleDateString('default', {
-                            month: 'long',
-                        })}
+                <div className="flex items-center justify-between w-full mb-8">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Bills
+                        </h1>
+                        <div className="px-3 py-[3px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                            {new Date().toLocaleDateString('default', {
+                                month: 'long',
+                            })}
+                        </div>
                     </div>
+                    {bills.length > 0 && (
+                        <div className="text-xl font-semibold text-gray-800">
+                            Total: ₹{totalAmount.toFixed(2)}
+                        </div>
+                    )}
+                    {bills.length === 0 && (
+                        <Button
+                            onClick={generateBills}
+                            className="text-white rounded-md py-2 w-[140px] mt-2 h-[40px] flex items-center justify-center text-lg transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                            btnText={
+                                generatingBills ? (
+                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                        {icons.loading}
+                                    </div>
+                                ) : (
+                                    'Generate Bills'
+                                )
+                            }
+                        />
+                    )}
                 </div>
 
                 {billElements.length > 0 && (

@@ -32,7 +32,7 @@ export default function BillCard({ bill }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md h-fit"
+            className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit"
         >
             <div
                 className="p-3 cursor-pointer"
@@ -62,9 +62,9 @@ export default function BillCard({ bill }) {
                             <h2 className="text-xs font-medium text-gray-800">
                                 BILL
                             </h2>
-                            <p className="text-xs text-gray-500">
-                                #{_id.slice(-8).toUpperCase()}
-                            </p>
+                            <span className="text-xs text-gray-600">
+                                Roll No: {getRollNo(studentInfo.userName)}
+                            </span>
                         </div>
                     </div>
 

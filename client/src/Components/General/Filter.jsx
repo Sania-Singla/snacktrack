@@ -86,7 +86,7 @@ export default function Filter({
                 {/* Dropdown Options */}
                 {isDropdownOpen && (
                     <div
-                        className="absolute z-10 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden w-full"
+                        className="absolute z-1 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden w-full"
                         style={{
                             width: dropdownWidth,
                             minWidth: 'max-content',

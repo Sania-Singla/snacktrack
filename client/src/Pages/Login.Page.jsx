@@ -189,7 +189,7 @@ export default function LoginPage() {
 
                     <div>
                         <Button
-                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
+                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full transition-all duration-200 ${
                                 disabled
                                     ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
                                     : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'

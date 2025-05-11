@@ -80,7 +80,7 @@ export default function PackagedItemView({ item, reference }) {
     return (
         <div
             ref={reference}
-            className="p-6 relative bg-white shadow-lg rounded-2xl overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-xl"
+            className="p-6 relative bg-white shadow-sm rounded-2xl overflow-hidden cursor-pointer transition-all hover:shadow-md"
         >
             {user.role === 'contractor' && (
                 <div className="absolute right-6 top-4 flex gap-3 justify-end">

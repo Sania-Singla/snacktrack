@@ -10,7 +10,7 @@ export default function StudentOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all hover:shadow-md h-fit"
+            className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit"
         >
             <div
                 className="p-4 cursor-pointer"
@@ -101,7 +101,7 @@ export default function StudentOrderCard({ order, reference }) {
                                             <div className="flex items-center gap-1 text-xs">
                                                 <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
                                                 <span className="text-gray-500">
-                                                    Packed
+                                                    Pack
                                                 </span>
                                             </div>
                                         )}

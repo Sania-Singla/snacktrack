@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import { orderService } from '../Services';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
-import CountUp from 'react-countup';
 import { useUserContext } from '../Contexts';
 import { checkTokenExpired } from '../Utils';
 
@@ -70,11 +68,9 @@ export default function StatisticsPage() {
                     </h3>
                     <p className="text-2xl font-bold text-[#4977ec]">
                         ₹
-                        <CountUp
-                            end={data.yearlySummary?.totalRevenue || 0}
-                            duration={2}
-                            separator=","
-                        />
+                        {(
+                            data.yearlySummary?.totalRevenue || 0
+                        ).toLocaleString()}
                     </p>
                 </div>
 
@@ -83,11 +79,9 @@ export default function StatisticsPage() {
                         Items Sold
                     </h3>
                     <p className="text-2xl font-bold text-[#4CAF50]">
-                        <CountUp
-                            end={data.yearlySummary?.totalItemsSold || 0}
-                            duration={2}
-                            separator=","
-                        />
+                        {(
+                            data.yearlySummary?.totalItemsSold || 0
+                        ).toLocaleString()}
                     </p>
                 </div>
 
@@ -97,11 +91,9 @@ export default function StatisticsPage() {
                     </h3>
                     <p className="text-2xl font-bold text-[#FF5722]">
                         ₹
-                        <CountUp
-                            end={data.yearlySummary?.averageMonthlyRevenue || 0}
-                            duration={2}
-                            decimals={2}
-                        />
+                        {(
+                            data.yearlySummary?.averageMonthlyRevenue || 0
+                        ).toFixed(2)}
                     </p>
                 </div>
             </div>
@@ -150,44 +142,7 @@ export default function StatisticsPage() {
                                     transition={{ duration: 0.3 }}
                                     className="overflow-hidden"
                                 >
-                                    <div className="px-4 pb-4 border-t border-gray-100">
-                                        {/* Mini Chart */}
-                                        <div className="h-48 mb-4">
-                                            <ResponsiveContainer
-                                                width="100%"
-                                                height="100%"
-                                            >
-                                                <BarChart
-                                                    data={month.items.slice(
-                                                        0,
-                                                        5
-                                                    )}
-                                                >
-                                                    <XAxis
-                                                        dataKey="itemName"
-                                                        tick={{ fontSize: 12 }}
-                                                        interval={0}
-                                                    />
-                                                    <Tooltip
-                                                        formatter={(value) => [
-                                                            `₹${value.toLocaleString()}`,
-                                                            'Revenue',
-                                                        ]}
-                                                        labelFormatter={(
-                                                            label
-                                                        ) =>
-                                                            `${label} (${month.items.find((i) => i.itemName === label)?.totalQuantity || 0} sold)`
-                                                        }
-                                                    />
-                                                    <Bar
-                                                        dataKey="totalRevenue"
-                                                        fill="#4977ec"
-                                                        radius={[4, 4, 0, 0]}
-                                                    />
-                                                </BarChart>
-                                            </ResponsiveContainer>
-                                        </div>
-
+                                    <div className="px-4 pb-4 border-t pt-4 border-gray-100">
                                         {/* Item List */}
                                         <div className="space-y-3">
                                             <h4 className="font-medium text-gray-700 mb-2">

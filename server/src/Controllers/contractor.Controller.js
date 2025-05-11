@@ -333,7 +333,7 @@ const registerStudent = tryCatch(
         await sendMail({
             to: student.email,
             subject: 'Welcome to SnackTrack',
-            html: `Hello ${student.fullName}, <br> Your temporary password is ${randomPassword}, You can update it anytime after logging in from settings.`,
+            html: `Hello ${student.fullName}, <br> Your temporary password is <b>${randomPassword}</b> <br> You can update it anytime after logging in from settings.`,
         });
 
         return res.status(CREATED).json(student);

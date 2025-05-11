@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { userService } from '../Services';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../Components';
@@ -46,48 +46,50 @@ export default function AdminPage() {
         }
     };
 
-    const canteenElements = canteens.map((canteen) => (
-        <div
-            key={canteen._id}
-            className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
-        >
-            {/* Hostel Details */}
-            <div className="flex items-center justify-between gap-4 mb-4">
-                <h2 className="text-xl font-bold text-gray-900">
-                    {canteen.hostelName}
-                </h2>
-                <p className="text-nowrap font-medium text-gray-800">
-                    {canteen.hostelType} {canteen.hostelNumber}
-                </p>
-            </div>
+    const canteenElements = useMemo(() => {
+        return canteens.map((canteen) => (
+            <div
+                key={canteen._id}
+                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+            >
+                {/* Hostel Details */}
+                <div className="flex items-center justify-between gap-4 mb-4">
+                    <h2 className="text-xl font-bold text-gray-900">
+                        {canteen.hostelName}
+                    </h2>
+                    <p className="text-nowrap font-medium text-gray-800">
+                        {canteen.hostelType} {canteen.hostelNumber}
+                    </p>
+                </div>
 
-            {/* Contractor Details */}
-            <div className="flex items-center gap-4">
-                <div>
-                    <div className="size-14 rounded-full overflow-hidden">
-                        <img
-                            src={canteen.contractor.avatar}
-                            alt={canteen.contractor.fullName}
-                            className="size-full object-cover"
-                        />
+                {/* Contractor Details */}
+                <div className="flex items-center gap-4">
+                    <div>
+                        <div className="size-14 rounded-full overflow-hidden">
+                            <img
+                                src={canteen.contractor.avatar}
+                                alt={canteen.contractor.fullName}
+                                className="size-full object-cover"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <p className="text-lg font-semibold text-gray-900">
+                            {canteen.contractor.fullName}
+                        </p>
+                        <p className="text-sm text-gray-700">
+                            <span className="font-medium">Email:</span>{' '}
+                            {canteen.contractor.email}
+                        </p>
+                        <p className="text-sm  text-gray-700">
+                            <span className="font-medium">Phone:</span>{' '}
+                            {canteen.contractor.phoneNumber}
+                        </p>
                     </div>
                 </div>
-                <div>
-                    <p className="text-lg font-semibold text-gray-900">
-                        {canteen.contractor.fullName}
-                    </p>
-                    <p className="text-sm text-gray-700">
-                        <span className="font-medium">Email:</span>{' '}
-                        {canteen.contractor.email}
-                    </p>
-                    <p className="text-sm  text-gray-700">
-                        <span className="font-medium">Phone:</span>{' '}
-                        {canteen.contractor.phoneNumber}
-                    </p>
-                </div>
             </div>
-        </div>
-    ));
+        ));
+    });
 
     return loading ? (
         <div>loading...</div>

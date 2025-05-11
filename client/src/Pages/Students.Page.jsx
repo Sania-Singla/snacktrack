@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { contractorService } from '../Services';
 import { paginate, checkTokenExpired } from '../Utils';
 import { useNavigate } from 'react-router-dom';
@@ -53,24 +53,30 @@ export default function StudentsPage() {
         return () => controller.abort();
     }, [page]);
 
-    const studentElements = students
-        ?.filter(
-            (student) =>
-                !search ||
-                student.fullName.toLowerCase().includes(search.toLowerCase()) ||
-                student.userName.toLowerCase().includes(search.toLowerCase())
-        )
-        .map((student, i) => (
-            <StudentView
-                key={student._id}
-                student={student}
-                reference={
-                    i + 1 === students.length && studentsInfo?.hasNextPage
-                        ? paginateRef
-                        : null
-                }
-            />
-        ));
+    const studentElements = useMemo(() => {
+        return students
+            ?.filter(
+                (student) =>
+                    !search ||
+                    student.fullName
+                        .toLowerCase()
+                        .includes(search.toLowerCase()) ||
+                    student.userName
+                        .toLowerCase()
+                        .includes(search.toLowerCase())
+            )
+            .map((student, i) => (
+                <StudentView
+                    key={student._id}
+                    student={student}
+                    reference={
+                        i + 1 === students.length && studentsInfo?.hasNextPage
+                            ? paginateRef
+                            : null
+                    }
+                />
+            ));
+    });
 
     async function removeAllStudents() {
         setPopupInfo({ type: 'removeAllStudents' });

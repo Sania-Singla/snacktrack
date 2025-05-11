@@ -3,6 +3,7 @@ import { tryCatch } from '../Utils/index.js';
 import { Bill, Order } from '../Models/index.js';
 import { Types } from 'mongoose';
 import cron from 'node-cron';
+import pLimit from 'p-limit';
 
 const getStudentBills = tryCatch('get student bills', async (req, res) => {
     const { studentId } = req.params;
@@ -113,14 +114,12 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
 });
 
 // Automatic using cron job
-const generateBill = tryCatch('generate bill', async (req, res) => {
-    // Get the previous month and year
+const generateBills = tryCatch('generate bill', async (req, res) => {
     const now = new Date();
     const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const month = lastMonth.getMonth(); // Months are 0-indexed in JS
+    const month = lastMonth.getMonth();
     const year = lastMonth.getFullYear();
 
-    // Find all students who have orders in the previous month
     const studentsWithOrders = await Order.aggregate([
         {
             $match: {
@@ -140,28 +139,32 @@ const generateBill = tryCatch('generate bill', async (req, res) => {
         },
     ]);
 
-    // Generate bills for each student
-    const billPromises = studentsWithOrders.map(async (student) => {
-        const existingBill = await Bill.findOne({
-            studentId: student._id,
-            month,
-            year,
-        });
+    const limit = pLimit(10); // Adjust concurrency for avoiding network errors
 
-        if (!existingBill) {
-            return Bill.create({
+    const billPromises = studentsWithOrders.map((student) =>
+        limit(async () => {
+            const existingBill = await Bill.findOne({
                 studentId: student._id,
-                canteenId: student.canteenId,
                 month,
                 year,
-                amount: student.totalAmount,
             });
-        }
-        return null;
-    });
+
+            if (!existingBill) {
+                return Bill.create({
+                    studentId: student._id,
+                    canteenId: student.canteenId,
+                    month,
+                    year,
+                    amount: student.totalAmount,
+                });
+            }
+        })
+    );
 
     await Promise.all(billPromises);
     console.log(`👍 Automated billing completed for ${month}/${year}`);
+
+    if (res) res.status(OK).json({ message: 'bills generated' });
 });
 
 const cleanupOldBillsAndOrders = tryCatch(
@@ -215,7 +218,7 @@ const cleanupOldBillsAndOrders = tryCatch(
 // Scheduled cron job to run on the 1st of every month at 12:05 AM
 const startBillingCronJob = () => {
     // Run at 00:05 on the 1st of every month
-    cron.schedule('5 0 1 * *', generateBill, {
+    cron.schedule('* * * * *', generateBills, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
@@ -227,7 +230,7 @@ const startBillingCronJob = () => {
 
 const startCleanupCronJob = () => {
     // Run at 12:05 AM on January 1st and July 1st each year
-    cron.schedule('5 0 1 1,7 *', cleanupOldBillsAndOrders, {
+    cron.schedule('*/2 * * * *', cleanupOldBillsAndOrders, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
@@ -239,7 +242,7 @@ const startCleanupCronJob = () => {
 
 export {
     markPaid,
-    generateBill,
+    generateBills,
     getBills,
     getStudentBills,
     startBillingCronJob,

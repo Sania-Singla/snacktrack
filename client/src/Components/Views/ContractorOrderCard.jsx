@@ -22,6 +22,7 @@ export default function ContractorOrderCard({ order, reference }) {
                 { value: '', label: 'Pending' },
                 { value: 'Prepared', label: 'Prepared' },
                 { value: 'Rejected', label: 'Reject' },
+                { value: 'PickedUp', label: 'Picked Up' },
             ]);
         } else {
             setStatusOptions([
@@ -48,7 +49,7 @@ export default function ContractorOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="h-fit bg-white rounded-xl shadow-sm border border-gray-100 overflow-visible transition-all hover:shadow-md"
+            className="h-fit bg-white rounded-xl shadow-sm overflow-visible transition-all hover:shadow-md"
         >
             <div
                 className="p-4 cursor-pointer"
@@ -184,7 +185,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                     <div className="flex items-center gap-1 text-xs">
                                                         <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
                                                         <span className="text-gray-500">
-                                                            Packed
+                                                            Pack
                                                         </span>
                                                     </div>
                                                 )}

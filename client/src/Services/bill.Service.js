@@ -21,6 +21,15 @@ class BillService {
         });
     }
 
+    async generateBills() {
+        return await fetchWrapper({
+            endPoint: `/bills/generate`,
+            method: 'GET',
+            credentials: 'include',
+            aim: 'generateBills',
+        });
+    }
+
     async markPaid(billId) {
         return await fetchWrapper({
             endPoint: `/bills/${billId}`,
