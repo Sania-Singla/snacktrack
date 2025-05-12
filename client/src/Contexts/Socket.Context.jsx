@@ -61,7 +61,6 @@ const SocketContextProvider = ({ children }) => {
         });
 
         socketInstance.on('orderPrepared', (order) => {
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
             setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
             setStudentOrders((prev) =>
                 prev.map((o) =>

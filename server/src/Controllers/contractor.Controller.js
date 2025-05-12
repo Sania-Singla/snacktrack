@@ -245,7 +245,7 @@ const updateKitchenKey = tryCatch(
 // student management tasks
 
 const getStudents = tryCatch('get students', async (req, res) => {
-    const { limit = 10, page = 1 } = req.query; // for pagination
+    const { limit = 10, page = 1 } = req.query;
     const result = await Student.aggregatePaginate(
         [
             { $match: { canteenId: new Types.ObjectId(req.user.canteenId) } },
@@ -254,7 +254,7 @@ const getStudents = tryCatch('get students', async (req, res) => {
         {
             page: parseInt(page),
             limit: parseInt(limit),
-            sort: { createdAt: -1 },
+            sort: { userName: 1 },
         }
     );
 
@@ -402,7 +402,7 @@ const updateStudentAccountDetails = tryCatch(
     async (req, res, next) => {
         const contractor = req.user;
         const { studentId } = req.params;
-        const { fullName, phoneNumber, email, rollNo, password } = req.body;
+        const { fullName, phoneNumber, email, rollNo } = req.body;
 
         const [student] = await Student.aggregate([
             {
@@ -424,16 +424,6 @@ const updateStudentAccountDetails = tryCatch(
 
         if (!student) {
             return next(new ErrorHandler('student not found', NOT_FOUND));
-        }
-
-        const isStudentPassValid = await bcrypt.compare(
-            password,
-            student.password
-        );
-        if (!isStudentPassValid) {
-            return next(
-                new ErrorHandler('invalid student password', BAD_REQUEST)
-            );
         }
 
         let alreadyExists = null;

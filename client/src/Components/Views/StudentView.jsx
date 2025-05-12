@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
@@ -7,7 +6,6 @@ import { getRollNo } from '../../Utils';
 export default function StudentView({ student, reference }) {
     const { _id, avatar, fullName, userName, email, phoneNumber } = student;
     const { setShowPopup, setPopupInfo } = usePopupContext();
-    const navigate = useNavigate();
 
     async function removeStudent() {
         setPopupInfo({ type: 'removeStudent', student });
@@ -81,21 +79,6 @@ export default function StudentView({ student, reference }) {
                         />
                     </div>
                 </div>
-            </div>
-
-            <div className="flex justify-end w-full gap-2">
-                <Button
-                    onClick={() => navigate(`/orders/${_id}`)}
-                    btnText="View Orders"
-                    title="View Orders"
-                    className="text-white rounded-md text-[15px] w-fit px-3 h-[30px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                />
-                <Button
-                    onClick={() => navigate(`/bills/${_id}`)}
-                    btnText="View Bills"
-                    title="View Bills"
-                    className="text-white rounded-md text-[15px] w-fit px-3 h-[30px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                />
             </div>
         </div>
     );

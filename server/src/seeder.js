@@ -23,7 +23,6 @@ export const seedDatabase = async () => {
         await PackagedFood.deleteMany();
         await Bill.deleteMany();
         await EmailVerification.deleteMany();
-        await Order.deleteMany();
 
         console.log('Existing data cleared');
 
@@ -112,7 +111,7 @@ export const seedDatabase = async () => {
             {
                 studentId: students[0]._id,
                 canteenId: canteen1._id,
-                month: 3,
+                month: 4,
                 year: 2025,
                 amount: 500,
                 paid: true,
@@ -120,27 +119,27 @@ export const seedDatabase = async () => {
             {
                 studentId: students[0]._id,
                 canteenId: canteen1._id,
-                month: 2,
+                month: 3,
                 year: 2025,
                 amount: 300,
             },
             {
                 studentId: students[0]._id,
                 canteenId: canteen1._id,
-                month: 3,
+                month: 2,
                 year: 2025,
                 amount: 400,
                 paid: true,
             },
             {
-                studentId: students[0]._id,
+                studentId: students[1]._id,
                 canteenId: canteen1._id,
-                month: 3,
+                month: 4,
                 year: 2025,
                 amount: 400,
             },
             {
-                studentId: students[1]._id,
+                studentId: students[2]._id,
                 canteenId: canteen2._id,
                 month: 1,
                 year: 2025,

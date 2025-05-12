@@ -113,14 +113,14 @@ class ContractorService {
 
     async updateStudentAccountDetails(
         studentId,
-        { fullName, phoneNumber, rollNo, password }
+        { fullName, phoneNumber, rollNo, email }
     ) {
         return await fetchWrapper({
             endPoint: `/contractors/students/${studentId}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateStudentAccountDetails',
-            body: { fullName, phoneNumber, rollNo, password },
+            body: { fullName, phoneNumber, rollNo, email },
         });
     }
 

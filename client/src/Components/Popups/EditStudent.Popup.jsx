@@ -18,23 +18,20 @@ export default function EditStudentPopup() {
         fullName: popupInfo.student?.fullName || '',
         rollNo: getRollNo(popupInfo.student?.userName) || '',
         phoneNumber: popupInfo.student?.phoneNumber || '',
-        password: '',
+        email: popupInfo.student?.email || '',
     });
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const { setUser } = useUserContext();
 
     async function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-        if (name !== 'password') {
-            value
-                ? verifyExpression(name, value, setError)
-                : setError((prev) => ({ ...prev, [name]: '' }));
-        }
+        value
+            ? verifyExpression(name, value, setError)
+            : setError((prev) => ({ ...prev, [name]: '' }));
         onMouseOver();
     }
 
@@ -48,8 +45,6 @@ export default function EditStudentPopup() {
     }
 
     function onMouseOver() {
-        console.log(handleDisable());
-        console.log(inputs);
         setDisabled(handleDisable());
     }
 
@@ -61,6 +56,7 @@ export default function EditStudentPopup() {
         }
         setLoading(true);
         setDisabled(true);
+        setError({});
         try {
             const res = await contractorService.updateStudentAccountDetails(
                 popupInfo.student._id,
@@ -69,17 +65,18 @@ export default function EditStudentPopup() {
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
                 setStudents((prev) =>
-                    prev.map((student) => {
-                        if (student._id === popupInfo.student._id) {
+                    prev.map((s) => {
+                        if (s._id === popupInfo.student._id) {
                             return {
-                                ...student,
+                                ...s,
                                 fullName: inputs.fullName,
                                 phoneNumber: inputs.phoneNumber,
+                                email: inputs.email,
                                 userName:
                                     popupInfo.student.userName.slice(0, 4) +
                                     inputs.rollNo,
                             };
-                        } else return student;
+                        } else return s;
                     })
                 );
                 setShowPopup(false);
@@ -110,47 +107,36 @@ export default function EditStudentPopup() {
             required: true,
         },
         {
+            type: 'email',
+            name: 'email',
+            label: 'Email',
+            placeholder: 'Enter new email',
+            required: true,
+        },
+        {
             type: 'text',
             name: 'phoneNumber',
             label: 'PhoneNumber',
             placeholder: 'Enter new Phone Number',
             required: true,
         },
-        {
-            type: showPassword ? 'text' : 'password',
-            name: 'password',
-            label: "Student's Password",
-            placeholder: "Enter student's password",
-            required: true,
-        },
     ];
 
-    const inputElements = inputFields.map((field) =>
-        field.name === 'password' ? (
+    const inputElements = inputFields.map((field) => (
+        <div className="w-full" key={field.name}>
             <InputField
-                key={field.name}
                 field={field}
                 handleChange={handleChange}
+                error={error}
                 inputs={inputs}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
             />
-        ) : (
-            <div className="w-full" key={field.name}>
-                <InputField
-                    field={field}
-                    handleChange={handleChange}
-                    error={error}
-                    inputs={inputs}
-                />
-                {error[field.name] && (
-                    <div className="text-red-500 text-xs font-medium">
-                        {error[field.name]}
-                    </div>
-                )}
-            </div>
-        )
-    );
+            {error[field.name] && (
+                <div className="text-red-500 text-xs font-medium">
+                    {error[field.name]}
+                </div>
+            )}
+        </div>
+    ));
 
     return (
         <div className="relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-3">

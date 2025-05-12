@@ -1,24 +1,24 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { billService } from '../Services';
-import { BillCard, Button } from '../Components';
-import { checkTokenExpired, paginate } from '../Utils';
+import { Button, StudentBillCard } from '../Components';
+import { checkTokenExpired, getRollNo, paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 import { icons } from '../Assets/icons';
 import { useSearchContext, useUserContext } from '../Contexts';
 import toast from 'react-hot-toast';
 
 export default function BillsPage() {
-    const [bills, setBills] = useState([]);
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
-    const [billsInfo, setBillsInfo] = useState({});
+    const [studentsInfo, setStudentsInfo] = useState({});
     const { search } = useSearchContext();
     const { setUser } = useUserContext();
     const [generatingBills, setGeneratingBills] = useState(false);
 
-    const paginateRef = paginate(billsInfo?.hasNextPage, loading, setPage);
+    const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -29,8 +29,8 @@ export default function BillsPage() {
                 setLoading(true);
                 const res = await billService.getBills(page, LIMIT, signal);
                 if (res && !res.message) {
-                    setBills((prev) => prev.concat(res.bills));
-                    setBillsInfo(res.billsInfo);
+                    setStudents((prev) => prev.concat(res.students));
+                    setStudentsInfo(res.studentsInfo);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
@@ -56,35 +56,28 @@ export default function BillsPage() {
         }
     }
 
-    const billElements = useMemo(() => {
-        return bills
+    const studentElements = useMemo(() => {
+        return students
             .filter(
-                (b) =>
+                (s) =>
                     !search ||
-                    b.studentInfo.fullName
+                    s.fullName.toLowerCase().includes(search.toLowerCase()) ||
+                    getRollNo(s.userName)
                         .toLowerCase()
-                        .includes(search.toLowerCase()) ||
-                    b.studentInfo.userName
-                        .toLowerCase()
-                        .includes(search.toLowerCase()) ||
-                    b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
+                        .includes(search.toLowerCase())
             )
-            .map((bill, i) => (
-                <BillCard
+            .map((s, i) => (
+                <StudentBillCard
                     reference={
-                        i + 1 === bills.length && billsInfo?.hasNextPage
+                        i + 1 === students.length && studentsInfo?.hasNextPage
                             ? paginateRef
                             : null
                     }
-                    key={bill._id}
-                    bill={bill}
+                    key={s._id}
+                    student={s}
                 />
             ));
-    }, [bills, search, billsInfo?.hasNextPage, paginateRef]);
-
-    const totalAmount = useMemo(() => {
-        return bills.reduce((total, bill) => total + (bill.amount || 0), 0);
-    }, [bills]);
+    }, [students, search, studentsInfo?.hasNextPage, paginateRef]);
 
     return (
         <div>
@@ -100,31 +93,31 @@ export default function BillsPage() {
                             })}
                         </div>
                     </div>
-                    {bills.length > 0 && (
-                        <div className="text-xl font-semibold text-gray-800">
-                            Total: ₹{totalAmount.toFixed(2)}
-                        </div>
-                    )}
-                    {bills.length === 0 && (
-                        <Button
-                            onClick={generateBills}
-                            className="text-white rounded-md py-2 w-[140px] mt-2 h-[40px] flex items-center justify-center text-lg transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
-                            btnText={
-                                generatingBills ? (
-                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                        {icons.loading}
-                                    </div>
-                                ) : (
-                                    'Generate Bills'
-                                )
-                            }
-                        />
-                    )}
+
+                    <Button
+                        onClick={generateBills}
+                        className="text-white rounded-md py-2 px-4 mt-2 h-[40px] flex items-center justify-center text-lg transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                        btnText={
+                            generatingBills ? (
+                                <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                    {icons.loading}
+                                </div>
+                            ) : (
+                                `Generate Bills for ${new Date(
+                                    new Date().getFullYear(),
+                                    new Date().getMonth() - 1,
+                                    1
+                                ).toLocaleDateString('default', {
+                                    month: 'long',
+                                })}`
+                            )
+                        }
+                    />
                 </div>
 
-                {billElements.length > 0 && (
+                {studentElements.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {billElements}
+                        {studentElements}
                     </div>
                 )}
 
@@ -135,7 +128,7 @@ export default function BillsPage() {
                         </div>
                     </div>
                 ) : (
-                    billElements.length === 0 && <div>No bills found</div>
+                    studentElements.length === 0 && <div>No students found</div>
                 )}
             </div>
         </div>

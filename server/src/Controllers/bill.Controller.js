@@ -1,36 +1,12 @@
 import { OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
-import { Bill, Order } from '../Models/index.js';
+import { Bill, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
 import cron from 'node-cron';
-import pLimit from 'p-limit';
 
 const getStudentBills = tryCatch('get student bills', async (req, res) => {
     const { studentId } = req.params;
-    const bills = await Bill.aggregate([
-        { $match: { studentId: new Types.ObjectId(studentId) } },
-        {
-            $lookup: {
-                from: 'students',
-                localField: 'studentId',
-                foreignField: '_id',
-                as: 'studentInfo',
-                pipeline: [
-                    {
-                        $project: {
-                            fullName: 1,
-                            userName: 1,
-                            email: 1,
-                            phoneNumber: 1,
-                            avatar: 1,
-                        },
-                    },
-                ],
-            },
-        },
-        { $unwind: '$studentInfo' },
-        { $sort: { createdAt: -1 } },
-    ]);
+    const bills = await Bill.find({ studentId: new Types.ObjectId(studentId) });
 
     if (bills.length) {
         return res.status(OK).json(bills);
@@ -43,55 +19,59 @@ const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
     const { page = 1, limit = 10 } = req.query;
 
-    // get bills of the previous month only
-    const bills = await Bill.aggregatePaginate(
+    const students = await Student.aggregatePaginate(
         [
-            {
-                $match: {
-                    canteenId: new Types.ObjectId(contractor.canteenId),
-                    month: new Date().getMonth(), // previous month as 0 indexed
-                    year: new Date().getFullYear(),
-                },
-            },
+            { $match: { canteenId: new Types.ObjectId(contractor.canteenId) } },
             {
                 $lookup: {
-                    from: 'students',
-                    localField: 'studentId',
-                    foreignField: '_id',
-                    as: 'studentInfo',
+                    from: 'bills',
+                    localField: '_id',
+                    foreignField: 'studentId',
+                    as: 'bills',
                     pipeline: [
                         {
                             $project: {
-                                fullName: 1,
-                                userName: 1,
-                                email: 1,
-                                phoneNumber: 1,
-                                avatar: 1,
+                                paid: 1,
+                                paidOn: 1,
+                                month: 1,
+                                year: 1,
+                                amount: 1,
+                                studentId: 1,
                             },
                         },
+                        { $sort: { month: -1, year: -1 } },
                     ],
                 },
             },
-            { $unwind: '$studentInfo' },
+            {
+                $project: {
+                    userName: 1,
+                    fullName: 1,
+                    bills: 1,
+                    avatar: 1,
+                    email: 1,
+                    phoneNumber: 1,
+                },
+            },
         ],
         {
             page: parseInt(page),
             limit: parseInt(limit),
-            sort: { createdAt: -1 },
+            sort: { userName: 1 },
         }
     );
 
-    if (bills.docs.length) {
+    if (students.docs.length) {
         return res.status(OK).json({
-            bills: bills.docs,
-            billsInfo: {
-                totalPages: bills.totalPages,
-                hasNextPage: bills.hasNextPage,
-                hasPrevPage: bills.hasPrevPage,
+            students: students.docs,
+            studentsInfo: {
+                totalPages: students.totalPages,
+                hasNextPage: students.hasNextPage,
+                hasPrevPage: students.hasPrevPage,
             },
         });
     } else {
-        return res.status(OK).json({ message: 'no bills found' });
+        return res.status(OK).json({ message: 'no students found' });
     }
 });
 
@@ -113,8 +93,8 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
     return res.status(OK).json({ message: 'bill marked as paid' });
 });
 
-// Automatic using cron job
-const generateBills = tryCatch('generate bill', async (req, res) => {
+// generate bills for the previous month
+const generateBills = tryCatch('generate bills', async (req, res) => {
     const now = new Date();
     const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const month = lastMonth.getMonth();
@@ -139,30 +119,32 @@ const generateBills = tryCatch('generate bill', async (req, res) => {
         },
     ]);
 
-    const limit = pLimit(10); // Adjust concurrency for avoiding network errors
-
-    const billPromises = studentsWithOrders.map((student) =>
-        limit(async () => {
-            const existingBill = await Bill.findOne({
+    const operations = studentsWithOrders.map((student) => ({
+        updateOne: {
+            filter: {
                 studentId: student._id,
                 month,
                 year,
-            });
-
-            if (!existingBill) {
-                return Bill.create({
+            },
+            update: {
+                $setOnInsert: {
                     studentId: student._id,
                     canteenId: student.canteenId,
                     month,
                     year,
                     amount: student.totalAmount,
-                });
-            }
-        })
-    );
+                },
+            },
+            upsert: true,
+        },
+    }));
 
-    await Promise.all(billPromises);
-    console.log(`👍 Automated billing completed for ${month}/${year}`);
+    if (operations.length > 0) {
+        await Bill.bulkWrite(operations);
+        console.log(`👍 Automated billing completed for ${month + 1}/${year}`);
+    } else {
+        console.log('ℹ️ No students with picked up orders for billing period.');
+    }
 
     if (res) res.status(OK).json({ message: 'bills generated' });
 });
@@ -170,54 +152,32 @@ const generateBills = tryCatch('generate bill', async (req, res) => {
 const cleanupOldBillsAndOrders = tryCatch(
     'cleanup old bills and orders',
     async () => {
-        // Get current date
         const now = new Date();
-        const currentYear = now.getFullYear();
-
-        // Determine if it's January 1st or July 1st
         const isJan1 = now.getMonth() === 0 && now.getDate() === 1;
-        const isJuly1 = now.getMonth() === 6 && now.getDate() === 1;
 
-        if (!isJan1 && !isJuly1) {
-            console.log('Not January 1st or July 1st - skipping cleanup');
+        if (!isJan1) {
+            console.log('🧹 Not January 1st - skipping cleanup');
             return;
         }
 
-        // For January 1st, delete all bills/orders from previous year's first half (Jan-Jun)
-        // For July 1st, delete all bills/orders from previous year's second half (Jul-Dec)
-        const startMonth = isJan1 ? 0 : 6; // January or July
-        const endMonth = isJan1 ? 5 : 11; // June or December
-        const targetYear = isJan1 ? currentYear - 1 : currentYear;
-
-        const startDate = new Date(targetYear, startMonth, 1);
-        const endDate = new Date(targetYear, endMonth + 1, 1); // +1 to include last day of month
-
         console.log(
-            `🧹 Starting cleanup for ${isJan1 ? 'Jan-Jun' : 'Jul-Dec'} ${targetYear}`
+            '🧹 Starting full paid bill and order cleanup (January 1st)'
         );
 
-        // Delete all paid bills in the target period
-        const billDeleteResult = await Bill.deleteMany({
-            paid: true,
-            paidOn: { $gte: startDate, $lt: endDate },
-        });
+        const paidBills = await Bill.find({ paid: true });
+        const paidBillIds = paidBills.map((b) => b._id);
 
-        // Delete all orders in the target period
-        const orderDeleteResult = await Order.deleteMany({
-            createdAt: { $gte: startDate, $lt: endDate },
-        });
+        await Promise.all([
+            Bill.deleteMany({ _id: { $in: paidBillIds } }),
+            Order.deleteMany({ billId: { $in: paidBillIds } }),
+        ]);
 
-        console.log(
-            `🧹 Cleanup completed for ${isJan1 ? 'first half' : 'second half'} of ${targetYear}: ` +
-                `Deleted ${billDeleteResult.deletedCount} paid bills and ` +
-                `${orderDeleteResult.deletedCount} orders`
-        );
+        console.log(`🧹 Cleanup completed for ${targetYear}`);
     }
 );
 
-// Scheduled cron job to run on the 1st of every month at 12:05 AM
 const startBillingCronJob = () => {
-    // Run at 00:05 on the 1st of every month
+    // Run at 12:05 on the 1st of every month
     cron.schedule('5 0 1 * *', generateBills, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
@@ -229,14 +189,14 @@ const startBillingCronJob = () => {
 };
 
 const startCleanupCronJob = () => {
-    // Run at 12:05 AM on January 1st and July 1st each year
-    cron.schedule('5 0 1 1,7 *', cleanupOldBillsAndOrders, {
+    // Run at 12:05 AM on January 1st
+    cron.schedule('5 0 1 1 *', cleanupOldBillsAndOrders, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
 
     console.log(
-        '🧹 Cleanup cron job scheduled to run at 12:05 AM on Jan 1st and July 1st each year'
+        '🧹 Cleanup cron job scheduled to run at 12:05 AM on Jan 1st each year'
     );
 };
 

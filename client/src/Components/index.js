@@ -39,6 +39,7 @@ import OrderUnavailablePopup from './Popups/OrderUnavailable.Popup';
 import EmptyCart from './Views/EmptyCart';
 import OrderDropdown from './General/OrderDropdown';
 import BillCard from './Views/BillCard';
+import StudentBillCard from './Views/StudentBillCard';
 
 export {
     Header,
@@ -82,4 +83,5 @@ export {
     EmailVerificationPopup,
     EmptyCart,
     OrderPlacedPopup,
+    StudentBillCard,
 };

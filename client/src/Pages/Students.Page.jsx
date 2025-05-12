@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { contractorService } from '../Services';
-import { paginate, checkTokenExpired } from '../Utils';
+import { paginate, checkTokenExpired, getRollNo } from '../Utils';
 import { useNavigate } from 'react-router-dom';
 import {
     useStudentContext,
@@ -61,7 +61,7 @@ export default function StudentsPage() {
                     student.fullName
                         .toLowerCase()
                         .includes(search.toLowerCase()) ||
-                    student.userName
+                    getRollNo(student.userName)
                         .toLowerCase()
                         .includes(search.toLowerCase())
             )
