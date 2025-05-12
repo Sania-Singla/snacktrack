@@ -14,31 +14,43 @@ export default function StudentBillCard({ student }) {
     return (
         <div className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit">
             <div
-                className="p-3 cursor-pointer"
+                className="p-4 cursor-pointer"
                 onClick={() => setExpanded(!expanded)}
             >
                 <div className="flex justify-between items-center w-full">
-                    {/* User Info Section */}
-                    <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full overflow-hidden drop-shadow-sm">
-                            <img
-                                src={avatar}
-                                alt={`${fullName} image`}
-                                className="size-full object-cover"
-                            />
+                    <div className="flex items-center justify-start gap-4">
+                        {/* avatar */}
+                        <div>
+                            <div className="size-[80px] overflow-hidden rounded-full drop-shadow-md">
+                                <img
+                                    alt="student avatar"
+                                    src={avatar}
+                                    className="size-full object-cover"
+                                />
+                            </div>
                         </div>
-                        <div className="flex-1 space-y-[2px]">
-                            <h3 className="flex items-center gap-1">
-                                <span className="font-medium text-sm text-gray-800 truncate">
-                                    {fullName}
-                                </span>
-                                <span className="text-xs text-gray-600">•</span>
-                                <span className="text-xs text-gray-600">
-                                    Roll No: {getRollNo(userName)}
-                                </span>
-                            </h3>
-                            <div className="flex items-center gap-1 text-xs text-gray-600">
+
+                        {/* info */}
+                        <div className="">
+                            <div className="text-ellipsis line-clamp-1 hover:text-[#5c5c5c] text-[16px] font-semibold text-black w-fit">
+                                {fullName}
+                            </div>
+
+                            <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                                <span className="font-medium">Roll No: </span>
+                                {getRollNo(userName)}
+                            </div>
+
+                            <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                                <span className="font-medium">
+                                    Phone Number:{' '}
+                                </span>{' '}
                                 {phoneNumber}
+                            </div>
+
+                            <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                                <span className="font-medium">Email: </span>{' '}
+                                {email}
                             </div>
                         </div>
                     </div>
