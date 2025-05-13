@@ -2,12 +2,13 @@ import { EmailVerification } from '../Models/index.js';
 import { customAlphabet } from 'nanoid';
 import { sendMail } from '../mailer.js';
 
-async function sendVerificationEmail(email) {
+async function sendVerificationEmail(name, email) {
     const randomCode = customAlphabet('0123456789', 6)(); // Generate a random 6-digit numeric code for email verification
 
     // send mail
     await sendMail({
-        to: email,
+        receiverName: name,
+        receiverMail: email,
         subject: 'Welcome to SnackTrack',
         html: `Your Email verification code is ${randomCode}. This code will expire in 1 minute`,
     });

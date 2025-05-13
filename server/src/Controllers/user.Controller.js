@@ -143,9 +143,10 @@ const resetPassword = tryCatch('reset password', async (req, res, next) => {
 
     // send this password on student's email
     await sendMail({
-        to: email,
+        receiverName: fullName,
+        receiverMail: email,
         subject: 'Welcome to SnackTrack',
-        html: `Hello ${fullName}, <br> Your temporary password is ${randomPassword}, You can update it anytime after logging in from settings.`,
+        html: `Hello ${fullName}, <br> Your temporary password is <b>${randomPassword}</b><br> You can update it anytime after logging in from settings.`,
     });
 
     return res.status(OK).json({ message: 'new password sent to email' });
@@ -298,15 +299,17 @@ const sendQuery = tryCatch('send query to admin', async (req, res, next) => {
     }
 
     await sendMail({
-        from: email,
-        to: process.env.ADMIN_EMAIL,
+        senderName: fullName,
+        senderMail: email,
+        receiverName: 'Snack Track',
+        receiverMail: process.env.ADMIN_EMAIL,
         subject,
         html: `
-                <p><b>Subject:</b> ${subject}</p>
-                <p><b>Message:</b> ${message}</p>
-                <p><b>From:</b> ${fullName}</p>
-                <p><b>Phone Number:</b> ${phoneNumber}</p>
-            `,
+            <h2>Query from ${fullName}</h2>
+            <p><b>Message:</b> ${message}</p>
+            <p><b>From:</b> ${fullName}</p>
+            <p><b>Phone Number:</b> ${phoneNumber}</p>
+        `,
     });
 
     return res.status(OK).json({ message: 'query sent successfully' });

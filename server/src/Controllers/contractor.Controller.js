@@ -87,7 +87,7 @@ const register = tryCatch('register as contractor', async (req, res, next) => {
     }
 
     // Send email verification
-    await sendVerificationEmail(email.trim());
+    await sendVerificationEmail(fullName, email.trim());
 
     return res.status(OK).json({ message: 'Verification code sent' });
 });
@@ -331,7 +331,8 @@ const registerStudent = tryCatch(
 
         // send this password on student's email
         await sendMail({
-            to: student.email,
+            receiverName: student.fullName,
+            receiverMail: student.email,
             subject: 'Welcome to SnackTrack',
             html: `Hello ${student.fullName}, <br> Your temporary password is <b>${randomPassword}</b> <br> You can update it anytime after logging in from settings.`,
         });

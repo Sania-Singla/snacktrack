@@ -22,35 +22,28 @@ async function generateTransporter() {
 }
 
 async function sendMail({
-    from = '',
-    to = '',
-    subject = 'No particular subject', // to avoid spam mails
+    senderName = 'Snack Track',
+    senderMail = process.env.ADMIN_EMAIL,
+    receiverName,
+    receiverMail,
+    replyToMail = '',
+    subject = 'No particular subject',
     text = '',
     html = '',
-    replyTo = '',
 }) {
     if (!transporter) throw new Error('❌ Transporter not initialized.');
 
     try {
         const mailOptions = {
-            from: from
-                ? `${from} <${process.env.ADMIN_EMAIL}>`
-                : `Snack Track <${process.env.ADMIN_EMAIL}>`,
-            to,
+            from: `${senderName} <${senderMail}>`, // although would always show admin email
+            to: `${receiverName} <${receiverMail}>`,
+            replyTo: replyToMail || senderMail,
             subject,
             text,
             html,
-            replyTo: replyTo || from || process.env.ADMIN_EMAIL,
-        };
-
-        // Headers to allow custom from address
-        mailOptions.headers = {
-            'X-Entity-Ref-ID': new Date().getTime().toString(),
-            ...(from && {
-                From: from,
-                Sender: process.env.ADMIN_EMAIL,
-                'Reply-To': replyTo || from,
-            }),
+            headers: {
+                'X-Entity-Ref-ID': new Date().getTime().toString(),
+            },
         };
 
         return await transporter.sendMail(mailOptions);
