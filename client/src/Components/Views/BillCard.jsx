@@ -9,8 +9,7 @@ import { billService } from '../../Services';
 
 export default function BillCard({ bill }) {
     const { _id, month, year, amount, studentInfo } = bill;
-    const { avatar, fullName, userName, email, phoneNumber, studentId } =
-        studentInfo;
+    const { avatar, fullName, userName, email, phoneNumber } = studentInfo;
     const [paid, setPaid] = useState(bill.paid);
     const [paidOn, setPaidOn] = useState(bill.paidOn);
     const { user, setUser } = useUserContext();
@@ -92,7 +91,9 @@ export default function BillCard({ bill }) {
                         btnText="Get Orders"
                         className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
                         onClick={() =>
-                            navigate(`/orders/${studentId}?filter=${month}`)
+                            navigate(
+                                `/orders/${studentInfo._id}?filter=${month}`
+                            )
                         }
                     />
                     {user.role === 'contractor' && !paid && (
