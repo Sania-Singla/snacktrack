@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
-import { BillCard } from '../Components';
-import { useSearchContext, useUserContext } from '../Contexts';
+import { StudentBillCard } from '../Components';
+import { useUserContext } from '../Contexts';
 import { icons } from '../Assets/icons';
 import { checkTokenExpired } from '../Utils';
 
@@ -12,7 +12,6 @@ export default function StudentBillsPage() {
     const { studentId } = useParams();
     const navigate = useNavigate();
     const { user, setUser } = useUserContext();
-    const { search } = useSearchContext();
 
     useEffect(() => {
         const controller = new AbortController();
@@ -38,21 +37,17 @@ export default function StudentBillsPage() {
     }, []);
 
     const billElements = useMemo(() => {
-        return bills
-            .filter(
-                (b) =>
-                    !search ||
-                    b._id.slice(-8).toLowerCase().includes(search.toLowerCase())
-            )
-            .map((bill) => <BillCard key={bill._id} bill={bill} />);
-    }, [bills, search]);
+        return bills.map((bill) => (
+            <StudentBillCard studentInfo={user} key={bill._id} bill={bill} />
+        ));
+    }, [bills]);
 
     return (
         <div>
             <div className="w-full p-2 md:p-4">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold text-gray-900">
-                        {user._id === studentId ? 'My Bills' : 'Bills'}
+                        My Bills
                     </h1>
                 </div>
 

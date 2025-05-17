@@ -250,6 +250,26 @@ const getStudents = tryCatch('get students', async (req, res) => {
         [
             { $match: { canteenId: new Types.ObjectId(req.user.canteenId) } },
             { $project: { password: 0, refreshToken: 0 } },
+            {
+                $lookup: {
+                    from: 'bills',
+                    localField: '_id',
+                    foreignField: 'studentId',
+                    as: 'bills',
+                    pipeline: [
+                        {
+                            $project: {
+                                amount: 1,
+                                paid: 1,
+                                paidOn: 1,
+                                month: 1,
+                                year: 1,
+                            },
+                        },
+                        { $sort: { createdAt: -1 } },
+                    ],
+                },
+            },
         ],
         {
             page: parseInt(page),

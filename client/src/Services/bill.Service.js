@@ -11,9 +11,9 @@ class BillService {
         });
     }
 
-    async getBills(page, limit, signal) {
+    async getBills(month, page, limit, signal) {
         return await fetchWrapper({
-            endPoint: `/bills?page=${page}&limit=${limit}`,
+            endPoint: `/bills?month=${month}&page=${page}&limit=${limit}`,
             method: 'GET',
             signal,
             credentials: 'include',

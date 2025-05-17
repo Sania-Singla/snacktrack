@@ -1,11 +1,15 @@
-import { Button } from '..';
+import { Button, StudentBillCard } from '..';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
 import { getRollNo } from '../../Utils';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function StudentView({ student, reference }) {
-    const { _id, avatar, fullName, userName, email, phoneNumber } = student;
+    const { _id, avatar, fullName, userName, email, phoneNumber, bills } =
+        student;
     const { setShowPopup, setPopupInfo } = usePopupContext();
+    const [expanded, setExpanded] = useState(false);
 
     async function removeStudent() {
         setPopupInfo({ type: 'removeStudent', student });
@@ -24,17 +28,6 @@ export default function StudentView({ student, reference }) {
         >
             <div className="w-full flex justify-between gap-4">
                 <div className="flex items-center justify-start gap-4">
-                    {/* avatar */}
-                    <div>
-                        <div className="size-[80px] overflow-hidden rounded-full drop-shadow-md">
-                            <img
-                                alt="student avatar"
-                                src={avatar}
-                                className="size-full object-cover"
-                            />
-                        </div>
-                    </div>
-
                     {/* info */}
                     <div className="">
                         <div className="text-ellipsis line-clamp-1 hover:text-[#5c5c5c] text-[16px] font-semibold text-black w-fit">
@@ -57,29 +50,70 @@ export default function StudentView({ student, reference }) {
                     </div>
                 </div>
 
-                <div className="w-fit flex flex-col gap-3 items-end justify-center">
-                    <Button
-                        btnText={
-                            <div className="size-[15px] group-hover:fill-[#4977ec]">
-                                {icons.edit}
-                            </div>
-                        }
-                        className="bg-[#f0efef] p-2 group rounded-full drop-shadow-lg hover:bg-[#ebeaea]"
-                        onClick={editStudent}
-                    />
-                    <div>
+                <div className="flex flex-col justify-between items-end">
+                    <div className="flex h-fit gap-3">
                         <Button
                             btnText={
-                                <div className="size-[15px] group-hover:fill-red-700">
-                                    {icons.delete}
+                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                    {icons.edit}
                                 </div>
                             }
                             className="bg-[#f0efef] p-2 group rounded-full drop-shadow-lg hover:bg-[#ebeaea]"
-                            onClick={removeStudent}
+                            onClick={editStudent}
                         />
+                        <div>
+                            <Button
+                                btnText={
+                                    <div className="size-[15px] group-hover:fill-red-700">
+                                        {icons.delete}
+                                    </div>
+                                }
+                                className="bg-[#f0efef] p-2 group rounded-full drop-shadow-lg hover:bg-[#ebeaea]"
+                                onClick={removeStudent}
+                            />
+                        </div>
                     </div>
+
+                    <Button
+                        className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                        btnText={
+                            <div className="flex gap-2 items-center">
+                                Get Details
+                                <div className="size-[10px] fill-white">
+                                    {icons.arrowDown}
+                                </div>
+                            </div>
+                        }
+                        onClick={() => setExpanded(!expanded)}
+                    />
                 </div>
             </div>
+
+            <AnimatePresence>
+                {expanded && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="p-1 pt-4 space-y-4 border-t w-full border-gray-300"
+                    >
+                        {bills.length > 0 ? (
+                            bills.map((b) => (
+                                <StudentBillCard
+                                    studentInfo={student}
+                                    bill={b}
+                                    key={b._id}
+                                />
+                            ))
+                        ) : (
+                            <span className="italic text-sm text-gray-500">
+                                No bills found
+                            </span>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -1,5 +1,5 @@
 import { useUserContext } from '../../Contexts';
-import { checkTokenExpired, formatTime } from '../../Utils';
+import { checkTokenExpired, formatTime, getRollNo } from '../../Utils';
 import { icons } from '../../Assets/icons';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
@@ -8,7 +8,9 @@ import { useNavigate } from 'react-router-dom';
 import { billService } from '../../Services';
 
 export default function BillCard({ bill }) {
-    const { _id, month, year, amount, studentId } = bill;
+    const { _id, month, year, amount, studentInfo } = bill;
+    const { avatar, fullName, userName, email, phoneNumber, studentId } =
+        studentInfo;
     const [paid, setPaid] = useState(bill.paid);
     const [paidOn, setPaidOn] = useState(bill.paidOn);
     const { user, setUser } = useUserContext();
@@ -36,48 +38,38 @@ export default function BillCard({ bill }) {
             className="bg-white p-3 cursor-pointer rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit border border-gray-200"
         >
             <div className="flex justify-between items-center w-full">
-                <div className="flex items-center gap-3">
-                    {/* Month/year badge */}
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-11 rounded-lg flex items-center justify-center border border-blue-400">
-                        <div className="text-center">
-                            <p className="text-xs font-bold text-blue-800 leading-none">
-                                {new Date(
-                                    year,
-                                    month - 1,
-                                    1
-                                ).toLocaleDateString('default', {
-                                    month: 'short',
-                                })}
-                            </p>
-                            <p className="text-xs font-bold text-blue-800 mt-[2px]">
-                                {year}
-                            </p>
+                <div className="flex items-center justify-start gap-4">
+                    {/* info */}
+                    <div className="space-y-1">
+                        <div className="text-ellipsis line-clamp-1 hover:text-[#5c5c5c] w-fit">
+                            <span className="text-[16px] font-semibold text-black">
+                                {fullName}
+                            </span>{' '}
+                            &bull;{' '}
+                            <span className="text-gray-600 text-sm">
+                                {' '}
+                                Roll No: {getRollNo(userName)}
+                            </span>
+                        </div>
+
+                        <div className="text-gray-600 text-sm w-fit">
+                            {phoneNumber}
                         </div>
                     </div>
-
-                    <div className="flex flex-col gap-1 mb-1">
-                        <h2 className="text-xs font-medium text-gray-800">
-                            BILL
-                        </h2>
-                        <span className="text-xs text-gray-600">
-                            #{_id.slice(-8).toUpperCase()}
-                        </span>
-                    </div>
                 </div>
-
-                <div className="flex items-end flex-col gap-[5px]">
-                    <span
-                        className={`px-2 py-[3px] text-xs font-bold rounded-full ${
+                <div className="space-y-2">
+                    <p
+                        className={`px-2 py-[3px] text-xs font-bold text-center rounded-full ${
                             paid
                                 ? 'bg-green-50 text-green-700'
                                 : 'bg-yellow-50 text-yellow-700'
                         }`}
                     >
                         {paid ? 'Paid' : 'Pending'}
-                    </span>
-                    <span className="font-semibold text-[16px] text-gray-900">
+                    </p>
+                    <p className="font-semibold text-base text-gray-900">
                         ₹{amount.toFixed(2)}
-                    </span>
+                    </p>
                 </div>
             </div>
 

@@ -101,7 +101,9 @@ export default function PendingOrders({ filter }) {
                     </div>
                 </div>
             ) : (
-                orderElements.length === 0 && <div>No orders found</div>
+                orderElements.length === 0 && (
+                    <div className="italic text-gray-600">No orders found</div>
+                )
             )}
         </div>
     );

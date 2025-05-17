@@ -1,6 +1,6 @@
 import { OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
-import { Bill, Order, Student } from '../Models/index.js';
+import { Bill, Order } from '../Models/index.js';
 import { Types } from 'mongoose';
 import cron from 'node-cron';
 
@@ -17,61 +17,56 @@ const getStudentBills = tryCatch('get student bills', async (req, res) => {
 
 const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, month = new Date().getMonth() } = req.query;
 
-    const students = await Student.aggregatePaginate(
+    const bills = await Bill.aggregatePaginate(
         [
-            { $match: { canteenId: new Types.ObjectId(contractor.canteenId) } },
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(contractor.canteenId),
+                    month: parseInt(month),
+                    year: new Date().getFullYear(),
+                },
+            },
             {
                 $lookup: {
-                    from: 'bills',
-                    localField: '_id',
-                    foreignField: 'studentId',
-                    as: 'bills',
+                    from: 'students',
+                    localField: 'studentId',
+                    foreignField: '_id',
+                    as: 'studentInfo',
                     pipeline: [
                         {
                             $project: {
-                                paid: 1,
-                                paidOn: 1,
-                                month: 1,
-                                year: 1,
-                                amount: 1,
-                                studentId: 1,
+                                fullName: 1,
+                                userName: 1,
+                                email: 1,
+                                phoneNumber: 1,
+                                avatar: 1,
                             },
                         },
-                        { $sort: { month: -1, year: -1 } },
                     ],
                 },
             },
-            {
-                $project: {
-                    userName: 1,
-                    fullName: 1,
-                    bills: 1,
-                    avatar: 1,
-                    email: 1,
-                    phoneNumber: 1,
-                },
-            },
+            { $unwind: '$studentInfo' },
         ],
         {
             page: parseInt(page),
             limit: parseInt(limit),
-            sort: { userName: 1 },
+            sort: { createdAt: -1 },
         }
     );
 
-    if (students.docs.length) {
+    if (bills.docs.length) {
         return res.status(OK).json({
-            students: students.docs,
-            studentsInfo: {
-                totalPages: students.totalPages,
-                hasNextPage: students.hasNextPage,
-                hasPrevPage: students.hasPrevPage,
+            bills: bills.docs,
+            billsInfo: {
+                totalPages: bills.totalPages,
+                hasNextPage: bills.hasNextPage,
+                hasPrevPage: bills.hasPrevPage,
             },
         });
     } else {
-        return res.status(OK).json({ message: 'no students found' });
+        return res.status(OK).json({ message: 'no bills found' });
     }
 });
 
@@ -146,7 +141,7 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
         console.log('ℹ️ No students with picked up orders for billing period.');
     }
 
-    if (res) res.status(OK).json({ message: 'bills generated' });
+    if (res) res.status(OK).json({ message: 'operation performed' });
 });
 
 const cleanupOldBillsAndOrders = tryCatch(

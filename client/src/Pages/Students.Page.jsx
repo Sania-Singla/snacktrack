@@ -118,7 +118,11 @@ export default function StudentsPage() {
                     </div>
                 </div>
             ) : (
-                studentElements.length === 0 && <div>No student found !!</div>
+                studentElements.length === 0 && (
+                    <div className="italic text-gray-600">
+                        No student found !!
+                    </div>
+                )
             )}
         </div>
     );

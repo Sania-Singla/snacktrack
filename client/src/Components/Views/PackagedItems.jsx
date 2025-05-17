@@ -48,7 +48,7 @@ export default function PackagedItems() {
                     {itemElements}
                 </div>
             ) : (
-                <div>No Items Found !!</div>
+                <div className="italic text-gray-600">No Items Found</div>
             )}
         </div>
     );

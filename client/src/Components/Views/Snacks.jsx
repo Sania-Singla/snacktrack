@@ -50,7 +50,7 @@ export default function Snacks() {
                     {snackElements}
                 </div>
             ) : (
-                <div>No Snacks Found !!</div>
+                <div className="italic text-gray-600">No Snacks Found</div>
             )}
         </div>
     );

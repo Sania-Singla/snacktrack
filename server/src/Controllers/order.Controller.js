@@ -18,7 +18,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         isPacked: i.isPacked,
     }));
 
-    // Create a new order
     const order = await Order.create({
         studentId: student._id,
         canteenId: student.canteenId,
@@ -37,7 +36,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         );
     }
 
-    // Now, populate the items just like in getCanteenOrders
     const populatedOrder = await Order.aggregate([
         { $match: { _id: order._id } },
         { $unwind: '$items' },
@@ -421,12 +419,17 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
 
 const getStatistics = tryCatch('get statistics', async (req, res) => {
     const { canteenId } = req.user;
+    const now = new Date();
+    const currentMonth = now.getMonth() + 1;
 
     const data = await Order.aggregate([
         {
             $match: {
                 canteenId: new Types.ObjectId(canteenId),
                 status: 'PickedUp',
+                $expr: {
+                    $ne: [{ $month: '$createdAt' }, currentMonth],
+                },
             },
         },
         {
