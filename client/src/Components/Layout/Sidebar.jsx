@@ -55,9 +55,8 @@ export default function Sidebar() {
     ];
 
     const systemItems = [
-        { path: '/support', name: 'Support', icon: icons.support },
+        { path: '/faqs', name: 'FAQ', icon: icons.details },
         { path: '/about-us', name: 'About Us', icon: icons.search },
-        { path: '/contact-us', name: 'Contact Us', icon: icons.contact },
         { path: '/settings', name: 'Settings', icon: icons.settings },
     ];
 

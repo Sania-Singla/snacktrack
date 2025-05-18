@@ -12,9 +12,7 @@ import {
     RegisterStudentPage,
     SettingsPage,
     StudentsPage,
-    SupportPage,
     AboutUsPage,
-    ContactUsPage,
     ServerErrorPage,
     NotFoundPage,
     Redirect,
@@ -61,9 +59,7 @@ export const router = createBrowserRouter(
                         path="bills/:studentId"
                         element={<StudentBillsPage />}
                     />
-                    <Route path="support" element={<SupportPage />} />
                     <Route path="about-us" element={<AboutUsPage />} />
-                    <Route path="contact-us" element={<ContactUsPage />} />
                     <Route path="faqs" element={<FAQpage />} />
                 </Route>
 

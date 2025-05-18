@@ -37,6 +37,7 @@ export default function InputField({
                 <input
                     type={field.type}
                     name={field.name}
+                    min={field.type === 'number' ? '0' : undefined}
                     id={field.id || field.name}
                     value={inputs[field.name]}
                     onChange={handleChange}

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Logout, Searchbar } from '..';
 import {
     useUserContext,
@@ -10,6 +10,7 @@ import { icons } from '../../Assets/icons';
 
 export default function Header() {
     const { user } = useUserContext();
+    const { pathname } = useLocation();
     const { setShowSideBar } = useSideBarContext();
     const navigate = useNavigate();
     const { cartItems } = useStudentContext();
@@ -19,6 +20,14 @@ export default function Header() {
         (total, item) => total + item.quantity,
         0
     );
+
+    const staticPages = [
+        '/about-us',
+        '/settings',
+        '/faqs',
+        '/statistics',
+        '/cart',
+    ];
 
     return (
         <header className="drop-shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-4 font-medium flex items-center justify-between gap-4">
@@ -53,7 +62,9 @@ export default function Header() {
                 </Link>
             </div>
 
-            <div className="max-w-[400px] lg:max-w-[500px] w-full hidden sm:block ">
+            <div
+                className={`${staticPages.includes(pathname) ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] w-full`}
+            >
                 <Searchbar />
             </div>
 

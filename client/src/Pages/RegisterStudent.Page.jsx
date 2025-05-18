@@ -84,7 +84,7 @@ export default function RegisterStudentPage() {
 
     const inputFields = [
         {
-            type: 'text',
+            type: 'number',
             name: 'rollNo',
             label: 'Roll No',
             placeholder: 'Enter Hostel Roll Number',

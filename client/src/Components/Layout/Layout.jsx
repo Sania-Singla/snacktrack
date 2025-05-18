@@ -15,8 +15,6 @@ export default function Layout({ renderTemplate = true }) {
 
     const staticPages = [
         '/about-us',
-        '/contact-us',
-        '/support',
         '/settings',
         '/faqs',
         '/statistics',
