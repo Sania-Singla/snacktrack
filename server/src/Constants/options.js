@@ -3,6 +3,7 @@ const COOKIE_OPTIONS = {
     path: '/',
     secure: true,
     sameSite: 'None',
+    domain: '.snacktrack.live',
 };
 
 const CORS_OPTIONS = {

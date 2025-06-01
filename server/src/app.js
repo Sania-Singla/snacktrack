@@ -27,8 +27,6 @@ app.use('/api/contractors', contractorRouter);
 app.use('/api/orders', orderRouter);
 app.use('/api/bills', billRouter);
 
-app.get('/', (req, res) => {
-    res.status(OK).json({ message: 'Welcome to Snack Track!' });
-});
+app.get('/', (req, res) => res.send('Welcome to Snack Track!'));
 
 app.use(errorMiddleware);
