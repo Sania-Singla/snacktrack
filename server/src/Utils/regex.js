@@ -15,8 +15,7 @@ import {
 export default function verifyRegex(name, value) {
     if (value) {
         switch (name) {
-            case 'fullName':
-            case 'name': {
+            case 'fullName': {
                 return /^[a-zA-Z ]{1,20}$/.test(value);
             }
 

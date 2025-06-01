@@ -306,7 +306,6 @@ const registerStudent = tryCatch(
         const isValid = ['fullName', 'email', 'phoneNumber', 'rollNo'].every(
             (key) => verifyExpression(key, req.body[key]?.trim())
         );
-
         if (!isValid) {
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
@@ -323,7 +322,6 @@ const registerStudent = tryCatch(
             rollNo
         ).trim();
 
-        // Check if student already exists with this userName
         const existingStudent = await Student.findOne({
             $or: [
                 { userName: userName.trim() },
@@ -336,7 +334,6 @@ const registerStudent = tryCatch(
             return next(new ErrorHandler('user already exists', BAD_REQUEST));
         }
 
-        // password hashing auto done by pre hook in the model
         const randomPassword = nanoid(8); // unique temporary random password
 
         const student = await Student.create({
@@ -621,27 +618,24 @@ const toggleSnackAvailability = tryCatch(
 
 const addItem = tryCatch('add item', async (req, res, next) => {
     const contractor = req.user;
-    const { category, variants } = req.body;
+    const { name, price } = req.body;
 
-    // Validate required fields
-    if (!category || !variants.length) {
+    if (!name || !price) {
         return next(new ErrorHandler('missing fields', BAD_REQUEST));
     }
 
     const alreadyExists = await PackagedFood.findOne({
         canteenId: new Types.ObjectId(contractor.canteenId),
-        // case insensitive
-        category: { $regex: new RegExp(`^${category}$`, 'i') },
+        name: { $regex: new RegExp(`^${name}$`, 'i') },
     });
     if (alreadyExists) {
-        return next(new ErrorHandler('category already exists', BAD_REQUEST));
+        return next(new ErrorHandler('name already exists', BAD_REQUEST));
     }
 
-    // Create new packaged food item
     const item = await PackagedFood.create({
         canteenId: contractor.canteenId,
-        category,
-        variants,
+        name,
+        price,
     });
 
     return res.status(CREATED).json(item);
@@ -668,10 +662,9 @@ const updateItemDetails = tryCatch(
     async (req, res, next) => {
         const { itemId } = req.params;
         const contractor = req.user;
-        const { category, variants } = req.body;
+        const { name, price } = req.body;
 
-        // Validate required fields
-        if (!category && !variants.length) {
+        if (!name && !price) {
             return next(new ErrorHandler('missing fields', BAD_REQUEST));
         }
 
@@ -681,23 +674,42 @@ const updateItemDetails = tryCatch(
         });
         if (!item) return next(new ErrorHandler('item not found', NOT_FOUND));
 
-        if (item.category.toLowerCase() !== category.toLowerCase()) {
+        if (item.name.toLowerCase() !== name.toLowerCase()) {
             const existingItem = await PackagedFood.findOne({
                 canteenId: new Types.ObjectId(contractor.canteenId),
-                // case insensitive
-                category: { $regex: new RegExp(`^${category}$`, 'i') },
+                name: { $regex: new RegExp(`^${name}$`, 'i') },
             });
 
             if (existingItem) {
                 return next(
-                    new ErrorHandler('category already exists', BAD_REQUEST)
+                    new ErrorHandler('name already exists', BAD_REQUEST)
                 );
             }
         }
-        item.category = category.trim() || item.category;
-        item.variants = variants || item.variants;
+        item.name = name.trim() || item.name;
+        item.price = price || item.price;
         await item.save();
         return res.status(OK).json(item);
+    }
+);
+
+const toggleItemAvailability = tryCatch(
+    'toggle item availability',
+    async (req, res) => {
+        const { itemId } = req.params;
+        const contractor = req.user;
+
+        const item = await PackagedFood.findOne({
+            _id: new Types.ObjectId(itemId),
+            canteenId: new Types.ObjectId(contractor.canteenId),
+        });
+        if (!item) return next(new ErrorHandler('item not found', NOT_FOUND));
+
+        item.isAvailable = !item.isAvailable;
+        await item.save();
+        return res
+            .status(OK)
+            .json({ message: 'item availability toggled successfully' });
     }
 );
 
@@ -719,4 +731,5 @@ export {
     addItem,
     deleteItem,
     updateItemDetails,
+    toggleItemAvailability,
 };

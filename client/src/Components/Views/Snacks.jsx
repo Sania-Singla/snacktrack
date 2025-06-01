@@ -45,7 +45,7 @@ export default function Snacks() {
             )}
             {snackElements.length > 0 ? (
                 <div
-                    className={`grid gap-5 ${snackElements.length <= 2 ? 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(250px,350px))]' : 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))]'}`}
+                    className={`grid gap-5 ${snackElements.length <= 2 ? 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(250px,350px))]' : 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))]'}`}
                 >
                     {snackElements}
                 </div>

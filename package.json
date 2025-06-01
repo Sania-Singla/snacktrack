@@ -6,7 +6,7 @@
         "client": "cd client && npm run dev",
         "server": "cd server && npm run dev",
         "dev": "concurrently \"npm run client\" \"npm run server\"",
-        "build": "npm i && cd client && npm i && cd ../server && npm i"
+        "build": "npm i && npm i --prefix client && npm i --prefix server"
     },
     "keywords": [],
     "author": "Sania",

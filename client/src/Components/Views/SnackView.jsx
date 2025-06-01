@@ -91,21 +91,21 @@ export default function SnackView({ snack, reference }) {
                 <div className="absolute right-6 top-6 flex gap-3 justify-end">
                     <Button
                         btnText={
-                            <div className="size-[18px] group-hover:fill-[#4977ec]">
+                            <div className="size-[15px] group-hover:fill-[#4977ec]">
                                 {icons.edit}
                             </div>
                         }
-                        className="bg-[#f0efef] p-[10px] group rounded-full drop-shadow-sm hover:bg-[#ebeaea]"
+                        className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
                         onClick={editSnack}
                     />
                     <div>
                         <Button
                             btnText={
-                                <div className="size-[18px] group-hover:fill-red-700">
+                                <div className="size-[15px] group-hover:fill-red-700">
                                     {icons.delete}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-[10px] group rounded-full drop-shadow-lg hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
                             onClick={removeSnack}
                         />
                     </div>
@@ -126,14 +126,14 @@ export default function SnackView({ snack, reference }) {
                 {/* Availability and Price */}
                 <div className="flex items-center justify-between">
                     {/* Availability */}
-                    <div className="flex items-center gap-2 bg-gray-100 shadow-sm rounded-full px-3 py-1">
+                    <div className="flex items-center gap-1 bg-gray-100 shadow-sm rounded-full px-3 py-1">
                         <div
-                            className={`size-2 rounded-full ${isAvailable ? 'bg-green-600' : 'bg-red-500'}`}
+                            className={`size-[6px] rounded-full ${isAvailable ? 'bg-green-600' : 'bg-red-500'}`}
                         />
                         <span
                             className={`text-sm font-semibold ${isAvailable ? 'text-green-600' : 'text-red-600'}`}
                         >
-                            {isAvailable ? 'Available' : 'Not Available'}
+                            {isAvailable ? 'Available' : 'UnAvailable'}
                         </span>
                     </div>
 

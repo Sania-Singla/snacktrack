@@ -10,10 +10,10 @@ const placeOrder = tryCatch('place order', async (req, res) => {
     const student = req.user;
 
     const updatedCartItems = cartItems.map((i) => ({
-        itemId: i._id,
-        quantity: i.quantity,
-        itemType: i.type,
+        id: i._id,
+        type: i.type,
         price: i.price,
+        quantity: i.quantity,
         specialInstructions: i.specialInstructions,
         isPacked: i.isPacked,
     }));
@@ -26,92 +26,21 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         packingCharges,
     });
 
-    // update inventory for packaged Items
-    const packagedItems = cartItems.filter((item) => item.type !== 'Snack');
+    const populatedOrder = {
+        ...order.toObject(),
+        items: cartItems,
+    };
 
-    for (const item of packagedItems) {
-        await PackagedFood.updateOne(
-            { _id: item._id, 'variants.price': item.price },
-            { $inc: { 'variants.$.availableCount': -item.quantity } }
-        );
-    }
-
-    const populatedOrder = await Order.aggregate([
-        { $match: { _id: order._id } },
-        { $unwind: '$items' },
-        {
-            $lookup: {
-                from: 'snacks',
-                localField: 'items.itemId',
-                foreignField: '_id',
-                as: 'snackDetails',
-                pipeline: [{ $project: { name: 1, image: 1 } }],
-            },
+    const data = {
+        ...populatedOrder,
+        studentInfo: {
+            fullName: student.fullName,
+            phoneNumber: student.phoneNumber,
+            avatar: student.avatar,
+            userName: student.userName,
         },
-        {
-            $lookup: {
-                from: 'packagedfoods',
-                localField: 'items.itemId',
-                foreignField: '_id',
-                as: 'packagedFoodDetails',
-                pipeline: [{ $project: { category: 1 } }],
-            },
-        },
-        {
-            $addFields: {
-                'items.name': {
-                    $cond: [
-                        { $eq: ['$items.itemType', 'Snack'] },
-                        { $arrayElemAt: ['$snackDetails.name', 0] },
-                        null,
-                    ],
-                },
-                'items.image': {
-                    $cond: [
-                        { $eq: ['$items.itemType', 'Snack'] },
-                        { $arrayElemAt: ['$snackDetails.image', 0] },
-                        null,
-                    ],
-                },
-                'items.category': {
-                    $cond: [
-                        { $eq: ['$items.itemType', 'PackagedFood'] },
-                        {
-                            $arrayElemAt: ['$packagedFoodDetails.category', 0],
-                        },
-                        null,
-                    ],
-                },
-            },
-        },
-        {
-            $group: {
-                _id: '$_id',
-                amount: { $first: '$amount' },
-                packingCharges: { $first: '$packingCharges' },
-                status: { $first: '$status' },
-                canteenId: { $first: '$canteenId' },
-                studentId: { $first: '$studentId' },
-                items: { $push: '$items' },
-                createdAt: { $first: '$createdAt' },
-                updatedAt: { $first: '$updatedAt' },
-            },
-        },
-        { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
-    ]);
-
-    if (populatedOrder.length) {
-        const data = {
-            ...populatedOrder[0],
-            studentInfo: {
-                fullName: student.fullName,
-                phoneNumber: student.phoneNumber,
-                avatar: student.avatar,
-                userName: student.userName,
-            },
-        };
-        return res.status(OK).json(data);
-    } else return res.status(OK).json({ message: 'Order not found' });
+    };
+    return res.status(OK).json(data);
 });
 
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
@@ -119,12 +48,15 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     const { studentId } = req.params;
 
     // get timestamp of the first day of the month in utc
-    const monthIndex = new Date(
-        `${month} 1, ${new Date().getFullYear()}`
-    ).getMonth();
-    const currentYear = new Date().getFullYear();
-    const startDate = new Date(currentYear, monthIndex, 1);
-    const endDate = new Date(currentYear, monthIndex + 1, 0, 23, 59, 59, 999);
+    const monthIndex = parseInt(month, 10) - 1; // 0-based for JS Date()
+    const currentYear = new Date().getUTCFullYear();
+
+    const startDate = new Date(
+        Date.UTC(currentYear, monthIndex, 1, 0, 0, 0, 0)
+    );
+    const endDate = new Date(
+        Date.UTC(currentYear, monthIndex + 1, 0, 23, 59, 59, 999)
+    );
 
     const result = await Order.aggregatePaginate(
         [
@@ -138,7 +70,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
             {
                 $lookup: {
                     from: 'snacks',
-                    localField: 'items.itemId',
+                    localField: 'items.id',
                     foreignField: '_id',
                     as: 'snackDetails',
                     pipeline: [{ $project: { name: 1, image: 1 } }],
@@ -147,37 +79,42 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
             {
                 $lookup: {
                     from: 'packagedfoods',
-                    localField: 'items.itemId',
+                    localField: 'items.id',
                     foreignField: '_id',
                     as: 'packagedFoodDetails',
-                    pipeline: [{ $project: { category: 1 } }],
+                    pipeline: [{ $project: { name: 1 } }],
                 },
             },
             {
                 $addFields: {
                     'items.name': {
-                        $cond: [
-                            { $eq: ['$items.itemType', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.name', 0] },
-                            null,
-                        ],
+                        $switch: {
+                            branches: [
+                                {
+                                    case: { $eq: ['$items.type', 'Snack'] },
+                                    then: {
+                                        $arrayElemAt: ['$snackDetails.name', 0],
+                                    },
+                                },
+                                {
+                                    case: {
+                                        $eq: ['$items.type', 'PackagedFood'],
+                                    },
+                                    then: {
+                                        $arrayElemAt: [
+                                            '$packagedFoodDetails.name',
+                                            0,
+                                        ],
+                                    },
+                                },
+                            ],
+                            default: null,
+                        },
                     },
                     'items.image': {
                         $cond: [
-                            { $eq: ['$items.itemType', 'Snack'] },
+                            { $eq: ['$items.type', 'Snack'] },
                             { $arrayElemAt: ['$snackDetails.image', 0] },
-                            null,
-                        ],
-                    },
-                    'items.category': {
-                        $cond: [
-                            { $eq: ['$items.itemType', 'PackagedFood'] },
-                            {
-                                $arrayElemAt: [
-                                    '$packagedFoodDetails.category',
-                                    0,
-                                ],
-                            },
                             null,
                         ],
                     },
@@ -251,15 +188,12 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
 
     const now = new Date();
 
-    // Set start time
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
 
-    // Set end time
     const endOfDay = new Date(now);
     endOfDay.setHours(23, 59, 59, 999);
 
-    // Fetch today's orders from this canteen
     const result = await Order.aggregatePaginate(
         [
             {
@@ -292,7 +226,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
             {
                 $lookup: {
                     from: 'snacks',
-                    localField: 'items.itemId',
+                    localField: 'items.id',
                     foreignField: '_id',
                     as: 'snackDetails',
                     pipeline: [{ $project: { name: 1, image: 1 } }],
@@ -301,37 +235,42 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
             {
                 $lookup: {
                     from: 'packagedfoods',
-                    localField: 'items.itemId',
+                    localField: 'items.id',
                     foreignField: '_id',
                     as: 'packagedFoodDetails',
-                    pipeline: [{ $project: { category: 1 } }],
+                    pipeline: [{ $project: { name: 1 } }],
                 },
             },
             {
                 $addFields: {
                     'items.name': {
-                        $cond: [
-                            { $eq: ['$items.itemType', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.name', 0] },
-                            null,
-                        ],
+                        $switch: {
+                            branches: [
+                                {
+                                    case: { $eq: ['$items.type', 'Snack'] },
+                                    then: {
+                                        $arrayElemAt: ['$snackDetails.name', 0],
+                                    },
+                                },
+                                {
+                                    case: {
+                                        $eq: ['$items.type', 'PackagedFood'],
+                                    },
+                                    then: {
+                                        $arrayElemAt: [
+                                            '$packagedFoodDetails.name',
+                                            0,
+                                        ],
+                                    },
+                                },
+                            ],
+                            default: null,
+                        },
                     },
                     'items.image': {
                         $cond: [
-                            { $eq: ['$items.itemType', 'Snack'] },
+                            { $eq: ['$items.type', 'Snack'] },
                             { $arrayElemAt: ['$snackDetails.image', 0] },
-                            null,
-                        ],
-                    },
-                    'items.category': {
-                        $cond: [
-                            { $eq: ['$items.itemType', 'PackagedFood'] },
-                            {
-                                $arrayElemAt: [
-                                    '$packagedFoodDetails.category',
-                                    0,
-                                ],
-                            },
                             null,
                         ],
                     },
@@ -394,6 +333,7 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
                     .filter((i) => i.type !== 'Snack')
                     .map((i) => i._id),
             },
+            isAvailable: true,
         }),
     ]);
 
@@ -402,15 +342,7 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
         if (i.type === 'Snack') {
             return snacks.some((s) => s._id.equals(i._id));
         } else {
-            const item = packagedItems.find((p) => p._id.equals(i._id));
-            if (!item) return false;
-
-            const variant = item.variants.find((v) => v.price === i.price);
-            if (variant && variant.availableCount > 0) {
-                i.availableCount = variant.availableCount; // Added availableCount to response
-                return true;
-            }
-            return false;
+            return packagedItems.some((p) => p._id.equals(i._id));
         }
     });
 

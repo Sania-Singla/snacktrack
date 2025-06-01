@@ -6,7 +6,7 @@
     "description": "A web application to track your snacks",
     "author": "Sania",
     "scripts": {
-        "dev": "npm run format && vite",
+        "dev": "vite",
         "format": "prettier --write .",
         "build": "vite build",
         "lint": "eslint .",
@@ -23,6 +23,7 @@
         "react-hot-toast": "^2.5.2",
         "react-phone-input-2": "^2.15.1",
         "react-router-dom": "^7.3.0",
+        "snack-track": "file:..",
         "socket.io-client": "^4.8.1",
         "tailwindcss": "^4.0.12"
     },

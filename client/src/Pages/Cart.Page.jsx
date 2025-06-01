@@ -29,15 +29,7 @@ export default function CartPage() {
                     const foundItem = res.find(
                         (i) => i._id === item._id && i.price === item.price
                     );
-
-                    if (item.type === 'Snack') {
-                        return { ...item, isAvailable: !!foundItem };
-                    } else {
-                        return {
-                            ...item,
-                            availableCount: foundItem?.availableCount || 0,
-                        };
-                    }
+                    return { ...item, isAvailable: !!foundItem };
                 });
                 setCartItems(updatedCartItems);
                 return updatedCartItems;
@@ -67,34 +59,22 @@ export default function CartPage() {
         0
     );
 
-    const tax = (subtotal + packingCharges) * TAX; // 5% tax on subtotal + packing
+    const tax = (subtotal + packingCharges) * TAX; // tax on subtotal + packing
     const total = subtotal + packingCharges + tax;
 
     function updateQuantity(item, newQuantity) {
-        const { _id, price } = item;
-        const updatedCartItems = cartItems.map((item) =>
-            item._id === _id && item.price === price
-                ? { ...item, quantity: newQuantity }
-                : item
+        const { _id } = item;
+        const updatedCartItems = cartItems.map((i) =>
+            i._id === _id ? { ...i, quantity: newQuantity } : i
         );
-        // update local storage
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-        // update state
         setCartItems(updatedCartItems);
     }
 
     function removeFromCart(item) {
-        const { _id, price, type } = item;
-        const updatedCartItems = cartItems.filter((item) => {
-            if (type === 'Snack') {
-                return item._id !== _id;
-            } else {
-                return !(item._id === _id && item.price === price);
-            }
-        });
-        // update local storage
+        const { _id } = item;
+        const updatedCartItems = cartItems.filter((i) => i._id !== _id);
         localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-        // update state
         setCartItems(updatedCartItems);
     }
 
@@ -102,13 +82,7 @@ export default function CartPage() {
         try {
             setOrdering(true);
             const items = await checkAvailability();
-            const hasUnavailableItems = items.some((i) => {
-                if (i.type === 'Snack') {
-                    return !i.isAvailable;
-                } else {
-                    return i.quantity > i.availableCount;
-                }
-            });
+            const hasUnavailableItems = items.some((i) => !i.isAvailable);
             if (hasUnavailableItems) {
                 setShowPopup(true);
                 setPopupInfo({ type: 'orderUnavailable' });
@@ -126,9 +100,10 @@ export default function CartPage() {
                 setPopupInfo({ type: 'orderPlaced', count });
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
-                socket.emit('newOrder', res);
+                socket?.emit('newOrder', res);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
+            console.log(err);
             navigate('/server-error');
         } finally {
             setOrdering(false);
@@ -145,17 +120,14 @@ export default function CartPage() {
             price,
             _id,
             name,
-            category,
             type,
             image,
             quantity,
             isPacked,
             isAvailable,
-            availableCount,
         } = item;
 
-        const isUnavailable =
-            type === 'Snack' ? !isAvailable : availableCount < quantity;
+        const isUnavailable = type === 'Snack' && !isAvailable;
 
         return (
             <div
@@ -168,9 +140,7 @@ export default function CartPage() {
                         <div className="absolute inset-0 bg-gray-300 opacity-50 rounded-lg pointer-events-none"></div>
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                             <span className="bg-white px-2 py-1 rounded-md text-sm font-medium text-red-600 shadow-sm">
-                                {type === 'Snack'
-                                    ? 'Not Available'
-                                    : `Only ${availableCount} left`}
+                                Not Available
                             </span>
                         </div>
                     </>
@@ -195,13 +165,14 @@ export default function CartPage() {
                         {/* info */}
                         <div>
                             <h3 className="text-lg font-medium text-gray-900">
-                                {name || category}
+                                {name}
                             </h3>
                             <p className="text-sm text-gray-500">
                                 ₹{price.toFixed(2)}
                                 {isPacked && (
                                     <span className="text-xs text-gray-500 ml-1">
-                                        (+₹5 packing)
+                                        ( +₹{PER_ITEM_PACKAGING_CHARGES} for
+                                        packing )
                                     </span>
                                 )}
                             </p>
@@ -255,7 +226,9 @@ export default function CartPage() {
                             ₹
                             {(
                                 price * quantity +
-                                (isPacked ? 5 * quantity : 0)
+                                (isPacked
+                                    ? PER_ITEM_PACKAGING_CHARGES * quantity
+                                    : 0)
                             ).toFixed(2)}
                         </p>
                         <Button

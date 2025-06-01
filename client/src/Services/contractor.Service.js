@@ -177,6 +177,15 @@ class ContractorService {
         });
     }
 
+    async toggleItemAvailability(itemId) {
+        return await fetchWrapper({
+            endPoint: `/contractors/packaged/availability/${itemId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'toggleItemAvailability',
+        });
+    }
+
     // packaged food management tasks
 
     async removeItem(itemId) {
@@ -188,23 +197,23 @@ class ContractorService {
         });
     }
 
-    async addItem({ variants, category }) {
+    async addItem(inputs) {
         return await fetchWrapper({
             endPoint: `/contractors/packaged`,
             method: 'POST',
             credentials: 'include',
             aim: 'addItem',
-            body: { variants, category },
+            body: inputs,
         });
     }
 
-    async updateItemDetails({ category, variants }, itemId) {
+    async updateItemDetails(inputs, itemId) {
         return await fetchWrapper({
             endPoint: `/contractors/packaged/${itemId}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateItemDetails',
-            body: { variants, category },
+            body: inputs,
         });
     }
 

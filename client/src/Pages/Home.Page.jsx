@@ -33,10 +33,7 @@ export default function HomePage() {
                     JSON.parse(localStorage.getItem('cartItems')) || [],
                 ]);
 
-                checkTokenExpired(snacks, setUser);
-                checkTokenExpired(PackagedItems, setUser);
-
-                if (snacks && !snacks.message)
+                if (snacks && !snacks.message) {
                     setSnacks(
                         snacks.map((snack) => ({
                             ...snack,
@@ -45,21 +42,18 @@ export default function HomePage() {
                                     ?.quantity || 0,
                         }))
                     );
-                if (items && !items.message)
+                } else checkTokenExpired(snacks, setUser);
+
+                if (items && !items.message) {
                     setItems(
                         items.map((item) => ({
                             ...item,
-                            variants: item.variants.map((v) => ({
-                                ...v,
-                                quantity:
-                                    cartItems.find(
-                                        ({ _id, price }) =>
-                                            _id === item._id &&
-                                            v.price === price
-                                    )?.quantity || 0,
-                            })),
+                            quantity:
+                                cartItems.find((i) => i._id === item._id)
+                                    ?.quantity || 0,
                         }))
                     );
+                } else checkTokenExpired(PackagedItems, setUser);
             } catch (err) {
                 navigate('/server-error');
             } finally {

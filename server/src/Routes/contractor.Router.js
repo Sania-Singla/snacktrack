@@ -20,6 +20,7 @@ import {
     deleteItem,
     updateItemDetails,
     updateKitchenKey,
+    toggleItemAvailability,
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.route('/register').post(register);
@@ -63,3 +64,6 @@ contractorRouter
     .route('/packaged/:itemId')
     .delete(deleteItem)
     .patch(updateItemDetails);
+contractorRouter
+    .route('/packaged/availability/:itemId')
+    .patch(toggleItemAvailability);

@@ -14,8 +14,8 @@ const MAX_FILE_SIZE = 5;
 const LIMIT = 20; // Pagination limit
 const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 const SERVER_ERROR = 500;
-const PER_ITEM_PACKAGING_CHARGES = 0.5;
-const TAX = 0.05; // 5% tax on total amount
+const PER_ITEM_PACKAGING_CHARGES = 0; // ex: 0.5 rupees
+const TAX = 0; // ex: 0.05 for 5% tax on total amount
 
 const CONTRIBUTORS = [
     {

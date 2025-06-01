@@ -14,9 +14,7 @@ export default function EditCartItem() {
     function handleEdit() {
         const updatedCartItems = cartItems.map((i) => {
             if (i._id === item._id) {
-                if (i.type === 'Snack' || i.price === item.price) {
-                    return { ...i, specialInstructions: input, isPacked: pack };
-                }
+                return { ...i, specialInstructions: input, isPacked: pack };
             } else return i;
         });
         setCartItems(updatedCartItems);
@@ -65,8 +63,7 @@ export default function EditCartItem() {
                     htmlFor="packItem"
                     className="ml-2 text-sm text-gray-700"
                 >
-                    Pack this item ( ₹ {PER_ITEM_PACKAGING_CHARGES} packaging
-                    charges )
+                    Pack this item ( ₹{PER_ITEM_PACKAGING_CHARGES} per item)
                 </label>
             </div>
 

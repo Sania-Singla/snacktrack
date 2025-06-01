@@ -7,14 +7,7 @@ class OrderService {
             method: 'POST',
             credentials: 'include',
             body: {
-                cartItems: cartItems.map((i) => ({
-                    _id: i._id,
-                    quantity: i.quantity,
-                    type: i.type,
-                    price: i.price,
-                    specialInstructions: i.specialInstructions,
-                    isPacked: i.isPacked,
-                })),
+                cartItems,
                 amount: total,
                 packingCharges,
             },

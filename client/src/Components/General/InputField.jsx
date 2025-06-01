@@ -1,14 +1,7 @@
 import { icons } from '../../Assets/icons';
 
 export default function InputField({
-    field = {
-        name: '',
-        type: '',
-        required: false,
-        label: '',
-        placeholder: '',
-        id: '',
-    },
+    field,
     inputs,
     handleChange = null,
     handleBlur = null,
@@ -16,6 +9,8 @@ export default function InputField({
     showPassword = false,
     className = '',
 }) {
+    const { name, type, required, label, placeholder, id, ...rest } = field;
+
     const passwordVariants = [
         'password',
         'oldPassword',
@@ -26,26 +21,27 @@ export default function InputField({
         'confirmKey',
     ];
     return (
-        <div key={field.name} className={`w-full ${className}`}>
+        <div key={name} className={`w-full ${className}`}>
             <div className="bg-white z-[1] ml-2 px-[5px] w-fit relative top-[10px] text-[15px] font-medium">
-                <label htmlFor={field.name}>
-                    {field.required && <span className="text-red-500">* </span>}
-                    {field.label} :
+                <label htmlFor={name}>
+                    {required && <span className="text-red-500">* </span>}
+                    {label} :
                 </label>
             </div>
             <div className="relative w-full">
                 <input
-                    type={field.type}
-                    name={field.name}
-                    min={field.type === 'number' ? '0' : undefined}
-                    id={field.id || field.name}
-                    value={inputs[field.name]}
+                    type={type}
+                    name={name}
+                    min={type === 'number' ? '0' : undefined}
+                    id={id || name}
+                    value={inputs[name]}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder={field.placeholder}
+                    placeholder={placeholder}
+                    {...rest}
                     className="overflow-x-scroll shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-500 bg-transparent placeholder:text-[15px]"
                 />
-                {passwordVariants.includes(field.name) && (
+                {passwordVariants.includes(name) && (
                     <div
                         onClick={() => setShowPassword((prev) => !prev)}
                         className="size-[16px] absolute right-0 top-[50%] transform translate-y-[-50%] mr-4 cursor-pointer fill-[#474747]"

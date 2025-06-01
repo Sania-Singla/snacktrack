@@ -29,15 +29,15 @@ const orderSchema = new Schema(
         },
         items: [
             {
-                itemType: {
+                type: {
                     type: String,
                     required: true,
                     enum: ['PackagedFood', 'Snack'],
                 },
-                itemId: {
+                id: {
                     type: Types.ObjectId,
                     required: true,
-                    refPath: 'items.itemType', // Dynamic reference based on itemType
+                    refPath: 'items.type', // Dynamic reference based on itemType
                 },
                 quantity: {
                     type: Number,
@@ -53,7 +53,6 @@ const orderSchema = new Schema(
                     default: false,
                 },
                 price: {
-                    // usefull when we are adding specific variants for items (each variant will be considered as separate item)
                     type: Number,
                     required: true,
                 },

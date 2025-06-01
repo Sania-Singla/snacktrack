@@ -62,8 +62,8 @@ export default function RemoveItemPopup() {
             <div className="flex flex-col gap-3">
                 <p className="text-2xl font-bold text-center">Remove Item</p>
                 <p className="text-[15px] text-center">
-                    <span className="font-medium">Category: </span>
-                    {popupInfo.item.category}
+                    <span className="font-medium">Name: </span>
+                    {popupInfo.item.name}
                 </p>
 
                 <div className="w-full flex flex-row-reverse gap-3 mt-2 items-start">

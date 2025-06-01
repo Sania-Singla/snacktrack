@@ -30,19 +30,17 @@ export function verifyExpression(name, value, setError) {
                     ? setError((prevError) => ({ ...prevError, [name]: '' }))
                     : setError((prevError) => ({
                           ...prevError,
-                          [name]: `price cannot be 0.`,
+                          [name]: 'price cannot be 0.',
                       }));
                 break;
             }
 
-            case 'fullName':
-            case 'name':
-            case 'category': {
+            case 'fullName': {
                 /^[a-zA-Z ]{1,20}$/.test(value)
                     ? setError((prevError) => ({ ...prevError, [name]: '' }))
                     : setError((prevError) => ({
                           ...prevError,
-                          [name]: `only letters & spaces are allowed under 20 characters.`,
+                          [name]: 'only letters & spaces are allowed.',
                       }));
                 break;
             }
@@ -52,7 +50,7 @@ export function verifyExpression(name, value, setError) {
                     ? setError((prevError) => ({ ...prevError, [name]: '' }))
                     : setError((prevError) => ({
                           ...prevError,
-                          [name]: `only numbers are allowed under 3 characters.`,
+                          [name]: 'only numbers are allowed.',
                       }));
                 break;
             }
@@ -75,7 +73,7 @@ export function verifyExpression(name, value, setError) {
                     ? setError((prevError) => ({ ...prevError, [name]: '' }))
                     : setError((prevError) => ({
                           ...prevError,
-                          [name]: `password must be 8-12 characters.`,
+                          [name]: 'password must be 8-12 characters.',
                       }));
                 break;
             }
@@ -87,7 +85,7 @@ export function verifyExpression(name, value, setError) {
                     ? setError((prevError) => ({ ...prevError, [name]: '' }))
                     : setError((prevError) => ({
                           ...prevError,
-                          [name]: `key must be 4-12 characters.`,
+                          [name]: 'key must be 4-12 characters.',
                       }));
             }
 

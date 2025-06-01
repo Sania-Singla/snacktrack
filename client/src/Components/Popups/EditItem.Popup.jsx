@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { contractorService } from '../../Services';
 import {
     usePopupContext,
@@ -15,83 +15,28 @@ export default function AddItemPopup() {
     const { setItems } = useSnackContext();
     const { setShowPopup, popupInfo } = usePopupContext();
     const [inputs, setInputs] = useState({
-        category: popupInfo.item.category || '',
+        name: popupInfo.item.name || '',
+        price: popupInfo.item.price || 0,
     });
-    const [variants, setVariants] = useState(popupInfo.item.variants);
     const [error, setError] = useState({});
-    const [variantErrors, setVariantErrors] = useState({});
     const [disabled, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const { setUser } = useUserContext();
 
-    // Check for duplicate prices whenever variants change
-    useEffect(() => {
-        const prices = variants.map((variant) => variant.price);
-        const newVariantErrors = {};
-
-        variants.forEach((variant, i) => {
-            // Check for duplicate prices
-            if (
-                prices.filter((price) => price === variant.price).length > 1 &&
-                variant.price !== 0
-            ) {
-                newVariantErrors[i] = 'Price already exists';
-            } else if (variant.price == 0) {
-                newVariantErrors[i] = 'Price cannot be 0';
-            } else if (variant.availableCount == 0) {
-                newVariantErrors[i] = 'Count cannot be 0';
-            } else {
-                newVariantErrors[i] = '';
-            }
-        });
-
-        setVariantErrors(newVariantErrors);
-    }, [variants]);
-
     async function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
         if (value) verifyExpression(name, value, setError);
-        else setError((prev) => ({ ...prev, [name]: '' }));
         onMouseOver();
     }
-
-    const handleVariantChange = (i, e) => {
-        const { name, value } = e.target;
-        setVariants((prev) =>
-            prev.map((variant, index) =>
-                index === i ? { ...variant, [name]: value } : variant
-            )
-        );
-        onMouseOver();
-    };
-
-    const addVariant = () => {
-        if (variants.length < 3) {
-            setVariants([...variants, { price: 0, availableCount: 0 }]);
-        }
-    };
-
-    const removeVariant = (index) => {
-        const updatedVariants = variants.filter((_, i) => i !== index);
-        setVariants(updatedVariants);
-    };
 
     function handleDisable() {
         return (
             Object.values(inputs).some((value) => !value) ||
-            variants.some(
-                (variant) =>
-                    !variant.price ||
-                    !variant.availableCount ||
-                    variant.availableCount == 0 ||
-                    variant.price == 0
-            ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
-            ) ||
-            Object.values(variantErrors).some((error) => error)
+            )
         );
     }
 
@@ -105,18 +50,12 @@ export default function AddItemPopup() {
             toast.error('Please fill all fields correctly');
             return;
         }
-        if (!variants.length) {
-            toast.error('At least one variant is required.');
-            return;
-        }
+
         setLoading(true);
         setDisabled(true);
         try {
             const res = await contractorService.updateItemDetails(
-                {
-                    ...inputs,
-                    variants,
-                },
+                inputs,
                 popupInfo.item._id
             );
             if (res && !res.message) {
@@ -138,48 +77,36 @@ export default function AddItemPopup() {
         }
     }
 
-    const variantElements = variants.map((variant, i) => (
-        <div key={i || variant._id} className="flex gap-2">
-            <div className="w-full">
-                <InputField
-                    inputs={variant}
-                    field={{
-                        type: 'number',
-                        name: 'price',
-                        id: 'price' + i,
-                        label: 'Price',
-                        placeholder: 'Enter price',
-                        required: true,
-                    }}
-                    handleChange={(e) => handleVariantChange(i, e)}
-                />
-                {variantErrors[i] && (
-                    <p className="text-red-500 text-xs font-medium">
-                        {variantErrors[i]}
-                    </p>
-                )}
-            </div>
+    const inputFields = [
+        {
+            type: 'text',
+            name: 'name',
+            label: 'Name',
+            placeholder: 'Enter item name',
+            required: true,
+        },
+        {
+            type: 'number',
+            name: 'price',
+            label: 'Price',
+            placeholder: 'Enter item price',
+            required: true,
+        },
+    ];
+
+    const inputElements = inputFields.map((field) => (
+        <div className="w-full" key={field.name}>
             <InputField
-                inputs={variant}
-                field={{
-                    type: 'number',
-                    name: 'availableCount',
-                    id: 'availableCount' + i,
-                    label: 'No of pcs',
-                    placeholder: 'Enter no. of pcs',
-                    required: true,
-                }}
-                handleChange={(e) => handleVariantChange(i, e)}
+                field={field}
+                handleChange={handleChange}
+                error={error}
+                inputs={inputs}
             />
-            <Button
-                btnText={
-                    <div className="size-[16px] stroke-red-500">
-                        {icons.cross}
-                    </div>
-                }
-                onClick={() => removeVariant(i)}
-                className="p-[5px] bg-red-100 rounded-full size-fit relative top-[29px]"
-            />
+            {error[field.name] && (
+                <div className="text-red-500 text-xs font-medium">
+                    {error[field.name]}
+                </div>
+            )}
         </div>
     ));
 
@@ -207,46 +134,11 @@ export default function AddItemPopup() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex flex-col items-start justify-center gap-4 w-full"
+                    className="flex flex-col items-start justify-center gap-3 w-full"
                 >
-                    <div className="w-full">
-                        <InputField
-                            field={{
-                                type: 'text',
-                                name: 'category',
-                                label: 'Category',
-                                placeholder: 'Enter Item category',
-                                required: true,
-                            }}
-                            handleChange={handleChange}
-                            error={error}
-                            inputs={inputs}
-                        />
-                        {error.category && (
-                            <p className="text-red-500 text-xs font-medium">
-                                {error.category}
-                            </p>
-                        )}
-                    </div>
+                    {inputElements}
 
-                    {/* Variants */}
-                    <div className="w-full">
-                        <p className="font-medium">Variants :</p>
-                        <div className="flex flex-col gap-1">
-                            {variantElements}
-                        </div>
-                        {variants.length < 3 && (
-                            <div>
-                                <Button
-                                    btnText="Add Variant"
-                                    onClick={addVariant}
-                                    className="w-full bg-gray-200 mt-4 hover:border-gray-800 border-transparent border-[0.01rem] text-gray-800 py-2 rounded-md"
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="w-full">
+                    <div className="w-full mt-2">
                         <Button
                             type="submit"
                             className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${

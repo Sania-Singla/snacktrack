@@ -17,7 +17,7 @@ export default function PackagedItems() {
         ?.filter(
             (item) =>
                 !search ||
-                item.category?.toLowerCase().includes(search.toLowerCase())
+                item.name?.toLowerCase().includes(search.toLowerCase())
         )
         .map((item) => <PackagedItemView key={item._id} item={item} />);
 
@@ -44,7 +44,9 @@ export default function PackagedItems() {
                 />
             )}
             {itemElements.length > 0 ? (
-                <div className={`flex flex-col w-full gap-6`}>
+                <div
+                    className={`grid gap-5 ${itemElements.length <= 2 ? 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(250px,350px))]' : 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))]'}`}
+                >
                     {itemElements}
                 </div>
             ) : (

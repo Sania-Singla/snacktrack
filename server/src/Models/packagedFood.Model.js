@@ -8,23 +8,19 @@ const packagedFoodSchema = new Schema(
             required: true,
             ref: 'Canteen',
         },
-        category: {
+        name: {
             type: String,
             required: true,
             trim: true,
         },
-        variants: [
-            {
-                price: {
-                    type: Number,
-                    required: true,
-                },
-                availableCount: {
-                    type: Number,
-                    default: 0,
-                },
-            },
-        ],
+        price: {
+            type: Number,
+            required: true,
+        },
+        isAvailable: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true }
 );

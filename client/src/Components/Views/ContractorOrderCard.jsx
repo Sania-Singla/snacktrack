@@ -144,15 +144,15 @@ export default function ContractorOrderCard({ order, reference }) {
                         <div className="px-5 pb-5 border-t border-gray-100">
                             <div className="space-y-4 mt-4">
                                 {items.map((item) => (
-                                    <div key={item._id} className="space-y-2">
+                                    <div key={item.id} className="space-y-2">
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
-                                                    {item.itemType ===
+                                                    {item.type ===
                                                     'Snack' ? (
                                                         <img
                                                             src={item.image}
-                                                            alt={`${name} image`}
+                                                            alt={`${item.name} image`}
                                                             className="object-cover size-full"
                                                         />
                                                     ) : (
@@ -163,8 +163,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                 </div>
                                                 <div>
                                                     <h3 className="text-sm font-medium text-gray-800 capitalize">
-                                                        {item.name ||
-                                                            item.category}
+                                                        {item.name}
                                                     </h3>
                                                     <p className="text-xs text-gray-500">
                                                         Qty: {item.quantity} • ₹
