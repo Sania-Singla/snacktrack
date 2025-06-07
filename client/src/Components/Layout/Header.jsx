@@ -21,13 +21,7 @@ export default function Header() {
         0
     );
 
-    const staticPages = [
-        '/about-us',
-        '/settings',
-        '/faqs',
-        '/statistics',
-        '/cart',
-    ];
+    const staticPages = ['/settings', '/statistics', '/cart'];
 
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 

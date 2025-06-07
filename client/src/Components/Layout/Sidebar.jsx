@@ -58,8 +58,6 @@ export default function Sidebar() {
             icon: icons.settings,
             show: true,
         },
-        { path: '/faqs', name: 'FAQ', icon: icons.details, show: true },
-        { path: '/about-us', name: 'About Us', icon: icons.search, show: true },
     ];
 
     const itemElements = items.map(

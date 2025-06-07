@@ -1,8 +1,6 @@
 import NotFoundPage from './General/NotFound.Page';
 import ServerErrorPage from './General/ServerError.Page';
 import Redirect from './General/Redirect';
-import AboutUsPage from './General/AboutUs.Page';
-import FAQpage from './General/FAQ.Page';
 import NewUserPage from './General/NewUser.Page';
 import HomePage from './Home.Page';
 import LoginPage from './Login.Page';
@@ -21,7 +19,6 @@ import BillsPage from './Bills.Page';
 
 export {
     StudentBillsPage,
-    AboutUsPage,
     HomePage,
     LoginPage,
     RegisterStudentPage,
@@ -29,7 +26,6 @@ export {
     NotFoundPage,
     ServerErrorPage,
     Redirect,
-    FAQpage,
     NewUserPage,
     StudentsPage,
     TodayOrdersPage,

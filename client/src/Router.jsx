@@ -12,12 +12,10 @@ import {
     RegisterStudentPage,
     SettingsPage,
     StudentsPage,
-    AboutUsPage,
     ServerErrorPage,
     NotFoundPage,
     Redirect,
     BillsPage,
-    FAQpage,
     NewUserPage,
     TodayOrdersPage,
     StudentOrdersPage,
@@ -59,8 +57,6 @@ export const router = createBrowserRouter(
                         path="bills/:studentId"
                         element={<StudentBillsPage />}
                     />
-                    <Route path="about-us" element={<AboutUsPage />} />
-                    <Route path="faqs" element={<FAQpage />} />
                 </Route>
 
                 {/* accessable to student only */}

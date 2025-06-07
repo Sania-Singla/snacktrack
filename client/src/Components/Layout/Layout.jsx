@@ -13,13 +13,7 @@ export default function Layout({ renderTemplate = true }) {
         layoutRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
     }, [pathname]);
 
-    const staticPages = [
-        '/about-us',
-        '/settings',
-        '/faqs',
-        '/statistics',
-        '/cart',
-    ];
+    const staticPages = ['/settings', '/statistics', '/cart'];
 
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 
