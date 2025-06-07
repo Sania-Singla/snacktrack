@@ -52,12 +52,14 @@ export default function Sidebar() {
             icon: icons.group,
             show: user.role === 'contractor',
         },
-    ];
-
-    const systemItems = [
-        { path: '/faqs', name: 'FAQ', icon: icons.details },
-        { path: '/about-us', name: 'About Us', icon: icons.search },
-        { path: '/settings', name: 'Settings', icon: icons.settings },
+        {
+            path: '/settings',
+            name: 'Settings',
+            icon: icons.settings,
+            show: true,
+        },
+        { path: '/faqs', name: 'FAQ', icon: icons.details, show: true },
+        { path: '/about-us', name: 'About Us', icon: icons.search, show: true },
     ];
 
     const itemElements = items.map(
@@ -79,21 +81,6 @@ export default function Sidebar() {
                 </NavLink>
             )
     );
-
-    const systemItemElements = systemItems.map((item) => (
-        <NavLink
-            key={item.name}
-            to={item.path}
-            className={({ isActive }) =>
-                `${isActive && 'backdrop-brightness-90'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-90`
-            }
-        >
-            <div className="flex items-center justify-start gap-4">
-                <div className="size-[19px] fill-[#202020]">{item.icon}</div>
-                <div>{item.name}</div>
-            </div>
-        </NavLink>
-    ));
 
     const sideBarRef = useRef();
 
@@ -192,14 +179,8 @@ export default function Sidebar() {
 
                             <hr className="w-full border-gray-300" />
 
-                            <div className="overflow-y-scroll text-[17px] text-black w-full h-[calc(100%-60px)] py-3 flex flex-col items-start justify-between">
-                                <div className="w-full flex flex-col gap-1 mb-1 items-start justify-start">
-                                    {itemElements}
-                                </div>
-                                <div className="w-full flex flex-col gap-1 items-start justify-start">
-                                    <hr className="w-full border-gray-300 mb-1" />
-                                    {systemItemElements}
-                                </div>
+                            <div className="text-[17px] py-3 h-[calc(100%-60px)] text-black overflow-y-scroll w-full flex flex-col gap-1 mb-1 items-start justify-start">
+                                {itemElements}
                             </div>
                         </div>
                     </motion.aside>
