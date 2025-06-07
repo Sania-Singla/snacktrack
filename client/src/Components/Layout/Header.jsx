@@ -29,6 +29,9 @@ export default function Header() {
         '/cart',
     ];
 
+    const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
+
+
     return (
         <header className="drop-shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-4 font-medium flex items-center justify-between gap-4">
             <div className="flex items-center justify-center gap-4">
@@ -63,7 +66,7 @@ export default function Header() {
             </div>
 
             <div
-                className={`${staticPages.includes(pathname) ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] w-full`}
+                className={`${isStaticPage ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] w-full`}
             >
                 <Searchbar />
             </div>

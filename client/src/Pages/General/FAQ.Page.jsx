@@ -35,16 +35,8 @@ export default function FAQpage() {
             answer: "Check your meal balance under the 'My Account' section in 'Meal Credits'.",
         },
         {
-            question: 'Are there any special discounts for students?',
-            answer: 'Yes! Occasionally, we offer discounts and meal packages. Check the homepage for updates.',
-        },
-        {
             question: 'How often is the menu updated?',
             answer: 'The menu is updated daily based on availability and seasonal ingredients.',
-        },
-        {
-            question: 'What payment methods are accepted?',
-            answer: 'We accept UPI, credit/debit cards, and hostel meal credits.',
         },
         {
             question: 'Who can I contact for additional queries?',
