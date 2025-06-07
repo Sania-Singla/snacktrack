@@ -36,7 +36,7 @@ export default function App() {
     }, [location]);
 
     return (
-        <div className="bg-white h-dvw w-dvw">
+        <div className="bg-white h-lvw w-lvw">
             {loading ? (
                 <div className="text-black h-full w-full flex flex-col items-center justify-center">
                     <div className="size-[33px] fill-[#4977ec] dark:text-[#ececec]">
