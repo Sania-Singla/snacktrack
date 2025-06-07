@@ -21,6 +21,8 @@ export default function Layout({ renderTemplate = true }) {
         '/cart',
     ];
 
+    const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
+
     return renderTemplate ? (
         <div ref={layoutRef} className="overflow-y-scroll h-full w-full">
             <Header />
@@ -28,7 +30,7 @@ export default function Layout({ renderTemplate = true }) {
             <Sidebar />
             <main className="mt-[60px] p-4 min-h-[calc(100%-60px)] w-full bg-[#f9f9f9]">
                 <div
-                    className={`mb-6 mt-2 w-full sm:hidden ${staticPages.includes(pathname) && 'hidden'}`}
+                    className={`mb-6 mt-2 w-full sm:hidden ${isStaticPage && 'hidden'}`}
                 >
                     <Searchbar />
                 </div>
