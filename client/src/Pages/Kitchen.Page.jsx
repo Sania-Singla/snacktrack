@@ -59,11 +59,10 @@ export default function KitchenPage() {
                             });
                         }
                     }
+                    setLoading(false);
                 }
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 
@@ -89,12 +88,11 @@ export default function KitchenPage() {
                 }
                 setError(false);
                 setKitchenOrders(res.orders);
+                setVerifying(false);
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');
-        } finally {
-            setVerifying(false);
-        }
+        } 
     }
 
     function handleMinus(itemId, orderId) {

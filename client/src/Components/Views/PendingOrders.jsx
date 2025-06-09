@@ -42,11 +42,10 @@ export default function PendingOrders({ filter }) {
                 if (res && !res.message) {
                     setPendingOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 
@@ -73,11 +72,10 @@ export default function PendingOrders({ filter }) {
                 if (res && !res.message) {
                     setPendingOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 

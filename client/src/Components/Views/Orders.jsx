@@ -38,11 +38,10 @@ export default function Orders({ filter }) {
                 if (res && !res.message) {
                     setOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 
@@ -69,11 +68,10 @@ export default function Orders({ filter }) {
                 if (res && !res.message) {
                     setOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 

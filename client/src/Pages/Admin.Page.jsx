@@ -21,11 +21,10 @@ export default function AdminPage() {
                 if (res) {
                     if (res.message) setError(true);
                     else setCanteens(res);
+                    setLoading(false);
                 }
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
     }, []);
@@ -38,11 +37,10 @@ export default function AdminPage() {
             if (res && !res.message) {
                 setCanteens(res);
                 setError(false);
+                setVerifying(false);
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');
-        } finally {
-            setVerifying(false);
         }
     };
 

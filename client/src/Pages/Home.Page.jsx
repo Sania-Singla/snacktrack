@@ -54,10 +54,9 @@ export default function HomePage() {
                         }))
                     );
                 } else checkTokenExpired(PackagedItems, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 

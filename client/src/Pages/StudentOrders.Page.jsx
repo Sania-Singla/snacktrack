@@ -40,6 +40,36 @@ export default function StudentOrdersPage() {
         (async function () {
             try {
                 setLoading(true);
+                setStudentOrders([]);
+                setPage(1);
+                const res = await orderService.getStudentOrders(
+                    studentId,
+                    filter,
+                    1,
+                    LIMIT,
+                    signal
+                );
+                if (res && !res.message) {
+                    setStudentOrders(res.orders);
+                    setOrdersInfo(res.ordersInfo);
+                    setLoading(false);
+                } else checkTokenExpired(res, setUser);
+            } catch (err) {
+                navigate('/server-error');
+            }
+        })();
+
+        return () => controller.abort();
+    }, [filter]);
+
+    useEffect(() => {
+        if (page === 1) return; // Already handled in filter use effect
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        (async function () {
+            try {
+                setLoading(true);
                 const res = await orderService.getStudentOrders(
                     studentId,
                     filter,
@@ -50,20 +80,15 @@ export default function StudentOrdersPage() {
                 if (res && !res.message) {
                     setStudentOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 
         return () => controller.abort();
-    }, [page, filter]);
-
-    useEffect(() => {
-        setStudentOrders([]), setPage(1);
-    }, [filter]);
+    }, [page]);
 
     return (
         <div className="w-full p-4">

@@ -25,8 +25,6 @@ export default function StudentsPage() {
     // pagination
     const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
 
-    useEffect(() => setStudents([]), []);
-
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
@@ -34,6 +32,7 @@ export default function StudentsPage() {
         (async function () {
             try {
                 setLoading(true);
+                if (page === 1) setStudents([]);
                 const res = await contractorService.getStudents(
                     signal,
                     page,
@@ -42,11 +41,10 @@ export default function StudentsPage() {
                 if (res && !res.message) {
                     setStudents((prev) => prev.concat(res.students));
                     setStudentsInfo(res.studentsInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 
