@@ -8,13 +8,19 @@ import {
     placeOrder,
     updateOrderStatus,
     checkAvailability,
-    getStatistics,
+    getKitchenOrders,
 } from '../Controllers/order.Controller.js';
 
 orderRouter.use(verifyJwt);
 
+orderRouter.route('/place').post(placeOrder);
+
 orderRouter.route('/availability').post(checkAvailability);
-orderRouter.route('/statistics').get(getStatistics);
+
+orderRouter.route('/kitchen').get(getKitchenOrders);
+
+orderRouter.route('/student/:studentId').get(getStudentOrders);
+
+orderRouter.route('/canteen/:canteenId').get(getCanteenOrders);
+
 orderRouter.route('/:orderId').patch(updateOrderStatus);
-orderRouter.route('/:studentId').get(getStudentOrders);
-orderRouter.route('/').get(getCanteenOrders).post(placeOrder);

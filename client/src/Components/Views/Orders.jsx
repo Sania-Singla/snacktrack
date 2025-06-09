@@ -14,7 +14,7 @@ export default function Orders({ filter }) {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
@@ -30,7 +30,9 @@ export default function Orders({ filter }) {
             try {
                 setLoading(true);
                 const res = await orderService.getCanteenOrders(
-                    filter,
+                    filter.status,
+                    filter.date,
+                    user.canteenId,
                     page,
                     LIMIT,
                     signal
@@ -47,7 +49,7 @@ export default function Orders({ filter }) {
         })();
 
         return () => controller.abort();
-    }, [page, filter]);
+    }, [page]);
 
     const orderElements = orders
         .filter(

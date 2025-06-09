@@ -3,7 +3,7 @@ import { fetchWrapper } from '../Utils';
 class OrderService {
     async placeOrder(cartItems, total, packingCharges) {
         return await fetchWrapper({
-            endPoint: `/orders`,
+            endPoint: `/orders/place`,
             method: 'POST',
             credentials: 'include',
             body: {
@@ -26,7 +26,7 @@ class OrderService {
 
     async getStudentOrders(studentId, month, page, limit, signal) {
         return await fetchWrapper({
-            endPoint: `/orders/${studentId}?month=${month}&page=${page}&limit=${limit}`,
+            endPoint: `/orders/student/${studentId}?month=${month}&page=${page}&limit=${limit}`,
             method: 'GET',
             signal,
             credentials: 'include',
@@ -34,9 +34,10 @@ class OrderService {
         });
     }
 
-    async getCanteenOrders(status, page, limit, signal) {
+    // TODO: add query for date wise
+    async getCanteenOrders(status, date, canteenId, page, limit, signal) {
         return await fetchWrapper({
-            endPoint: `/orders?limit=${limit}&page=${page}&status=${status}`,
+            endPoint: `/orders/canteen/${canteenId}?date=${date}&limit=${limit}&page=${page}&status=${status}`,
             method: 'GET',
             signal,
             credentials: 'include',
@@ -44,13 +45,15 @@ class OrderService {
         });
     }
 
-    async getStatistics(signal) {
+    // only today's
+    async getKitchenOrders(key, signal) {
         return await fetchWrapper({
-            endPoint: `/orders/statistics`,
+            endPoint: `/orders/kitchen`,
             method: 'GET',
             signal,
+            body: { key },
             credentials: 'include',
-            aim: 'getStatistics',
+            aim: 'getKitchenOrders',
         });
     }
 

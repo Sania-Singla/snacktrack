@@ -72,32 +72,12 @@ class UserService {
         });
     }
 
-    async getOrders(key = '') {
-        return await fetchWrapper({
-            endPoint: `/users/orders`,
-            method: 'POST',
-            credentials: 'include',
-            body: { key },
-            aim: 'getOrders',
-        });
-    }
-
     async getCanteens(signal) {
         return await fetchWrapper({
             endPoint: `/users/canteens`,
             method: 'GET',
             signal,
             aim: 'getCanteens',
-        });
-    }
-
-    async sendQuery({ subject, message }) {
-        return await fetchWrapper({
-            endPoint: `/users/query`,
-            method: 'POST',
-            credentials: 'include',
-            body: { subject, message },
-            aim: 'sendQuery',
         });
     }
 }

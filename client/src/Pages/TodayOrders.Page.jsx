@@ -8,12 +8,13 @@ import toast from 'react-hot-toast';
 export default function TodayOrdersPage() {
     const [searchParams] = useSearchParams();
     const { audioEnabled, setAudioEnabled } = useUserContext();
-    const filter = searchParams.get('filter') || 'Pending';
+    const filter = {
+        status: searchParams.get('status') || 'Pending',
+        date: searchParams.get('date') || new Date(),
+    };
 
     useEffect(() => {
-        // Initialize with current state
         setAudioEnabled(getAudioState());
-        // Subscribe to changes
         return subscribeToAudioChanges((enabled) => setAudioEnabled(enabled));
     }, []);
 
@@ -56,11 +57,15 @@ export default function TodayOrdersPage() {
                             </div>
                         )}
                     </div>
-                    <Filter options={options} defaultOption={filter} />
+                    <Filter
+                        options={options}
+                        defaultOption={filter.status}
+                        queryParamName="status"
+                    />
                 </div>
             </div>
 
-            {filter === 'Pending' ? (
+            {filter.status === 'Pending' ? (
                 <PendingOrders filter={filter} />
             ) : (
                 <Orders filter={filter} />

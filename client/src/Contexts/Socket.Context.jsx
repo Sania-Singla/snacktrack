@@ -51,7 +51,6 @@ const SocketContextProvider = ({ children }) => {
         });
 
         socketInstance.on('orderRejected', (order) => {
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
             setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
             setStudentOrders((prev) =>
                 prev.map((o) =>
@@ -70,7 +69,6 @@ const SocketContextProvider = ({ children }) => {
         });
 
         socketInstance.on('orderPickedUp', (order) => {
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
             setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
             setStudentOrders((prev) =>
                 prev.map((o) =>

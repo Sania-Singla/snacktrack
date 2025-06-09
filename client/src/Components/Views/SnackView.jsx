@@ -123,41 +123,22 @@ export default function SnackView({ snack, reference }) {
 
             {/* Content */}
             <div className="flex flex-col gap-3 w-full mt-4">
-                {/* Availability and Price */}
-                <div className="flex items-center justify-between">
-                    {/* Availability */}
-                    <div className="flex items-center gap-1 bg-gray-100 shadow-sm rounded-full px-3 py-1">
-                        <div
-                            className={`size-[6px] rounded-full ${isAvailable ? 'bg-green-600' : 'bg-red-500'}`}
-                        />
-                        <span
-                            className={`text-sm font-semibold ${isAvailable ? 'text-green-600' : 'text-red-600'}`}
-                        >
-                            {isAvailable ? 'Available' : 'UnAvailable'}
-                        </span>
-                    </div>
-
-                    {/* Price */}
-                    <p className="text-sm font-bold bg-gray-100 shadow-sm rounded-full px-3 py-1">
-                        Rs. {price}
-                    </p>
+                {/* Availability */}
+                <div className="flex items-center gap-1 w-fit bg-gray-100 shadow-sm rounded-full px-3 py-1">
+                    <div
+                        className={`size-[6px] rounded-full ${isAvailable ? 'bg-green-600' : 'bg-red-500'}`}
+                    />
+                    <span
+                        className={`text-sm font-semibold ${isAvailable ? 'text-green-600' : 'text-red-600'}`}
+                    >
+                        {isAvailable ? 'Available' : 'UnAvailable'}
+                    </span>
                 </div>
 
-                {/* Name and Info */}
-                <div className="flex flex-col gap-2">
-                    {/* Name */}
-                    <p className="text-xl font-bold text-gray-900 truncate">
-                        {name}
-                    </p>
-
-                    {/* Info */}
-                    {info && (
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                            {info} Lorem ipsum dolor sit amet, consectetur
-                            adipisicing elit. Consequatur, quidem.
-                        </p>
-                    )}
-                </div>
+                {/* Name */}
+                <p className="text-xl font-bold text-gray-900 truncate">
+                    {name}
+                </p>
 
                 {/* Add to Cart Button or Toggle Switch */}
                 <div className="w-full flex items-center justify-end mt-2">

@@ -22,7 +22,6 @@ import {
     CartPage,
     StudentBillsPage,
     KitchenPage,
-    StatisticsPage,
     AdminPage,
     RegisterCanteenPage,
 } from './Pages';
@@ -78,7 +77,6 @@ export const router = createBrowserRouter(
                         />
                         <Route path="all-bills" element={<BillsPage />} />
                         <Route path="students" element={<StudentsPage />} />
-                        <Route path="statistics" element={<StatisticsPage />} />
                     </Route>
                     <Route
                         path="register-student"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { userService } from '../Services';
+import { orderService, userService } from '../Services';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Dropdown } from '../Components';
 import { icons } from '../Assets/icons';
@@ -31,7 +31,7 @@ export default function KitchenPage() {
 
         (async function () {
             try {
-                const res = await userService.getOrders();
+                const res = await orderService.getKitchenOrders();
                 if (res) {
                     if (res.message) {
                         // get canteens to show in verify key popup
@@ -73,7 +73,7 @@ export default function KitchenPage() {
 
         setVerifying(true);
         try {
-            const res = await userService.getOrders(
+            const res = await orderService.getKitchenOrders(
                 `${hostel.hostelType}${hostel.hostelNumber}-${key}`
             );
             if (res && !res.message) {

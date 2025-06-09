@@ -12,7 +12,6 @@ import StudentOrdersPage from './StudentOrders.Page';
 import CartPage from './Cart.Page';
 import StudentBillsPage from './StudentBills.Page';
 import KitchenPage from './Kitchen.Page';
-import StatisticsPage from './Statistics.Page';
 import AdminPage from './Admin.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
 import BillsPage from './Bills.Page';
@@ -32,7 +31,6 @@ export {
     StudentOrdersPage,
     CartPage,
     KitchenPage,
-    StatisticsPage,
     BillsPage,
     AdminPage,
     RegisterCanteenPage,

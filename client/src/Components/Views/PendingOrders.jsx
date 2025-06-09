@@ -17,13 +17,13 @@ export default function PendingOrders({ filter }) {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
     useEffect(() => {
-        setPendingOrders([]), setPage(1);
+        setLoading(true), setPendingOrders([]), setPage(1);
     }, [filter]);
 
     useEffect(() => {
@@ -34,7 +34,9 @@ export default function PendingOrders({ filter }) {
             try {
                 setLoading(true);
                 const res = await orderService.getCanteenOrders(
-                    'Pending',
+                    filter.status,
+                    filter.date,
+                    user.canteenId,
                     page,
                     LIMIT,
                     signal

@@ -12,9 +12,8 @@ import {
     uploadOnCloudinary,
     deleteFromCloudinary,
 } from '../Helpers/index.js';
-import { Canteen, Student, Contractor, Order } from '../Models/index.js';
+import { Canteen, Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcrypt';
-import { Types } from 'mongoose';
 import { sendMail } from '../mailer.js';
 import { nanoid } from 'nanoid';
 
@@ -183,15 +182,14 @@ const updateAvatar = tryCatch('update avatar', async (req, res, next) => {
     }
 });
 
-// for hostel dropdown during student login
+// for hostel dropdowns
 const getCanteens = tryCatch('get canteens', async (req, res) => {
-    return res.status(200).json(HOSTELS);
+    return res.status(OK).json(HOSTELS);
 });
 
 // for admin page
 const getContractors = tryCatch('get contractors', async (req, res) => {
     const canteens = await Canteen.aggregate([
-        { $match: {} },
         {
             $lookup: {
                 from: 'contractors',
@@ -216,105 +214,6 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
     return res.status(OK).json(canteens);
 });
 
-// for kitchen page
-const getKitchenOrders = tryCatch('get orders', async (req, res, next) => {
-    const { hostelType, hostelNumber } = req;
-
-    const canteen = await Canteen.findOne({ hostelType, hostelNumber });
-
-    const now = new Date();
-
-    // Set start time
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    // Set end time
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-
-    // Fetch today's orders from this canteen
-    const orders = await Order.aggregatePaginate(
-        [
-            {
-                $match: {
-                    canteenId: new Types.ObjectId(canteen._id),
-                    createdAt: { $gte: startOfDay, $lt: endOfDay },
-                    status: 'Pending',
-                },
-            },
-            { $unwind: '$items' },
-            { $match: { 'items.itemType': 'Snack' } },
-            {
-                $lookup: {
-                    from: 'snacks',
-                    localField: 'items.itemId',
-                    foreignField: '_id',
-                    as: 'snackDetails',
-                    pipeline: [{ $project: { name: 1, image: 1 } }],
-                },
-            },
-            {
-                $addFields: {
-                    'items.name': {
-                        $cond: [
-                            { $eq: ['$items.itemType', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.name', 0] },
-                            null,
-                        ],
-                    },
-                    'items.image': {
-                        $cond: [
-                            { $eq: ['$items.itemType', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.image', 0] },
-                            null,
-                        ],
-                    },
-                },
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    status: { $first: '$status' },
-                    canteenId: { $first: '$canteenId' },
-                    studentId: { $first: '$studentId' },
-                    items: { $push: '$items' },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
-                },
-            },
-            { $project: { snackDetails: 0 } },
-        ],
-        { sort: { createdAt: 1 } }
-    );
-
-    return res.status(OK).json({ canteenId: canteen._id, orders: orders.docs });
-});
-
-const sendQuery = tryCatch('send query to admin', async (req, res, next) => {
-    const { subject, message } = req.body;
-    const { email, fullName, phoneNumber } = req.user;
-
-    if (!subject || !message) {
-        return next(new ErrorHandler('missing fields', BAD_REQUEST));
-    }
-
-    await sendMail({
-        senderName: fullName,
-        senderMail: email,
-        receiverName: 'Snack Track',
-        receiverMail: process.env.ADMIN_EMAIL,
-        subject,
-        html: `
-            <h2>Query from ${fullName}</h2>
-            <p><b>Message:</b> ${message}</p>
-            <p><b>From:</b> ${fullName}</p>
-            <p><b>Phone Number:</b> ${phoneNumber}</p>
-        `,
-    });
-
-    return res.status(OK).json({ message: 'query sent successfully' });
-});
-
 export {
     getCurrentUser,
     login,
@@ -323,7 +222,5 @@ export {
     updatePassword,
     updateAvatar,
     getCanteens,
-    getKitchenOrders,
-    sendQuery,
     resetPassword,
 };

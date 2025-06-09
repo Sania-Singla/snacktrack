@@ -173,7 +173,7 @@ const cleanupOldBillsAndOrders = tryCatch(
 
 const startBillingCronJob = () => {
     // Run at 12:05 on the 1st of every month
-    cron.schedule('5 0 1 * *', generateBills, {
+    cron.schedule('*/20 * * * *', generateBills, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
