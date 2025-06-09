@@ -1,33 +1,25 @@
 import express from 'express';
 export const userRouter = express.Router();
-import {
-    verifyJwt,
-    upload,
-    verifyAdminKeyJwt,
-    verifyStaffKeyJwt,
-} from '../Middlewares/index.js';
+import { verifyJwt, upload } from '../Middlewares/index.js';
 import {
     updateAvatar,
     updatePassword,
     getCurrentUser,
     logout,
     login,
-    getContractors,
-    // getKitchenOrders,
     getCanteens,
     resetPassword,
+    updateAccountDetails,
 } from '../Controllers/user.Controller.js';
-
-userRouter.route('/login').patch(login);
 
 // for dropdowns
 userRouter.route('/canteens').get(getCanteens);
 
-userRouter.route('/contractors').post(verifyAdminKeyJwt, getContractors);
-
-// userRouter.route('/orders').post(verifyStaffKeyJwt, getKitchenOrders);
+userRouter.route('/login').patch(login);
 
 userRouter.use(verifyJwt);
+
+userRouter.route('/account').patch(updateAccountDetails);
 
 userRouter.route('/password').patch(updatePassword);
 

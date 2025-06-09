@@ -1,9 +1,6 @@
 import { upload } from './multer.Middleware.js';
 import { verifyJwt, optionalVerifyJwt } from './auth.Middleware.js';
-import {
-    verifyAdminKeyJwt,
-    verifyStaffKeyJwt,
-} from './verifyKeys.Middleware.js';
+import { verifyAdminJwt, verifyStaffJwt } from './verifyKeys.Middleware.js';
 import { errorMiddleware } from './error.Middleware.js';
 
 export {
@@ -11,6 +8,6 @@ export {
     verifyJwt,
     optionalVerifyJwt,
     errorMiddleware,
-    verifyAdminKeyJwt,
-    verifyStaffKeyJwt,
+    verifyAdminJwt,
+    verifyStaffJwt,
 };

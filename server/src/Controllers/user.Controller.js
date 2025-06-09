@@ -182,45 +182,68 @@ const updateAvatar = tryCatch('update avatar', async (req, res, next) => {
     }
 });
 
-// for hostel dropdowns
+const updateAccountDetails = tryCatch(
+    'update account details',
+    async (req, res, next) => {
+        const { _id, password } = req.user;
+        const data = {
+            email: req.body.email.trim(),
+            phoneNumber: req.body.phoneNumber,
+            password: req.body.password,
+        };
+
+        // input error handling
+        if (!data.email || !data.phoneNumber) {
+            return next(new ErrorHandler('missing fields', BAD_REQUEST));
+        }
+
+        for (const [key, value] of Object.entries(data)) {
+            if (value && key !== 'password') {
+                const isValid = verifyExpression(key, value);
+                if (!isValid) {
+                    return next(
+                        new ErrorHandler(`${key} is invalid.`, BAD_REQUEST)
+                    );
+                }
+            }
+        }
+
+        const isPassValid = bcrypt.compareSync(data.password, password);
+        if (!isPassValid) {
+            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
+        }
+
+        const Model = role === 'contractor' ? Contractor : Student;
+
+        // update or keep prev details if empty
+        await Model.findByIdAndUpdate(
+            _id,
+            {
+                $set: {
+                    ...(data.email && { email: data.email }),
+                    ...(data.phoneNumber && { phoneNumber: data.phoneNumber }),
+                },
+            },
+            { new: true }
+        );
+
+        return res
+            .status(OK)
+            .json({ message: 'account details updated successfully' });
+    }
+);
+
 const getCanteens = tryCatch('get canteens', async (req, res) => {
     return res.status(OK).json(HOSTELS);
-});
-
-// for admin page
-const getContractors = tryCatch('get contractors', async (req, res) => {
-    const canteens = await Canteen.aggregate([
-        {
-            $lookup: {
-                from: 'contractors',
-                localField: 'contractorId',
-                foreignField: '_id',
-                as: 'contractor',
-                pipeline: [
-                    {
-                        $project: {
-                            fullName: 1,
-                            email: 1,
-                            phoneNumber: 1,
-                            avatar: 1,
-                        },
-                    },
-                ],
-            },
-        },
-        { $unwind: '$contractor' },
-        { $project: { snacks: 0, packagedItems: 0 } },
-    ]);
-    return res.status(OK).json(canteens);
 });
 
 export {
     getCurrentUser,
     login,
     logout,
-    getContractors,
     updatePassword,
     updateAvatar,
+    updateAccountDetails,
     getCanteens,
     resetPassword,
 };

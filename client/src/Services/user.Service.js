@@ -62,16 +62,6 @@ class UserService {
         });
     }
 
-    async getContractors(key = '') {
-        return await fetchWrapper({
-            endPoint: `/users/contractors`,
-            method: 'POST',
-            credentials: 'include',
-            body: { key },
-            aim: 'getContractors',
-        });
-    }
-
     async getCanteens(signal) {
         return await fetchWrapper({
             endPoint: `/users/canteens`,

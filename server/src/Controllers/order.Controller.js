@@ -41,6 +41,31 @@ const placeOrder = tryCatch('place order', async (req, res) => {
     return res.status(OK).json(data);
 });
 
+const updateOrderStatus = tryCatch(
+    'update order status',
+    async (req, res, next) => {
+        const { orderId } = req.params;
+        const { status } = req.query;
+        const contractor = req.user;
+
+        const order = await Order.findOneAndUpdate(
+            {
+                _id: new Types.ObjectId(orderId),
+                canteenId: new Types.ObjectId(contractor.canteenId),
+            },
+            { $set: { status } },
+            { new: true }
+        );
+        if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
+
+        return res
+            .status(OK)
+            .json({ message: 'order status updated successfully' });
+    }
+);
+
+// TODO: date wise also
+
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     const { limit = 10, page = 1, month } = req.query;
     const { studentId } = req.params;
@@ -154,30 +179,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     );
 });
 
-const updateOrderStatus = tryCatch(
-    'update order status',
-    async (req, res, next) => {
-        const { orderId } = req.params;
-        const { status } = req.query;
-        const contractor = req.user;
-
-        const order = await Order.findOneAndUpdate(
-            {
-                _id: new Types.ObjectId(orderId),
-                canteenId: new Types.ObjectId(contractor.canteenId),
-            },
-            { $set: { status } },
-            { new: true }
-        );
-        if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
-
-        return res
-            .status(OK)
-            .json({ message: 'order status updated successfully' });
-    }
-);
-
-// today's only // TODO: date wise also
+// today's only
 const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     const { limit = 10, page = 1, status = 'Pending' } = req.query;
     const canteenId = req.user.canteenId; // contractor
@@ -421,10 +423,10 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
 });
 
 export {
-    getStudentOrders,
-    getCanteenOrders,
     placeOrder,
+    getStudentOrders,
     updateOrderStatus,
-    checkAvailability,
+    getCanteenOrders,
     getKitchenOrders,
+    checkAvailability,
 };

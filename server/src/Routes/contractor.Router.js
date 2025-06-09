@@ -4,66 +4,60 @@ import { upload, verifyJwt } from '../Middlewares/index.js';
 
 import {
     getStudents,
-    register,
-    completeRegistration,
-    resendVerificationCode,
-    updateAccountDetails,
     registerStudent,
     removeAllStudents,
     removeStudent,
-    updateStudentAccountDetails,
+    updateStudent,
     addSnack,
     deleteSnack,
-    updateSnackDetails,
+    updateSnack,
     toggleSnackAvailability,
     addItem,
     deleteItem,
-    updateItemDetails,
+    updateItem,
     updateKitchenKey,
     toggleItemAvailability,
 } from '../Controllers/contractor.Controller.js';
 
-contractorRouter.route('/register').post(register);
-contractorRouter.route('/complete-registeration').post(completeRegistration);
-contractorRouter.route('/resend-code').post(resendVerificationCode);
-
 contractorRouter.use(verifyJwt);
 
-// personal usage
-
-contractorRouter.route('/account').patch(updateAccountDetails);
 contractorRouter.route('/kitchen-key').patch(updateKitchenKey);
 
-// student management tasks
+// student management
 
 contractorRouter
     .route('/students')
     .get(getStudents)
     .post(registerStudent)
     .delete(removeAllStudents);
+
 contractorRouter
     .route('/students/:studentId')
     .delete(removeStudent)
-    .patch(updateStudentAccountDetails);
+    .patch(updateStudent);
 
-// snack management tasks
+// snack management
 
 contractorRouter.route('/snacks').post(upload.single('image'), addSnack);
+
 contractorRouter
     .route('/snacks/:snackId')
     .delete(deleteSnack)
-    .patch(upload.single('image'), updateSnackDetails);
+    .patch(upload.single('image'), updateSnack);
+
 contractorRouter
     .route('/snacks/availability/:snackId')
     .patch(toggleSnackAvailability);
 
-// packaged food management tasks
+// packaged food management
 
 contractorRouter.route('/packaged').post(addItem);
+
 contractorRouter
     .route('/packaged/:itemId')
     .delete(deleteItem)
-    .patch(updateItemDetails);
+    .patch(updateItem);
+
 contractorRouter
     .route('/packaged/availability/:itemId')
     .patch(toggleItemAvailability);

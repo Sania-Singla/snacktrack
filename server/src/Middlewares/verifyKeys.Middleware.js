@@ -2,27 +2,33 @@ import jwt from 'jsonwebtoken';
 import { FORBIDDEN, COOKIE_OPTIONS, BAD_REQUEST } from '../Constants/index.js';
 import {
     extractTokens,
-    generateAdminKeyToken,
-    generateStaffKeyToken,
+    generateAdminToken,
+    generateStaffToken,
 } from '../Helpers/index.js';
 import { Canteen } from '../Models/index.js';
 import bcrypt from 'bcrypt';
 
-const verifyAdminKeyJwt = async (req, res, next) => {
+const verifyAdminJwt = async (req, res, next) => {
     try {
-        const { adminKeyToken } = extractTokens(req);
+        const { adminToken } = extractTokens(req);
 
-        if (adminKeyToken) {
+        if (adminToken) {
             // verify
             const decodedToken = jwt.verify(
-                adminKeyToken,
-                process.env.ADMIN_KEY_TOKEN_SECRET
+                adminToken,
+                process.env.ADMIN_TOKEN_SECRET
             );
             if (!decodedToken) {
                 return res
                     .status(FORBIDDEN)
-                    .clearCookie('adminKeyToken', COOKIE_OPTIONS)
+                    .clearCookie('adminToken', COOKIE_OPTIONS)
                     .json({ message: 'Invalid admin key token' });
+            }
+            if (decodedToken.key !== process.env.ADMIN_KEY) {
+                return res
+                    .status(FORBIDDEN)
+                    .clearCookie('adminToken', COOKIE_OPTIONS)
+                    .json({ message: 'Invalid admin key' });
             }
             return next();
         } else {
@@ -31,10 +37,12 @@ const verifyAdminKeyJwt = async (req, res, next) => {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
             if (key !== process.env.ADMIN_KEY) {
-                return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
+                return res
+                    .status(BAD_REQUEST)
+                    .json({ message: 'Invalid admin key' });
             }
-            const adminKeyToken = await generateAdminKeyToken(key);
-            res.cookie('adminKeyToken', adminKeyToken, {
+            const adminToken = await generateAdminToken(key);
+            res.cookie('adminToken', adminToken, {
                 ...COOKIE_OPTIONS,
                 maxAge: Number(process.env.ADMIN_KEY_TOKEN_MAXAGE),
             });
@@ -43,7 +51,7 @@ const verifyAdminKeyJwt = async (req, res, next) => {
     } catch (err) {
         return res
             .status(FORBIDDEN)
-            .clearCookie('adminKeyToken', COOKIE_OPTIONS)
+            .clearCookie('adminToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid admin key jwt token',
                 err: err.message,
@@ -51,59 +59,51 @@ const verifyAdminKeyJwt = async (req, res, next) => {
     }
 };
 
-const verifyStaffKeyJwt = async (req, res, next) => {
+const verifyStaffJwt = async (req, res, next) => {
     try {
-        const { staffKeyToken } = extractTokens(req);
-        if (staffKeyToken) {
+        const { staffToken } = extractTokens(req);
+        if (staffToken) {
             // verify
             const decodedToken = jwt.verify(
-                staffKeyToken,
+                staffToken,
                 process.env.STAFF_KEY_TOKEN_SECRET
             );
             if (!decodedToken) {
                 return res
                     .status(FORBIDDEN)
-                    .clearCookie('staffKeyToken', COOKIE_OPTIONS)
-                    .json({ message: 'Invalid staff key token' });
+                    .clearCookie('staffToken', COOKIE_OPTIONS)
+                    .json({ message: 'Invalid staff token' });
             }
-            const [hostel] = decodedToken.key.split('-');
-            const match = hostel.match(/([A-Za-z]+)(\d+)/);
-            if (match) {
-                req.hostelType = match[1]; // The alphabetic part (e.g., "GH", "WWH")
-                req.hostelNumber = Number(match[2]); // The numeric part (e.g., 10)
-            }
+            const [canteenId] = decodedToken.key.split('-');
+            req.canteenId = canteenId;
+            return next();
+        } else if (req.user.role === 'contractor') {
+            req.canteenId = req.user.canteenId;
             return next();
         } else {
             const { key } = req.body;
             if (!key) {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
-            const [hostel, actualKey] = key.split('-');
-            const match = hostel.match(/([A-Za-z]+)(\d+)/);
-            let hostelType, hostelNumber;
-            if (match) {
-                hostelType = match[1]; // The alphabetic part (e.g., "GH", "WWH")
-                hostelNumber = Number(match[2]); // The numeric part (e.g., 10)
-            }
+            const [canteenId, actualKey] = key.split('-');
+            const canteen = await Canteen.findOne({ canteenId });
 
-            const canteen = await Canteen.findOne({ hostelType, hostelNumber });
             const isValid = bcrypt.compareSync(actualKey, canteen.kitchenKey);
             if (!isValid) {
                 return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
             }
-            const staffKeyToken = await generateStaffKeyToken(key);
-            res.cookie('staffKeyToken', staffKeyToken, {
+            const staffToken = await generateStaffToken(key);
+            res.cookie('staffToken', staffToken, {
                 ...COOKIE_OPTIONS,
                 maxAge: Number(process.env.STAFF_KEY_TOKEN_MAXAGE),
             });
-            req.hostelType = hostelType;
-            req.hostelNumber = hostelNumber;
+            req.canteenId = canteenId;
             return next();
         }
     } catch (err) {
         return res
             .status(FORBIDDEN)
-            .clearCookie('staffKeyToken', COOKIE_OPTIONS)
+            .clearCookie('staffToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid staff key jwt token',
                 err: err.message,
@@ -111,4 +111,4 @@ const verifyStaffKeyJwt = async (req, res, next) => {
     }
 };
 
-export { verifyAdminKeyJwt, verifyStaffKeyJwt };
+export { verifyAdminJwt, verifyStaffJwt };

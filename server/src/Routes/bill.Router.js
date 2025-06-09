@@ -12,6 +12,9 @@ import { verifyJwt } from '../Middlewares/index.js';
 billRouter.use(verifyJwt);
 
 billRouter.route('/generate').get(generateBills);
+
 billRouter.route('/:billId').patch(markPaid);
+
 billRouter.route('/:studentId').get(getStudentBills);
+
 billRouter.route('/').get(getBills);

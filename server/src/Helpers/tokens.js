@@ -47,9 +47,9 @@ const generateRefreshToken = async (data) => {
  * @returns JWT Token
  */
 
-const generateAdminKeyToken = async (key) => {
-    return jwt.sign({ key }, process.env.ADMIN_KEY_TOKEN_SECRET, {
-        expiresIn: process.env.ADMIN_KEY_TOKEN_EXPIRY,
+const generateAdminToken = async (key) => {
+    return jwt.sign({ key }, process.env.ADMIN_TOKEN_SECRET, {
+        expiresIn: process.env.ADMIN_TOKEN_EXPIRY,
     });
 };
 
@@ -59,9 +59,9 @@ const generateAdminKeyToken = async (key) => {
  * @returns JWT Token
  */
 
-const generateStaffKeyToken = async (key) => {
-    return jwt.sign({ key }, process.env.STAFF_KEY_TOKEN_SECRET, {
-        expiresIn: process.env.STAFF_KEY_TOKEN_EXPIRY,
+const generateStaffToken = async (key) => {
+    return jwt.sign({ key }, process.env.STAFF_TOKEN_SECRET, {
+        expiresIn: process.env.STAFF_TOKEN_EXPIRY,
     });
 };
 
@@ -75,13 +75,9 @@ const extractTokens = (req) => {
         accessToken:
             req.cookies?.accessToken ||
             req.headers['authorization']?.split(' ')[1],
-
-        refreshToken:
-            req.cookies?.refreshToken || req.headers['x-refresh-token'],
-
-        adminKeyToken: req.cookies?.adminKeyToken || req.headers['x-admin-key'],
-
-        staffKeyToken: req.cookies?.staffKeyToken || req.headers['x-staff-key'],
+        refreshToken: req.cookies?.refreshToken || req.headers['x-refresh'],
+        adminToken: req.cookies?.adminToken || req.headers['x-admin'],
+        staffToken: req.cookies?.staffToken || req.headers['x-staff'],
     };
 };
 
@@ -90,6 +86,6 @@ export {
     generateTokens,
     generateAccessToken,
     generateRefreshToken,
-    generateAdminKeyToken,
-    generateStaffKeyToken,
+    generateAdminToken,
+    generateStaffToken,
 };

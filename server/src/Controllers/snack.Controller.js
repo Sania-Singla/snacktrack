@@ -16,7 +16,7 @@ const getSnacks = tryCatch('get snacks', async (req, res) => {
     }
 });
 
-const getPackagedFoodItems = tryCatch(
+const getPackagedItems = tryCatch(
     'get packaged food items',
     async (req, res) => {
         const user = req.user; // could be student or contractor
@@ -32,4 +32,4 @@ const getPackagedFoodItems = tryCatch(
     }
 );
 
-export { getSnacks, getPackagedFoodItems };
+export { getSnacks, getPackagedItems };

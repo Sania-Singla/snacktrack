@@ -88,6 +88,13 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
     return res.status(OK).json({ message: 'bill marked as paid' });
 });
 
+// todo: PENDING
+
+const generateBill = tryCatch('generate bill for student', async (req, res) => {
+    const { studentId } = req.params;
+    const contractor = req.user;
+});
+
 // generate bills for the previous month
 const generateBills = tryCatch('generate bills', async (req, res) => {
     const now = new Date();
@@ -144,7 +151,7 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
     if (res) res.status(OK).json({ message: 'operation performed' });
 });
 
-const cleanupOldBillsAndOrders = tryCatch(
+const cleanOldBillsAndOrders = tryCatch(
     'cleanup old bills and orders',
     async () => {
         const now = new Date();
@@ -173,7 +180,7 @@ const cleanupOldBillsAndOrders = tryCatch(
 
 const startBillingCronJob = () => {
     // Run at 12:05 on the 1st of every month
-    cron.schedule('*/20 * * * *', generateBills, {
+    cron.schedule('5 0 1 * *', generateBills, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
@@ -185,7 +192,7 @@ const startBillingCronJob = () => {
 
 const startCleanupCronJob = () => {
     // Run at 12:05 AM on January 1st
-    cron.schedule('5 0 1 1 *', cleanupOldBillsAndOrders, {
+    cron.schedule('5 0 1 1 *', cleanOldBillsAndOrders, {
         scheduled: true,
         timezone: 'Asia/Kolkata',
     });
@@ -202,5 +209,5 @@ export {
     getStudentBills,
     startBillingCronJob,
     startCleanupCronJob,
-    cleanupOldBillsAndOrders,
+    cleanOldBillsAndOrders,
 };

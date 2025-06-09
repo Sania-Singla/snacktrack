@@ -1,72 +1,13 @@
 import { fetchWrapper } from '../Utils';
 
 class ContractorService {
-    // personal usage
-
-    async register({
-        fullName,
-        password,
-        phoneNumber,
-        email,
-        hostel,
-        kitchenKey,
-    }) {
+    async updateKitchenKey({ password, newKey }) {
         return await fetchWrapper({
-            endPoint: `/contractors/register`,
-            method: 'POST',
-            aim: 'register',
-            body: {
-                fullName,
-                password,
-                email,
-                phoneNumber,
-                hostel,
-                kitchenKey,
-            },
-        });
-    }
-
-    async completeRegistration({
-        fullName,
-        password,
-        phoneNumber,
-        email,
-        code,
-        hostel,
-        kitchenKey,
-    }) {
-        return await fetchWrapper({
-            endPoint: `/contractors/complete-registeration`,
-            method: 'POST',
-            aim: 'completeRegistration',
-            body: {
-                fullName,
-                password,
-                email,
-                phoneNumber,
-                code,
-                hostel,
-                kitchenKey,
-            },
-        });
-    }
-
-    async resendEmailVerification(email) {
-        return await fetchWrapper({
-            endPoint: `/contractors/resend-code`,
-            method: 'POST',
-            aim: 'resendEmailVerification',
-            body: { email },
-        });
-    }
-
-    async updateAccountDetails({ email, phoneNumber, fullName, password }) {
-        return await fetchWrapper({
-            endPoint: `/contractors/account`,
+            endPoint: `/contractors/kitchen-key`,
             method: 'PATCH',
+            aim: 'updateKitchenKey',
             credentials: 'include',
-            aim: 'updateAccountDetails',
-            body: { email, phoneNumber, fullName, password },
+            body: { password, newKey },
         });
     }
 
@@ -111,15 +52,12 @@ class ContractorService {
         });
     }
 
-    async updateStudentAccountDetails(
-        studentId,
-        { fullName, phoneNumber, rollNo, email }
-    ) {
+    async updateStudent(studentId, { fullName, phoneNumber, rollNo, email }) {
         return await fetchWrapper({
             endPoint: `/contractors/students/${studentId}`,
             method: 'PATCH',
             credentials: 'include',
-            aim: 'updateStudentAccountDetails',
+            aim: 'updateStudent',
             body: { fullName, phoneNumber, rollNo, email },
         });
     }
@@ -152,7 +90,7 @@ class ContractorService {
         });
     }
 
-    async updateSnackDetails({ name, price, image }, snackId) {
+    async updateSnack({ name, price, image }, snackId) {
         const formData = new FormData();
         Object.entries({ image, name, price }).forEach(([key, value]) => {
             formData.append(key, value);
@@ -164,7 +102,7 @@ class ContractorService {
             credentials: 'include',
             body: formData,
             type: 'formData',
-            aim: 'updateSnackDetails',
+            aim: 'updateSnack',
         });
     }
 
@@ -174,15 +112,6 @@ class ContractorService {
             method: 'PATCH',
             credentials: 'include',
             aim: 'toggleSnackAvailability',
-        });
-    }
-
-    async toggleItemAvailability(itemId) {
-        return await fetchWrapper({
-            endPoint: `/contractors/packaged/availability/${itemId}`,
-            method: 'PATCH',
-            credentials: 'include',
-            aim: 'toggleItemAvailability',
         });
     }
 
@@ -207,23 +136,22 @@ class ContractorService {
         });
     }
 
-    async updateItemDetails(inputs, itemId) {
+    async updateItem(inputs, itemId) {
         return await fetchWrapper({
             endPoint: `/contractors/packaged/${itemId}`,
             method: 'PATCH',
             credentials: 'include',
-            aim: 'updateItemDetails',
+            aim: 'updateItem',
             body: inputs,
         });
     }
 
-    async updateKitchenKey({ password, newKey }) {
+    async toggleItemAvailability(itemId) {
         return await fetchWrapper({
-            endPoint: `/contractors/kitchen-key`,
+            endPoint: `/contractors/packaged/availability/${itemId}`,
             method: 'PATCH',
-            aim: 'updateKitchenKey',
             credentials: 'include',
-            body: { password, newKey },
+            aim: 'toggleItemAvailability',
         });
     }
 }

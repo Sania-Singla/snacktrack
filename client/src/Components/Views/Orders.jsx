@@ -19,10 +19,39 @@ export default function Orders({ filter }) {
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
     useEffect(() => {
-        setOrders([]), setPage(1);
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        (async function () {
+            try {
+                setLoading(true);
+                setOrders([]);
+                setPage(1);
+                const res = await orderService.getCanteenOrders(
+                    filter.status,
+                    filter.date,
+                    user.canteenId,
+                    1,
+                    LIMIT,
+                    signal
+                );
+                if (res && !res.message) {
+                    setOrders(res.orders);
+                    setOrdersInfo(res.ordersInfo);
+                } else checkTokenExpired(res, setUser);
+            } catch (err) {
+                navigate('/server-error');
+            } finally {
+                setLoading(false);
+            }
+        })();
+
+        return () => controller.abort();
     }, [filter]);
 
     useEffect(() => {
+        if (page === 1) return; // Already handled in filter use effect
+
         const controller = new AbortController();
         const signal = controller.signal;
 
