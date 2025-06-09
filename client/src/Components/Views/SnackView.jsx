@@ -113,7 +113,7 @@ export default function SnackView({ snack, reference }) {
             )}
 
             {/* Image */}
-            <div className="h-[180px] w-full rounded-xl overflow-hidden shadow-md">
+            <div className="aspect-[5/3] w-full rounded-xl overflow-hidden shadow-md">
                 <img
                     alt="snack image"
                     src={image}

@@ -90,7 +90,7 @@ export default function Sidebar() {
             x: 0,
             transition: {
                 type: 'tween',
-                duration: 0.5,
+                duration: 0.2,
             },
         },
         exit: {
@@ -106,13 +106,13 @@ export default function Sidebar() {
         visible: {
             backdropFilter: 'brightness(0.65)',
             transition: {
-                duration: 0.5,
+                duration: 0.3,
             },
         },
         hidden: {
             backdropFilter: 'brightness(1)',
             transition: {
-                duration: 0.2,
+                duration: 0.1,
             },
         },
     };
@@ -137,7 +137,7 @@ export default function Sidebar() {
                         className="h-full w-[265px] flex justify-start"
                     >
                         <div className="w-full px-3 bg-[#f9f9f9] drop-shadow-sm flex flex-col items-start justify-start h-full">
-                            <div className="h-[60px] gap-5 px-1 w-full flex items-center justify-between">
+                            <div className="h-[60px] px-3 gap-5 w-full flex items-center justify-between">
                                 {/* hamburgur menu btn */}
                                 <Button
                                     btnText={
@@ -149,7 +149,6 @@ export default function Sidebar() {
                                         setShowSideBar((prev) => !prev)
                                     }
                                     title="Close Sidebar"
-                                    className="bg-[#ffffff] p-[10px] group rounded-full drop-shadow-sm w-fit"
                                 />
 
                                 <div className="flex gap-4 items-center">
@@ -159,7 +158,7 @@ export default function Sidebar() {
                                         <Logout />
                                     </div>
                                     {/* avatar */}
-                                    <div className="size-[40px] rounded-full overflow-hidden drop-shadow-sm hover:brightness-90">
+                                    <div className="size-[40px] rounded-full overflow-hidden shadow-sm hover:brightness-90">
                                         <img
                                             src={user.avatar}
                                             alt="user avatar"

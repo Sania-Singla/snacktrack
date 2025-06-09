@@ -1,8 +1,8 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Snacks, PackagedItems, Filter } from '../Components';
+import { Snacks, PackagedItems, Filter, Button } from '../Components';
 import { icons } from '../Assets/icons';
 import { useEffect, useState } from 'react';
-import { useSnackContext, useUserContext } from '../Contexts';
+import { usePopupContext, useSnackContext, useUserContext } from '../Contexts';
 import { snackService } from '../Services';
 import { checkTokenExpired } from '../Utils';
 
@@ -11,8 +11,9 @@ export default function HomePage() {
     const filter = searchParams.get('filter') || 'snacks'; // Default to 'snacks'
     const { setSnacks, setItems } = useSnackContext();
     const navigate = useNavigate();
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [loading, setLoading] = useState(true);
+    const { setShowPopup, setPopupInfo } = usePopupContext();
 
     const options = [
         { value: 'snacks', label: 'Snacks', icon: icons.snack },
@@ -63,14 +64,58 @@ export default function HomePage() {
         return () => controller.abort();
     }, [filter]);
 
+    function addItem() {
+        setShowPopup(true);
+        setPopupInfo({ type: 'addItem' });
+    }
+
+    function addSnack() {
+        setShowPopup(true);
+        setPopupInfo({ type: 'addSnack' });
+    }
+
     return (
-        <div>
-            <div className="w-full flex justify-end mb-6">
+        <>
+            <div className="mb-8 w-full flex justify-between">
+                {user.role === 'contractor' &&
+                    (filter === 'snacks' ? (
+                        <Button
+                            onClick={addSnack}
+                            btnText={
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="size-[16px] fill-white">
+                                        {icons.plus}
+                                    </div>
+                                    <span className="text-[18px]">
+                                        Add Snack
+                                    </span>
+                                </div>
+                            }
+                            title="Add Snack"
+                            className="text-white rounded-md w-fit px-3 bg-[#4977ec] hover:bg-[#3b62c2]"
+                        />
+                    ) : (
+                        <Button
+                            onClick={addItem}
+                            btnText={
+                                <div className="flex items-center justify-center gap-2">
+                                    <div className="size-[16px] fill-white">
+                                        {icons.plus}
+                                    </div>
+                                    <span className="text-[18px]">
+                                        Add Item
+                                    </span>
+                                </div>
+                            }
+                            title="Add Snack"
+                            className="text-white rounded-md w-fit px-3 bg-[#4977ec] hover:bg-[#3b62c2]"
+                        />
+                    ))}
                 <Filter options={options} defaultOption={filter} />
             </div>
 
             {/* Render Based on Filter */}
-            <div className="sm:px-4 pb-8">
+            <div className="pb-8">
                 {loading ? (
                     <div className="flex justify-center py-12">
                         <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
@@ -83,6 +128,6 @@ export default function HomePage() {
                     <PackagedItems />
                 )}
             </div>
-        </div>
+        </>
     );
 }
