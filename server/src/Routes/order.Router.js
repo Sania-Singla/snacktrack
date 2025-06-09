@@ -16,7 +16,7 @@ import {
 } from '../Controllers/order.Controller.js';
 
 orderRouter
-    .route('/kitchen/:key?')
+    .route('/kitchen')
     .post(optionalVerifyJwt, verifyStaffJwt, getKitchenOrders);
 
 orderRouter.use(verifyJwt);

@@ -47,7 +47,12 @@ const SocketContextProvider = ({ children }) => {
         socketInstance.on('newOrder', async (order) => {
             await playSound();
             setPendingOrders((prev) => prev.concat(order));
-            setKitchenOrders((prev) => prev.concat(order));
+            setKitchenOrders((prev) =>
+                prev.concat({
+                    ...order,
+                    items: order.items.filter((i) => i.type === 'packagedFood'),
+                })
+            );
         });
 
         socketInstance.on('orderRejected', (order) => {

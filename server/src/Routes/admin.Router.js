@@ -13,10 +13,7 @@ import {
 
 adminRouter.use(verifyAdminJwt);
 
-adminRouter
-    .route('/contractor/:key?')
-    .get(getContractors)
-    .patch(updateContractor);
+adminRouter.route('/contractor').post(getContractors).patch(updateContractor);
 
 adminRouter.route('/canteen/register').post(registerCanteen);
 

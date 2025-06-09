@@ -84,8 +84,9 @@ class AdminService {
 
     async getContractors(key = '') {
         return await fetchWrapper({
-            endPoint: `/admins/contractor/${key}`,
-            method: 'GET',
+            endPoint: `/admins/contractor`,
+            method: 'POST',
+            body: { key },
             aim: 'getContractors',
             credentials: 'include',
         });
