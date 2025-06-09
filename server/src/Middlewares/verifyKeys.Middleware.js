@@ -32,7 +32,7 @@ const verifyAdminJwt = async (req, res, next) => {
             }
             return next();
         } else {
-            const { key } = req.body;
+            const { key } = req.params;
             if (!key) {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
@@ -81,12 +81,12 @@ const verifyStaffJwt = async (req, res, next) => {
             req.canteenId = req.user.canteenId;
             return next();
         } else {
-            const { key } = req.body;
+            const { key } = req.params;
             if (!key) {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
             const [canteenId, actualKey] = key.split('-');
-            const canteen = await Canteen.findOne({ canteenId });
+            const canteen = await Canteen.findById(canteenId);
 
             const isValid = bcrypt.compareSync(actualKey, canteen.kitchenKey);
             if (!isValid) {

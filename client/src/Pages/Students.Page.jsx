@@ -99,7 +99,7 @@ export default function StudentsPage() {
                                     <p>Remove All Students</p>
                                 </div>
                             }
-                            className="bg-red-700 text-white p-2 rounded-lg"
+                            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg"
                         />
                     </div>
 

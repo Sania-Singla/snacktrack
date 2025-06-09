@@ -49,7 +49,7 @@ const login = tryCatch('login as contractor', async (req, res, next) => {
         Model.findByIdAndUpdate(
             user._id,
             { $set: { refreshToken } },
-            { new: true } // Ensures the updated document is returned
+            { new: true } 
         )
             .select('-password -refreshToken')
             .lean(),
@@ -92,14 +92,11 @@ const getCurrentUser = tryCatch('get current user', async (req, res, next) => {
 
     // populate canteen Info
     const canteen = await Canteen.findById(user.canteenId);
-    user = {
-        ...user,
-        hostelType: canteen.hostelType,
-        hostelNumber: canteen.hostelNumber,
-        hostelName: canteen.hostelName,
-    };
+    const { hostelName, hostelNumber, hostelType } = canteen;
 
-    return res.status(OK).json(user);
+    return res
+        .status(OK)
+        .json({ ...user, hostelType, hostelNumber, hostelName });
 });
 
 const updatePassword = tryCatch('update password', async (req, res, next) => {
@@ -186,14 +183,11 @@ const updateAccountDetails = tryCatch(
     'update account details',
     async (req, res, next) => {
         const { _id, password } = req.user;
-        const data = {
-            email: req.body.email.trim(),
-            phoneNumber: req.body.phoneNumber,
-            password: req.body.password,
-        };
+        const { email, phoneNumber, role } = req.body;
+        const data = { email, phoneNumber, password };
 
         // input error handling
-        if (!data.email || !data.phoneNumber) {
+        if (!email || !phoneNumber) {
             return next(new ErrorHandler('missing fields', BAD_REQUEST));
         }
 
@@ -220,8 +214,8 @@ const updateAccountDetails = tryCatch(
             _id,
             {
                 $set: {
-                    ...(data.email && { email: data.email }),
-                    ...(data.phoneNumber && { phoneNumber: data.phoneNumber }),
+                    email,
+                    phoneNumber,
                 },
             },
             { new: true }
@@ -234,7 +228,8 @@ const updateAccountDetails = tryCatch(
 );
 
 const getCanteens = tryCatch('get canteens', async (req, res) => {
-    return res.status(OK).json(HOSTELS);
+    const canteens = await Canteen.find();
+    return res.status(OK).json(canteens);
 });
 
 export {

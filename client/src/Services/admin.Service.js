@@ -1,6 +1,6 @@
 import { fetchWrapper } from '../Utils';
 
-class ContractorService {
+class AdminService {
     async registerCanteen({
         fullName,
         phoneNumber,
@@ -82,9 +82,9 @@ class ContractorService {
         });
     }
 
-    async getContractors() {
+    async getContractors(key = '') {
         return await fetchWrapper({
-            endPoint: `/admins/contractor`,
+            endPoint: `/admins/contractor/${key}`,
             method: 'GET',
             aim: 'getContractors',
             credentials: 'include',
@@ -92,4 +92,4 @@ class ContractorService {
     }
 }
 
-export const contractorService = new ContractorService();
+export const adminService = new AdminService();

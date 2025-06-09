@@ -48,7 +48,7 @@ class OrderService {
     // only today's
     async getKitchenOrders(key, signal) {
         return await fetchWrapper({
-            endPoint: `/orders/kitchen/${key}`,
+            endPoint: key ? `/orders/kitchen/${key}` : `/orders/kitchen`,
             method: 'GET',
             signal,
             credentials: 'include',

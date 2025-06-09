@@ -32,7 +32,7 @@ export default function PendingOrders({ filter }) {
                 setPendingOrders([]);
                 setPage(1);
                 const res = await orderService.getCanteenOrders(
-                    filter.status,
+                    'Pending',
                     filter.date,
                     user.canteenId,
                     1,

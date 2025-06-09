@@ -172,6 +172,14 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
     return res.status(OK).json(canteens);
 });
 
+const getHostels = tryCatch('get hostels', async (req, res, next) => {
+    const hostels = await Canteen.distinct('hostelName');
+    if (!hostels || hostels.length === 0) {
+        return next(new ErrorHandler('No hostels found', NOT_FOUND));
+    }
+    return res.status(OK).json(hostels);
+});
+
 const deleteCanteen = tryCatch('delete canteen', async (req, res, next) => {});
 
 const updateContractor = tryCatch(

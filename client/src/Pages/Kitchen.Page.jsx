@@ -17,13 +17,11 @@ export default function KitchenPage() {
     const { setUser, user } = useUserContext();
     const [verifying, setVerifying] = useState(false);
     const [showKey, setShowKey] = useState(false);
-    const [hostel, setHostel] = useState({});
-    const [hostels, setHostels] = useState([
+    const [canteen, setCanteen] = useState({});
+    const [canteens, setCanteens] = useState([
         { value: '', label: 'Select Hostel' },
     ]);
     const { socket } = useSocketContext();
-
-    useEffect(() => setKitchenOrders([]), []);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -31,23 +29,28 @@ export default function KitchenPage() {
 
         (async function () {
             try {
+                setKitchenOrders([]);
+
                 const res = await orderService.getKitchenOrders();
                 if (res) {
                     if (res.message) {
+                        // token invalid
+
                         // get canteens to show in verify key popup
                         const data = await userService.getCanteens(signal);
                         if (data) {
-                            setHostels((prev) => [
+                            setCanteens((prev) => [
                                 ...prev,
-                                ...data.map((h) => ({
-                                    label: `${h.hostelType}${h.hostelNumber}-${h.hostelName}`,
-                                    value: h,
+                                ...data.map((c) => ({
+                                    label: `${c.hostelType}${c.hostelNumber}-${c.hostelName}`,
+                                    value: c,
                                 })),
                             ]);
                             setError(true);
                         }
                     } else {
-                        // show orders
+                        // key verified from token
+                        setKitchenOrders(res.orders);
                         if (!user) {
                             setUser({
                                 canteenId: res.canteenId,
@@ -55,7 +58,6 @@ export default function KitchenPage() {
                                 role: 'staff',
                             });
                         }
-                        setKitchenOrders(res.orders);
                     }
                 }
             } catch (err) {
@@ -69,12 +71,13 @@ export default function KitchenPage() {
     }, []);
 
     async function verifyKey() {
-        if (!key || !hostel) return;
-
-        setVerifying(true);
         try {
+            if (!key || !canteen) return;
+
+            setVerifying(true);
+
             const res = await orderService.getKitchenOrders(
-                `${hostel.hostelType}${hostel.hostelNumber}-${key}`
+                `${canteen._id}-${key}`
             );
             if (res && !res.message) {
                 if (!user) {
@@ -159,7 +162,7 @@ export default function KitchenPage() {
                 </p>
 
                 <div className="w-full flex justify-center mb-4">
-                    <Dropdown options={hostels} setValue={setHostel} />
+                    <Dropdown options={canteens} setValue={setCanteen} />
                 </div>
 
                 <div className="relative flex items-center w-full justify-center mb-3">

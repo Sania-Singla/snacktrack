@@ -85,7 +85,7 @@ export default function EditSnackPopup() {
         setLoading(true);
         setDisabled(true);
         try {
-            const res = await contractorService.updateSnackDetails(
+            const res = await contractorService.updateSnack(
                 inputs,
                 popupInfo.snack._id
             );

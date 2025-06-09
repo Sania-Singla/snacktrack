@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { userService } from '../Services';
+import { adminService } from '../Services';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../Components';
 import { icons } from '../Assets/icons';
@@ -17,7 +17,7 @@ export default function AdminPage() {
     useEffect(() => {
         (async function () {
             try {
-                const res = await userService.getContractors();
+                const res = await adminService.getContractors();
                 if (res) {
                     if (res.message) setError(true);
                     else setCanteens(res);
@@ -31,13 +31,13 @@ export default function AdminPage() {
     }, []);
 
     const verifyKey = async () => {
-        if (!key) return;
-        setVerifying(true);
         try {
-            const res = await userService.getContractors(key);
+            if (!key) return;
+            setVerifying(true);
+            const res = await adminService.getContractors(key);
             if (res && !res.message) {
-                setError(false);
                 setCanteens(res);
+                setError(false);
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');

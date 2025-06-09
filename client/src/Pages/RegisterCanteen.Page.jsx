@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { contractorService, userService } from '../Services';
+import { adminService, userService } from '../Services';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Dropdown, InputField } from '../Components';
 import { verifyExpression } from '../Utils';
@@ -14,7 +14,6 @@ import toast from 'react-hot-toast';
 export default function RegisterCanteenPage() {
     const initialInputs = {
         fullName: '',
-        password: '',
         phoneNumber: '',
         email: '',
         kitchenKey: '',
@@ -23,12 +22,13 @@ export default function RegisterCanteenPage() {
     const [error, setError] = useState({});
     const { setPopupInfo, setShowPopup } = usePopupContext();
     const [disabled, setDisabled] = useState(true);
-    const [showPassword, setShowPassword] = useState(false);
     const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [hostel, setHostel] = useState({});
-    const [hostels, setHostels] = useState([]);
+    const [hostels, setHostels] = useState([
+        { label: 'Select Hostel', value: '' },
+    ]);
 
     function handleChange(e) {
         const { value, name } = e.target;
@@ -47,12 +47,15 @@ export default function RegisterCanteenPage() {
     }
 
     useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+
         (async function () {
             try {
-                const res = await userService.getCanteens();
+                const res = await userService.getCanteens(signal);
                 if (res)
-                    setHostels([
-                        { label: 'Select Hostel', value: '' },
+                    setHostels((prev) => [
+                        ...prev,
                         ...res.map((h) => ({
                             label: `${h.hostelType}${h.hostelNumber}-${h.hostelName}`,
                             value: h,
@@ -62,6 +65,8 @@ export default function RegisterCanteenPage() {
                 navigate('/server-error');
             }
         })();
+
+        return () => controller.abort();
     }, []);
 
     function handleDisable() {
@@ -88,7 +93,10 @@ export default function RegisterCanteenPage() {
         setDisabled(true);
         setError({});
         try {
-            const res = await contractorService.register({ hostel, ...inputs });
+            const res = await adminService.registerCanteen({
+                hostel,
+                ...inputs,
+            });
             if (res && res.message === 'Verification code sent') {
                 toast.success('Verification code sent to your email');
                 setShowPopup(true);
@@ -121,13 +129,6 @@ export default function RegisterCanteenPage() {
             required: true,
         },
         {
-            type: showPassword ? 'text' : 'password',
-            name: 'password',
-            label: 'Password',
-            placeholder: 'Create New Password',
-            required: true,
-        },
-        {
             type: showkitchenKey ? 'text' : 'password',
             name: 'kitchenKey',
             label: 'Kitchen Key',
@@ -142,14 +143,8 @@ export default function RegisterCanteenPage() {
                 field={field}
                 handleChange={handleChange}
                 inputs={inputs}
-                showPassword={
-                    field.name === 'kitchenKey' ? showkitchenKey : showPassword
-                }
-                setShowPassword={
-                    field.name === 'kitchenKey'
-                        ? setShowKitchenKey
-                        : setShowPassword
-                }
+                showPassword={showkitchenKey}
+                setShowPassword={setShowKitchenKey}
             />
             {error[field.name] && (
                 <div className="text-red-500 text-xs font-medium">

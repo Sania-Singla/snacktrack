@@ -45,9 +45,9 @@ const SocketContextProvider = ({ children }) => {
         // Events
 
         socketInstance.on('newOrder', async (order) => {
+            await playSound();
             setPendingOrders((prev) => prev.concat(order));
             setKitchenOrders((prev) => prev.concat(order));
-            await playSound();
         });
 
         socketInstance.on('orderRejected', (order) => {
@@ -99,13 +99,13 @@ const SocketContextProvider = ({ children }) => {
             });
         });
 
-        return socketInstance; // optional
+        return socketInstance;
     }
 
     function disconnectSocket() {
         if (socket) {
             console.log('socket disconnecting...');
-            socket.disconnect(); // will set socket = null implicitly
+            socket.disconnect();
             setSocket(null);
         }
     }
