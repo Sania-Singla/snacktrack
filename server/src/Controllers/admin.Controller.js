@@ -4,7 +4,6 @@ import {
     NOT_FOUND,
     CREATED,
     USER_PLACEHOLDER_IMAGE_URL,
-    HOSTELS,
 } from '../Constants/index.js';
 import {
     verifyExpression,
@@ -24,6 +23,9 @@ const registerCanteen = tryCatch(
         if (!fullName || !email || !phoneNumber || !hostel || !kitchenKey) {
             return next(new ErrorHandler('Missing fields', BAD_REQUEST));
         }
+
+        req.body.kitchenKey =
+            hostel.hostelType + hostel.hostelNumber + kitchenKey.trim();
 
         const isValid = ['fullName', 'email', 'phoneNumber'].every((key) =>
             verifyExpression(key, req.body[key]?.trim())
@@ -64,44 +66,10 @@ const registerCanteen = tryCatch(
             );
         }
 
-        // Now register the contractor & canteen
-        const canteen = await Canteen.create({
-            hostelName: hostel.hostelName.trim(),
-            hostelNumber: hostel.hostelNumber,
-            hostelType: hostel.hostelType.trim(),
-            kitchenKey,
-        });
-
-        const randomPassword = nanoid(8); // unique temporary random password
-
-        // password hashing auto done by pre hook in the model
-        const contractor = await Contractor.create({
-            fullName,
-            email,
-            phoneNumber,
-            password: randomPassword,
-            avatar: USER_PLACEHOLDER_IMAGE_URL,
-            canteenId: canteen._id,
-        });
-
-        // Link contractor to canteen
-        canteen.contractorId = contractor._id;
-        await canteen.save();
-
-        // send this password on contractor's email
-        await sendMail({
-            receiverName: fullName,
-            receiverMail: email,
-            subject: 'Welcome to SnackTrack',
-            html: `Hello ${fullName}, <br> Your password is <b>${randomPassword}</b> <br> You can update it anytime after logging in from settings.`,
-        });
-
-        return res.status(CREATED).json(contractor);
-
         // Send email verification
-        // await sendVerificationEmail(fullName, email.trim());
+        await sendVerificationEmail(fullName, email.trim());
 
-        // return res.status(OK).json({ message: 'Verification code sent' });
+        return res.status(OK).json({ message: 'Verification code sent' });
     }
 );
 
