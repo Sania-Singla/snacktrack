@@ -172,12 +172,22 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
     return res.status(OK).json(canteens);
 });
 
-const deleteCanteen = tryCatch('delete canteen', async (req, res, next) => {});
+const deleteCanteen = tryCatch('delete canteen', async (req, res) => {
+    const { canteenId } = req.params;
+    const deletedCanteen = await Canteen.findByIdAndDelete({ _id: canteenId });
+    return res.status(OK).json(deletedCanteen);
+});
 
-const updateContractor = tryCatch(
-    'update contractor',
-    async (req, res, next) => {}
-);
+const updateContractor = tryCatch('update contractor', async (req, res) => {
+    const { contractorId } = req.params;
+    const { fullName, phoneNumber, email, kitchenKey } = req.body;
+    const contractor = { fullName, phoneNumber, email, kitchenKey };
+    if (Object.values(contractor).some(!value)) {
+        return res.status(BAD_REQUEST).json({ message: 'Missing fields' });
+    }
+    const newContractor = Canteen.findbyIdAndUpdate(contractorId); // admin can delete student of any canteenId!
+    return res.status(OK).json(newContractor);
+});
 
 export {
     registerCanteen,
