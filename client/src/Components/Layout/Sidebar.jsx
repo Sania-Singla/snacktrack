@@ -65,7 +65,7 @@ export default function Sidebar() {
                     to={item.path}
                 >
                     <div className="flex items-center justify-start gap-4">
-                        <div className="size-[19px] fill-[#2a2a2a]">
+                        <div className="size-[18px] fill-gray-700">
                             {item.icon}
                         </div>
                         <div>{item.name}</div>
@@ -137,7 +137,7 @@ export default function Sidebar() {
                         className="h-full w-[265px] flex justify-start"
                     >
                         <div className="w-full px-3 bg-[#f9f9f9] drop-shadow-sm flex flex-col items-start justify-start h-full">
-                            <div className="h-[60px] px-3 gap-5 w-full flex items-center justify-between">
+                            <div className="h-[60px] px-2 gap-5 w-full flex items-center justify-between">
                                 {/* hamburgur menu btn */}
                                 <Button
                                     btnText={
@@ -157,8 +157,8 @@ export default function Sidebar() {
                                     >
                                         <Logout />
                                     </div>
-                                    {/* avatar */}
-                                    <div className="size-[40px] rounded-full overflow-hidden shadow-sm hover:brightness-90">
+
+                                    <div className="size-[35px] rounded-full overflow-hidden shadow-sm">
                                         <img
                                             src={user.avatar}
                                             alt="user avatar"

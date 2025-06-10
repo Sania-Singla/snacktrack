@@ -26,7 +26,7 @@ export default function Header() {
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 
     return (
-        <header className="shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-6 font-medium flex items-center justify-between gap-4">
+        <header className="shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-5 font-medium flex items-center justify-between gap-4">
             <div className="flex items-center justify-center gap-4">
                 {/* hamburgur menu btn */}
                 <Button
@@ -44,16 +44,14 @@ export default function Header() {
                     to={'/'}
                     className="flex items-center justify-center gap-3 text-nowrap font-medium text-lg"
                 >
-                    <div className="overflow-hidden rounded-full size-[35px] shadow-sm hover:scale-110 transition-all duration-300">
+                    <div className="overflow-hidden rounded-full size-[35px] shadow-sm">
                         <img
                             src={LOGO}
                             alt="Snack Track Logo"
                             className="object-cover size-full hover:brightness-95"
                         />
                     </div>
-                    <p className="hover:scale-110 transition-all duration-300">
-                        SnackTrack
-                    </p>
+                    <p className="hover:text-[#4977ec]">SnackTrack</p>
                 </Link>
             </div>
 

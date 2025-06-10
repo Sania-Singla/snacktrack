@@ -92,7 +92,7 @@ export default function KitchenPage() {
             } else toast.error('Please Enter a Valid Key');
         } catch (err) {
             navigate('/server-error');
-        } 
+        }
     }
 
     function handleMinus(itemId, orderId) {
@@ -205,18 +205,16 @@ export default function KitchenPage() {
                     {/* logo */}
                     <Link
                         to={'/'}
-                        className="flex items-center justify-center gap-3 text-nowrap font-medium text-xl"
+                        className="flex items-center justify-center gap-3 text-nowrap font-medium text-lg"
                     >
-                        <div className="overflow-hidden rounded-full size-[38px] drop-shadow-sm hover:scale-110 transition-all duration-300">
+                        <div className="overflow-hidden rounded-full size-[35px] shadow-sm">
                             <img
                                 src={LOGO}
                                 alt="Snack Track Logo"
                                 className="object-cover size-full hover:brightness-95"
                             />
                         </div>
-                        <p className="hover:scale-110 transition-all duration-300">
-                            SnackTrack
-                        </p>
+                        <p className="hover:text-[#4977ec]">SnackTrack</p>
                     </Link>
                     <p className="bg-[#4977ec]/10 text-[#4977ec] px-3 py-1 rounded-full text-sm font-medium">
                         {kitchenOrders.length}{' '}
