@@ -15,7 +15,9 @@ adminRouter.use(verifyAdminJwt);
 
 adminRouter.route('/contractor').post(getContractors);
 
-adminRouter.route('/contractor/:canteenId/:contractorId');
+adminRouter
+    .route('/contractor/:canteenId/:contractorId')
+    .patch(updateContractor);
 
 adminRouter.route('/canteen/register').post(registerCanteen);
 
