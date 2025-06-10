@@ -13,6 +13,7 @@ import {
     updateOrderStatus,
     checkAvailability,
     getKitchenOrders,
+    getOrderStats,
 } from '../Controllers/order.Controller.js';
 
 orderRouter
@@ -28,5 +29,7 @@ orderRouter.route('/availability').post(checkAvailability);
 orderRouter.route('/student/:studentId').get(getStudentOrders);
 
 orderRouter.route('/canteen/:canteenId').get(getCanteenOrders);
+
+orderRouter.route('/stats/:canteenId').get(getOrderStats);
 
 orderRouter.route('/:orderId').patch(updateOrderStatus);

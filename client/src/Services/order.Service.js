@@ -24,6 +24,7 @@ class OrderService {
         });
     }
 
+    // todo: date wise filter
     async getStudentOrders(studentId, month, page, limit, signal) {
         return await fetchWrapper({
             endPoint: `/orders/student/${studentId}?month=${month}&page=${page}&limit=${limit}`,
@@ -34,10 +35,9 @@ class OrderService {
         });
     }
 
-    // TODO: add query for date wise
-    async getCanteenOrders(status, date, canteenId, page, limit, signal) {
+    async getCanteenOrders(status, canteenId, page, limit, signal) {
         return await fetchWrapper({
-            endPoint: `/orders/canteen/${canteenId}?date=${date}&limit=${limit}&page=${page}&status=${status}`,
+            endPoint: `/orders/canteen/${canteenId}?limit=${limit}&page=${page}&status=${status}`,
             method: 'GET',
             signal,
             credentials: 'include',
@@ -64,6 +64,16 @@ class OrderService {
             credentials: 'include',
             body: { cartItems },
             aim: 'checkAvailability',
+        });
+    }
+
+    async getOrderStats(canteenId, signal) {
+        return await fetchWrapper({
+            endPoint: `/orders/stats/${canteenId}`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getOrderStats',
         });
     }
 }

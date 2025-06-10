@@ -33,7 +33,6 @@ export default function PendingOrders({ filter }) {
                 setPage(1);
                 const res = await orderService.getCanteenOrders(
                     'Pending',
-                    filter.date,
                     user.canteenId,
                     1,
                     LIMIT,
@@ -62,8 +61,7 @@ export default function PendingOrders({ filter }) {
             try {
                 setLoading(true);
                 const res = await orderService.getCanteenOrders(
-                    filter.status,
-                    filter.date,
+                    filter,
                     user.canteenId,
                     page,
                     LIMIT,
@@ -92,14 +90,8 @@ export default function PendingOrders({ filter }) {
                 o.studentInfo.userName
                     .toLowerCase()
                     .includes(search.toLowerCase()) ||
-                o.items.some(
-                    (item) =>
-                        item.name
-                            ?.toLowerCase()
-                            .includes(search.toLowerCase()) ||
-                        item.category
-                            ?.toLowerCase()
-                            .includes(search.toLowerCase())
+                o.items.some((item) =>
+                    item.name?.toLowerCase().includes(search.toLowerCase())
                 ) ||
                 o._id.slice(-8).toLowerCase().includes(search.toLowerCase())
         )
@@ -116,7 +108,7 @@ export default function PendingOrders({ filter }) {
         ));
 
     return (
-        <div className="w-full md:p-4">
+        <div className="w-full">
             {orderElements.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {orderElements}

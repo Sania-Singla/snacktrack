@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Snacks, PackagedItems, Filter, Button } from '../Components';
+import { Snacks, PackagedItems, Button } from '../Components';
 import { icons } from '../Assets/icons';
 import { useEffect, useState } from 'react';
 import { usePopupContext, useSnackContext, useUserContext } from '../Contexts';
@@ -7,18 +7,13 @@ import { snackService } from '../Services';
 import { checkTokenExpired } from '../Utils';
 
 export default function HomePage() {
-    const [searchParams] = useSearchParams();
-    const filter = searchParams.get('filter') || 'snacks'; // Default to 'snacks'
+    const [searchParams, setSearchParams] = useSearchParams();
+    const filter = searchParams.get('filter') || 'snacks';
     const { setSnacks, setItems } = useSnackContext();
     const navigate = useNavigate();
     const { user, setUser } = useUserContext();
     const [loading, setLoading] = useState(true);
     const { setShowPopup, setPopupInfo } = usePopupContext();
-
-    const options = [
-        { value: 'snacks', label: 'Snacks', icon: icons.snack },
-        { value: 'packaged', label: 'Packaged', icon: icons.soda },
-    ];
 
     useEffect(() => {
         setLoading(true);
@@ -28,33 +23,43 @@ export default function HomePage() {
 
         (async function () {
             try {
-                const [snacks, items, cartItems] = await Promise.all([
-                    snackService.getSnacks(signal),
-                    snackService.getPackagedFoodItems(signal),
-                    JSON.parse(localStorage.getItem('cartItems')) || [],
-                ]);
-
-                if (snacks && !snacks.message) {
-                    setSnacks(
-                        snacks.map((snack) => ({
-                            ...snack,
-                            quantity:
-                                cartItems.find((i) => i._id === snack._id)
-                                    ?.quantity || 0,
-                        }))
-                    );
-                } else checkTokenExpired(snacks, setUser);
+                let items = [],
+                    cartItems = [];
+                    
+                if (filter === 'snacks') {
+                    [items, cartItems] = await Promise.all([
+                        snackService.getSnacks(signal),
+                        JSON.parse(localStorage.getItem('cartItems')) || [],
+                    ]);
+                } else {
+                    [items, cartItems] = await Promise.all([
+                        snackService.getPackagedFoodItems(signal),
+                        JSON.parse(localStorage.getItem('cartItems')) || [],
+                    ]);
+                }
 
                 if (items && !items.message) {
-                    setItems(
-                        items.map((item) => ({
-                            ...item,
-                            quantity:
-                                cartItems.find((i) => i._id === item._id)
-                                    ?.quantity || 0,
-                        }))
-                    );
-                } else checkTokenExpired(PackagedItems, setUser);
+                    if (filter === 'snacks') {
+                        setSnacks(
+                            items.map((snack) => ({
+                                ...snack,
+                                quantity:
+                                    cartItems.find((i) => i._id === snack._id)
+                                        ?.quantity || 0,
+                            }))
+                        );
+                    } else {
+                        setItems(
+                            items.map((item) => ({
+                                ...item,
+                                quantity:
+                                    cartItems.find((i) => i._id === item._id)
+                                        ?.quantity || 0,
+                            }))
+                        );
+                    }
+                } else checkTokenExpired(items, setUser);
+
                 setLoading(false);
             } catch (err) {
                 navigate('/server-error');
@@ -73,6 +78,12 @@ export default function HomePage() {
         setShowPopup(true);
         setPopupInfo({ type: 'addSnack' });
     }
+
+    const handleOptionClick = (value) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('filter', value);
+        setSearchParams(params);
+    };
 
     return (
         <>
@@ -111,7 +122,32 @@ export default function HomePage() {
                             className="text-white rounded-md w-fit px-3 bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     ))}
-                <Filter options={options} defaultOption={filter} />
+                <div className="flex items-center gap-4">
+                    <Button
+                        onClick={() => handleOptionClick('snacks')}
+                        className="hover:bg-[#4977ec] hover:text-white group transition-all duration-100 bg-white shadow-sm rounded-md px-2 py-[5px]"
+                        btnText={
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="size-4 fill-gray-700 group-hover:fill-white">
+                                    {icons.snack}
+                                </div>
+                                <span>Snacks</span>
+                            </div>
+                        }
+                    />
+                    <Button
+                        onClick={() => handleOptionClick('packaged')}
+                        className="hover:bg-[#4977ec] hover:text-white group transition-all duration-100 bg-white shadow-sm rounded-md px-2 py-[5px]"
+                        btnText={
+                            <div className="flex items-center justify-center gap-2">
+                                <div className="size-[18px] stroke-gray-600 group-hover:stroke-white">
+                                    {icons.soda}
+                                </div>
+                                <span>Packaged</span>
+                            </div>
+                        }
+                    />
+                </div>
             </div>
 
             {/* Render Based on Filter */}

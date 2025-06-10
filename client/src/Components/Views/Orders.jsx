@@ -28,8 +28,7 @@ export default function Orders({ filter }) {
                 setOrders([]);
                 setPage(1);
                 const res = await orderService.getCanteenOrders(
-                    filter.status,
-                    filter.date,
+                    filter,
                     user.canteenId,
                     1,
                     LIMIT,
@@ -58,8 +57,7 @@ export default function Orders({ filter }) {
             try {
                 setLoading(true);
                 const res = await orderService.getCanteenOrders(
-                    filter.status,
-                    filter.date,
+                    filter,
                     user.canteenId,
                     page,
                     LIMIT,
@@ -88,6 +86,9 @@ export default function Orders({ filter }) {
                 o.studentInfo.userName
                     .toLowerCase()
                     .includes(search.toLowerCase()) ||
+                o.items.some((item) =>
+                    item.name?.toLowerCase().includes(search.toLowerCase())
+                ) ||
                 o._id.slice(-8).toLowerCase().includes(search.toLowerCase())
         )
         .map((order, i) => (
@@ -102,7 +103,7 @@ export default function Orders({ filter }) {
             />
         ));
     return (
-        <div className="w-full md:p-4">
+        <div className="w-full">
             {orderElements.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {orderElements}

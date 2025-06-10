@@ -160,8 +160,8 @@ export default function BillsPage() {
                         }
                     /> */}
                     {bills.length > 0 && (
-                        <div className="hidden sm:flex text-xl w-full items-center justify-center font-semibold text-gray-800 ">
-                            <div className="border border-blue-500 bg-blue-50 rounded-lg px-3 py-2">
+                        <div className="hidden sm:flex text-lg w-full items-center justify-center font-semibold text-gray-800 ">
+                            <div className="border border-blue-500 bg-blue-50 rounded-lg px-3 py-[5px]">
                                 Total: ₹{totalAmount.toFixed(2)}
                             </div>
                         </div>

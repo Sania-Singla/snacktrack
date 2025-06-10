@@ -1,6 +1,6 @@
 import { OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
-import { Canteen, Order, PackagedFood, Snack } from '../Models/index.js';
+import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 
 const placeOrder = tryCatch('place order', async (req, res) => {
@@ -184,20 +184,15 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     const { limit = 10, page = 1, status = 'Pending' } = req.query;
     const canteenId = req.user.canteenId; // contractor
 
-    const now = new Date();
-
-    const startOfDay = new Date(now);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-
     const result = await Order.aggregatePaginate(
         [
             {
                 $match: {
                     canteenId: new Types.ObjectId(canteenId),
-                    createdAt: { $gte: startOfDay, $lt: endOfDay },
+                    createdAt: {
+                        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+                    },
                     status,
                 },
             },
@@ -313,73 +308,106 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     );
 });
 
+const getOrderStats = tryCatch('get order stats', async (req, res) => {
+    const { canteenId } = req.params;
+    const stats = await Order.aggregate([
+        {
+            $match: {
+                canteenId: new Types.ObjectId(canteenId),
+                createdAt: {
+                    $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                    $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+                },
+            },
+        },
+        {
+            $group: {
+                _id: '$status',
+                count: { $sum: 1 },
+            },
+        },
+        {
+            $project: {
+                status: '$_id',
+                count: 1,
+                _id: 0,
+            },
+        },
+    ]);
+
+    const result = {
+        total: 0,
+        pending: 0,
+        prepared: 0,
+        pickedUp: 0,
+        rejected: 0,
+    };
+
+    stats.forEach((stat) => {
+        result.total += stat.count;
+        result[stat.status.toLowerCase()] = stat.count;
+    });
+
+    return res.status(OK).json(result);
+});
+
 // for kitchen page
-const getKitchenOrders = tryCatch(
-    'get kitchen orders',
-    async (req, res, next) => {
-        const { canteenId } = req;
+const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
+    const { canteenId } = req;
 
-        const now = new Date();
-
-        // Set start time
-        const startOfDay = new Date(now);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        // Set end time
-        const endOfDay = new Date(now);
-        endOfDay.setHours(23, 59, 59, 999);
-
-        // Fetch today's orders from this canteen
-        const orders = await Order.aggregatePaginate(
-            [
-                {
-                    $match: {
-                        canteenId: new Types.ObjectId(canteenId),
-                        createdAt: { $gte: startOfDay, $lt: endOfDay },
-                        status: 'Pending',
+    // Fetch today's orders from this canteen
+    const orders = await Order.aggregatePaginate(
+        [
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(canteenId),
+                    createdAt: {
+                        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
+                    },
+                    status: 'Pending',
+                },
+            },
+            { $unwind: '$items' },
+            { $match: { 'items.type': 'Snack' } },
+            {
+                $lookup: {
+                    from: 'snacks',
+                    localField: 'items.id',
+                    foreignField: '_id',
+                    as: 'snackDetails',
+                    pipeline: [{ $project: { name: 1 } }],
+                },
+            },
+            {
+                $addFields: {
+                    'items.name': {
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $arrayElemAt: ['$snackDetails.name', 0] },
+                            null,
+                        ],
                     },
                 },
-                { $unwind: '$items' },
-                { $match: { 'items.type': 'Snack' } },
-                {
-                    $lookup: {
-                        from: 'snacks',
-                        localField: 'items.id',
-                        foreignField: '_id',
-                        as: 'snackDetails',
-                        pipeline: [{ $project: { name: 1 } }],
-                    },
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    status: { $first: '$status' },
+                    canteenId: { $first: '$canteenId' },
+                    studentId: { $first: '$studentId' },
+                    items: { $push: '$items' },
+                    createdAt: { $first: '$createdAt' },
+                    updatedAt: { $first: '$updatedAt' },
                 },
-                {
-                    $addFields: {
-                        'items.name': {
-                            $cond: [
-                                { $eq: ['$items.type', 'Snack'] },
-                                { $arrayElemAt: ['$snackDetails.name', 0] },
-                                null,
-                            ],
-                        },
-                    },
-                },
-                {
-                    $group: {
-                        _id: '$_id',
-                        status: { $first: '$status' },
-                        canteenId: { $first: '$canteenId' },
-                        studentId: { $first: '$studentId' },
-                        items: { $push: '$items' },
-                        createdAt: { $first: '$createdAt' },
-                        updatedAt: { $first: '$updatedAt' },
-                    },
-                },
-                { $project: { snackDetails: 0 } },
-            ],
-            { sort: { createdAt: 1 } }
-        );
+            },
+            { $project: { snackDetails: 0 } },
+        ],
+        { sort: { createdAt: 1 } }
+    );
 
-        return res.status(OK).json({ canteenId, orders: orders.docs });
-    }
-);
+    return res.status(OK).json({ canteenId, orders: orders.docs });
+});
 
 const checkAvailability = tryCatch('check availability', async (req, res) => {
     const { cartItems } = req.body;
@@ -417,6 +445,7 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
 
 export {
     placeOrder,
+    getOrderStats,
     getStudentOrders,
     updateOrderStatus,
     getCanteenOrders,
