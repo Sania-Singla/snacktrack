@@ -95,7 +95,7 @@ export default function SnackView({ snack, reference }) {
                                 {icons.edit}
                             </div>
                         }
-                        className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                        className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                         onClick={editSnack}
                     />
                     <div>
@@ -105,7 +105,7 @@ export default function SnackView({ snack, reference }) {
                                     {icons.delete}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                             onClick={removeSnack}
                         />
                     </div>

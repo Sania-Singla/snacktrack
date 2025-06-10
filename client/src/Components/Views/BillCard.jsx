@@ -13,7 +13,6 @@ export default function BillCard({ bill }) {
     const [paid, setPaid] = useState(bill.paid);
     const [paidOn, setPaidOn] = useState(bill.paidOn);
     const { user, setUser } = useUserContext();
-    const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
 
     async function markPaid() {
@@ -33,32 +32,38 @@ export default function BillCard({ bill }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            onClick={() => setExpanded(!expanded)}
+            onClick={() =>
+                navigate(`/orders/${studentInfo._id}?filter=${month}`)
+            }
             className="bg-white p-3 cursor-pointer rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit border border-gray-200"
         >
-            <div className="flex justify-between items-center w-full">
+            <div className="flex justify-between w-full h-full">
+                {/* info */}
                 <div className="flex items-center justify-start gap-4">
-                    {/* info */}
-                    <div className="space-y-1">
-                        <div className="text-ellipsis line-clamp-1 hover:text-[#5c5c5c] w-fit">
-                            <span className="text-[16px] font-semibold text-black">
-                                {fullName}
-                            </span>{' '}
-                            &bull;{' '}
-                            <span className="text-gray-600 text-sm">
-                                {' '}
-                                Roll No: {getRollNo(userName)}
-                            </span>
+                    <div className="">
+                        <div className="text-ellipsis line-clamp-1 hover:text-[#5c5c5c] text-[16px] font-semibold text-black w-fit">
+                            {fullName}
                         </div>
 
-                        <div className="text-gray-600 text-sm w-fit">
+                        <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                            <span className="font-medium">Roll No: </span>
+                            {getRollNo(userName)}
+                        </div>
+
+                        <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                            <span className="font-medium">Phone Number: </span>{' '}
                             {phoneNumber}
+                        </div>
+
+                        <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                            <span className="font-medium">Email: </span> {email}
                         </div>
                     </div>
                 </div>
-                <div className="space-y-2">
+
+                <div className="flex flex-col justify-between items-end">
                     <p
-                        className={`px-2 py-[3px] text-xs font-bold text-center rounded-full ${
+                        className={`px-2 py-[3px] text-[12px] font-bold text-center rounded-full ${
                             paid
                                 ? 'bg-green-50 text-green-700'
                                 : 'bg-yellow-50 text-yellow-700'
@@ -66,7 +71,7 @@ export default function BillCard({ bill }) {
                     >
                         {paid ? 'Paid' : 'Pending'}
                     </p>
-                    <p className="font-semibold text-base text-gray-900">
+                    <p className="font-semibold text-lg text-gray-900">
                         ₹{amount.toFixed(2)}
                     </p>
                 </div>
@@ -88,11 +93,11 @@ export default function BillCard({ bill }) {
                 )}
                 <div className="flex justify-end gap-2 items-center mt-3 pt-3 border-t border-gray-100">
                     <Button
-                        btnText="Get Orders"
+                        btnText="Orders"
                         className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
                         onClick={() =>
                             navigate(
-                                `/orders/${studentInfo._id}?filter=${month}`
+                                `/orders/${studentInfo._id}?month=${month}`
                             )
                         }
                     />

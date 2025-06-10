@@ -49,9 +49,10 @@ class AdminService {
         email,
         kitchenKey,
         resetAvatar = '',
+        contractorId,
     }) {
         return await fetchWrapper({
-            endPoint: `/admins/contractor?query=${resetAvatar}`,
+            endPoint: `/admins/contractor/${contractorId}?query=${resetAvatar}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateContractor',

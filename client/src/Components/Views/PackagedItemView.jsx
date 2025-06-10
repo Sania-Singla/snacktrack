@@ -94,7 +94,7 @@ export default function PackagedItemView({ item, reference }) {
                                 {icons.edit}
                             </div>
                         }
-                        className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                        className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                         onClick={editItem}
                     />
                     <div>
@@ -104,7 +104,7 @@ export default function PackagedItemView({ item, reference }) {
                                     {icons.delete}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                             onClick={removeItem}
                         />
                     </div>

@@ -75,7 +75,7 @@ export default function StudentOrderCard({ order, reference }) {
                                                     className="object-cover size-full"
                                                 />
                                             ) : (
-                                                <div className="size-5 text-gray-400">
+                                                <div className="size-5 stroke-gray-800">
                                                     {icons.soda}
                                                 </div>
                                             )}
