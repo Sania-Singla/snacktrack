@@ -2,14 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
-import { useNavigate } from 'react-router-dom';
-import { contractorService } from '../../Services';
+import { adminService } from '../../Services';
 import toast from 'react-hot-toast';
 
 export default function EmailVerificationPopup() {
     const { popupInfo, setShowPopup } = usePopupContext();
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const [resendingMail, setResendingMail] = useState(false);
     const [disabled, setDisabled] = useState(true);
     const [code, setCode] = useState(['', '', '', '', '', '']);
@@ -40,17 +38,18 @@ export default function EmailVerificationPopup() {
     const verifyEmail = async () => {
         setLoading(true);
         try {
-            const res = await contractorService.completeRegistration({
-                ...popupInfo.target,
+            const res = await adminService.verifyCode({
+                email: popupInfo.target.email,
                 code: code.join(''),
             });
-            if (res && !res.message) {
-                setShowPopup(false);
-                toast.success('Canteen Registered Successfully');
-                navigate('/login');
-            } else toast.error(res?.message);
+            if (res && res.message === 'Email verified Successfully') {
+                popupInfo.onVerify();
+                toast.success('Email verified Successfully');
+            } else {
+                toast.error('Invalid code. Please try again.');
+            }
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Failed to verify email. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -59,10 +58,11 @@ export default function EmailVerificationPopup() {
     const resendCode = async () => {
         try {
             setResendingMail(true);
-            const res = await contractorService.resendEmailVerification(
-                popupInfo.target.email
-            );
-            if (res && res.message === 'Verification code resent') {
+            const res = await adminService.sendVerificationCode({
+                email: popupInfo.target.email,
+                fullName: popupInfo.target.fullName,
+            });
+            if (res && res.message === 'Verification code sent') {
                 toast.success(res.message);
                 // Set new expiry time (current time + 60 seconds)
                 const newExpiryTime = Date.now() + 60000;
@@ -71,7 +71,8 @@ export default function EmailVerificationPopup() {
                 inputRefs.current[0].focus();
             }
         } catch (err) {
-            navigate('/server-error');
+            console.log(err);
+            toast.error('Failed to resend code. Please try again.');
         } finally {
             setResendingMail(false);
         }

@@ -23,53 +23,35 @@ class AdminService {
         });
     }
 
-    async completeRegistration({
+    async sendVerificationCode({ fullName, email }) {
+        return await fetchWrapper({
+            endPoint: `/admins/canteen/verify/send`,
+            method: 'POST',
+            aim: 'sendVerificationCode',
+            body: { fullName, email },
+            credentials: 'include',
+        });
+    }
+
+    async verifyCode({ email, code }) {
+        return await fetchWrapper({
+            endPoint: `/admins/canteen/verify/check`,
+            method: 'POST',
+            aim: 'verifyCode',
+            body: { email, code },
+            credentials: 'include',
+        });
+    }
+
+    async updateContractor({
         fullName,
         phoneNumber,
         email,
-        code,
-        hostel,
         kitchenKey,
+        resetAvatar = '',
     }) {
         return await fetchWrapper({
-            endPoint: `/admins/canteen/complete-registeration`,
-            method: 'POST',
-            aim: 'completeRegistration',
-            credentials: 'include',
-            body: {
-                fullName,
-                email,
-                phoneNumber,
-                code,
-                hostel,
-                kitchenKey,
-            },
-        });
-    }
-
-    async resendEmailVerification(email) {
-        return await fetchWrapper({
-            endPoint: `/admins/canteen/resend-code`,
-            method: 'POST',
-            aim: 'resendEmailVerification',
-            body: { email },
-            credentials: 'include',
-        });
-    }
-
-    async deleteCanteen(canteenId) {
-        return await fetchWrapper({
-            endPoint: `/admins/canteen/delete`,
-            method: 'DELETE',
-            aim: 'deleteCanteen',
-            body: { canteenId },
-            credentials: 'include',
-        });
-    }
-
-    async updateContractor({ fullName, phoneNumber, email, kitchenKey }) {
-        return await fetchWrapper({
-            endPoint: `/admins/contractor`,
+            endPoint: `/admins/contractor?query=${resetAvatar}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateContractor',

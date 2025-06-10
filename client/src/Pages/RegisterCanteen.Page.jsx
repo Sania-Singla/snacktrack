@@ -24,8 +24,10 @@ export default function RegisterCanteenPage() {
     const [disabled, setDisabled] = useState(true);
     const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [sendingMail, setSendingMail] = useState(false);
     const navigate = useNavigate();
     const [hostel, setHostel] = useState({});
+    const [isVerified, setIsVerified] = useState(false);
     const [hostels, setHostels] = useState([
         { label: 'Select Hostel', value: '' },
     ]);
@@ -44,6 +46,35 @@ export default function RegisterCanteenPage() {
         if (value) verifyExpression(name, formattedValue, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
         onMouseOver();
+    }
+
+    async function sendVerifyEmail() {
+        try {
+            if (!inputs.email) {
+                toast.error('Please enter your email');
+                return;
+            }
+            setSendingMail(true);
+            const res = await adminService.sendVerificationCode({
+                fullName: inputs.fullName,
+                email: inputs.email,
+            });
+            if (res && res.message === 'Verification code sent') {
+                toast.success('Verification code sent to your email');
+                setShowPopup(true);
+                setPopupInfo({
+                    type: 'verifyEmail',
+                    target: { email: inputs.email, fullName: inputs.fullName },
+                    onVerify: () => {
+                        setIsVerified(true);
+                        setShowPopup(false);
+                    },
+                });
+            }
+            setSendingMail(true);
+        } catch (err) {
+            toast.error('Failed to send verification email');
+        }
     }
 
     useEffect(() => {
@@ -72,10 +103,11 @@ export default function RegisterCanteenPage() {
     function handleDisable() {
         return (
             Object.values(inputs).some((value) => !value) ||
-            !hostel ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
-            )
+            ) ||
+            !hostel ||
+            !isVerified
         );
     }
 
@@ -97,17 +129,13 @@ export default function RegisterCanteenPage() {
                 hostel,
                 ...inputs,
             });
-            if (res && res.message === 'Verification code sent') {
-                toast.success('Verification code sent to your email');
-                setShowPopup(true);
-                setPopupInfo({
-                    type: 'verifyEmail',
-                    target: { hostel, ...inputs },
-                });
+            if (res && !res.message) {
+                toast.success('Canteen Registered Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
             navigate('/server-error');
         } finally {
+            setInputs(initialInputs);
             setDisabled(false);
             setLoading(false);
         }
@@ -139,13 +167,42 @@ export default function RegisterCanteenPage() {
 
     const inputElements = inputFields.map((field) => (
         <div className="w-full" key={field.name}>
-            <InputField
-                field={field}
-                handleChange={handleChange}
-                inputs={inputs}
-                showPassword={showkitchenKey}
-                setShowPassword={setShowKitchenKey}
-            />
+            <div className="flex w-full justify-center items-center gap-4">
+                <InputField
+                    field={field}
+                    handleChange={handleChange}
+                    inputs={inputs}
+                    showPassword={showkitchenKey}
+                    setShowPassword={setShowKitchenKey}
+                    className="w-full"
+                    disabled={field.name === 'email' && isVerified}
+                />
+                {field.name === 'email' && (
+                    <Button
+                        title={!isVerified && 'Verify email'}
+                        btnText={
+                            sendingMail ? (
+                                <div className="flex items-center justify-center">
+                                    <div className="size-4 fill-[#4977ec] dark:text-[#a2bdff]">
+                                        {icons.loading}
+                                    </div>
+                                </div>
+                            ) : isVerified ? (
+                                'Verified'
+                            ) : (
+                                'Verify'
+                            )
+                        }
+                        onClick={sendVerifyEmail}
+                        className={`rounded-md mt-[22px] w-[100px] h-[40px] text-sm flex items-center justify-center ${
+                            isVerified
+                                ? 'bg-green-600 cursor-not-allowed text-white border'
+                                : 'bg-[#4977ec] text-white hover:bg-[#3b62c2] active:scale-[98%]'
+                        }`}
+                        disabled={isVerified || sendingMail}
+                    />
+                )}
+            </div>
             {error[field.name] && (
                 <div className="text-red-500 text-xs font-medium">
                     {error[field.name]}
@@ -157,7 +214,7 @@ export default function RegisterCanteenPage() {
     return (
         <div className="py-10 text-black flex flex-col items-center justify-center gap-4 min-h-screen">
             <Link to={'/'}>
-                <div className="overflow-hidden rounded-full size-[90px] hover:brightness-95 drop-shadow-md">
+                <div className="overflow-hidden rounded-full size-[90px] hover:brightness-95 shadow-sm">
                     <img
                         src={LOGO}
                         alt="peer connect logo"
@@ -186,13 +243,13 @@ export default function RegisterCanteenPage() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex flex-col items-start justify-center gap-4 w-full"
+                    className="flex flex-col items-start justify-center gap-3 w-full"
                 >
                     <div className="w-full flex justify-center mt-4">
                         <Dropdown options={hostels} setValue={setHostel} />
                     </div>
 
-                    <div className="w-full flex flex-col gap-1">
+                    <div className="w-full flex flex-col gap-2">
                         {inputElements}
 
                         {/* phone number field */}
@@ -226,7 +283,7 @@ export default function RegisterCanteenPage() {
                         </div>
                     </div>
 
-                    <div className="w-full">
+                    <div className="w-full mt-2">
                         <Button
                             type="submit"
                             className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${

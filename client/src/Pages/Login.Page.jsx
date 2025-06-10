@@ -150,7 +150,7 @@ export default function LoginPage() {
                 to={'/'}
                 className="w-fit flex items-center justify-center hover:brightness-95"
             >
-                <div className="overflow-hidden rounded-full size-[90px] drop-shadow-md">
+                <div className="overflow-hidden rounded-full size-[90px] shadow-sm">
                     <img
                         src={LOGO}
                         alt="peer connect logo"

@@ -5,6 +5,7 @@ import {
     CREATED,
     USER_PLACEHOLDER_IMAGE_URL,
     FORBIDDEN,
+    HOSTELS,
 } from '../Constants/index.js';
 import {
     verifyExpression,
@@ -15,6 +16,7 @@ import {
 } from '../Utils/index.js';
 import { Canteen, Contractor } from '../Models/index.js';
 import { sendMail } from '../mailer.js';
+import { nanoid } from 'nanoid';
 
 const registerCanteen = tryCatch(
     'register as contractor',
@@ -24,9 +26,6 @@ const registerCanteen = tryCatch(
         if (!fullName || !email || !phoneNumber || !hostel || !kitchenKey) {
             return next(new ErrorHandler('Missing fields', BAD_REQUEST));
         }
-
-        req.body.kitchenKey =
-            hostel.hostelType + hostel.hostelNumber + kitchenKey.trim();
 
         const isValid = ['fullName', 'email', 'phoneNumber'].every((key) =>
             verifyExpression(key, req.body[key]?.trim())
@@ -67,38 +66,6 @@ const registerCanteen = tryCatch(
             );
         }
 
-        // Send email verification
-        await sendVerificationEmail(fullName, email.trim());
-
-        return res.status(OK).json({ message: 'Verification code sent' });
-    }
-);
-
-const completeRegistration = tryCatch(
-    'complete contractor registration',
-    async (req, res, next) => {
-        const { email, code, fullName, phoneNumber, hostel, kitchenKey } =
-            req.body;
-
-        if (
-            !email ||
-            !code ||
-            !fullName ||
-            !phoneNumber ||
-            !hostel ||
-            !kitchenKey
-        ) {
-            return next(new ErrorHandler('Missing fields', BAD_REQUEST));
-        }
-
-        // Verify code
-        const isValid = await verifyEmail(email, code);
-        if (!isValid) {
-            return next(
-                new ErrorHandler('Invalid verification code', BAD_REQUEST)
-            );
-        }
-
         // Now register the contractor & canteen
         const canteen = await Canteen.create({
             hostelName: hostel.hostelName.trim(),
@@ -135,30 +102,84 @@ const completeRegistration = tryCatch(
     }
 );
 
-const verifyEmail = tryCatch('verify email', async (req, res) => {
-    const { email, code } = req.body;
-    if (!email || !code) {
-        return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
+const sendVerificationCode = tryCatch(
+    'send verification email',
+    async (req, res) => {
+        const { fullName, email } = req.body;
+
+        if (!fullName || !email) {
+            return res.status(BAD_REQUEST).json({ message: 'missing Fields' });
+        }
+
+        await sendVerificationEmail(fullName, email.trim());
+
+        return res.status(OK).json({ message: 'Verification code sent' });
     }
-    const isVerified = verifyEmail(email, code);
+);
+
+const verifyCode = tryCatch('verify email', async (req, res) => {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+        return res.status(BAD_REQUEST).json({ message: 'missing Fields' });
+    }
+
+    const isVerified = await verifyEmail(email, code);
     if (!isVerified) {
-        return res.status(FORBIDDEN).json('Please verify you email first.');
+        return res
+            .status(FORBIDDEN)
+            .json({ message: 'Please verify you email.' });
     }
 
     return res.status(OK).json({ message: 'Email verified Successfully' });
 });
 
-const resendVerificationCode = tryCatch(
-    'resend verification code',
-    async (req, res) => {
-        const { email } = req.body;
+const updateContractor = tryCatch('update contractor', async (req, res) => {
+    const { contractorId } = req.params;
+    const { resetAvatar } = req.query;
+    const { fullName, phoneNumber, email, kitchenKey } = req.body;
 
-        // Send email verification
-        await sendVerificationEmail(email.trim());
-
-        return res.status(OK).json({ message: 'Verification code resent' });
+    if (!fullName || !phoneNumber || !email || !kitchenKey) {
+        return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
     }
-);
+
+    const contractor = await Contractor.findById(contractorId);
+
+    const oldKitchenKey = contractor.kitchenKey;
+    const canteenId = oldKitchenKey.split('-');
+    const newKitchenKey = canteenId + '-' + kitchenKey.trim();
+
+    let alreadyExists = null;
+
+    if (contractor.phoneNumber !== phoneNumber) {
+        alreadyExists = await Contractor.findOne({ phoneNumber });
+    } else if (contractor.email !== email.toLowerCase()) {
+        alreadyExists = await Contractor.findOne({
+            email: email.toLowerCase(),
+        });
+    }
+    if (alreadyExists) {
+        return next(new ErrorHandler('contractor already exists', BAD_REQUEST));
+    }
+
+    const newContractor = Contractor.findbyIdAndUpdate(
+        contractorId,
+        {
+            $set: {
+                fullName,
+                phoneNumber,
+                email,
+                kitchenKey: newKitchenKey,
+                avatar: resetAvatar
+                    ? USER_PLACEHOLDER_IMAGE_URL
+                    : contractor.avatar,
+            },
+        },
+        { new: true }
+    );
+
+    return res.status(OK).json(newContractor);
+});
 
 const getContractors = tryCatch('get contractors', async (req, res) => {
     const canteens = await Canteen.aggregate([
@@ -190,67 +211,11 @@ const getHostels = tryCatch('get hostels', async (req, res, next) => {
     return res.status(OK).json(HOSTELS);
 });
 
-const deleteCanteen = tryCatch('delete canteen', async (req, res) => {
-    const { canteenId } = req.params;
-    const deletedCanteen = await Canteen.findByIdAndDelete(canteenId);
-    return res.status(OK).json(deletedCanteen);
-});
-
-const updateContractor = tryCatch('update contractor', async (req, res) => {
-    const { contractorId, canteenId } = req.params;
-    const { fullName, phoneNumber, email, kitchenKey } = req.body;
-    if ((!fullName, !phoneNumber, !email, !kitchenKey)) {
-        return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
-    }
-
-    const [canteen, contractor] = await Promise.all([
-        Canteen.findById(canteenId),
-        Contractor.findOne({
-            $or: [{ email: email.trim() }, { phoneNumber: phoneNumber.trim() }],
-        }),
-    ]);
-
-    if (!contractor) {
-        return next(new ErrorHandler('contractor not found', BAD_REQUEST));
-    }
-
-    let newKitchenKey = null;
-    if (contractor.kitchenKey !== kitchenKey) {
-        newKitchenKey =
-            canteen.hostelType + canteen.hostelNumber + kitchenKey.trim();
-    }
-    let alreadyExists = null;
-
-    if (contractor.phoneNumber !== phoneNumber) {
-        alreadyExists = await Contractor.findOne({ phoneNumber });
-    } else if (contractor.email !== email.toLowerCase()) {
-        alreadyExists = await Contractor.findOne({
-            email: email.toLowerCase(),
-        });
-    }
-    if (alreadyExists) {
-        return next(new ErrorHandler('contractor already exists', BAD_REQUEST));
-    }
-    const newContractor = Canteen.findbyIdAndUpdate(
-        { contractorId }, // admin can delete student of any canteenId!
-        {
-            $set: {
-                fullName,
-                phoneNumber,
-                email,
-                kitchenKey: newKitchenKey,
-            },
-        }
-    );
-    return res.status(OK).json(newContractor);
-});
-
 export {
     registerCanteen,
-    completeRegistration,
-    resendVerificationCode,
-    deleteCanteen,
     updateContractor,
     getContractors,
     getHostels,
+    sendVerificationCode,
+    verifyCode,
 };
