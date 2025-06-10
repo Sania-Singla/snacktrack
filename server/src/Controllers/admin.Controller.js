@@ -4,6 +4,7 @@ import {
     NOT_FOUND,
     CREATED,
     USER_PLACEHOLDER_IMAGE_URL,
+    FORBIDDEN,
 } from '../Constants/index.js';
 import {
     verifyExpression,
@@ -134,6 +135,19 @@ const completeRegistration = tryCatch(
     }
 );
 
+const verifyEmail = tryCatch('verify email', async (req, res) => {
+    const { email, code } = req.body;
+    if (!email || !code) {
+        return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
+    }
+    const isVerified = verifyEmail(email, code);
+    if (!isVerified) {
+        return res.status(FORBIDDEN).json('Please verify you email first.');
+    }
+
+    return res.status(OK).json({ message: 'Email verified Successfully' });
+});
+
 const resendVerificationCode = tryCatch(
     'resend verification code',
     async (req, res) => {
@@ -176,12 +190,60 @@ const getHostels = tryCatch('get hostels', async (req, res, next) => {
     return res.status(OK).json(HOSTELS);
 });
 
-const deleteCanteen = tryCatch('delete canteen', async (req, res, next) => {});
+const deleteCanteen = tryCatch('delete canteen', async (req, res) => {
+    const { canteenId } = req.params;
+    const deletedCanteen = await Canteen.findByIdAndDelete(canteenId);
+    return res.status(OK).json(deletedCanteen);
+});
 
-const updateContractor = tryCatch(
-    'update contractor',
-    async (req, res, next) => {}
-);
+const updateContractor = tryCatch('update contractor', async (req, res) => {
+    const { contractorId, canteenId } = req.params;
+    const { fullName, phoneNumber, email, kitchenKey } = req.body;
+    if ((!fullName, !phoneNumber, !email, !kitchenKey)) {
+        return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
+    }
+
+    const [canteen, contractor] = await Promise.all([
+        Canteen.findById(canteenId),
+        Contractor.findOne({
+            $or: [{ email: email.trim() }, { phoneNumber: phoneNumber.trim() }],
+        }),
+    ]);
+
+    if (!contractor) {
+        return next(new ErrorHandler('contractor not found', BAD_REQUEST));
+    }
+
+    let newKitchenKey = null;
+    if (contractor.kitchenKey !== kitchenKey) {
+        newKitchenKey =
+            canteen.hostelType + canteen.hostelNumber + kitchenKey.trim();
+    }
+    let alreadyExists = null;
+
+    if (contractor.phoneNumber !== phoneNumber) {
+        alreadyExists = await Contractor.findOne({ phoneNumber });
+    } else if (contractor.email !== email.toLowerCase()) {
+        alreadyExists = await Contractor.findOne({
+            email: email.toLowerCase(),
+        });
+    }
+    if (alreadyExists) {
+        return next(new ErrorHandler('contractor already exists', BAD_REQUEST));
+    }
+    const newContractor = Canteen.findbyIdAndUpdate(
+        { contractorId }, // admin can delete student of any canteenId!
+        {
+            $set: {
+                fullName,
+                phoneNumber,
+                email,
+                kitchenKey: newKitchenKey,
+            },
+        }
+    );
+    return res.status(OK).json(newContractor);
+});
 
 export {
     registerCanteen,

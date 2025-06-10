@@ -14,13 +14,17 @@ import {
 
 adminRouter.use(verifyAdminJwt);
 
-adminRouter.route('/hostels').get(getHostels);
+adminRouter.route('/contractor').post(getContractors);
 
-adminRouter.route('/contractor').post(getContractors).patch(updateContractor);
+adminRouter
+    .route('/contractor/:canteenId/:contractorId')
+    .patch(updateContractor);
+
+adminRouter.route('/hostels').get(getHostels);
 
 adminRouter.route('/canteen/register').post(registerCanteen);
 
-adminRouter.route('/canteen/delete').delete(deleteCanteen);
+adminRouter.route('/canteen/delete/:canteenId').delete(deleteCanteen);
 
 adminRouter.route('/canteen/complete-registeration').post(completeRegistration);
 
