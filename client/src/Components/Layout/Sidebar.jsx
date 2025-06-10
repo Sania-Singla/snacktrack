@@ -60,7 +60,7 @@ export default function Sidebar() {
                 <NavLink
                     key={item.name}
                     className={({ isActive }) =>
-                        `${isActive && 'backdrop-brightness-90'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-90`
+                        `${isActive && 'backdrop-brightness-95'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-90`
                     }
                     to={item.path}
                 >
@@ -136,12 +136,12 @@ export default function Sidebar() {
                         exit="exit"
                         className="h-full w-[265px] flex justify-start"
                     >
-                        <div className="w-full px-3 bg-[#f9f9f9] drop-shadow-sm flex flex-col items-start justify-start h-full">
+                        <div className="w-full px-3 bg-gray-50 drop-shadow-sm flex flex-col items-start justify-start h-full">
                             <div className="h-[60px] px-2 gap-5 w-full flex items-center justify-between">
                                 {/* hamburgur menu btn */}
                                 <Button
                                     btnText={
-                                        <div className="size-[20px] fill-[#434343] group-hover:fill-[#4977ec]">
+                                        <div className="size-[20px] fill-[#434343] hover:fill-[#4977ec]">
                                             {icons.hamburgur}
                                         </div>
                                     }

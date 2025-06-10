@@ -9,9 +9,12 @@ import {
     deleteCanteen,
     updateContractor,
     getContractors,
+    getHostels,
 } from '../Controllers/admin.Controller.js';
 
 adminRouter.use(verifyAdminJwt);
+
+adminRouter.route('/hostels').get(getHostels);
 
 adminRouter.route('/contractor').post(getContractors).patch(updateContractor);
 

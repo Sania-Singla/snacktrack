@@ -22,15 +22,14 @@ export default function Layout({ renderTemplate = true }) {
             <Header />
             <hr className="w-full" />
             <Sidebar />
-            {/* <main className="mt-[60px] p-4 sm:p-6 min-h-[calc(100%-60px)] w-full bg-[#f9f9f9]">
+            <main className="mt-[60px] p-4 min-h-[calc(100%-60px)] w-full bg-gray-50">
                 <div
                     className={`mb-6 mt-2 w-full sm:hidden ${isStaticPage && 'hidden'}`}
                 >
                     <Searchbar />
                 </div>
                 <Outlet />
-            </main> */}
-            <hr className="border-gray-300 mt-[60px]" />
+            </main>
             <Footer />
             <Popup />
             <Toaster />

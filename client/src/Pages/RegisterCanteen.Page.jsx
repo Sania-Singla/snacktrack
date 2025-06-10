@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { adminService, userService } from '../Services';
+import { adminService } from '../Services';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Dropdown, InputField } from '../Components';
 import { verifyExpression } from '../Utils';
@@ -52,7 +52,7 @@ export default function RegisterCanteenPage() {
 
         (async function () {
             try {
-                const res = await userService.getCanteens(signal);
+                const res = await adminService.getHostels(signal);
                 if (res)
                     setHostels((prev) => [
                         ...prev,
