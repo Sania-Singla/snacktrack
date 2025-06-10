@@ -41,8 +41,8 @@ export default function PendingOrders({ filter }) {
                 if (res && !res.message) {
                     setPendingOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }

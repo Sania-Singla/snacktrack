@@ -101,8 +101,8 @@ export default function CartPage() {
                 localStorage.removeItem('cartItems');
                 setCartItems([]);
                 socket?.emit('newOrder', res);
-                setOrdering(false);
             } else checkTokenExpired(res, setUser);
+            setOrdering(false);
         } catch (err) {
             navigate('/server-error');
         }

@@ -37,8 +37,8 @@ export default function Orders({ filter }) {
                 if (res && !res.message) {
                     setOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }

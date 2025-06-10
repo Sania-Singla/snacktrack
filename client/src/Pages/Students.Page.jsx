@@ -41,8 +41,8 @@ export default function StudentsPage() {
                 if (res && !res.message) {
                     setStudents((prev) => prev.concat(res.students));
                     setStudentsInfo(res.studentsInfo);
-                    setLoading(false);
-                } else checkTokenExpired(res, setUser);
+                } else checkTokenExpired(res, setUser);                    setLoading(false);
+
             } catch (err) {
                 navigate('/server-error');
             }
