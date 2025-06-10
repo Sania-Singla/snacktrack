@@ -1,5 +1,7 @@
 import SANIAIMAGE from '../Assets/images/snack.png';
 import LOGO from '../Assets/images/logo.png';
+import PU from '../Assets/images/pu.png';
+import UIET from '../Assets/images/uiet.png';
 import SNACK_PLACEHOLDER_IMAGE from '../Assets/images/snack.png';
 import USER_PLACEHOLDER_IMAGE from '../Assets/images/user.png';
 import AUDIO_FILE from '../Assets/audios/notification.wav';
@@ -37,6 +39,8 @@ export {
     BASE_BACKEND_URL,
     LIMIT,
     LOGO,
+    UIET,
+    PU,
     AUDIO_FILE,
     SNACK_PLACEHOLDER_IMAGE,
     USER_PLACEHOLDER_IMAGE,

@@ -96,7 +96,7 @@ export default function Searchbar() {
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                className="w-full bg-white border-transparent border-[0.1rem] indent-8 rounded-full px-[5px] py-1 text-black text-[15px] font-normal placeholder:text-gray-400 outline-none focus:border-[#4977ec] transition-all duration-100"
+                className="w-full bg-white border-transparent border-[0.1rem] indent-8 rounded-full px-[5px] py-1 text-black text-[15px] placeholder:font-light placeholder:text-gray-400 outline-none focus:border-[#4977ec] transition-all duration-100"
             />
             <div className="size-[15px] fill-gray-300 group-focus-within:fill-[#4977ec] absolute top-[50%] translate-y-[-50%] left-3">
                 {icons.search}

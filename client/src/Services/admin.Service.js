@@ -91,6 +91,15 @@ class AdminService {
             credentials: 'include',
         });
     }
+
+    async getHostels() {
+        return await fetchWrapper({
+            endPoint: `/admins/hostels`,
+            method: 'GET',
+            aim: 'getHostels',
+            credentials: 'include',
+        });
+    }
 }
 
 export const adminService = new AdminService();

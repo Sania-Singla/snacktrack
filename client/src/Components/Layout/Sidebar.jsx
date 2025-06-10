@@ -60,12 +60,12 @@ export default function Sidebar() {
                 <NavLink
                     key={item.name}
                     className={({ isActive }) =>
-                        `${isActive && 'backdrop-brightness-90'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-90`
+                        `${isActive && 'backdrop-brightness-95'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-90`
                     }
                     to={item.path}
                 >
                     <div className="flex items-center justify-start gap-4">
-                        <div className="size-[19px] fill-[#2a2a2a]">
+                        <div className="size-[18px] fill-gray-700">
                             {item.icon}
                         </div>
                         <div>{item.name}</div>
@@ -136,12 +136,12 @@ export default function Sidebar() {
                         exit="exit"
                         className="h-full w-[265px] flex justify-start"
                     >
-                        <div className="w-full px-3 bg-[#f9f9f9] drop-shadow-sm flex flex-col items-start justify-start h-full">
-                            <div className="h-[60px] px-3 gap-5 w-full flex items-center justify-between">
+                        <div className="w-full px-3 bg-gray-50 drop-shadow-sm flex flex-col items-start justify-start h-full">
+                            <div className="h-[60px] px-2 gap-5 w-full flex items-center justify-between">
                                 {/* hamburgur menu btn */}
                                 <Button
                                     btnText={
-                                        <div className="size-[20px] fill-[#434343] group-hover:fill-[#4977ec]">
+                                        <div className="size-[20px] fill-[#434343] hover:fill-[#4977ec]">
                                             {icons.hamburgur}
                                         </div>
                                     }
@@ -157,8 +157,8 @@ export default function Sidebar() {
                                     >
                                         <Logout />
                                     </div>
-                                    {/* avatar */}
-                                    <div className="size-[40px] rounded-full overflow-hidden shadow-sm hover:brightness-90">
+
+                                    <div className="size-[35px] rounded-full overflow-hidden shadow-sm">
                                         <img
                                             src={user.avatar}
                                             alt="user avatar"

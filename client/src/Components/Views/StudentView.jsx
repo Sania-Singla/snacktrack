@@ -58,7 +58,7 @@ export default function StudentView({ student, reference }) {
                                     {icons.edit}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-2 group rounded-full drop-shadow-lg hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                             onClick={editStudent}
                         />
                         <div>
@@ -68,17 +68,17 @@ export default function StudentView({ student, reference }) {
                                         {icons.delete}
                                     </div>
                                 }
-                                className="bg-[#f0efef] p-2 group rounded-full drop-shadow-lg hover:bg-[#ebeaea]"
+                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                                 onClick={removeStudent}
                             />
                         </div>
                     </div>
 
                     <Button
-                        className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                        className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[5px] bg-[#4977ec] hover:bg-[#3b62c2]"
                         btnText={
                             <div className="flex gap-2 items-center">
-                                Get Details
+                                Details
                                 <div className="size-[10px] fill-white">
                                     {icons.arrowDown}
                                 </div>
@@ -92,9 +92,9 @@ export default function StudentView({ student, reference }) {
             <AnimatePresence>
                 {expanded && (
                     <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
+                        initial={{ height: 0 }}
+                        animate={{ height: '100%' }}
+                        exit={{ height: 0 }}
                         transition={{ duration: 0.2 }}
                         className="p-1 pt-4 space-y-4 border-t w-full border-gray-300"
                     >
