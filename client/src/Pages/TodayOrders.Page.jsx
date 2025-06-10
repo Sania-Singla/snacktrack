@@ -65,7 +65,7 @@ export default function TodayOrdersPage() {
                 </div>
             </div>
 
-            {filter.status === 'Pending' ? (
+            {filter.status === 'Pending' || !filter.status ? (
                 <PendingOrders filter={filter} />
             ) : (
                 <Orders filter={filter} />

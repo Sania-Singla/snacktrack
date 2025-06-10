@@ -58,7 +58,7 @@ export default function EditStudentPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await contractorService.updateStudentAccountDetails(
+            const res = await contractorService.updateStudent(
                 popupInfo.student._id,
                 inputs
             );

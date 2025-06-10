@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 import { checkTokenExpired } from '../../Utils';
 
 export default function SnackView({ snack, reference }) {
-    const { _id, image, name, price, info, isAvailable } = snack;
+    const { _id, image, name, isAvailable } = snack;
     const [quantityInCart, setQuantityInCart] = useState(snack.quantity);
     const { user, setUser } = useUserContext();
     const { setSnacks } = useSnackContext();
@@ -113,7 +113,7 @@ export default function SnackView({ snack, reference }) {
             )}
 
             {/* Image */}
-            <div className="h-[180px] w-full rounded-xl overflow-hidden shadow-md">
+            <div className="aspect-[5/3] w-full rounded-xl overflow-hidden shadow-md">
                 <img
                     alt="snack image"
                     src={image}

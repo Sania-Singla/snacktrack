@@ -43,6 +43,35 @@ export default function BillsPage() {
         (async function () {
             try {
                 setLoading(true);
+                setBills([]);
+                setPage(1);
+                const res = await billService.getBills(
+                    filter,
+                    1,
+                    LIMIT,
+                    signal
+                );
+                if (res && !res.message) {
+                    setBills((prev) => prev.concat(res.bills));
+                    setBillsInfo(res.billsInfo);
+                    setLoading(false);
+                } else checkTokenExpired(res, setUser);
+            } catch (err) {
+                navigate('/server-error');
+            }
+        })();
+
+        return () => controller.abort();
+    }, [filter]);
+
+    useEffect(() => {
+        if (page === 1) return; // Already handled in filter use effect
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        (async function () {
+            try {
+                setLoading(true);
                 const res = await billService.getBills(
                     filter,
                     page,
@@ -52,20 +81,15 @@ export default function BillsPage() {
                 if (res && !res.message) {
                     setBills((prev) => prev.concat(res.bills));
                     setBillsInfo(res.billsInfo);
+                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 
         return () => controller.abort();
-    }, [page, filter]);
-
-    useEffect(() => {
-        setBills([]), setPage(1), setBillsInfo({});
-    }, [filter]);
+    }, [page]);
 
     // async function generateBills() {
     //     try {

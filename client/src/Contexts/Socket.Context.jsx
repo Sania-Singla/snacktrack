@@ -45,9 +45,14 @@ const SocketContextProvider = ({ children }) => {
         // Events
 
         socketInstance.on('newOrder', async (order) => {
-            setPendingOrders((prev) => prev.concat(order));
-            setKitchenOrders((prev) => prev.concat(order));
             await playSound();
+            setPendingOrders((prev) => prev.concat(order));
+            setKitchenOrders((prev) =>
+                prev.concat({
+                    ...order,
+                    items: order.items.filter((i) => i.type === 'packagedFood'),
+                })
+            );
         });
 
         socketInstance.on('orderRejected', (order) => {
@@ -99,13 +104,13 @@ const SocketContextProvider = ({ children }) => {
             });
         });
 
-        return socketInstance; // optional
+        return socketInstance;
     }
 
     function disconnectSocket() {
         if (socket) {
             console.log('socket disconnecting...');
-            socket.disconnect(); // will set socket = null implicitly
+            socket.disconnect();
             setSocket(null);
         }
     }

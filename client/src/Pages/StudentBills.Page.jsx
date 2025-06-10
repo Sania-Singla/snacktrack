@@ -24,12 +24,12 @@ export default function StudentBillsPage() {
                     studentId,
                     signal
                 );
-                if (res && !res.message) setBills(res);
-                else checkTokenExpired(res, setUser);
+                if (res && !res.message) {
+                    setBills(res);
+                    setLoading(false);
+                } else checkTokenExpired(res, setUser);
             } catch (err) {
                 navigate('/server-error');
-            } finally {
-                setLoading(false);
             }
         })();
 

@@ -13,11 +13,11 @@ import {
 
 adminRouter.use(verifyAdminJwt);
 
+adminRouter.route('/contractor').post(getContractors).patch(updateContractor);
+
 adminRouter.route('/canteen/register').post(registerCanteen);
 
 adminRouter.route('/canteen/delete').delete(deleteCanteen);
-
-adminRouter.route('/contractor').get(getContractors).patch(updateContractor);
 
 adminRouter.route('/canteen/complete-registeration').post(completeRegistration);
 

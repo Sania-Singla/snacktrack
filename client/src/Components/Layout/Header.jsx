@@ -15,7 +15,7 @@ export default function Header() {
     const navigate = useNavigate();
     const { cartItems } = useStudentContext();
 
-    // Calculate total quantity by summing all item quantities
+    // total quantity by adding all item quantities
     const totalQuantity = cartItems.reduce(
         (total, item) => total + item.quantity,
         0
@@ -26,7 +26,7 @@ export default function Header() {
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 
     return (
-        <header className="drop-shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-4 font-medium flex items-center justify-between gap-4">
+        <header className="shadow-sm fixed top-0 z-[10] w-full bg-[#f9f9f9] text-black h-[60px] px-6 font-medium flex items-center justify-between gap-4">
             <div className="flex items-center justify-center gap-4">
                 {/* hamburgur menu btn */}
                 <Button
@@ -37,15 +37,14 @@ export default function Header() {
                     }
                     title="Show Sidebar"
                     onClick={() => setShowSideBar((prev) => !prev)}
-                    className="bg-[#ffffff] p-[9px] group rounded-full drop-shadow-sm w-fit"
                 />
 
                 {/* logo */}
                 <Link
                     to={'/'}
-                    className="flex items-center justify-center gap-3 text-nowrap font-medium text-xl"
+                    className="flex items-center justify-center gap-3 text-nowrap font-medium text-lg"
                 >
-                    <div className="overflow-hidden rounded-full size-[38px] drop-shadow-sm hover:scale-110 transition-all duration-300">
+                    <div className="overflow-hidden rounded-full size-[35px] shadow-sm hover:scale-110 transition-all duration-300">
                         <img
                             src={LOGO}
                             alt="Snack Track Logo"

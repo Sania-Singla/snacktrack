@@ -317,12 +317,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
 const getKitchenOrders = tryCatch(
     'get kitchen orders',
     async (req, res, next) => {
-        const { hostelType, hostelNumber } = req;
-
-        const canteen = await Canteen.findOne({
-            hostelType,
-            hostelNumber,
-        }).select('_id');
+        const { canteenId } = req;
 
         const now = new Date();
 
@@ -339,7 +334,7 @@ const getKitchenOrders = tryCatch(
             [
                 {
                     $match: {
-                        canteenId: new Types.ObjectId(canteen._id),
+                        canteenId: new Types.ObjectId(canteenId),
                         createdAt: { $gte: startOfDay, $lt: endOfDay },
                         status: 'Pending',
                     },
@@ -382,9 +377,7 @@ const getKitchenOrders = tryCatch(
             { sort: { createdAt: 1 } }
         );
 
-        return res
-            .status(OK)
-            .json({ canteenId: canteen._id, orders: orders.docs });
+        return res.status(OK).json({ canteenId, orders: orders.docs });
     }
 );
 

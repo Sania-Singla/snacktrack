@@ -44,6 +44,16 @@ class UserService {
         });
     }
 
+    async updateAccountDetails({ phoneNumber, rollNo, email }) {
+        return await fetchWrapper({
+            endPoint: `/users/account`,
+            method: 'PATCH',
+            credentials: 'include',
+            body: { phoneNumber, rollNo, email },
+            aim: 'updateAccountDetails',
+        });
+    }
+
     async getCurrentUser() {
         return await fetchWrapper({
             endPoint: `/users`,

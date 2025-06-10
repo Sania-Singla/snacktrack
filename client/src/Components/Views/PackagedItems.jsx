@@ -1,17 +1,9 @@
-import { PackagedItemView, Button } from '../../Components';
-import {
-    useSnackContext,
-    useSearchContext,
-    usePopupContext,
-    useUserContext,
-} from '../../Contexts';
-import { icons } from '../../Assets/icons';
+import { PackagedItemView } from '../../Components';
+import { useSnackContext, useSearchContext } from '../../Contexts';
 
 export default function PackagedItems() {
     const { items } = useSnackContext();
     const { search } = useSearchContext();
-    const { setShowPopup, setPopupInfo } = usePopupContext();
-    const { user } = useUserContext();
 
     const itemElements = items
         ?.filter(
@@ -21,37 +13,17 @@ export default function PackagedItems() {
         )
         .map((item) => <PackagedItemView key={item._id} item={item} />);
 
-    function addItem() {
-        setShowPopup(true);
-        setPopupInfo({ type: 'addItem' });
-    }
-
     return (
-        <div className="relative">
-            {user.role === 'contractor' && (
-                <Button
-                    onClick={addItem}
-                    btnText={
-                        <div className="flex items-center justify-center gap-2">
-                            <div className="size-[16px] fill-white">
-                                {icons.plus}
-                            </div>
-                            <span className="text-[18px]">Add Item</span>
-                        </div>
-                    }
-                    title="Add Snack"
-                    className="absolute z-[1] -top-16 text-white rounded-md w-fit text-nowrap px-3 h-[39px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                />
-            )}
+        <>
             {itemElements.length > 0 ? (
                 <div
-                    className={`grid gap-5 ${itemElements.length <= 2 ? 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(250px,350px))]' : 'grid-cols-[repeat(auto-fit,minmax(250px,1fr))]'}`}
+                    className={`grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(350px,1fr))]`}
                 >
                     {itemElements}
                 </div>
             ) : (
                 <div className="italic text-gray-600">No Items Found</div>
             )}
-        </div>
+        </>
     );
 }

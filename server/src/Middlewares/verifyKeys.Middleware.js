@@ -33,6 +33,7 @@ const verifyAdminJwt = async (req, res, next) => {
             return next();
         } else {
             const { key } = req.body;
+
             if (!key) {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
@@ -44,7 +45,7 @@ const verifyAdminJwt = async (req, res, next) => {
             const adminToken = await generateAdminToken(key);
             res.cookie('adminToken', adminToken, {
                 ...COOKIE_OPTIONS,
-                maxAge: Number(process.env.ADMIN_KEY_TOKEN_MAXAGE),
+                maxAge: Number(process.env.ADMIN_TOKEN_MAXAGE),
             });
             return next();
         }
@@ -66,7 +67,7 @@ const verifyStaffJwt = async (req, res, next) => {
             // verify
             const decodedToken = jwt.verify(
                 staffToken,
-                process.env.STAFF_KEY_TOKEN_SECRET
+                process.env.STAFF_TOKEN_SECRET
             );
             if (!decodedToken) {
                 return res
@@ -77,7 +78,7 @@ const verifyStaffJwt = async (req, res, next) => {
             const [canteenId] = decodedToken.key.split('-');
             req.canteenId = canteenId;
             return next();
-        } else if (req.user.role === 'contractor') {
+        } else if (req.user?.role === 'contractor') {
             req.canteenId = req.user.canteenId;
             return next();
         } else {
@@ -86,7 +87,7 @@ const verifyStaffJwt = async (req, res, next) => {
                 return res.status(BAD_REQUEST).json({ message: 'missing key' });
             }
             const [canteenId, actualKey] = key.split('-');
-            const canteen = await Canteen.findOne({ canteenId });
+            const canteen = await Canteen.findById(canteenId);
 
             const isValid = bcrypt.compareSync(actualKey, canteen.kitchenKey);
             if (!isValid) {
@@ -95,7 +96,7 @@ const verifyStaffJwt = async (req, res, next) => {
             const staffToken = await generateStaffToken(key);
             res.cookie('staffToken', staffToken, {
                 ...COOKIE_OPTIONS,
-                maxAge: Number(process.env.STAFF_KEY_TOKEN_MAXAGE),
+                maxAge: Number(process.env.STAFF_TOKEN_MAXAGE),
             });
             req.canteenId = canteenId;
             return next();

@@ -54,7 +54,7 @@ export default function AddItemPopup() {
         setLoading(true);
         setDisabled(true);
         try {
-            const res = await contractorService.updateItemDetails(
+            const res = await contractorService.updateItem(
                 inputs,
                 popupInfo.item._id
             );
