@@ -18,5 +18,4 @@ startBillingCronJob(); // cron job to generate bills every month at 12:05 AM
 startCleanupCronJob(); // cron job to delete bills & orders every 6 months (july & jan) at 12:05 AM
 
 http.listen(PORT, () => console.log(`✅ server listening on port ${PORT}...`));
-
 export { transporter, redisClient };

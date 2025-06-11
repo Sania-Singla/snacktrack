@@ -32,7 +32,9 @@ export default function StudentOrderCard({ order, reference }) {
                                     ? 'bg-yellow-50 text-yellow-700'
                                     : status === 'Rejected'
                                       ? 'bg-red-50 text-red-700'
-                                      : 'bg-green-50 text-green-700'
+                                      : status === 'Prepared'
+                                        ? 'bg-blue-50 text-blue-700'
+                                        : 'bg-green-50 text-green-700'
                             }`}
                         >
                             {status}
