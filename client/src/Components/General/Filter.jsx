@@ -77,7 +77,7 @@ export default function Filter({
                         </span>
                     </div>
                     <div
-                        className={`shrink-0 size-3.5 fill-gray-800 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`shrink-0 size-3 fill-gray-800 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
                     >
                         {icons.arrowDown}
                     </div>

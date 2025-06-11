@@ -1,19 +1,25 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { PendingOrders, Filter, Orders, Button } from '../Components';
+import {
+    PendingOrders,
+    Filter,
+    Orders,
+    Button,
+    CalendarFilter,
+} from '../Components';
 import { toggleAudio, getAudioState, subscribeToAudioChanges } from '../Utils';
-import { useUserContext } from '../Contexts';
+import { useOrderContext, useUserContext } from '../Contexts';
 import toast from 'react-hot-toast';
 import { orderService } from '../Services';
 
 export default function TodayOrdersPage() {
     const [searchParams] = useSearchParams();
-    const { audioEnabled, setAudioEnabled } = useUserContext();
-    const filter = searchParams.get('filter') || 'Pending';
-    const [stats, setStats] = useState({});
+    const { audioEnabled, setAudioEnabled, user } = useUserContext();
+    const { stats, setStats } = useOrderContext();
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const { user } = useUserContext();
+    const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
+    const statusFilter = searchParams.get('status') || 'Pending';
 
     useEffect(() => {
         setAudioEnabled(getAudioState());
@@ -36,6 +42,7 @@ export default function TodayOrdersPage() {
                 setLoading(true);
                 const res = await orderService.getOrderStats(
                     user.canteenId,
+                    dateFilter,
                     signal
                 );
                 if (res && !res.message) setStats(res);
@@ -46,7 +53,7 @@ export default function TodayOrdersPage() {
         })();
 
         return () => controller.abort();
-    }, []);
+    }, [dateFilter]);
 
     return (
         <div className="w-full sm:p-4">
@@ -64,7 +71,7 @@ export default function TodayOrdersPage() {
                             title={
                                 audioEnabled ? 'Disable Audio' : 'Enable Audio'
                             }
-                            className={`bg-[#ffffff] size-[40px] text-lg group rounded-full drop-shadow-sm ${
+                            className={`bg-[#ffffff] flex items-center justify-center size-[40px] text-lg group rounded-full drop-shadow-sm ${
                                 !audioEnabled ? 'opacity-70' : ''
                             }`}
                             onClick={() => {
@@ -76,26 +83,31 @@ export default function TodayOrdersPage() {
                         />
                         {!audioEnabled && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="w-8 h-[2px] bg-red-500 rotate-45 transform origin-center" />
+                                <div className="w-7 h-[2px] bg-red-500 rotate-45 transform origin-center" />
                             </div>
                         )}
                     </div>
-                    <Filter options={options} defaultOption={filter} />
+                    <CalendarFilter />
+                    <Filter
+                        options={options}
+                        defaultOption={statusFilter}
+                        queryParamName="status"
+                    />
                 </div>
             </div>
 
             {loading ? (
                 <div className="my-8">loading...</div>
             ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {/* Pending Orders */}
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-base font-medium text-gray-500">
+                        <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-base font-medium text-gray-800">
                                 Pending
                             </h3>
                             <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
-                                <span className="text-blue-600 text-[15px] font-bold">
+                                <span className="text-blue-600 font-bold">
                                     {stats.pending}
                                 </span>
                             </div>
@@ -110,12 +122,12 @@ export default function TodayOrdersPage() {
 
                     {/* Prepared Orders */}
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-base font-medium text-gray-500">
+                        <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-base font-medium text-gray-800">
                                 Prepared
                             </h3>
                             <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
-                                <span className="text-purple-600 text-[15px] font-bold">
+                                <span className="text-purple-600 font-bold">
                                     {stats.prepared}
                                 </span>
                             </div>
@@ -130,12 +142,12 @@ export default function TodayOrdersPage() {
 
                     {/* Picked Up Orders */}
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-base font-medium text-gray-500">
+                        <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-base font-medium text-gray-800">
                                 Completed
                             </h3>
                             <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
-                                <span className="text-green-600 text-[15px] font-bold">
+                                <span className="text-green-600 font-bold">
                                     {stats.pickedUp}
                                 </span>
                             </div>
@@ -150,12 +162,12 @@ export default function TodayOrdersPage() {
 
                     {/* Rejected Orders */}
                     <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-base font-medium text-gray-500">
+                        <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-base font-medium text-gray-800">
                                 Rejected
                             </h3>
                             <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">
-                                <span className="text-red-600 text-[15px] font-bold">
+                                <span className="text-red-600 font-bold">
                                     {stats.rejected}
                                 </span>
                             </div>
@@ -170,11 +182,7 @@ export default function TodayOrdersPage() {
                 </div>
             )}
 
-            {filter === 'Pending' ? (
-                <PendingOrders filter={filter} />
-            ) : (
-                <Orders filter={filter} />
-            )}
+            {statusFilter === 'Pending' ? <PendingOrders /> : <Orders />}
         </div>
     );
 }

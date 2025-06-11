@@ -21,8 +21,7 @@ export default function ContractorOrderCard({ order, reference }) {
             setStatusOptions([
                 { value: '', label: 'Pending' },
                 { value: 'Prepared', label: 'Prepared' },
-                { value: 'Rejected', label: 'Reject' },
-                { value: 'PickedUp', label: 'Picked Up' },
+                { value: 'Rejected', label: 'Rejected' },
             ]);
         } else {
             setStatusOptions([

@@ -5,6 +5,7 @@ const OrderContext = createContext();
 const OrderContextProvider = ({ children }) => {
     const [studentOrders, setStudentOrders] = useState([]);
     const [pendingOrders, setPendingOrders] = useState([]);
+    const [stats, setStats] = useState({});
     const [kitchenOrders, setKitchenOrders] = useState([]);
     const [preparedCount, setPreparedCount] = useState(
         JSON.parse(localStorage.getItem('preparedCount')) || {}
@@ -21,6 +22,8 @@ const OrderContextProvider = ({ children }) => {
                 setKitchenOrders,
                 preparedCount,
                 setPreparedCount,
+                stats,
+                setStats,
             }}
         >
             {children}

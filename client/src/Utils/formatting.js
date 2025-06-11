@@ -6,7 +6,6 @@
  */
 export function formatTime(timeStamp) {
     return new Date(timeStamp).toLocaleString('en-US', {
-        timeZone: 'UTC', // prevent local timezone shift
         weekday: 'short',
         month: 'short',
         day: 'numeric',

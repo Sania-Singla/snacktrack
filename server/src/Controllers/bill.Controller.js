@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
 import { Bill, Order } from '../Models/index.js';
@@ -17,7 +18,7 @@ const getStudentBills = tryCatch('get student bills', async (req, res) => {
 
 const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
-    const { page = 1, limit = 10, month = new Date().getMonth() } = req.query;
+    const { page = 1, limit = 10, month = moment().month() } = req.query;
 
     const bills = await Bill.aggregatePaginate(
         [
@@ -25,7 +26,7 @@ const getBills = tryCatch('get bills', async (req, res) => {
                 $match: {
                     canteenId: new Types.ObjectId(contractor.canteenId),
                     month: parseInt(month),
-                    year: new Date().getFullYear(),
+                    year: moment().year(),
                 },
             },
             {
@@ -79,7 +80,7 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
             _id: new Types.ObjectId(billId),
             canteenId: new Types.ObjectId(contractor.canteenId),
         },
-        { paid: true, paidOn: new Date() },
+        { paid: true, paidOn: moment().toDate() },
         { new: true }
     );
     if (!bill) {
@@ -90,25 +91,26 @@ const markPaid = tryCatch('mark bill paid', async (req, res) => {
 
 // todo: PENDING
 
-const generateBill = tryCatch('generate bill for student', async (req, res) => {
-    const { studentId } = req.params;
-    const contractor = req.user;
-});
+// generate bill for a specific student in mid of a month
+const generateBill = tryCatch(
+    'generate bill for student',
+    async (req, res) => {}
+);
 
 // generate bills for the previous month
 const generateBills = tryCatch('generate bills', async (req, res) => {
-    const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const month = lastMonth.getMonth();
-    const year = lastMonth.getFullYear();
+    const now = moment();
+    const lastMonth = now.clone().subtract(1, 'month');
+    const month = lastMonth.month();
+    const year = lastMonth.year();
 
     const studentsWithOrders = await Order.aggregate([
         {
             $match: {
                 status: 'PickedUp',
                 createdAt: {
-                    $gte: new Date(year, month - 1, 1),
-                    $lt: new Date(year, month, 1),
+                    $gte: lastMonth.clone().startOf('month').toDate(),
+                    $lt: lastMonth.clone().endOf('month').toDate(),
                 },
             },
         },
@@ -154,8 +156,8 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
 const cleanOldBillsAndOrders = tryCatch(
     'cleanup old bills and orders',
     async () => {
-        const now = new Date();
-        const isJan1 = now.getMonth() === 0 && now.getDate() === 1;
+        const now = moment();
+        const isJan1 = now.month() === 0 && now.date() === 1;
 
         if (!isJan1) {
             console.log('🧹 Not January 1st - skipping cleanup');
@@ -174,7 +176,7 @@ const cleanOldBillsAndOrders = tryCatch(
             Order.deleteMany({ billId: { $in: paidBillIds } }),
         ]);
 
-        console.log(`🧹 Cleanup completed for ${targetYear}`);
+        console.log(`🧹 Cleanup completed for ${now.year()}`);
     }
 );
 

@@ -1,25 +1,13 @@
 import { fetchWrapper } from '../Utils';
 
 class AdminService {
-    async registerCanteen({
-        fullName,
-        phoneNumber,
-        email,
-        hostel,
-        kitchenKey,
-    }) {
+    async registerCanteen({ fullName, phoneNumber, email, hostel }) {
         return await fetchWrapper({
             endPoint: `/admins/canteen/register`,
             method: 'POST',
             aim: 'register',
             credentials: 'include',
-            body: {
-                fullName,
-                email,
-                phoneNumber,
-                hostel,
-                kitchenKey,
-            },
+            body: { fullName, email, phoneNumber, hostel },
         });
     }
 

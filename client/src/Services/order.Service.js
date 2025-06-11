@@ -35,9 +35,9 @@ class OrderService {
         });
     }
 
-    async getCanteenOrders(status, canteenId, page, limit, signal) {
+    async getCanteenOrders(status, canteenId, date, page, limit, signal) {
         return await fetchWrapper({
-            endPoint: `/orders/canteen/${canteenId}?limit=${limit}&page=${page}&status=${status}`,
+            endPoint: `/orders/canteen/${canteenId}?limit=${limit}&page=${page}&status=${status}&date=${date}`,
             method: 'GET',
             signal,
             credentials: 'include',
@@ -67,9 +67,9 @@ class OrderService {
         });
     }
 
-    async getOrderStats(canteenId, signal) {
+    async getOrderStats(canteenId, date, signal) {
         return await fetchWrapper({
-            endPoint: `/orders/stats/${canteenId}`,
+            endPoint: `/orders/stats/${canteenId}?date=${date}`,
             method: 'GET',
             signal,
             credentials: 'include',

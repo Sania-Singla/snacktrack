@@ -3,10 +3,14 @@ import { useEffect, useState } from 'react';
 import { orderService } from '../Services';
 import { useUserContext, useOrderContext } from '../Contexts';
 import { icons } from '../Assets/icons';
-import { Button, Filter, StudentOrderCard } from '../Components';
+import {
+    Button,
+    CalendarFilter,
+    Filter,
+    StudentOrderCard,
+} from '../Components';
 import { paginate, checkTokenExpired } from '../Utils';
 import { LIMIT } from '../Constants/constants';
-import CalendarFilter from '../Components/General/CalenderFilter';
 
 export default function StudentOrdersPage() {
     const { setStudentOrders, studentOrders } = useOrderContext();

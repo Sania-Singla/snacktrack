@@ -1,7 +1,42 @@
-import { OK } from '../Constants/index.js';
+import { FORBIDDEN, OK } from '../Constants/index.js';
 import { tryCatch } from '../Utils/index.js';
 import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
+import moment from 'moment';
+
+const checkAvailability = tryCatch('check availability', async (req, res) => {
+    const { cartItems } = req.body;
+
+    const [snacks, packagedItems] = await Promise.all([
+        Snack.find({
+            _id: {
+                $in: cartItems
+                    .filter((i) => i.type === 'Snack')
+                    .map((i) => i._id),
+            },
+            isAvailable: true,
+        }),
+        PackagedFood.find({
+            _id: {
+                $in: cartItems
+                    .filter((i) => i.type !== 'Snack')
+                    .map((i) => i._id),
+            },
+            isAvailable: true,
+        }),
+    ]);
+
+    // Filter available items
+    const availableItems = cartItems.filter((i) => {
+        if (i.type === 'Snack') {
+            return snacks.some((s) => s._id.equals(i._id));
+        } else {
+            return packagedItems.some((p) => p._id.equals(i._id));
+        }
+    });
+
+    return res.status(OK).json(availableItems);
+});
 
 const placeOrder = tryCatch('place order', async (req, res) => {
     const { cartItems, amount, packingCharges } = req.body;
@@ -48,15 +83,29 @@ const updateOrderStatus = tryCatch(
         const { status } = req.query;
         const contractor = req.user;
 
-        const order = await Order.findOneAndUpdate(
-            {
-                _id: new Types.ObjectId(orderId),
-                canteenId: new Types.ObjectId(contractor.canteenId),
-            },
-            { $set: { status } },
-            { new: true }
-        );
+        // only allow the order status to be updated on the same date
+
+        const order = await Order.findOne({
+            _id: new Types.ObjectId(orderId),
+            canteenId: new Types.ObjectId(contractor.canteenId),
+        });
+
         if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
+
+        const orderDate = moment(order.createdAt).startOf('day').utc();
+        const todayDate = moment().startOf('day').utc();
+
+        if (!orderDate.isSame(todayDate)) {
+            return next(
+                new ErrorHandler(
+                    "You can only update the order status for today's orders",
+                    FORBIDDEN
+                )
+            );
+        }
+
+        order.status = status;
+        await order.save();
 
         return res
             .status(OK)
@@ -64,22 +113,21 @@ const updateOrderStatus = tryCatch(
     }
 );
 
-// TODO: date wise also
-
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     const { limit = 10, page = 1, month } = req.query;
     const { studentId } = req.params;
 
-    // get timestamp of the first day of the month in utc
-    const monthIndex = parseInt(month, 10) - 1; // 0-based for JS Date()
-    const currentYear = new Date().getUTCFullYear();
+    const monthIndex = parseInt(month, 10) - 1;
+    const currentYear = moment().utc().year();
 
-    const startDate = new Date(
-        Date.UTC(currentYear, monthIndex, 1, 0, 0, 0, 0)
-    );
-    const endDate = new Date(
-        Date.UTC(currentYear, monthIndex + 1, 0, 23, 59, 59, 999)
-    );
+    const startDate = moment({ year: currentYear, month: monthIndex, day: 1 })
+        .startOf('day')
+        .utc()
+        .toDate();
+    const endDate = moment({ year: currentYear, month: monthIndex + 1, day: 0 })
+        .endOf('day')
+        .utc()
+        .toDate();
 
     const result = await Order.aggregatePaginate(
         [
@@ -179,20 +227,27 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     );
 });
 
-// today's only
+// any date (by default today)
 const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     const { limit = 10, page = 1, status = 'Pending' } = req.query;
-    const canteenId = req.user.canteenId; // contractor
+    let { date } = req.query;
+
+    const parsedDate =
+        !date || !moment(date, 'YYYY-MM-DD', true).isValid()
+            ? moment()
+            : moment(date);
+
+    const startOfDay = parsedDate.clone().startOf('day').utc().toDate();
+    const endOfDay = parsedDate.clone().endOf('day').utc().toDate();
+
+    const canteenId = req.user.canteenId;
 
     const result = await Order.aggregatePaginate(
         [
             {
                 $match: {
                     canteenId: new Types.ObjectId(canteenId),
-                    createdAt: {
-                        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-                    },
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
                     status,
                 },
             },
@@ -202,7 +257,6 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                     from: 'students',
                     localField: 'studentId',
                     foreignField: '_id',
-                    as: 'studentInfo',
                     pipeline: [
                         {
                             $project: {
@@ -214,6 +268,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                             },
                         },
                     ],
+                    as: 'studentInfo',
                 },
             },
             {
@@ -221,8 +276,8 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                     from: 'snacks',
                     localField: 'items.id',
                     foreignField: '_id',
-                    as: 'snackDetails',
                     pipeline: [{ $project: { name: 1, image: 1 } }],
+                    as: 'snack',
                 },
             },
             {
@@ -230,40 +285,23 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                     from: 'packagedfoods',
                     localField: 'items.id',
                     foreignField: '_id',
-                    as: 'packagedFoodDetails',
                     pipeline: [{ $project: { name: 1 } }],
+                    as: 'packaged',
                 },
             },
             {
                 $addFields: {
                     'items.name': {
-                        $switch: {
-                            branches: [
-                                {
-                                    case: { $eq: ['$items.type', 'Snack'] },
-                                    then: {
-                                        $arrayElemAt: ['$snackDetails.name', 0],
-                                    },
-                                },
-                                {
-                                    case: {
-                                        $eq: ['$items.type', 'PackagedFood'],
-                                    },
-                                    then: {
-                                        $arrayElemAt: [
-                                            '$packagedFoodDetails.name',
-                                            0,
-                                        ],
-                                    },
-                                },
-                            ],
-                            default: null,
-                        },
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $arrayElemAt: ['$snack.name', 0] },
+                            { $arrayElemAt: ['$packaged.name', 0] },
+                        ],
                     },
                     'items.image': {
                         $cond: [
                             { $eq: ['$items.type', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.image', 0] },
+                            { $arrayElemAt: ['$snack.image', 0] },
                             null,
                         ],
                     },
@@ -285,7 +323,6 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                     },
                 },
             },
-            { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
         ],
         {
             page: parseInt(page),
@@ -310,14 +347,21 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
 
 const getOrderStats = tryCatch('get order stats', async (req, res) => {
     const { canteenId } = req.params;
+    let { date } = req.query;
+
+    const parsedDate =
+        !date || !moment(date, 'YYYY-MM-DD', true).isValid()
+            ? moment()
+            : moment(date);
+
+    const startOfDay = parsedDate.clone().startOf('day').utc().toDate();
+    const endOfDay = parsedDate.clone().endOf('day').utc().toDate();
+
     const stats = await Order.aggregate([
         {
             $match: {
                 canteenId: new Types.ObjectId(canteenId),
-                createdAt: {
-                    $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                    $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-                },
+                createdAt: { $gte: startOfDay, $lt: endOfDay },
             },
         },
         {
@@ -355,16 +399,16 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
 const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
     const { canteenId } = req;
 
+    const startOfDay = moment().startOf('day').utc().toDate();
+    const endOfDay = moment().endOf('day').utc().toDate();
+
     // Fetch today's orders from this canteen
     const orders = await Order.aggregatePaginate(
         [
             {
                 $match: {
                     canteenId: new Types.ObjectId(canteenId),
-                    createdAt: {
-                        $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                        $lt: new Date(new Date().setHours(23, 59, 59, 999)),
-                    },
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
                     status: 'Pending',
                 },
             },
@@ -406,41 +450,7 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
         { sort: { createdAt: 1 } }
     );
 
-    return res.status(OK).json({ canteenId, orders: orders.docs });
-});
-
-const checkAvailability = tryCatch('check availability', async (req, res) => {
-    const { cartItems } = req.body;
-
-    const [snacks, packagedItems] = await Promise.all([
-        Snack.find({
-            _id: {
-                $in: cartItems
-                    .filter((i) => i.type === 'Snack')
-                    .map((i) => i._id),
-            },
-            isAvailable: true,
-        }),
-        PackagedFood.find({
-            _id: {
-                $in: cartItems
-                    .filter((i) => i.type !== 'Snack')
-                    .map((i) => i._id),
-            },
-            isAvailable: true,
-        }),
-    ]);
-
-    // Filter available items
-    const availableItems = cartItems.filter((i) => {
-        if (i.type === 'Snack') {
-            return snacks.some((s) => s._id.equals(i._id));
-        } else {
-            return packagedItems.some((p) => p._id.equals(i._id));
-        }
-    });
-
-    return res.status(OK).json(availableItems);
+    return res.status(OK).json(orders.docs);
 });
 
 export {

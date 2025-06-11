@@ -14,6 +14,7 @@ const SocketContextProvider = ({ children }) => {
         setPendingOrders,
         setPreparedCount,
         setKitchenOrders,
+        setStats,
     } = useOrderContext();
 
     function connectSocket() {
@@ -53,6 +54,11 @@ const SocketContextProvider = ({ children }) => {
                     items: order.items.filter((i) => i.type === 'packagedFood'),
                 })
             );
+            setStats((prev) => ({
+                ...prev,
+                total: prev.total + 1,
+                pending: prev.pending + 1,
+            }));
         });
 
         socketInstance.on('orderRejected', (order) => {
@@ -62,6 +68,11 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'Rejected' } : o
                 )
             );
+            setStats((prev) => ({
+                ...prev,
+                pending: prev.pending - 1,
+                rejected: prev.rejected + 1,
+            }));
         });
 
         socketInstance.on('orderPrepared', (order) => {
@@ -71,6 +82,11 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'Prepared' } : o
                 )
             );
+            setStats((prev) => ({
+                ...prev,
+                pending: prev.pending - 1,
+                prepared: prev.prepared + 1,
+            }));
         });
 
         socketInstance.on('orderPickedUp', (order) => {
@@ -80,6 +96,11 @@ const SocketContextProvider = ({ children }) => {
                     o._id === order._id ? { ...o, status: 'PickedUp' } : o
                 )
             );
+            setStats((prev) => ({
+                ...prev,
+                prepared: prev.prepared - 1,
+                pickedUp: prev.pickedUp + 1,
+            }));
 
             setPreparedCount((prev) => {
                 const newCount = { ...prev };

@@ -14,8 +14,8 @@ export default function CalendarFilter({ queryParamName = 'date', month }) {
     const handleDateChange = (date) => {
         const params = new URLSearchParams(searchParams);
         if (date) {
-            const isoDate = date.toISOString().split('T')[0];
-            params.set(queryParamName, isoDate);
+            const localDate = date.toLocaleDateString('en-CA'); // 'YYYY-MM-DD' local date string
+            params.set(queryParamName, localDate);
         } else {
             params.delete(queryParamName);
         }
