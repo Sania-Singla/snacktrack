@@ -32,9 +32,6 @@ export default function BillCard({ bill }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            onClick={() =>
-                navigate(`/orders/${studentInfo._id}?filter=${month}`)
-            }
             className="bg-white p-3 cursor-pointer rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit border border-gray-200"
         >
             <div className="flex justify-between w-full h-full">

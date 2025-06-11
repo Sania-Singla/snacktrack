@@ -123,6 +123,18 @@ const SocketContextProvider = ({ children }) => {
                 localStorage.setItem('preparedCount', JSON.stringify(newState));
                 return newState;
             });
+
+            // check if these matches some order
+            // setPendingOrders((prev) =>
+            //     prev.map((o) => {
+            //         if (o._id === orderId  ) {
+            //             return {
+            //                 ...o,
+            //                 status: 'Prepared',
+            //             };
+            //         } else return o;
+            //     })
+            // );
         });
 
         return socketInstance;

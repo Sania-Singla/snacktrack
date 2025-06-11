@@ -24,7 +24,6 @@ class OrderService {
         });
     }
 
-    // todo: date wise filter
     async getStudentOrders(studentId, month, page, limit, signal) {
         return await fetchWrapper({
             endPoint: `/orders/student/${studentId}?month=${month}&page=${page}&limit=${limit}`,

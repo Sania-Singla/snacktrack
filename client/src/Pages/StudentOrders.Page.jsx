@@ -21,8 +21,7 @@ export default function StudentOrdersPage() {
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
     const [searchParams, setSearchParams] = useSearchParams();
-    const monthFilter =
-        parseInt(searchParams.get('month')) || new Date().getMonth() + 1;
+    const monthFilter = searchParams.get('month') || new Date().getMonth() + 1;
     let dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
 
     const months = [
@@ -55,7 +54,6 @@ export default function StudentOrdersPage() {
                     searchParams.delete('date');
                     setSearchParams(searchParams);
                 }
-
                 const res = await orderService.getStudentOrders(
                     studentId,
                     monthFilter,
@@ -78,7 +76,7 @@ export default function StudentOrdersPage() {
 
     useEffect(() => {
         if (page === 1) return; // Already handled in filter use effect
-        
+
         const controller = new AbortController();
         const signal = controller.signal;
 
@@ -107,9 +105,9 @@ export default function StudentOrdersPage() {
 
     const filteredOrders = dateFilter
         ? studentOrders.filter((order) => {
-              const orderDate = new Date(order.createdAt)
-                  .toISOString()
-                  .split('T')[0];
+              const orderDate = new Date(order.createdAt).toLocaleDateString(
+                  'en-CA'
+              ); // Format: 'YYYY-MM-DD'
               return orderDate === dateFilter;
           })
         : studentOrders;

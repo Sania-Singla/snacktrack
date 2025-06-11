@@ -103,40 +103,44 @@ export default function KitchenPage() {
     const itemSummary = useMemo(() => {
         const summary = {};
         kitchenOrders.forEach(({ items, _id: orderId }) => {
-            items.forEach(({ quantity, name, itemId, specialInstructions }) => {
-                const itemKey = `${itemId}-${orderId}`;
-                const count = preparedCount[itemKey] || 0;
-                const remaining = quantity - count;
+            items.forEach(
+                ({ quantity, name, _id: itemId, specialInstructions }) => {
+                    const itemKey = `${itemId}-${orderId}`;
+                    const count = preparedCount[itemKey] || 0;
+                    const remaining = quantity - count;
 
-                if (remaining > 0) {
-                    if (summary[name]) {
-                        summary[name].quantity += remaining;
-                        summary[name].itemId = itemId;
-                        summary[name].orderId = orderId;
+                    if (remaining > 0) {
+                        if (summary[name]) {
+                            summary[name].quantity += remaining;
+                            summary[name].itemId = itemId;
+                            summary[name].orderId = orderId;
 
-                        if (specialInstructions) {
-                            if (!summary[name].instructions) {
-                                summary[name].instructions = {};
-                            }
-                            summary[name].instructions[specialInstructions] =
-                                (summary[name].instructions[
+                            if (specialInstructions) {
+                                if (!summary[name].instructions) {
+                                    summary[name].instructions = {};
+                                }
+                                summary[name].instructions[
                                     specialInstructions
-                                ] || 0) + remaining;
-                        }
-                    } else {
-                        summary[name] = {
-                            quantity: remaining,
-                            itemId,
-                            orderId,
-                        };
-                        if (specialInstructions) {
-                            summary[name].instructions = {
-                                [specialInstructions]: remaining,
+                                ] =
+                                    (summary[name].instructions[
+                                        specialInstructions
+                                    ] || 0) + remaining;
+                            }
+                        } else {
+                            summary[name] = {
+                                quantity: remaining,
+                                itemId,
+                                orderId,
                             };
+                            if (specialInstructions) {
+                                summary[name].instructions = {
+                                    [specialInstructions]: remaining,
+                                };
+                            }
                         }
                     }
                 }
-            });
+            );
         });
         return summary;
     }, [kitchenOrders, preparedCount]);

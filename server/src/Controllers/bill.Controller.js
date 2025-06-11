@@ -110,7 +110,7 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
                 status: 'PickedUp',
                 createdAt: {
                     $gte: lastMonth.clone().startOf('month').toDate(),
-                    $lt: lastMonth.clone().endOf('month').toDate(),
+                    $lte: lastMonth.clone().endOf('month').toDate(),
                 },
             },
         },

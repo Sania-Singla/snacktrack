@@ -1,4 +1,4 @@
-import { FORBIDDEN, OK } from '../Constants/index.js';
+import { FORBIDDEN, OK, NOT_FOUND } from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
@@ -26,7 +26,6 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
         }),
     ]);
 
-    // Filter available items
     const availableItems = cartItems.filter((i) => {
         if (i.type === 'Snack') {
             return snacks.some((s) => s._id.equals(i._id));
@@ -59,13 +58,9 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         packingCharges,
     });
 
-    const populatedOrder = {
+    const data = {
         ...order.toObject(),
         items: cartItems,
-    };
-
-    const data = {
-        ...populatedOrder,
         studentInfo: {
             fullName: student.fullName,
             phoneNumber: student.phoneNumber,
@@ -73,6 +68,7 @@ const placeOrder = tryCatch('place order', async (req, res) => {
             userName: student.userName,
         },
     };
+
     return res.status(OK).json(data);
 });
 
@@ -83,8 +79,6 @@ const updateOrderStatus = tryCatch(
         const { status } = req.query;
         const contractor = req.user;
 
-        // only allow the order status to be updated on the same date
-
         const order = await Order.findOne({
             _id: new Types.ObjectId(orderId),
             canteenId: new Types.ObjectId(contractor.canteenId),
@@ -92,8 +86,8 @@ const updateOrderStatus = tryCatch(
 
         if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
 
-        const orderDate = moment(order.createdAt).startOf('day').utc();
-        const todayDate = moment().startOf('day').utc();
+        const orderDate = moment.utc(order.createdAt).startOf('day');
+        const todayDate = moment.utc().startOf('day');
 
         if (!orderDate.isSame(todayDate)) {
             return next(new ErrorHandler('too late', FORBIDDEN));
@@ -113,15 +107,17 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     const { studentId } = req.params;
 
     const monthIndex = parseInt(month, 10) - 1;
-    const currentYear = moment().utc().year();
+    const currentYear = moment.utc().year();
 
-    const startDate = moment({ year: currentYear, month: monthIndex, day: 1 })
+    const startDate = moment
+        .utc({ year: currentYear, month: monthIndex, day: 1 })
         .startOf('day')
-        .utc()
         .toDate();
-    const endDate = moment({ year: currentYear, month: monthIndex + 1, day: 0 })
+
+    const endDate = moment
+        .utc({ year: currentYear, month: monthIndex })
+        .endOf('month')
         .endOf('day')
-        .utc()
         .toDate();
 
     const result = await Order.aggregatePaginate(
@@ -222,18 +218,17 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
     );
 });
 
-// any date (by default today)
 const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     const { limit = 10, page = 1, status = 'Pending' } = req.query;
     let { date } = req.query;
 
     const parsedDate =
         !date || !moment(date, 'YYYY-MM-DD', true).isValid()
-            ? moment()
-            : moment(date);
+            ? moment.utc()
+            : moment.utc(date);
 
-    const startOfDay = parsedDate.clone().startOf('day').utc().toDate();
-    const endOfDay = parsedDate.clone().endOf('day').utc().toDate();
+    const startOfDay = parsedDate.clone().startOf('day').toDate();
+    const endOfDay = parsedDate.clone().endOf('day').toDate();
 
     const canteenId = req.user.canteenId;
 
@@ -346,11 +341,11 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
 
     const parsedDate =
         !date || !moment(date, 'YYYY-MM-DD', true).isValid()
-            ? moment()
-            : moment(date);
+            ? moment.utc()
+            : moment.utc(date);
 
-    const startOfDay = parsedDate.clone().startOf('day').utc().toDate();
-    const endOfDay = parsedDate.clone().endOf('day').utc().toDate();
+    const startOfDay = parsedDate.clone().startOf('day').toDate();
+    const endOfDay = parsedDate.clone().endOf('day').toDate();
 
     const stats = await Order.aggregate([
         {
@@ -390,14 +385,12 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
     return res.status(OK).json(result);
 });
 
-// for kitchen page
 const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
     const { canteenId } = req;
 
-    const startOfDay = moment().startOf('day').utc().toDate();
-    const endOfDay = moment().endOf('day').utc().toDate();
+    const startOfDay = moment.utc().startOf('day').toDate();
+    const endOfDay = moment.utc().endOf('day').toDate();
 
-    // Fetch today's orders from this canteen
     const orders = await Order.aggregatePaginate(
         [
             {
