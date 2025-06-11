@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
+import { usePopupContext } from '../Contexts';
 
 export default function AdminPage() {
     const [canteens, setCanteens] = useState([]);
@@ -13,6 +14,7 @@ export default function AdminPage() {
     const [key, setKey] = useState('');
     const [verifying, setVerifying] = useState(false);
     const [showKey, setShowKey] = useState(false);
+    const { setShowPopup, setPopupInfo } = usePopupContext();
 
     useEffect(() => {
         (async function () {
@@ -59,31 +61,43 @@ export default function AdminPage() {
                         {canteen.hostelType} {canteen.hostelNumber}
                     </p>
                 </div>
-
                 {/* Contractor Details */}
-                <div className="flex items-center gap-4">
-                    <div>
-                        <div className="size-14 rounded-full overflow-hidden">
-                            <img
-                                src={canteen.contractor.avatar}
-                                alt={canteen.contractor.fullName}
-                                className="size-full object-cover"
-                            />
+                <div className="flex justify-between items-center gap-4">
+                    <div className="flex items-center gap-4">
+                        <div>
+                            <div className="size-14 rounded-full overflow-hidden">
+                                <img
+                                    src={canteen.contractor.avatar}
+                                    alt={canteen.contractor.fullName}
+                                    className="size-full object-cover"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-lg font-semibold text-gray-900">
+                                {canteen.contractor.fullName}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                                <span className="font-medium">Email:</span>{' '}
+                                {canteen.contractor.email}
+                            </p>
+                            <p className="text-sm  text-gray-700">
+                                <span className="font-medium">Phone:</span>{' '}
+                                {canteen.contractor.phoneNumber}
+                            </p>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-lg font-semibold text-gray-900">
-                            {canteen.contractor.fullName}
-                        </p>
-                        <p className="text-sm text-gray-700">
-                            <span className="font-medium">Email:</span>{' '}
-                            {canteen.contractor.email}
-                        </p>
-                        <p className="text-sm  text-gray-700">
-                            <span className="font-medium">Phone:</span>{' '}
-                            {canteen.contractor.phoneNumber}
-                        </p>
-                    </div>
+                    <Button
+                        onClick={() => {
+                            setShowPopup(true);
+                            setPopupInfo({
+                                type: 'editContractor',
+                                contractor: canteen.contractor,
+                            });
+                        }}
+                        btnText={icons.edit}
+                        className="size-4"
+                    />
                 </div>
             </div>
         ));

@@ -136,18 +136,13 @@ const verifyCode = tryCatch('verify email', async (req, res) => {
 
 const updateContractor = tryCatch('update contractor', async (req, res) => {
     const { contractorId } = req.params;
-    const { resetAvatar } = req.query;
-    const { fullName, phoneNumber, email, kitchenKey } = req.body;
+    const { fullName, phoneNumber, email } = req.body;
 
-    if (!fullName || !phoneNumber || !email || !kitchenKey) {
+    if (!fullName || !phoneNumber || !email) {
         return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
     }
 
     const contractor = await Contractor.findById(contractorId);
-
-    const oldKitchenKey = contractor.kitchenKey;
-    const canteenId = oldKitchenKey.split('-');
-    const newKitchenKey = canteenId + '-' + kitchenKey.trim();
 
     let alreadyExists = null;
 
@@ -162,24 +157,67 @@ const updateContractor = tryCatch('update contractor', async (req, res) => {
         return next(new ErrorHandler('contractor already exists', BAD_REQUEST));
     }
 
-    const newContractor = Contractor.findbyIdAndUpdate(
+    const updatedContractor = await Contractor.findByIdAndUpdate(
         contractorId,
         {
             $set: {
                 fullName,
                 phoneNumber,
                 email,
-                kitchenKey: newKitchenKey,
-                avatar: resetAvatar
-                    ? USER_PLACEHOLDER_IMAGE_URL
-                    : contractor.avatar,
             },
         },
         { new: true }
     );
 
-    return res.status(OK).json(newContractor);
+    return res.status(OK).json(updatedContractor);
 });
+
+// const chnageContractor = tryCatch('update contractor', async (req, res) => {
+//     const { contractorId } = req.params;
+//     const { resetAvatar } = req.query;
+//     const { fullName, phoneNumber, email, kitchenKey } = req.body;
+
+//     if (!fullName || !phoneNumber || !email || !kitchenKey) {
+//         return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
+//     }
+
+//     const contractor = await Contractor.findById(contractorId);
+
+//     const oldKitchenKey = contractor.kitchenKey;
+//     const canteenId = oldKitchenKey.split('-');
+//     const newKitchenKey = canteenId + '-' + kitchenKey.trim();
+
+//     let alreadyExists = null;
+
+//     if (contractor.phoneNumber !== phoneNumber) {
+//         alreadyExists = await Contractor.findOne({ phoneNumber });
+//     } else if (contractor.email !== email.toLowerCase()) {
+//         alreadyExists = await Contractor.findOne({
+//             email: email.toLowerCase(),
+//         });
+//     }
+//     if (alreadyExists) {
+//         return next(new ErrorHandler('contractor already exists', BAD_REQUEST));
+//     }
+
+//     const newContractor = Contractor.findbyIdAndUpdate(
+//         contractorId,
+//         {
+//             $set: {
+//                 fullName,
+//                 phoneNumber,
+//                 email,
+//                 kitchenKey: newKitchenKey,
+//                 avatar: resetAvatar
+//                     ? USER_PLACEHOLDER_IMAGE_URL
+//                     : contractor.avatar,
+//             },
+//         },
+//         { new: true }
+//     );
+
+//     return res.status(OK).json(newContractor);
+// });
 
 const getContractors = tryCatch('get contractors', async (req, res) => {
     const canteens = await Canteen.aggregate([

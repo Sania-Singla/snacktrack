@@ -43,24 +43,13 @@ class AdminService {
         });
     }
 
-    async updateContractor({
-        fullName,
-        phoneNumber,
-        email,
-        kitchenKey,
-        resetAvatar = '',
-    }) {
+    async updateContractor(inputs) {
         return await fetchWrapper({
-            endPoint: `/admins/contractor?query=${resetAvatar}`,
+            endPoint: `/admins/contractor/${inputs.contractorId}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateContractor',
-            body: {
-                fullName,
-                phoneNumber,
-                email,
-                kitchenKey,
-            },
+            body: inputs,
         });
     }
 
