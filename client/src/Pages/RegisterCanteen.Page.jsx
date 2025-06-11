@@ -69,7 +69,7 @@ export default function RegisterCanteenPage() {
                     },
                 });
             }
-            setSendingMail(true);
+            setSendingMail(false);
         } catch (err) {
             toast.error('Failed to send verification email');
         }

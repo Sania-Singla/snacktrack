@@ -78,7 +78,7 @@ const registerCanteen = tryCatch(
 
         const randomPassword = nanoid(8); // unique temporary random password
 
-        // password & kitchenKey hashing auto done by pre hooks 
+        // password & kitchenKey hashing auto done by pre hooks
         const contractor = await Contractor.create({
             fullName,
             email,
@@ -101,8 +101,8 @@ const registerCanteen = tryCatch(
                 Hello ${fullName}, <br>
                 Welcome to SnackTrack! <br>
                 You are now the manager of the canteen of Hostel: ${hostel.hostelType}${hostel.hostelNumber}-${hostel.hostelName}. <br>
-                Your password is <b>${randomPassword}</b> <br>
-                Your Kitchen Key is <b>${randomkitchenKey}</b> <br>
+                Your Temporary password is <b>${randomPassword}</b> <br>
+                Your Temporary Kitchen Key is <b>${randomkitchenKey}</b> <br>
                 <i>*These values can be updated anytime after logging in from settings.*</i> <br>
             `,
         });
