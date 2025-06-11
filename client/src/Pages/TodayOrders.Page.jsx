@@ -1,19 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import {
-    PendingOrders,
-    Filter,
-    Orders,
-    Button,
-    CalendarFilter,
-} from '../Components';
+import { PendingOrders, Orders, Button, CalendarFilter } from '../Components';
 import { toggleAudio, getAudioState, subscribeToAudioChanges } from '../Utils';
 import { useOrderContext, useUserContext } from '../Contexts';
 import toast from 'react-hot-toast';
 import { orderService } from '../Services';
 
 export default function TodayOrdersPage() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const { audioEnabled, setAudioEnabled, user } = useUserContext();
     const { stats, setStats } = useOrderContext();
     const [loading, setLoading] = useState(true);
@@ -25,13 +19,6 @@ export default function TodayOrdersPage() {
         setAudioEnabled(getAudioState());
         return subscribeToAudioChanges((enabled) => setAudioEnabled(enabled));
     }, []);
-
-    const options = [
-        { value: 'Pending', label: 'Pending' },
-        { value: 'PickedUp', label: 'Completed' },
-        { value: 'Rejected', label: 'Rejected' },
-        { value: 'Prepared', label: 'Prepared' },
-    ];
 
     useEffect(() => {
         const controller = new AbortController();
@@ -54,6 +41,13 @@ export default function TodayOrdersPage() {
 
         return () => controller.abort();
     }, [dateFilter]);
+
+    function handleStatusClick(status) {
+        if (statusFilter === status) return; // do nothing
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('status', status);
+        setSearchParams(newParams);
+    }
 
     return (
         <div className="w-full sm:p-4">
@@ -88,11 +82,6 @@ export default function TodayOrdersPage() {
                         )}
                     </div>
                     <CalendarFilter />
-                    <Filter
-                        options={options}
-                        defaultOption={statusFilter}
-                        queryParamName="status"
-                    />
                 </div>
             </div>
 
@@ -101,9 +90,12 @@ export default function TodayOrdersPage() {
             ) : (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     {/* Pending Orders */}
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div
+                        onClick={() => handleStatusClick('Pending')}
+                        className="bg-white p-4 cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
+                    >
                         <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-base font-medium text-gray-800">
+                            <h3 className="text-lg font-medium text-gray-800">
                                 Pending
                             </h3>
                             <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
@@ -121,9 +113,12 @@ export default function TodayOrdersPage() {
                     </div>
 
                     {/* Prepared Orders */}
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div
+                        onClick={() => handleStatusClick('Prepared')}
+                        className="bg-white p-4 cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
+                    >
                         <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-base font-medium text-gray-800">
+                            <h3 className="text-lg font-medium text-gray-800">
                                 Prepared
                             </h3>
                             <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
@@ -141,9 +136,12 @@ export default function TodayOrdersPage() {
                     </div>
 
                     {/* Picked Up Orders */}
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div
+                        onClick={() => handleStatusClick('PickedUp')}
+                        className="bg-white p-4 cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
+                    >
                         <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-base font-medium text-gray-800">
+                            <h3 className="text-lg font-medium text-gray-800">
                                 Completed
                             </h3>
                             <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
@@ -161,9 +159,12 @@ export default function TodayOrdersPage() {
                     </div>
 
                     {/* Rejected Orders */}
-                    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div
+                        onClick={() => handleStatusClick('Rejected')}
+                        className="bg-white p-4 cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
+                    >
                         <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-base font-medium text-gray-800">
+                            <h3 className="text-lg font-medium text-gray-800">
                                 Rejected
                             </h3>
                             <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">

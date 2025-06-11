@@ -51,7 +51,7 @@ const SocketContextProvider = ({ children }) => {
             setKitchenOrders((prev) =>
                 prev.concat({
                     ...order,
-                    items: order.items.filter((i) => i.type === 'packagedFood'),
+                    items: order.items.filter((i) => i.type !== 'packagedFood'),
                 })
             );
             setStats((prev) => ({

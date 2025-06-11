@@ -1,5 +1,5 @@
 import { FORBIDDEN, OK } from '../Constants/index.js';
-import { tryCatch } from '../Utils/index.js';
+import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment';
@@ -96,12 +96,7 @@ const updateOrderStatus = tryCatch(
         const todayDate = moment().startOf('day').utc();
 
         if (!orderDate.isSame(todayDate)) {
-            return next(
-                new ErrorHandler(
-                    "You can only update the order status for today's orders",
-                    FORBIDDEN
-                )
-            );
+            return next(new ErrorHandler('too late', FORBIDDEN));
         }
 
         order.status = status;
@@ -450,7 +445,7 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
         { sort: { createdAt: 1 } }
     );
 
-    return res.status(OK).json(orders.docs);
+    return res.status(OK).json({ orders: orders.docs });
 });
 
 export {

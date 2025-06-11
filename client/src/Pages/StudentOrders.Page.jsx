@@ -78,6 +78,7 @@ export default function StudentOrdersPage() {
 
     useEffect(() => {
         if (page === 1) return; // Already handled in filter use effect
+        
         const controller = new AbortController();
         const signal = controller.signal;
 
