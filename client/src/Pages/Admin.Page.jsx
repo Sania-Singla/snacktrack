@@ -62,7 +62,7 @@ export default function AdminPage() {
                     </p>
                 </div>
                 {/* Contractor Details */}
-                <div className="flex justify-between items-center gap-4">
+                <div className="relative mb-2">
                     <div className="flex items-center gap-4">
                         <div>
                             <div className="size-14 rounded-full overflow-hidden">
@@ -87,7 +87,7 @@ export default function AdminPage() {
                             </p>
                         </div>
                     </div>
-                    <div className="flex flex-col gap-6">
+                    <div className="absolute right-0 -top-1 flex flex-col gap-4">
                         <Button
                             btnText={
                                 <div className="size-[15px] group-hover:fill-[#4977ec]">
