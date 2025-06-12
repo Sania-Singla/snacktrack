@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
 import { useSocketContext, useUserContext } from '../../Contexts';
+import toast from 'react-hot-toast';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -21,8 +22,7 @@ export default function ContractorOrderCard({ order, reference }) {
             setStatusOptions([
                 { value: '', label: 'Pending' },
                 { value: 'Prepared', label: 'Prepared' },
-                { value: 'Rejected', label: 'Reject' },
-                { value: 'PickedUp', label: 'Picked Up' },
+                { value: 'Rejected', label: 'Rejected' },
             ]);
         } else {
             setStatusOptions([
@@ -40,6 +40,10 @@ export default function ContractorOrderCard({ order, reference }) {
             if (res && res.message === 'order status updated successfully') {
                 setStatus(status);
                 socket.emit(`order${status}`, order);
+            } else if (res && res.message === 'too late') {
+                toast.error(
+                    'You cannot change the status of this order anymore.'
+                );
             } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');
@@ -148,15 +152,14 @@ export default function ContractorOrderCard({ order, reference }) {
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
-                                                    {item.type ===
-                                                    'Snack' ? (
+                                                    {item.type === 'Snack' ? (
                                                         <img
                                                             src={item.image}
                                                             alt={`${item.name} image`}
                                                             className="object-cover size-full"
                                                         />
                                                     ) : (
-                                                        <div className="size-5 text-gray-400">
+                                                        <div className="size-5 stroke-gray-800">
                                                             {icons.soda}
                                                         </div>
                                                     )}

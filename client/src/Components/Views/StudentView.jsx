@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Button, StudentBillCard } from '..';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
@@ -10,6 +11,7 @@ export default function StudentView({ student, reference }) {
         student;
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const [expanded, setExpanded] = useState(false);
+    const navigate = useNavigate();
 
     async function removeStudent() {
         setPopupInfo({ type: 'removeStudent', student });
@@ -20,6 +22,8 @@ export default function StudentView({ student, reference }) {
         setPopupInfo({ type: 'editStudent', student });
         setShowPopup(true);
     }
+
+    const month = new Date().getMonth() + 1; // Current month
 
     return (
         <div
@@ -74,18 +78,35 @@ export default function StudentView({ student, reference }) {
                         </div>
                     </div>
 
-                    <Button
-                        className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[5px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                        btnText={
-                            <div className="flex gap-2 items-center">
-                                Details
-                                <div className="size-[10px] fill-white">
-                                    {icons.arrowDown}
+                    <div className="flex items-center justify-center gap-2">
+                        <Button
+                            className="text-white rounded-md w-fit text-nowrap text-[13px] px-[10px] py-1 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            btnText="Orders"
+                            onClick={() =>
+                                navigate(`/orders/${_id}?month=${month}`)
+                            }
+                        />
+
+                        <Button
+                            className="text-white rounded-md w-fit text-nowrap text-[13px] px-[10px] py-1 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            btnText={
+                                <div className="flex gap-2 items-center">
+                                    Bills
+                                    <div
+                                        className={`size-[10px] transition-transform fill-white ${
+                                            expanded
+                                                ? 'rotate-180 duration-400'
+                                                : 'rotate-0 duration-400'
+                                        }`}
+                                        style={{ transformOrigin: 'center' }}
+                                    >
+                                        {icons.arrowDown}
+                                    </div>
                                 </div>
-                            </div>
-                        }
-                        onClick={() => setExpanded(!expanded)}
-                    />
+                            }
+                            onClick={() => setExpanded(!expanded)}
+                        />
+                    </div>
                 </div>
             </div>
 
