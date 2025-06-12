@@ -15,6 +15,7 @@ import {
     EditCartItemPopup,
     OrderUnavailablePopup,
     EditContractorPopup,
+    NewContractorPopup,
 } from '..';
 import { usePopupContext } from '../../Contexts';
 
@@ -129,6 +130,12 @@ export default function Popup() {
                     <EditContractorPopup />
                 </Wrapper>
             );
+        case 'newContractor':
+            return (
+                <Wrapper>
+                    <NewContractorPopup/>
+                </Wrapper>
+            )
         default:
             return null;
     }

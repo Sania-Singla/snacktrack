@@ -117,7 +117,6 @@ const sendVerificationCode = tryCatch(
     'send verification email',
     async (req, res) => {
         const { fullName, email } = req.body;
-
         if (!fullName || !email) {
             return res.status(BAD_REQUEST).json({ message: 'missing Fields' });
         }
@@ -227,52 +226,100 @@ const updateContractor = tryCatch(
     }
 );
 
-const chnageContractor = tryCatch('update contractor', async (req, res) => {
-    const { contractorId } = req.params;
+const chnageContractor = tryCatch(
+    'chnage contractor',
+    async (req, res, next) => {
+        const { contractorId } = req.params;
+        console.log(contractorId);
+        const { fullName, phoneNumber, email } = req.body;
 
-    const { fullName, phoneNumber, email, kitchenKey } = req.body;
+        const randomkitchenKey = nanoid(8);
+        const randomPassword = nanoid(8);
 
-    if (!fullName || !phoneNumber || !email || !kitchenKey) {
-        return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
-    }
+        if (!fullName || !phoneNumber || !email) {
+            return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
+        }
 
-    const contractor = await Contractor.findById(contractorId);
+        const isValid = ['fullName', 'email', 'phoneNumber'].every((key) =>
+            verifyExpression(key, req.body[key]?.trim())
+        );
 
-    const oldKitchenKey = contractor.kitchenKey;
-    const canteenId = oldKitchenKey.split('-');
-    const newKitchenKey = canteenId + '-' + kitchenKey.trim();
+        if (!isValid) {
+            return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
+        }
 
-    let alreadyExists = null;
-
-    if (contractor.phoneNumber !== phoneNumber) {
-        alreadyExists = await Contractor.findOne({ phoneNumber });
-    } else if (contractor.email !== email.toLowerCase()) {
-        alreadyExists = await Contractor.findOne({
-            email: email.toLowerCase(),
-        });
-    }
-    if (alreadyExists) {
-        return next(new ErrorHandler('contractor already exists', BAD_REQUEST));
-    }
-
-    const newContractor = Contractor.findbyIdAndUpdate(
-        contractorId,
-        {
-            $set: {
-                fullName,
-                phoneNumber,
-                email,
-                kitchenKey: newKitchenKey,
-                avatar: resetAvatar
-                    ? USER_PLACEHOLDER_IMAGE_URL
-                    : contractor.avatar,
+        const [contractor] = await Contractor.aggregate([
+            {
+                $match: {
+                    _id: new Types.ObjectId(contractorId),
+                },
             },
-        },
-        { new: true }
-    );
+            {
+                $lookup: {
+                    from: 'canteens',
+                    localField: 'canteenId',
+                    foreignField: '_id',
+                    as: 'canteen',
+                },
+            },
+            {
+                $unwind: '$canteen',
+            },
+        ]);
 
-    return res.status(OK).json(newContractor);
-});
+        let existingContractor = await Contractor.findOne({
+            $or: [
+                {
+                    phoneNumber,
+                },
+                { email: email.toLowerCase() },
+            ],
+        });
+
+        if (existingContractor) {
+            return next(
+                new ErrorHandler('contractor already exists', BAD_REQUEST)
+            );
+        }
+
+        const newContractor = await Contractor.findByIdAndUpdate(
+            contractorId,
+            {
+                $set: {
+                    fullName,
+                    phoneNumber,
+                    email,
+                    avatar: USER_PLACEHOLDER_IMAGE_URL,
+                },
+            },
+            { new: true }
+        );
+
+        newContractor.password = randomPassword;
+
+        const canteen = await Canteen.findById(contractor.canteenId);
+        canteen.kitchenKey = randomkitchenKey;
+        await newContractor.save();
+        await canteen.save();
+
+        await sendMail({
+            receiverName: fullName,
+            receiverMail: email,
+            subject: 'Welcome to SnackTrack',
+            html: `
+                Hello ${fullName}, <br>
+                Welcome to SnackTrack! <br>
+                The manager of the Canteen of the Hostel: ${canteen.hostelType}${canteen.hostelNumber}-${canteen.hostelName} has been Changed Recently.
+                You are now the manager of this Canteen. <br>
+                Your Temporary password is <b>${randomPassword}</b> <br>
+                Your Temporary Kitchen Key is <b>${randomkitchenKey}</b> <br>
+                <i>*These values can be updated anytime after logging in from settings.*</i> <br>
+            `,
+        });
+
+        return res.status(OK).json(newContractor);
+    }
+);
 
 const getContractors = tryCatch('get contractors', async (req, res) => {
     const canteens = await Canteen.aggregate([
@@ -310,5 +357,6 @@ export {
     getContractors,
     getHostels,
     sendVerificationCode,
+    chnageContractor,
     verifyCode,
 };

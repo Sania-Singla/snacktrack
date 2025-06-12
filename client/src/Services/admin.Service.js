@@ -42,6 +42,17 @@ class AdminService {
         });
     }
 
+    async addNewContractor(inputs) {
+        return await fetchWrapper({
+            endPoint: `/admins/contractor/new/${inputs.contractorId}`,
+
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'addNewContractor',
+            body: inputs,
+        });
+    }
+
     async getContractors(key = '') {
         return await fetchWrapper({
             endPoint: `/admins/contractor`,

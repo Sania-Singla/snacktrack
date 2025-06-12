@@ -39,8 +39,8 @@ export default function AdminPage() {
             if (res && !res.message) {
                 setCanteens(res);
                 setError(false);
+                setVerifying(false);
             } else toast.error('Please Enter a Valid Key');
-            setVerifying(false);
         } catch (err) {
             navigate('/server-error');
         }
