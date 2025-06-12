@@ -9,7 +9,7 @@ import {
     updateContractor,
     getContractors,
     getHostels,
-    chnageContractor,
+    changeContractor,
 } from '../Controllers/admin.Controller.js';
 
 adminRouter.use(verifyAdminJwt);
@@ -17,7 +17,7 @@ adminRouter.use(verifyAdminJwt);
 adminRouter.route('/contractor').post(getContractors);
 
 adminRouter.route('/contractor/:contractorId').patch(updateContractor);
-adminRouter.route('/contractor/new/:contractorId').patch(chnageContractor);
+adminRouter.route('/contractor/new/:contractorId').patch(changeContractor);
 
 adminRouter.route('/hostels').get(getHostels);
 

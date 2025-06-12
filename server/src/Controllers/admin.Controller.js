@@ -226,7 +226,7 @@ const updateContractor = tryCatch(
     }
 );
 
-const chnageContractor = tryCatch(
+const changeContractor = tryCatch(
     'chnage contractor',
     async (req, res, next) => {
         const { contractorId } = req.params;
@@ -357,6 +357,6 @@ export {
     getContractors,
     getHostels,
     sendVerificationCode,
-    chnageContractor,
+    changeContractor,
     verifyCode,
 };
