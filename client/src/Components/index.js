@@ -35,6 +35,8 @@ import ContractorOrderCard from './Views/ContractorOrderCard';
 import AddSnackPopup from './Popups/AddSnack.Popup';
 import AddItemPopup from './Popups/AddItem.Popup';
 import EmailVerificationPopup from './Popups/EmailVerification.Popup';
+import EditContractorPopup from './Popups/EditContractor.Popup';
+import NewContractorPopup from './Popups/NewContractor.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
 import OrderUnavailablePopup from './Popups/OrderUnavailable.Popup';
 import EmptyCart from './Views/EmptyCart';
@@ -83,6 +85,8 @@ export {
     AddSnackPopup,
     AddItemPopup,
     EmailVerificationPopup,
+    EditContractorPopup,
+    NewContractorPopup,
     EmptyCart,
     OrderPlacedPopup,
     StudentBillCard,

@@ -31,25 +31,23 @@ class AdminService {
         });
     }
 
-    async updateContractor({
-        fullName,
-        phoneNumber,
-        email,
-        kitchenKey,
-        resetAvatar = '',
-        contractorId,
-    }) {
+    async updateContractor(contractorId, inputs) {
         return await fetchWrapper({
-            endPoint: `/admins/contractor/${contractorId}?query=${resetAvatar}`,
+            endPoint: `/admins/contractor/${contractorId}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateContractor',
-            body: {
-                fullName,
-                phoneNumber,
-                email,
-                kitchenKey,
-            },
+            body: inputs,
+        });
+    }
+
+    async changeContractor(contractorId, inputs) {
+        return await fetchWrapper({
+            endPoint: `/admins/contractor/new/${contractorId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'changeContractor',
+            body: inputs,
         });
     }
 

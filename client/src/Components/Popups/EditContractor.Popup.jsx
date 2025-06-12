@@ -1,41 +1,85 @@
 import { useEffect, useState } from 'react';
-import { adminService } from '../Services';
+import { adminService } from '../../Services';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Dropdown, InputField } from '../Components';
-import { verifyExpression } from '../Utils';
+import Button from '../General/Button';
+import InputField from '../General/InputField';
+import { verifyExpression } from '../../Utils';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import { usePopupContext } from '../Contexts';
-import { LOGO } from '../Constants/constants';
+import { usePopupContext } from '../../Contexts';
 import { motion } from 'framer-motion';
-import { icons } from '../Assets/icons';
+import { icons } from '../../Assets/icons';
 import toast from 'react-hot-toast';
 
-export default function RegisterCanteenPage() {
-    const initialInputs = {
-        fullName: '',
-        phoneNumber: '',
-        email: '',
-    };
-    const [inputs, setInputs] = useState(initialInputs);
+export default function EditContractorPopup() {
     const [error, setError] = useState({});
-    const { setPopupInfo, setShowPopup } = usePopupContext();
+    const { setPopupInfo, setShowPopup, popupInfo } = usePopupContext();
     const [disabled, setDisabled] = useState(true);
+    const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [sendingMail, setSendingMail] = useState(false);
     const navigate = useNavigate();
-    const [hostel, setHostel] = useState({});
-    const [isVerified, setIsVerified] = useState(false);
-    const [hostels, setHostels] = useState([
-        { label: 'Select Hostel', value: '' },
-    ]);
+    const [inputs, setInputs] = useState({
+        fullName: popupInfo.contractor?.fullName,
+        phoneNumber: popupInfo.contractor?.phoneNumber,
+        email: popupInfo.contractor?.email,
+        kitchenKey: popupInfo.contractor?.kitchenKey || '',
+    });
+    const [isVerified, setIsVerified] = useState(true);
+    const [sendingMail, setSendingMail] = useState(false);
 
     function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-        if (value) verifyExpression(name, value, setError);
-        else setError((prev) => ({ ...prev, [name]: '' }));
+        if (value) {
+            verifyExpression(name, value, setError);
+        } else setError((prev) => ({ ...prev, [name]: '' }));
+        if (name === 'email') {
+            if (value === popupInfo.contractor?.email) {
+                setIsVerified(true);
+            } else setIsVerified(false);
+        }
         onMouseOver();
+    }
+
+    useEffect(() => {
+        onMouseOver();
+    }, []);
+
+    async function sendVerifyEmail() {
+        try {
+            if (!inputs.email || !inputs.fullName) {
+                toast.error('Please enter your email and fullName');
+                return;
+            }
+
+            setSendingMail(true);
+
+            const res = await adminService.sendVerificationCode({
+                fullName: inputs.fullName,
+                email: inputs.email,
+            });
+            if (res && res.message === 'Verification code sent') {
+                toast.success('Verification code sent to your email');
+
+                setPopupInfo({
+                    type: 'verifyEmail',
+                    target: { email: inputs.email, fullName: inputs.fullName },
+                    onVerify: () => {
+                        setIsVerified(true);
+                        setPopupInfo({
+                            contractor: {
+                                _id: popupInfo.contractor._id,
+                                ...inputs,
+                            },
+                            type: 'editContractor',
+                        });
+                    },
+                });
+            }
+            setSendingMail(false);
+        } catch (err) {
+            toast.error('Failed to send verification email');
+        }
     }
 
     function handlePhoneChange(value, country, e, formattedValue) {
@@ -46,69 +90,14 @@ export default function RegisterCanteenPage() {
         onMouseOver();
     }
 
-    async function sendVerifyEmail() {
-        try {
-            if (!inputs.email) {
-                toast.error('Please enter your email');
-                return;
-            }
-            setSendingMail(true);
-            const res = await adminService.sendVerificationCode({
-                fullName: inputs.fullName,
-                email: inputs.email,
-            });
-            if (res && res.message === 'Verification code sent') {
-                toast.success('Verification code sent to your email');
-                setShowPopup(true);
-                setPopupInfo({
-                    type: 'verifyEmail',
-                    target: { email: inputs.email, fullName: inputs.fullName },
-                    onVerify: () => {
-                        setIsVerified(true);
-                        setShowPopup(false);
-                    },
-                });
-            }
-
-            setSendingMail(false);
-
-        } catch (err) {
-            toast.error('Failed to send verification email');
-        } finally {
-            setSendingMail(false);
-        }
-    }
-
-    useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
-
-        (async function () {
-            try {
-                const res = await adminService.getHostels(signal);
-                if (res)
-                    setHostels((prev) => [
-                        ...prev,
-                        ...res.map((h) => ({
-                            label: `${h.hostelType}${h.hostelNumber}-${h.hostelName}`,
-                            value: h,
-                        })),
-                    ]);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
-
-        return () => controller.abort();
-    }, []);
-
     function handleDisable() {
         return (
-            Object.values(inputs).some((value) => !value) ||
+            Object.entries(inputs).some(
+                ([key, value]) => !value && key !== 'kitchenKey'
+            ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             ) ||
-            !hostel ||
             !isVerified
         );
     }
@@ -127,17 +116,16 @@ export default function RegisterCanteenPage() {
         setDisabled(true);
         setError({});
         try {
-            const res = await adminService.registerCanteen({
-                hostel,
-                ...inputs,
-            });
+            const res = await adminService.updateContractor(
+                popupInfo.contractor?._id,
+                inputs
+            );
             if (res && !res.message) {
-                toast.success('Canteen Registered Successfully');
+                toast.success('Contractor Updated Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
             navigate('/server-error');
         } finally {
-            setInputs(initialInputs);
             setDisabled(false);
             setLoading(false);
         }
@@ -148,15 +136,22 @@ export default function RegisterCanteenPage() {
             type: 'text',
             name: 'fullName',
             label: 'Full Name',
-            placeholder: 'Enter Full Name',
+            placeholder: 'Enter your Full Name',
             required: true,
         },
         {
             type: 'email',
             name: 'email',
             label: 'Email',
-            placeholder: 'Enter Email',
+            placeholder: 'Enter your Email',
             required: true,
+        },
+        {
+            type: 'text',
+            name: 'kitchenKey',
+            label: 'Kitchen Key',
+            placeholder: 'Enter new Kitchen Key',
+            required: false,
         },
     ];
 
@@ -167,6 +162,8 @@ export default function RegisterCanteenPage() {
                     field={field}
                     handleChange={handleChange}
                     inputs={inputs}
+                    showPassword={showkitchenKey}
+                    setShowPassword={setShowKitchenKey}
                     className="w-full"
                 />
                 {field.name === 'email' && (
@@ -195,7 +192,7 @@ export default function RegisterCanteenPage() {
                     />
                 )}
             </div>
-            {error[field.name] && (
+            {error[field.name] && field.name !== 'email' && (
                 <div className="text-red-500 text-xs font-medium">
                     {error[field.name]}
                 </div>
@@ -204,19 +201,20 @@ export default function RegisterCanteenPage() {
     ));
 
     return (
-        <div className="py-10 text-black flex flex-col items-center justify-center gap-4 min-h-screen">
-            <Link to={'/'}>
-                <div className="overflow-hidden rounded-full size-[90px] hover:brightness-95 shadow-sm">
-                    <img
-                        src={LOGO}
-                        alt="peer connect logo"
-                        className="object-cover size-full"
-                    />
-                </div>
-            </Link>
+        <div className="relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl overflow-hidden text-black p-6 flex flex-col items-center justify-center gap-3">
+            <Button
+                btnText={
+                    <div className="size-[20px] stroke-black">
+                        {icons.cross}
+                    </div>
+                }
+                title="Close"
+                onClick={() => setShowPopup(false)}
+                className="absolute top-3 right-3"
+            />
             <div>
                 <p className="text-center px-2 text-[28px] font-medium">
-                    Register a New Canteen
+                    Edit Contractor
                 </p>
                 <motion.div
                     initial={{ width: 0 }}
@@ -225,8 +223,7 @@ export default function RegisterCanteenPage() {
                     className="relative -top-1 h-[0.1rem] bg-[#333333]"
                 />
             </div>
-
-            <div className="max-w-[500px] min-w-[300px] flex flex-col items-center justify-center gap-3">
+            <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (
                     <div className="text-red-500 w-full text-center">
                         {error.root}
@@ -235,17 +232,13 @@ export default function RegisterCanteenPage() {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="flex flex-col items-start justify-center gap-3 w-full"
+                    className="flex flex-col items-start justify-center gap-4 w-full"
                 >
-                    <div className="w-full flex justify-center mt-4">
-                        <Dropdown options={hostels} setValue={setHostel} />
-                    </div>
-
-                    <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex flex-col gap-1">
                         {inputElements}
 
                         {/* phone number field */}
-                        <div className="w-full">
+                        <div className="w-full shadow-md shadow-[#f8f0eb]">
                             <div className="bg-white z-[10] text-[15px] ml-2 px-1 w-fit relative top-3 font-medium">
                                 <label htmlFor="phoneNumber">
                                     <span className="text-red-500">* </span>
@@ -275,7 +268,7 @@ export default function RegisterCanteenPage() {
                         </div>
                     </div>
 
-                    <div className="w-full mt-2">
+                    <div className="w-full">
                         <Button
                             type="submit"
                             className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
@@ -291,7 +284,7 @@ export default function RegisterCanteenPage() {
                                         {icons.loading}
                                     </div>
                                 ) : (
-                                    'Register'
+                                    'Update Contractor'
                                 )
                             }
                         />

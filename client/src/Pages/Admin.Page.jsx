@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
+import { usePopupContext } from '../Contexts';
 
 export default function AdminPage() {
     const [canteens, setCanteens] = useState([]);
@@ -13,6 +14,7 @@ export default function AdminPage() {
     const [key, setKey] = useState('');
     const [verifying, setVerifying] = useState(false);
     const [showKey, setShowKey] = useState(false);
+    const { setShowPopup, setPopupInfo } = usePopupContext();
 
     useEffect(() => {
         (async function () {
@@ -37,8 +39,8 @@ export default function AdminPage() {
             if (res && !res.message) {
                 setCanteens(res);
                 setError(false);
+                setVerifying(false);
             } else toast.error('Please Enter a Valid Key');
-            setVerifying(false);
         } catch (err) {
             navigate('/server-error');
         }
@@ -59,30 +61,63 @@ export default function AdminPage() {
                         {canteen.hostelType} {canteen.hostelNumber}
                     </p>
                 </div>
-
                 {/* Contractor Details */}
-                <div className="flex items-center gap-4">
-                    <div>
-                        <div className="size-14 rounded-full overflow-hidden">
-                            <img
-                                src={canteen.contractor.avatar}
-                                alt={canteen.contractor.fullName}
-                                className="size-full object-cover"
-                            />
+                <div className="relative mb-2">
+                    <div className="flex items-center gap-4">
+                        <div>
+                            <div className="size-14 rounded-full overflow-hidden">
+                                <img
+                                    src={canteen.contractor.avatar}
+                                    alt={canteen.contractor.fullName}
+                                    className="size-full object-cover"
+                                />
+                            </div>
+                        </div>
+                        <div>
+                            <p className="text-lg font-semibold text-gray-900">
+                                {canteen.contractor.fullName}
+                            </p>
+                            <p className="text-sm text-gray-700">
+                                <span className="font-medium">Email:</span>{' '}
+                                {canteen.contractor.email}
+                            </p>
+                            <p className="text-sm  text-gray-700">
+                                <span className="font-medium">Phone:</span>{' '}
+                                {canteen.contractor.phoneNumber}
+                            </p>
                         </div>
                     </div>
-                    <div>
-                        <p className="text-lg font-semibold text-gray-900">
-                            {canteen.contractor.fullName}
-                        </p>
-                        <p className="text-sm text-gray-700">
-                            <span className="font-medium">Email:</span>{' '}
-                            {canteen.contractor.email}
-                        </p>
-                        <p className="text-sm  text-gray-700">
-                            <span className="font-medium">Phone:</span>{' '}
-                            {canteen.contractor.phoneNumber}
-                        </p>
+                    <div className="absolute right-0 -top-1 flex flex-col gap-4">
+                        <Button
+                            btnText={
+                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                    {icons.edit}
+                                </div>
+                            }
+                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            onClick={() => {
+                                setShowPopup(true);
+                                setPopupInfo({
+                                    type: 'editContractor',
+                                    contractor: canteen.contractor,
+                                });
+                            }}
+                        />
+                        <Button
+                            btnText={
+                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                    {icons.delete}
+                                </div>
+                            }
+                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            onClick={() => {
+                                setShowPopup(true);
+                                setPopupInfo({
+                                    type: 'newContractor',
+                                    contractor: canteen.contractor,
+                                });
+                            }}
+                        />
                     </div>
                 </div>
             </div>
