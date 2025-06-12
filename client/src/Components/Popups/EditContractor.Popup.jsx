@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminService } from '../../Services';
 import { useNavigate, Link } from 'react-router-dom';
 import Button from '../General/Button';
@@ -19,11 +19,10 @@ export default function EditContractorPopup() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [inputs, setInputs] = useState({
-        contractorId: popupInfo.contractor?._id,
-        fullName: popupInfo.contractor?.fullName || '',
-        phoneNumber: popupInfo.contractor?.phoneNumber || '',
-        email: popupInfo.contractor?.email || '',
-        kitchenKey: '',
+        fullName: popupInfo.contractor?.fullName,
+        phoneNumber: popupInfo.contractor?.phoneNumber,
+        email: popupInfo.contractor?.email,
+        kitchenKey: popupInfo.contractor?.kitchenKey || '',
     });
     const [isVerified, setIsVerified] = useState(true);
     const [sendingMail, setSendingMail] = useState(false);
@@ -31,33 +30,37 @@ export default function EditContractorPopup() {
     function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-        if (value && name !== 'kitchenKey')
+        if (value) {
             verifyExpression(name, value, setError);
-        else setError((prev) => ({ ...prev, [name]: '' }));
+        } else setError((prev) => ({ ...prev, [name]: '' }));
         if (name === 'email') {
             if (value === popupInfo.contractor?.email) {
                 setIsVerified(true);
-            } else {
-                setIsVerified(false);
-            }
+            } else setIsVerified(false);
         }
         onMouseOver();
     }
 
+    useEffect(() => {
+        onMouseOver();
+    }, []);
+
     async function sendVerifyEmail() {
         try {
-            if (!inputs.email) {
-                toast.error('Please enter your email');
+            if (!inputs.email || !inputs.fullName) {
+                toast.error('Please enter your email and fullName');
                 return;
             }
+
             setSendingMail(true);
+
             const res = await adminService.sendVerificationCode({
                 fullName: inputs.fullName,
                 email: inputs.email,
             });
             if (res && res.message === 'Verification code sent') {
                 toast.success('Verification code sent to your email');
-                setShowPopup(true);
+
                 setPopupInfo({
                     type: 'verifyEmail',
                     target: { email: inputs.email, fullName: inputs.fullName },
@@ -65,18 +68,17 @@ export default function EditContractorPopup() {
                         setIsVerified(true);
                         setPopupInfo({
                             contractor: {
-                                ...inputs,
                                 _id: popupInfo.contractor._id,
+                                ...inputs,
                             },
                             type: 'editContractor',
                         });
                     },
                 });
             }
+            setSendingMail(false);
         } catch (err) {
             toast.error('Failed to send verification email');
-        } finally {
-            setSendingMail(false);
         }
     }
 
@@ -91,12 +93,12 @@ export default function EditContractorPopup() {
     function handleDisable() {
         return (
             Object.entries(inputs).some(
-                ([key, value]) => key !== 'kitchenKey' && !value
+                ([key, value]) => !value && key !== 'kitchenKey'
             ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             ) ||
-            !isVerified 
+            !isVerified
         );
     }
 
@@ -114,7 +116,10 @@ export default function EditContractorPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await adminService.updateContractor(inputs);
+            const res = await adminService.updateContractor(
+                popupInfo.contractor?._id,
+                inputs
+            );
             if (res && !res.message) {
                 toast.success('Contractor Updated Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
@@ -131,15 +136,14 @@ export default function EditContractorPopup() {
             type: 'text',
             name: 'fullName',
             label: 'Full Name',
-            placeholder: 'Enter Full Name',
+            placeholder: 'Enter your Full Name',
             required: true,
         },
         {
             type: 'email',
             name: 'email',
             label: 'Email',
-            placeholder: 'Enter Email',
-            // disabled: isVerified && inputs.email !== popupInfo.contractor.email,
+            placeholder: 'Enter your Email',
             required: true,
         },
         {
@@ -147,6 +151,7 @@ export default function EditContractorPopup() {
             name: 'kitchenKey',
             label: 'Kitchen Key',
             placeholder: 'Enter new Kitchen Key',
+            required: false,
         },
     ];
 
@@ -159,6 +164,7 @@ export default function EditContractorPopup() {
                     inputs={inputs}
                     showPassword={showkitchenKey}
                     setShowPassword={setShowKitchenKey}
+                    className="w-full"
                 />
                 {field.name === 'email' && (
                     <Button

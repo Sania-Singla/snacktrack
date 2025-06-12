@@ -31,10 +31,9 @@ class AdminService {
         });
     }
 
-    async updateContractor(inputs) {
+    async updateContractor(contractorId, inputs) {
         return await fetchWrapper({
-            endPoint: `/admins/contractor/${inputs.contractorId}`,
-
+            endPoint: `/admins/contractor/${contractorId}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateContractor',
@@ -42,13 +41,12 @@ class AdminService {
         });
     }
 
-    async addNewContractor(inputs) {
+    async changeContractor(contractorId, inputs) {
         return await fetchWrapper({
-            endPoint: `/admins/contractor/new/${inputs.contractorId}`,
-
+            endPoint: `/admins/contractor/new/${contractorId}`,
             method: 'PATCH',
             credentials: 'include',
-            aim: 'addNewContractor',
+            aim: 'changeContractor',
             body: inputs,
         });
     }

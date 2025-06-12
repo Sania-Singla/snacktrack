@@ -168,7 +168,6 @@ export default function RegisterCanteenPage() {
                     handleChange={handleChange}
                     inputs={inputs}
                     className="w-full"
-                    disabled={field.name === 'email' && isVerified}
                 />
                 {field.name === 'email' && (
                     <Button

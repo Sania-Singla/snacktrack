@@ -19,14 +19,14 @@ export default function NewContractorPopup() {
     const { popupInfo } = usePopupContext();
     const navigate = useNavigate();
     const [inputs, setInputs] = useState({
-        contractorId: popupInfo.contractor?._id,
-        fullName: popupInfo.contractor?.fullName || '',
-        phoneNumber: popupInfo.contractor?.phoneNumber || '',
-        email: popupInfo.contractor?.email || '',
+        fullName: (popupInfo.autoFill && popupInfo.contractor.fullName) || '',
+        phoneNumber:
+            (popupInfo.autoFill && popupInfo.contractor.phoneNumber) || '',
+        email: (popupInfo.autoFill && popupInfo.contractor.email) || '',
     });
-    const [isVerified, setIsVerified] = useState(true);
+    const [isVerified, setIsVerified] = useState(false);
     const [sendingMail, setSendingMail] = useState(false);
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
 
     function handleChange(e) {
         const { value, name } = e.target;
@@ -36,17 +36,15 @@ export default function NewContractorPopup() {
         if (name === 'email') {
             if (value === popupInfo.contractor?.email) {
                 setIsVerified(true);
-            } else {
-                setIsVerified(false);
-            }
+            } else setIsVerified(false);
         }
         onMouseOver();
     }
 
     async function sendVerifyEmail() {
         try {
-            if (!inputs.email) {
-                toast.error('Please enter your email');
+            if (!inputs.email || !inputs.fullName) {
+                toast.error('Please enter your email and name');
                 return;
             }
             setSendingMail(true);
@@ -65,8 +63,9 @@ export default function NewContractorPopup() {
                         setPopupInfo({
                             contractor: {
                                 ...inputs,
-                                _id: popupInfo.contractor._id,
+                                _id: popupInfo.contractor?._id,
                             },
+                            autoFill: true,
                             type: 'newContractor',
                         });
                     },
@@ -88,13 +87,13 @@ export default function NewContractorPopup() {
     function handleDisable() {
         return (
             Object.entries(inputs).some(
-                ([key, value]) => key !== 'kitchenKey' && !value
+                ([key, value]) => !value && key !== 'kitchenKey'
             ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             ) ||
             !isVerified ||
-            !isConfirmed
+            !isChecked
         );
     }
     function onMouseOver() {
@@ -111,7 +110,10 @@ export default function NewContractorPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await adminService.addNewContractor(inputs);
+            const res = await adminService.changeContractor(
+                popupInfo.contractor._id,
+                inputs
+            );
             if (res && !res.message) {
                 toast.success('Contractor chnaged Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
@@ -128,14 +130,14 @@ export default function NewContractorPopup() {
             type: 'text',
             name: 'fullName',
             label: 'Full Name',
-            placeholder: 'Enter Full Name',
+            placeholder: 'Enter your Full name',
             required: true,
         },
         {
             type: 'email',
             name: 'email',
             label: 'Email',
-            placeholder: 'Enter Email',
+            placeholder: 'Enter your Email',
             required: true,
         },
     ];
@@ -147,6 +149,7 @@ export default function NewContractorPopup() {
                     field={field}
                     handleChange={handleChange}
                     inputs={inputs}
+                    className="w-full"
                 />
                 {field.name === 'email' && (
                     <Button
@@ -255,7 +258,7 @@ export default function NewContractorPopup() {
                             type="checkbox"
                             name="confirmation"
                             className="mt-1"
-                            onChange={(e) => setIsConfirmed(e.target.checked)}
+                            onChange={(e) => setIsChecked(e.target.checked)}
                         />
                         <label
                             className="ml-2 text-md text-red-600 font-semibold"

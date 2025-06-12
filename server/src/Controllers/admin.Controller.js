@@ -187,41 +187,40 @@ const updateContractor = tryCatch(
                 new ErrorHandler('contractor already exists', BAD_REQUEST)
             );
         }
-        let newKitchenKey = null;
+
+        let newKitchenKey = null,
+            isKitchenKeySame = false,
+            canteen = null;
         if (kitchenKey) {
             const oldKitchenKey = contractor.canteen.kitchenKey;
-            newKitchenKey =
-                new Types.ObjectId(contractor.canteenId) +
-                '-' +
-                kitchenKey.trim();
-            const isKitchenKeySame = bcrypt.compareSync(
-                newKitchenKey,
-                oldKitchenKey
-            );
+            newKitchenKey = `${contractor.canteenId}-${kitchenKey.trim()}`;
+            isKitchenKeySame = bcrypt.compareSync(newKitchenKey, oldKitchenKey);
             if (!isKitchenKeySame) {
-                const canteen = await Canteen.findById(contractor.canteenId);
+                canteen = await Canteen.findById(contractor.canteenId);
                 canteen.kitchenKey = newKitchenKey;
-                await canteen.save();
-                await sendMail({
-                    receiverName: fullName,
-                    receiverMail: email,
-                    subject: 'Welcome to SnackTrack',
-                    html: `Hello ${fullName}, <br> Your Canteen's Kitchen key is reset by you. The new Kitchen Key is <b>${newKitchenKey}</b> <br> You can update it anytime after.`,
-                });
             }
         }
-        newKitchenKey = bcrypt.hashSync(newKitchenKey, 10);
-        const updatedContractor = await Contractor.findByIdAndUpdate(
-            contractorId,
-            {
-                $set: {
-                    fullName,
-                    phoneNumber,
-                    email,
+
+        const [updatedContractor] = await Promise.all([
+            Contractor.findByIdAndUpdate(
+                contractorId,
+                {
+                    $set: {
+                        fullName,
+                        phoneNumber,
+                        email,
+                    },
                 },
-            },
-            { new: true }
-        );
+                { new: true }
+            ),
+            canteen.save(),
+            sendMail({
+                receiverName: fullName,
+                receiverMail: email,
+                subject: 'Welcome to SnackTrack',
+                html: `Hello ${fullName}, <br> Your Canteen's Kitchen key has been reset. The new Kitchen Key is <b>${kitchenKey.trim()}</b> <br> You can update it anytime from settings.`,
+            }),
+        ]);
         return res.status(OK).json(updatedContractor);
     }
 );
@@ -230,11 +229,7 @@ const changeContractor = tryCatch(
     'chnage contractor',
     async (req, res, next) => {
         const { contractorId } = req.params;
-        console.log(contractorId);
         const { fullName, phoneNumber, email } = req.body;
-
-        const randomkitchenKey = nanoid(8);
-        const randomPassword = nanoid(8);
 
         if (!fullName || !phoneNumber || !email) {
             return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
@@ -248,32 +243,8 @@ const changeContractor = tryCatch(
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
 
-        const [contractor] = await Contractor.aggregate([
-            {
-                $match: {
-                    _id: new Types.ObjectId(contractorId),
-                },
-            },
-            {
-                $lookup: {
-                    from: 'canteens',
-                    localField: 'canteenId',
-                    foreignField: '_id',
-                    as: 'canteen',
-                },
-            },
-            {
-                $unwind: '$canteen',
-            },
-        ]);
-
         let existingContractor = await Contractor.findOne({
-            $or: [
-                {
-                    phoneNumber,
-                },
-                { email: email.toLowerCase() },
-            ],
+            $or: [{ phoneNumber }, { email: email.toLowerCase() }],
         });
 
         if (existingContractor) {
@@ -282,25 +253,29 @@ const changeContractor = tryCatch(
             );
         }
 
-        const newContractor = await Contractor.findByIdAndUpdate(
-            contractorId,
-            {
-                $set: {
-                    fullName,
-                    phoneNumber,
-                    email,
-                    avatar: USER_PLACEHOLDER_IMAGE_URL,
+        const randomkitchenKey = nanoid(8);
+        const randomPassword = nanoid(8);
+
+        const [contractor, canteen] = await Promise.all([
+            Contractor.findByIdAndUpdate(
+                contractorId,
+                {
+                    $set: {
+                        fullName,
+                        phoneNumber,
+                        email,
+                        avatar: USER_PLACEHOLDER_IMAGE_URL,
+                    },
                 },
-            },
-            { new: true }
-        );
+                { new: true }
+            ),
+            Canteen.findById(contractor.canteenId),
+        ]);
 
-        newContractor.password = randomPassword;
-
-        const canteen = await Canteen.findById(contractor.canteenId);
+        contractor.password = randomPassword;
         canteen.kitchenKey = randomkitchenKey;
-        await newContractor.save();
-        await canteen.save();
+
+        await Promise.all([contractor.save(), canteen.save()]);
 
         await sendMail({
             receiverName: fullName,
@@ -317,7 +292,7 @@ const changeContractor = tryCatch(
             `,
         });
 
-        return res.status(OK).json(newContractor);
+        return res.status(OK).json(contractor);
     }
 );
 
