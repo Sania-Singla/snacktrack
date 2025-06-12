@@ -87,17 +87,38 @@ export default function AdminPage() {
                             </p>
                         </div>
                     </div>
-                    <Button
-                        onClick={() => {
-                            setShowPopup(true);
-                            setPopupInfo({
-                                type: 'editContractor',
-                                contractor: canteen.contractor,
-                            });
-                        }}
-                        btnText={icons.edit}
-                        className="size-4"
-                    />
+                    <div className="flex flex-col gap-6">
+                        <Button
+                            btnText={
+                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                    {icons.edit}
+                                </div>
+                            }
+                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            onClick={() => {
+                                setShowPopup(true);
+                                setPopupInfo({
+                                    type: 'editContractor',
+                                    contractor: canteen.contractor,
+                                });
+                            }}
+                        />
+                        <Button
+                            btnText={
+                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                    {icons.delete}
+                                </div>
+                            }
+                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            onClick={() => {
+                                setShowPopup(true);
+                                setPopupInfo({
+                                    type: 'newContractor',
+                                    contractor: canteen.contractor,
+                                });
+                            }}
+                        />
+                    </div>
                 </div>
             </div>
         ));

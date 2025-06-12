@@ -13,17 +13,17 @@ import toast from 'react-hot-toast';
 
 export default function EditContractorPopup() {
     const [error, setError] = useState({});
-    const { setPopupInfo, setShowPopup } = usePopupContext();
+    const { setPopupInfo, setShowPopup, popupInfo } = usePopupContext();
     const [disabled, setDisabled] = useState(true);
     const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
-    const { popupInfo } = usePopupContext();
     const navigate = useNavigate();
     const [inputs, setInputs] = useState({
         contractorId: popupInfo.contractor?._id,
         fullName: popupInfo.contractor?.fullName || '',
         phoneNumber: popupInfo.contractor?.phoneNumber || '',
         email: popupInfo.contractor?.email || '',
+        kitchenKey: '',
     });
     const [isVerified, setIsVerified] = useState(true);
     const [sendingMail, setSendingMail] = useState(false);
@@ -31,7 +31,8 @@ export default function EditContractorPopup() {
     function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-        if (value) verifyExpression(name, value, setError);
+        if (value && name !== 'kitchenKey')
+            verifyExpression(name, value, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));
         if (name === 'email') {
             if (value === popupInfo.contractor?.email) {
@@ -62,12 +63,20 @@ export default function EditContractorPopup() {
                     target: { email: inputs.email, fullName: inputs.fullName },
                     onVerify: () => {
                         setIsVerified(true);
-                        setShowPopup(false);
+                        setPopupInfo({
+                            contractor: {
+                                ...inputs,
+                                _id: popupInfo.contractor._id,
+                            },
+                            type: 'editContractor',
+                        });
                     },
                 });
             }
         } catch (err) {
             toast.error('Failed to send verification email');
+        } finally {
+            setSendingMail(false);
         }
     }
 
@@ -81,17 +90,16 @@ export default function EditContractorPopup() {
 
     function handleDisable() {
         return (
-            Object.values(inputs).some((value) => !value) ||
+            Object.entries(inputs).some(
+                ([key, value]) => key !== 'kitchenKey' && !value
+            ) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             ) ||
-            (!isVerified && inputs.email !== popupInfo.contractor.email) ||
-            !isVerified ||
-            (inputs.fullName === popupInfo.contractor.fullName &&
-                inputs.email === popupInfo.contractor.email &&
-                inputs.phoneNumber === popupInfo.contractor.phoneNumber)
+            !isVerified 
         );
     }
+
     function onMouseOver() {
         setDisabled(handleDisable());
     }
@@ -106,9 +114,7 @@ export default function EditContractorPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await adminService.updateContractor(
-                inputs
-            );
+            const res = await adminService.updateContractor(inputs);
             if (res && !res.message) {
                 toast.success('Contractor Updated Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
@@ -133,7 +139,14 @@ export default function EditContractorPopup() {
             name: 'email',
             label: 'Email',
             placeholder: 'Enter Email',
+            // disabled: isVerified && inputs.email !== popupInfo.contractor.email,
             required: true,
+        },
+        {
+            type: 'text',
+            name: 'kitchenKey',
+            label: 'Kitchen Key',
+            placeholder: 'Enter new Kitchen Key',
         },
     ];
 
@@ -147,11 +160,6 @@ export default function EditContractorPopup() {
                     showPassword={showkitchenKey}
                     setShowPassword={setShowKitchenKey}
                 />
-                {error[field.name] && field.name !== 'email' && (
-                    <div className="text-red-500 text-xs font-medium">
-                        {error[field.name]}
-                    </div>
-                )}
                 {field.name === 'email' && (
                     <Button
                         title={!isVerified && 'Verify email'}
@@ -178,7 +186,7 @@ export default function EditContractorPopup() {
                     />
                 )}
             </div>
-            {field.name === 'email' && error[field.name] && (
+            {error[field.name] && field.name !== 'email' && (
                 <div className="text-red-500 text-xs font-medium">
                     {error[field.name]}
                 </div>
