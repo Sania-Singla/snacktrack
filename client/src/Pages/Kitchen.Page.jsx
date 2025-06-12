@@ -100,8 +100,50 @@ export default function KitchenPage() {
         socket.emit('itemPrepared', { itemId, orderId });
     }
 
+    // const itemSummary = useMemo(() => {
+    //     const summary = {};
+    //     kitchenOrders.forEach(({ items, _id: orderId }) => {
+    //         items.forEach(
+    //             ({ quantity, name, _id: itemId, specialInstructions }) => {
+    //                 const itemKey = `${itemId}-${orderId}`;
+    //                 const count = preparedCount[itemKey] || 0;
+    //                 const remaining = quantity - count;
+
+    //                 if (remaining > 0) {
+    //                     if (summary[name]) {
+    //                         summary[name].quantity += remaining;
+    //                         summary[name].itemId = itemId;
+    //                         summary[name].orderId = orderId;
+
+    //                         if (specialInstructions) {
+    //                             summary[name].instructions ??= {};
+    //                             summary[name].instructions[
+    //                                 specialInstructions
+    //                             ] =
+    //                                 (summary[name].instructions[
+    //                                     specialInstructions
+    //                                 ] || 0) + remaining;
+    //                         }
+    //                     } else {
+    //                         summary[name] = {
+    //                             quantity: remaining,
+    //                             itemId,
+    //                             orderId,
+    //                             instructions: specialInstructions
+    //                                 ? { [specialInstructions]: remaining }
+    //                                 : undefined,
+    //                         };
+    //                     }
+    //                 }
+    //             }
+    //         );
+    //     });
+    //     return summary;
+    // }, [kitchenOrders, preparedCount]);
+
     const itemSummary = useMemo(() => {
         const summary = {};
+
         kitchenOrders.forEach(({ items, _id: orderId }) => {
             items.forEach(
                 ({ quantity, name, _id: itemId, specialInstructions }) => {
@@ -110,38 +152,20 @@ export default function KitchenPage() {
                     const remaining = quantity - count;
 
                     if (remaining > 0) {
-                        if (summary[name]) {
-                            summary[name].quantity += remaining;
-                            summary[name].itemId = itemId;
-                            summary[name].orderId = orderId;
-
-                            if (specialInstructions) {
-                                if (!summary[name].instructions) {
-                                    summary[name].instructions = {};
-                                }
-                                summary[name].instructions[
-                                    specialInstructions
-                                ] =
-                                    (summary[name].instructions[
-                                        specialInstructions
-                                    ] || 0) + remaining;
-                            }
-                        } else {
-                            summary[name] = {
-                                quantity: remaining,
-                                itemId,
-                                orderId,
-                            };
-                            if (specialInstructions) {
-                                summary[name].instructions = {
-                                    [specialInstructions]: remaining,
-                                };
-                            }
+                        if (!summary[name]) {
+                            summary[name] = [];
                         }
+                        summary[name].push({
+                            quantity: remaining,
+                            itemId,
+                            orderId,
+                            specialInstructions,
+                        });
                     }
                 }
             );
         });
+
         return summary;
     }, [kitchenOrders, preparedCount]);
 
@@ -238,70 +262,92 @@ export default function KitchenPage() {
                     <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto">
                         {Object.entries(itemSummary).length > 0 ? (
                             Object.entries(itemSummary).map(
-                                ([itemName, itemData]) => (
-                                    <div
-                                        key={itemName}
-                                        className="bg-gray-50 rounded-lg p-3 h-fit border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
-                                    >
-                                        <div className="flex flex-col gap-2">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="font-semibold text-gray-900 text-lg truncate max-w-[120px]">
-                                                    {itemName}
-                                                </h3>
-                                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[30px] rounded-full font-bold text-sm">
-                                                    {itemData.quantity}
-                                                </div>
-                                            </div>
+                                ([itemName, itemList]) => {
+                                    const firstItem = itemList[0]; // Always take the topmost (earliest) order
+                                    const totalQuantity = itemList.reduce(
+                                        (sum, item) => sum + item.quantity,
+                                        0
+                                    );
 
-                                            {itemData.instructions && (
-                                                <div className="mt-1 space-y-2">
-                                                    <div className="text-sm font-medium text-gray-500 border-b pb-1">
-                                                        Special Requests:
+                                    const instructionsSummary = {};
+                                    itemList.forEach((item) => {
+                                        if (item.specialInstructions) {
+                                            instructionsSummary[
+                                                item.specialInstructions
+                                            ] =
+                                                (instructionsSummary[
+                                                    item.specialInstructions
+                                                ] || 0) + item.quantity;
+                                        }
+                                    });
+
+                                    return (
+                                        <div
+                                            key={itemName}
+                                            className="bg-gray-50 rounded-lg p-3 h-fit border border-gray-200 hover:border-[#4977ec]/50 transition-colors"
+                                        >
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="font-semibold text-gray-900 text-lg truncate max-w-[120px]">
+                                                        {itemName}
+                                                    </h3>
+                                                    <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[30px] rounded-full font-bold text-sm">
+                                                        {totalQuantity}
                                                     </div>
-                                                    {Object.entries(
-                                                        itemData.instructions
-                                                    ).map(
-                                                        ([
-                                                            instruction,
-                                                            count,
-                                                        ]) => (
-                                                            <div
-                                                                key={
-                                                                    instruction
-                                                                }
-                                                                className="flex items-center gap-2 bg-red-50/50 p-2 rounded border border-red-100"
-                                                            >
-                                                                <span className="bg-red-100 text-red-800 p-1 rounded-full text-xs font-bold size-[24px] text-center">
-                                                                    {count}
-                                                                </span>
-                                                                <span className="text-xs mb-[5px] text-gray-700 flex-1">
-                                                                    {
+                                                </div>
+
+                                                {Object.keys(
+                                                    instructionsSummary
+                                                ).length > 0 && (
+                                                    <div className="mt-1 space-y-2">
+                                                        <div className="text-sm font-medium text-gray-500 border-b pb-1">
+                                                            Special Requests:
+                                                        </div>
+                                                        {Object.entries(
+                                                            instructionsSummary
+                                                        ).map(
+                                                            ([
+                                                                instruction,
+                                                                count,
+                                                            ]) => (
+                                                                <div
+                                                                    key={
                                                                         instruction
                                                                     }
-                                                                </span>
-                                                            </div>
-                                                        )
-                                                    )}
+                                                                    className="flex items-center gap-2 bg-red-50/50 p-2 rounded border border-red-100"
+                                                                >
+                                                                    <span className="bg-red-100 text-red-800 p-1 rounded-full text-xs font-bold size-[24px] text-center">
+                                                                        {count}
+                                                                    </span>
+                                                                    <span className="text-xs mb-[5px] text-gray-700 flex-1">
+                                                                        {
+                                                                            instruction
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {user?.role !== 'contractor' && (
+                                                <div className="flex items-center justify-center mt-3">
+                                                    <Button
+                                                        className="rounded-full size-8 text-3xl pb-[6px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
+                                                        onClick={() =>
+                                                            handleMinus(
+                                                                firstItem.itemId,
+                                                                firstItem.orderId
+                                                            )
+                                                        }
+                                                        btnText="-"
+                                                    />
                                                 </div>
                                             )}
                                         </div>
-
-                                        {user?.role !== 'contractor' && (
-                                            <div className="flex items-center justify-center mt-3">
-                                                <Button
-                                                    className="rounded-full size-8 text-3xl pb-[6px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
-                                                    onClick={() =>
-                                                        handleMinus(
-                                                            itemData.itemId,
-                                                            itemData.orderId
-                                                        )
-                                                    }
-                                                    btnText="-"
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-                                )
+                                    );
+                                }
                             )
                         ) : (
                             <div className="col-span-full p-4 text-center text-gray-500">
