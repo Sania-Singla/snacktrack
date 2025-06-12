@@ -17,6 +17,8 @@ export default function ContractorOrderCard({ order, reference }) {
     const { setUser } = useUserContext();
     const [statusOptions, setStatusOptions] = useState([]);
 
+    useEffect(() => setStatus(order.status), [order]);
+
     useEffect(() => {
         if (status === 'Pending') {
             setStatusOptions([
@@ -28,6 +30,7 @@ export default function ContractorOrderCard({ order, reference }) {
             setStatusOptions([
                 { value: '', label: 'Prepared' },
                 { value: 'PickedUp', label: 'Picked Up' },
+                { value: 'Rejected', label: 'Rejected' },
             ]);
         }
     }, [status]);

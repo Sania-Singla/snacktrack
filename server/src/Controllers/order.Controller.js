@@ -438,7 +438,7 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
         { sort: { createdAt: 1 } }
     );
 
-    return res.status(OK).json({ orders: orders.docs });
+    return res.status(OK).json({ orders: orders.docs, canteenId });
 });
 
 export {
