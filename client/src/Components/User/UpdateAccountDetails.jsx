@@ -139,10 +139,7 @@ export default function UpdateAccountDetails() {
                     </p>
                 </div>
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="w-full max-w-[600px] relative -top-2"
-                >
+                <form onSubmit={handleSubmit} className="w-full max-w-[600px]">
                     <div className="flex flex-col gap-2">{inputElements}</div>
                     <div className="flex gap-4 mt-6">
                         <Button

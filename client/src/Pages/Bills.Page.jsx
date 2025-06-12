@@ -54,8 +54,8 @@ export default function BillsPage() {
                 if (res && !res.message) {
                     setBills((prev) => prev.concat(res.bills));
                     setBillsInfo(res.billsInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }

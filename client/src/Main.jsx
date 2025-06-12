@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import './Styles/index.css';
+import 'react-datepicker/dist/react-datepicker.css';
 
 import { RouterProvider } from 'react-router-dom';
 import { router } from './Router';

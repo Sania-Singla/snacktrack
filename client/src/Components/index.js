@@ -4,6 +4,7 @@ import Sidebar from './Layout/Sidebar';
 import Layout from './Layout/Layout';
 import Searchbar from './General/Searchbar';
 import Filter from './General/Filter';
+import CalendarFilter from './General/CalendarFilter';
 import Dropdown from './General/Dropdown';
 import Button from './General/Button';
 import InputField from './General/InputField';
@@ -51,6 +52,7 @@ export {
     Dropdown,
     Logout,
     Layout,
+    CalendarFilter,
     Button,
     Searchbar,
     InputField,

@@ -173,14 +173,15 @@ const removeStudent = tryCatch(
         const contractor = req.user;
 
         // a contractor can remove the student only if the student belongs to his canteen
-        const student = await Promise.all([
+        const [student] = await Promise.all([
             Student.findOneAndDelete({
                 _id: new Types.ObjectId(studentId),
                 canteenId: new Types.ObjectId(contractor.canteenId),
             }),
-            Order.deleteMany({
-                studentId: new Types.ObjectId(studentId),
-            }),
+            // ! 🤔 DO WE NEED TO CASCADE ?
+            // Order.deleteMany({
+            //     studentId: new Types.ObjectId(studentId),
+            // }),
         ]);
         if (!student) {
             return next(new ErrorHandler('student not found', NOT_FOUND));

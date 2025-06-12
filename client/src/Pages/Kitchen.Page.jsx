@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { orderService, userService } from '../Services';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Dropdown } from '../Components';
@@ -8,8 +8,8 @@ import { useOrderContext, useSocketContext, useUserContext } from '../Contexts';
 import { LOGO } from '../Constants/constants';
 
 export default function KitchenPage() {
-    const { kitchenOrders, setKitchenOrders } = useOrderContext();
-    const { preparedCount } = useOrderContext();
+    const { kitchenOrders, setKitchenOrders, preparedCount } =
+        useOrderContext();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -100,47 +100,50 @@ export default function KitchenPage() {
         socket.emit('itemPrepared', { itemId, orderId });
     }
 
-    const itemSummary = {};
-    (function processOrders() {
+    const itemSummary = useMemo(() => {
+        const summary = {};
         kitchenOrders.forEach(({ items, _id: orderId }) => {
-            items.forEach(({ quantity, name, itemId, specialInstructions }) => {
-                const itemKey = `${itemId}-${orderId}`;
-                const count = preparedCount[itemKey] || 0;
-                const remaining = quantity - count;
+            items.forEach(
+                ({ quantity, name, _id: itemId, specialInstructions }) => {
+                    const itemKey = `${itemId}-${orderId}`;
+                    const count = preparedCount[itemKey] || 0;
+                    const remaining = quantity - count;
 
-                if (remaining > 0) {
-                    if (itemSummary[name]) {
-                        itemSummary[name].quantity += remaining;
-                        itemSummary[name].itemId = itemId;
-                        itemSummary[name].orderId = orderId;
+                    if (remaining > 0) {
+                        if (summary[name]) {
+                            summary[name].quantity += remaining;
+                            summary[name].itemId = itemId;
+                            summary[name].orderId = orderId;
 
-                        if (specialInstructions) {
-                            if (!itemSummary[name].instructions) {
-                                itemSummary[name].instructions = {};
-                            }
-                            itemSummary[name].instructions[
-                                specialInstructions
-                            ] =
-                                (itemSummary[name].instructions[
+                            if (specialInstructions) {
+                                if (!summary[name].instructions) {
+                                    summary[name].instructions = {};
+                                }
+                                summary[name].instructions[
                                     specialInstructions
-                                ] || 0) + remaining;
-                        }
-                    } else {
-                        itemSummary[name] = {
-                            quantity: remaining,
-                            itemId,
-                            orderId,
-                        };
-                        if (specialInstructions) {
-                            itemSummary[name].instructions = {
-                                [specialInstructions]: remaining,
+                                ] =
+                                    (summary[name].instructions[
+                                        specialInstructions
+                                    ] || 0) + remaining;
+                            }
+                        } else {
+                            summary[name] = {
+                                quantity: remaining,
+                                itemId,
+                                orderId,
                             };
+                            if (specialInstructions) {
+                                summary[name].instructions = {
+                                    [specialInstructions]: remaining,
+                                };
+                            }
                         }
                     }
                 }
-            });
+            );
         });
-    })();
+        return summary;
+    }, [kitchenOrders, preparedCount]);
 
     return loading ? (
         <div className="flex justify-center py-12">

@@ -64,7 +64,7 @@ export default function Filter({
                     ref={buttonRef}
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex cursor-pointer items-center justify-between w-full gap-2 bg-white border border-gray-300 hover:border-gray-400 px-3 py-2 rounded-lg shadow-sm text-lg text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200 min-w-[120px]"
+                    className="flex cursor-pointer items-center justify-between w-full gap-2 bg-white border border-gray-200 hover:border-gray-400 px-3 py-2 rounded-lg shadow-xs text-lg text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200 min-w-[120px]"
                 >
                     <div className="flex items-center gap-2 overflow-hidden">
                         {selectedOption?.icon && (
@@ -77,7 +77,7 @@ export default function Filter({
                         </span>
                     </div>
                     <div
-                        className={`shrink-0 size-3.5 fill-gray-800 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`shrink-0 size-3 fill-gray-800 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
                     >
                         {icons.arrowDown}
                     </div>

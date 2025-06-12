@@ -69,7 +69,7 @@ export default function Dropdown({ options, defaultOption = '', setValue }) {
 
                 {/* Dropdown Options */}
                 {isDropdownOpen && (
-                    <div className="absolute z-10 mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
+                    <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
                         {options.map(
                             (option) =>
                                 option.value !== selectedValue && (

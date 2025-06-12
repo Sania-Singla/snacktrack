@@ -32,7 +32,9 @@ export default function StudentOrderCard({ order, reference }) {
                                     ? 'bg-yellow-50 text-yellow-700'
                                     : status === 'Rejected'
                                       ? 'bg-red-50 text-red-700'
-                                      : 'bg-green-50 text-green-700'
+                                      : status === 'Prepared'
+                                        ? 'bg-blue-50 text-blue-700'
+                                        : 'bg-green-50 text-green-700'
                             }`}
                         >
                             {status}
@@ -75,7 +77,7 @@ export default function StudentOrderCard({ order, reference }) {
                                                     className="object-cover size-full"
                                                 />
                                             ) : (
-                                                <div className="size-5 text-gray-400">
+                                                <div className="size-5 stroke-gray-800">
                                                     {icons.soda}
                                                 </div>
                                             )}

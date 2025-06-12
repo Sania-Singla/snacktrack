@@ -41,8 +41,8 @@ export default function StudentsPage() {
                 if (res && !res.message) {
                     setStudents((prev) => prev.concat(res.students));
                     setStudentsInfo(res.studentsInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }
@@ -85,7 +85,26 @@ export default function StudentsPage() {
         <div className="sm:p-4 pt-2">
             {studentElements.length > 0 && (
                 <div className="w-full">
-                    <div className=" w-full flex justify-center mb-8">
+                    <div className=" w-full flex justify-between gap-4 mb-8">
+                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                            <div className="flex items-center justify-between gap-2">
+                                <h3 className="text-base font-medium text-gray-800">
+                                    Total Students
+                                </h3>
+                                <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
+                                    <span className="text-blue-600 font-bold">
+                                        {students.length}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="h-1 w-full bg-gray-100 mt-4">
+                                <div
+                                    className="h-1 bg-blue-500 rounded-full"
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                        </div>
+
                         <Button
                             title="Remove all Students"
                             onClick={removeAllStudents}
@@ -97,7 +116,7 @@ export default function StudentsPage() {
                                     <p>Remove All Students</p>
                                 </div>
                             }
-                            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg"
+                            className="bg-red-600 hover:bg-red-700 text-white p-2 h-fit rounded-lg"
                         />
                     </div>
 

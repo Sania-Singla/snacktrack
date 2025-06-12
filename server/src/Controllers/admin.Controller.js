@@ -23,9 +23,9 @@ import bcrypt from 'bcrypt';
 const registerCanteen = tryCatch(
     'register as contractor',
     async (req, res, next) => {
-        const { fullName, email, phoneNumber, hostel, kitchenKey } = req.body;
+        const { fullName, email, phoneNumber, hostel } = req.body;
 
-        if (!fullName || !email || !phoneNumber || !hostel || !kitchenKey) {
+        if (!fullName || !email || !phoneNumber || !hostel) {
             return next(new ErrorHandler('Missing fields', BAD_REQUEST));
         }
 
@@ -68,17 +68,19 @@ const registerCanteen = tryCatch(
             );
         }
 
+        const randomkitchenKey = nanoid(8); // unique temporary random kitchen key
+
         // Now register the contractor & canteen
         const canteen = await Canteen.create({
             hostelName: hostel.hostelName.trim(),
             hostelNumber: hostel.hostelNumber,
             hostelType: hostel.hostelType.trim(),
-            kitchenKey,
+            kitchenKey: randomkitchenKey,
         });
 
         const randomPassword = nanoid(8); // unique temporary random password
 
-        // password hashing auto done by pre hook in the model
+        // password & kitchenKey hashing auto done by pre hooks
         const contractor = await Contractor.create({
             fullName,
             email,
@@ -92,12 +94,19 @@ const registerCanteen = tryCatch(
         canteen.contractorId = contractor._id;
         await canteen.save();
 
-        // send this password on contractor's email
+        // send this password & kitchenKey on contractor's email
         await sendMail({
             receiverName: fullName,
             receiverMail: email,
             subject: 'Welcome to SnackTrack',
-            html: `Hello ${fullName}, <br> Your password is <b>${randomPassword}</b> <br> You can update it anytime after logging in from settings.`,
+            html: `
+                Hello ${fullName}, <br>
+                Welcome to SnackTrack! <br>
+                You are now the manager of the canteen of Hostel: ${hostel.hostelType}${hostel.hostelNumber}-${hostel.hostelName}. <br>
+                Your Temporary password is <b>${randomPassword}</b> <br>
+                Your Temporary Kitchen Key is <b>${randomkitchenKey}</b> <br>
+                <i>*These values can be updated anytime after logging in from settings.*</i> <br>
+            `,
         });
 
         return res.status(CREATED).json(contractor);
@@ -220,7 +229,7 @@ const updateContractor = tryCatch(
 
 const chnageContractor = tryCatch('update contractor', async (req, res) => {
     const { contractorId } = req.params;
-    const { resetAvatar } = req.query;
+
     const { fullName, phoneNumber, email, kitchenKey } = req.body;
 
     if (!fullName || !phoneNumber || !email || !kitchenKey) {

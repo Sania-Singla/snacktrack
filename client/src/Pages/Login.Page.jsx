@@ -2,7 +2,7 @@ import { LOGO } from '../Constants/constants';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { useUserContext } from '../Contexts';
+import { usePopupContext, useUserContext } from '../Contexts';
 import { userService } from '../Services';
 import { Button, Dropdown, InputField } from '../Components';
 import { icons } from '../Assets/icons';
@@ -133,14 +133,27 @@ export default function LoginPage() {
     const inputElements = inputFields.map(
         (field) =>
             field.show && (
-                <InputField
-                    key={field.name}
-                    field={field}
-                    handleChange={handleChange}
-                    inputs={inputs}
-                    showPassword={showPassword}
-                    setShowPassword={setShowPassword}
-                />
+                <div className="w-full">
+                    <InputField
+                        key={field.name}
+                        field={field}
+                        handleChange={handleChange}
+                        inputs={inputs}
+                        showPassword={showPassword}
+                        setShowPassword={setShowPassword}
+                    />
+                    {/* {field.name === 'password' && (
+                        <p
+                            onClick={() => {
+                                setShowPopup(true);
+                                setShowPopupInfo({ type: 'forgotPassword' });
+                            }}
+                            className="text-[#4977ec] text-xs text-right hover:underline cursor-pointer"
+                        >
+                            Forgot your password ?
+                        </p>
+                    )} */}
+                </div>
             )
     );
 

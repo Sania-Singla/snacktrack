@@ -84,7 +84,7 @@ export default function StudentBillCard({ bill, studentInfo }) {
                             </div>
                             <span>Paid on</span>
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-[13px] text-gray-600">
                             {formatTime(paidOn)}
                         </span>
                     </div>
@@ -96,7 +96,7 @@ export default function StudentBillCard({ bill, studentInfo }) {
                         className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
                         onClick={() =>
                             navigate(
-                                `/orders/${studentInfo._id}?filter=${month}`
+                                `/orders/${studentInfo._id}?month=${month}`
                             )
                         }
                     />

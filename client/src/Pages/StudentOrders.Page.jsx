@@ -3,7 +3,12 @@ import { useEffect, useState } from 'react';
 import { orderService } from '../Services';
 import { useUserContext, useOrderContext } from '../Contexts';
 import { icons } from '../Assets/icons';
-import { Button, Filter, StudentOrderCard } from '../Components';
+import {
+    Button,
+    CalendarFilter,
+    Filter,
+    StudentOrderCard,
+} from '../Components';
 import { paginate, checkTokenExpired } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 
@@ -15,8 +20,10 @@ export default function StudentOrdersPage() {
     const { studentId } = useParams();
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
-    const [searchParams] = useSearchParams();
-    const filter = searchParams.get('filter') || new Date().getMonth() + 1; // Default to current month
+    const [searchParams, setSearchParams] = useSearchParams();
+    const monthFilter = searchParams.get('month') || new Date().getMonth() + 1;
+    let dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
+
     const months = [
         { value: 1, label: 'January' },
         { value: 2, label: 'February' },
@@ -42,9 +49,14 @@ export default function StudentOrdersPage() {
                 setLoading(true);
                 setStudentOrders([]);
                 setPage(1);
+                // reset date filter if it exists
+                if (searchParams.get('date')) {
+                    searchParams.delete('date');
+                    setSearchParams(searchParams);
+                }
                 const res = await orderService.getStudentOrders(
                     studentId,
-                    filter,
+                    monthFilter,
                     1,
                     LIMIT,
                     signal
@@ -52,18 +64,19 @@ export default function StudentOrdersPage() {
                 if (res && !res.message) {
                     setStudentOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }
         })();
 
         return () => controller.abort();
-    }, [filter]);
+    }, [monthFilter]);
 
     useEffect(() => {
         if (page === 1) return; // Already handled in filter use effect
+
         const controller = new AbortController();
         const signal = controller.signal;
 
@@ -72,7 +85,7 @@ export default function StudentOrdersPage() {
                 setLoading(true);
                 const res = await orderService.getStudentOrders(
                     studentId,
-                    filter,
+                    monthFilter,
                     page,
                     LIMIT,
                     signal
@@ -80,8 +93,8 @@ export default function StudentOrdersPage() {
                 if (res && !res.message) {
                     setStudentOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }
@@ -90,23 +103,39 @@ export default function StudentOrdersPage() {
         return () => controller.abort();
     }, [page]);
 
+    const filteredOrders = dateFilter
+        ? studentOrders.filter((order) => {
+              const orderDate = new Date(order.createdAt).toLocaleDateString(
+                  'en-CA'
+              ); // Format: 'YYYY-MM-DD'
+              return orderDate === dateFilter;
+          })
+        : studentOrders;
+
     return (
         <div className="w-full p-4">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">
                     {user._id === studentId ? 'My Orders' : 'Orders'}
                 </h1>
-                <Filter options={months} defaultOption={filter} />
+                <div className="flex items-center gap-4 justify-center">
+                    <CalendarFilter month={monthFilter} />
+                    <Filter
+                        options={months}
+                        defaultOption={monthFilter}
+                        queryParamName="month"
+                    />
+                </div>
             </div>
 
-            {studentOrders.length > 0 && (
+            {filteredOrders.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {studentOrders.map((order, i) => (
+                    {filteredOrders.map((order, i) => (
                         <StudentOrderCard
                             order={order}
                             key={order._id}
                             reference={
-                                i + 1 === studentOrders.length &&
+                                i + 1 === filteredOrders.length &&
                                 ordersInfo?.hasNextPage
                                     ? paginateRef
                                     : null
@@ -123,7 +152,7 @@ export default function StudentOrdersPage() {
                     </div>
                 </div>
             ) : (
-                studentOrders.length === 0 && (
+                filteredOrders.length === 0 && (
                     <div className="text-center py-16">
                         <div className="mx-auto size-20 text-gray-300 mb-4">
                             {icons.package}

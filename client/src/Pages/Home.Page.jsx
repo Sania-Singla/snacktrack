@@ -25,7 +25,7 @@ export default function HomePage() {
             try {
                 let items = [],
                     cartItems = [];
-                    
+
                 if (filter === 'snacks') {
                     [items, cartItems] = await Promise.all([
                         snackService.getSnacks(signal),
@@ -103,7 +103,7 @@ export default function HomePage() {
                                 </div>
                             }
                             title="Add Snack"
-                            className="text-white rounded-md w-fit px-3 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md w-[160px] bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     ) : (
                         <Button
@@ -119,10 +119,10 @@ export default function HomePage() {
                                 </div>
                             }
                             title="Add Snack"
-                            className="text-white rounded-md w-fit px-3 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md w-[150px] bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     ))}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 w-full place-content-end">
                     <Button
                         onClick={() => handleOptionClick('snacks')}
                         className="hover:bg-[#4977ec] hover:text-white group transition-all duration-100 bg-white shadow-sm rounded-md px-2 py-[5px]"

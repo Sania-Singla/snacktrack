@@ -16,13 +16,11 @@ export default function RegisterCanteenPage() {
         fullName: '',
         phoneNumber: '',
         email: '',
-        kitchenKey: '',
     };
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const { setPopupInfo, setShowPopup } = usePopupContext();
     const [disabled, setDisabled] = useState(true);
-    const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
     const [sendingMail, setSendingMail] = useState(false);
     const navigate = useNavigate();
@@ -71,6 +69,9 @@ export default function RegisterCanteenPage() {
                     },
                 });
             }
+
+            setSendingMail(false);
+
         } catch (err) {
             toast.error('Failed to send verification email');
         } finally {
@@ -157,13 +158,6 @@ export default function RegisterCanteenPage() {
             placeholder: 'Enter Email',
             required: true,
         },
-        {
-            type: showkitchenKey ? 'text' : 'password',
-            name: 'kitchenKey',
-            label: 'Kitchen Key',
-            placeholder: 'Create New Kitchen Key',
-            required: true,
-        },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -173,8 +167,6 @@ export default function RegisterCanteenPage() {
                     field={field}
                     handleChange={handleChange}
                     inputs={inputs}
-                    showPassword={showkitchenKey}
-                    setShowPassword={setShowKitchenKey}
                     className="w-full"
                     disabled={field.name === 'email' && isVerified}
                 />
@@ -254,7 +246,7 @@ export default function RegisterCanteenPage() {
                         {inputElements}
 
                         {/* phone number field */}
-                        <div className="w-full shadow-md shadow-[#f8f0eb]">
+                        <div className="w-full">
                             <div className="bg-white z-[10] text-[15px] ml-2 px-1 w-fit relative top-3 font-medium">
                                 <label htmlFor="phoneNumber">
                                     <span className="text-red-500">* </span>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { LIMIT } from '../../Constants/constants';
 import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
@@ -11,7 +11,8 @@ import {
 } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 
-export default function PendingOrders({ filter }) {
+export default function PendingOrders() {
+    const [searchParams] = useSearchParams();
     const { pendingOrders, setPendingOrders } = useOrderContext();
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(true);
@@ -19,6 +20,7 @@ export default function PendingOrders({ filter }) {
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
+    const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
@@ -34,6 +36,7 @@ export default function PendingOrders({ filter }) {
                 const res = await orderService.getCanteenOrders(
                     'Pending',
                     user.canteenId,
+                    dateFilter,
                     1,
                     LIMIT,
                     signal
@@ -41,18 +44,18 @@ export default function PendingOrders({ filter }) {
                 if (res && !res.message) {
                     setPendingOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }
         })();
 
         return () => controller.abort();
-    }, [filter]);
+    }, [dateFilter]);
 
     useEffect(() => {
-        if (page === 1) return; // Already handled in filter use effect
+        if (page === 1) return;
 
         const controller = new AbortController();
         const signal = controller.signal;
@@ -60,9 +63,11 @@ export default function PendingOrders({ filter }) {
         (async function () {
             try {
                 setLoading(true);
+
                 const res = await orderService.getCanteenOrders(
-                    filter,
+                    'Pending',
                     user.canteenId,
+                    dateFilter,
                     page,
                     LIMIT,
                     signal
@@ -70,8 +75,8 @@ export default function PendingOrders({ filter }) {
                 if (res && !res.message) {
                     setPendingOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
                 } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }

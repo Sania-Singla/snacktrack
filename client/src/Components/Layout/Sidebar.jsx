@@ -60,7 +60,7 @@ export default function Sidebar() {
                 <NavLink
                     key={item.name}
                     className={({ isActive }) =>
-                        `${isActive && 'backdrop-brightness-95'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-90`
+                        `${isActive && 'backdrop-brightness-95'} w-full py-2 px-[10px] rounded-md hover:backdrop-brightness-95`
                     }
                     to={item.path}
                 >
