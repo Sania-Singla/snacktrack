@@ -187,7 +187,6 @@ const updateContractor = tryCatch(
                 new ErrorHandler('contractor already exists', BAD_REQUEST)
             );
         }
-
         let newKitchenKey = null,
             isKitchenKeySame = false,
             canteen = null;
@@ -196,8 +195,10 @@ const updateContractor = tryCatch(
             newKitchenKey = `${contractor.canteenId}-${kitchenKey.trim()}`;
             isKitchenKeySame = bcrypt.compareSync(newKitchenKey, oldKitchenKey);
             if (!isKitchenKeySame) {
-                canteen = await Canteen.findById(contractor.canteenId);
+                canteen = await Canteen.findById(contractor.canteenId);-
                 canteen.kitchenKey = newKitchenKey;
+                await canteen.save(); //because if canteen not updated, it will call null.save() ryt!!!
+                console.log(canteen.kitchenKey, canteen)
             }
         }
 
@@ -213,7 +214,6 @@ const updateContractor = tryCatch(
                 },
                 { new: true }
             ),
-            canteen.save(),
             sendMail({
                 receiverName: fullName,
                 receiverMail: email,
@@ -256,21 +256,19 @@ const changeContractor = tryCatch(
         const randomkitchenKey = nanoid(8);
         const randomPassword = nanoid(8);
 
-        const [contractor, canteen] = await Promise.all([
-            Contractor.findByIdAndUpdate(
-                contractorId,
-                {
-                    $set: {
-                        fullName,
-                        phoneNumber,
-                        email,
-                        avatar: USER_PLACEHOLDER_IMAGE_URL,
-                    },
+        const contractor = await Contractor.findByIdAndUpdate(
+            contractorId,
+            {
+                $set: {
+                    fullName,
+                    phoneNumber,
+                    email,
+                    avatar: USER_PLACEHOLDER_IMAGE_URL,
                 },
-                { new: true }
-            ),
-            Canteen.findById(contractor.canteenId),
-        ]);
+            },
+            { new: true }
+        );
+        const canteen = await Canteen.findById(contractor.canteenId);
 
         contractor.password = randomPassword;
         canteen.kitchenKey = randomkitchenKey;
