@@ -16,7 +16,7 @@ import {
 } from '../Utils/index.js';
 import { Canteen, Contractor } from '../Models/index.js';
 import { sendMail } from '../mailer.js';
-import { nanoid } from 'nanoid';
+import { customAlphabet, nanoid } from 'nanoid';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 
@@ -68,13 +68,17 @@ const registerCanteen = tryCatch(
             );
         }
 
-        const randomkitchenKey = nanoid(8); // unique temporary random kitchen key
+        const randomkitchenKey = customAlphabet(
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+            8
+        )();
 
         // Now register the contractor & canteen
         const canteen = await Canteen.create({
             hostelName: hostel.hostelName.trim(),
             hostelNumber: hostel.hostelNumber,
             hostelType: hostel.hostelType.trim(),
+            kitchenKey: randomkitchenKey,
         });
 
         const randomPassword = nanoid(8); // unique temporary random password
@@ -89,8 +93,7 @@ const registerCanteen = tryCatch(
             canteenId: canteen._id,
         });
 
-        // save kitchen Key in canteen & link contractor
-        canteen.kitchenKey = `${canteen._id}-${randomkitchenKey}`;
+        // link contractor to canteen
         canteen.contractorId = contractor._id;
         await canteen.save();
 

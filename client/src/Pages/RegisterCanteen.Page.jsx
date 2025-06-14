@@ -71,7 +71,6 @@ export default function RegisterCanteenPage() {
             }
 
             setSendingMail(false);
-
         } catch (err) {
             toast.error('Failed to send verification email');
         } finally {
@@ -133,6 +132,7 @@ export default function RegisterCanteenPage() {
             });
             if (res && !res.message) {
                 toast.success('Canteen Registered Successfully');
+                navigate('/admin');
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
             navigate('/server-error');
