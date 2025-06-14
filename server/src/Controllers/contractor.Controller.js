@@ -31,14 +31,6 @@ const updateKitchenKey = tryCatch(
             return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
         }
 
-        const canteen = await Canteen.findById(req.user.canteenId);
-        const key = canteen.hostelType + canteen.hostelNumber + newKey.trim();
-
-        const isValid = verifyExpression('kitchenKey', key);
-        if (!isValid) {
-            return next(new ErrorHandler('invalid kitchen key', BAD_REQUEST));
-        }
-
         // hash new key
         const hashedNewKey = bcrypt.hashSync(newKey, 10);
 
