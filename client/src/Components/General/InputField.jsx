@@ -17,9 +17,9 @@ export default function InputField({
         'oldPassword',
         'newPassword',
         'confirmPassword',
-        'contractorPassword',
         'newKey',
         'confirmKey',
+        'kitchenKey',
     ];
     return (
         <div key={name} className={`w-full ${className}`}>
