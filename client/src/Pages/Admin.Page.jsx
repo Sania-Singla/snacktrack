@@ -5,6 +5,7 @@ import { Button } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
 import { usePopupContext } from '../Contexts';
+import { LOGO_SVG } from '../Constants/constants';
 
 export default function AdminPage() {
     const [canteens, setCanteens] = useState([]);
@@ -50,11 +51,11 @@ export default function AdminPage() {
         return canteens.map((canteen) => (
             <div
                 key={canteen._id}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
+                className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow"
             >
                 {/* Hostel Details */}
                 <div className="flex items-center justify-between gap-4 mb-4">
-                    <h2 className="text-xl font-bold text-gray-900">
+                    <h2 className="text-[19px] font-bold text-gray-900">
                         {canteen.hostelName}
                     </h2>
                     <p className="text-nowrap font-medium text-gray-800">
@@ -62,7 +63,7 @@ export default function AdminPage() {
                     </p>
                 </div>
                 {/* Contractor Details */}
-                <div className="relative mb-2">
+                <div className="relative flex justify-between">
                     <div className="flex items-center gap-4">
                         <div>
                             <div className="size-14 rounded-full overflow-hidden">
@@ -87,14 +88,15 @@ export default function AdminPage() {
                             </p>
                         </div>
                     </div>
-                    <div className="absolute right-0 -top-1 flex flex-col gap-4">
+
+                    <div className="flex gap-2 flex-col h-fit self-end">
                         <Button
                             btnText={
-                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                <div className="size-[14px] group-hover:fill-[#4977ec]">
                                     {icons.edit}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                             onClick={() => {
                                 setShowPopup(true);
                                 setPopupInfo({
@@ -105,11 +107,11 @@ export default function AdminPage() {
                         />
                         <Button
                             btnText={
-                                <div className="size-[15px] group-hover:fill-[#4977ec]">
+                                <div className="size-[14px] group-hover:fill-[#4977ec]">
                                     {icons.delete}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-[10px] group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
                             onClick={() => {
                                 setShowPopup(true);
                                 setPopupInfo({
@@ -175,27 +177,30 @@ export default function AdminPage() {
     ) : (
         // Admin Dashboard
         <div className="min-h-screen bg-gray-100 p-6">
-            <div className="max-w-7xl mx-auto">
-                <section className="w-full bg-white shadow-md mb-8 rounded-xl py-10 px-8 md:px-16">
-                    <h1 className="text-4xl font-bold text-gray-900">
-                        Admin Dashboard
-                    </h1>
-                    <p className="mt-4 text-lg text-gray-700 max-w-3xl">
-                        Welcome to the Admin Dashboard. Here you can manage
-                        canteens and contractors efficiently.
-                    </p>
+            <div>
+                <section className="w-full bg-white shadow-md mb-8 rounded-xl p-8 md:px-12 flex justify-between">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            Admin Dashboard
+                        </h1>
+                        <p className="mt-4 text-gray-700 max-w-3xl">
+                            Welcome to the Admin Dashboard. Here you can manage
+                            canteens and contractors efficiently.
+                        </p>
+                    </div>
+                    <img src={LOGO_SVG} alt="logo svg" className="size-20" />
                 </section>
 
                 <div className="flex justify-center w-full mb-8">
                     <Button
-                        className="w-fit bg-[#4977ec] text-white text-lg px-6 py-3 rounded-lg font-semibold hover:bg-[#3b62c2]"
+                        className="w-fit bg-[#4977ec] text-white text-lg px-5 py-2 rounded-lg hover:bg-[#3b62c2]"
                         btnText="Register New Canteen"
                         onClick={() => navigate('new-canteen')}
                     />
                 </div>
 
                 {/* Canteen Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {canteenElements}
                 </div>
             </div>
