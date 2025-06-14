@@ -270,11 +270,14 @@ const changeContractor = tryCatch(
         );
         const canteen = await Canteen.findById(contractor.canteenId);
 
-        const randomkitchenKey = nanoid(8);
+        const randomkitchenKey = customAlphabet(
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+            8
+        )();
         const randomPassword = nanoid(8);
 
         contractor.password = randomPassword;
-        canteen.kitchenKey = `${canteen._id}-${randomkitchenKey}`;
+        canteen.kitchenKey = randomkitchenKey;
 
         await Promise.all([contractor.save(), canteen.save()]);
 

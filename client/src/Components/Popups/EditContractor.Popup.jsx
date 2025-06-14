@@ -213,17 +213,10 @@ export default function EditContractorPopup() {
                 onClick={() => setShowPopup(false)}
                 className="absolute top-3 right-3"
             />
-            <div>
-                <p className="text-center px-2 text-[28px] font-medium">
-                    Edit Contractor
-                </p>
-                <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: '100%' }}
-                    transition={{ duration: 0.3 }}
-                    className="relative -top-1 h-[0.1rem] bg-[#333333]"
-                />
-            </div>
+
+            <p className="text-center text-2xl font-bold">
+                Edit Contractor
+            </p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (
                     <div className="text-red-500 w-full text-center">
