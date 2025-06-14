@@ -200,8 +200,7 @@ const updateContractor = tryCatch(
             if (!isKitchenKeySame) {
                 canteen = await Canteen.findById(contractor.canteenId);
                 canteen.kitchenKey = newKitchenKey;
-                await canteen.save(); //because if canteen not updated, it will call null.save() ryt!!!
-                console.log(canteen.kitchenKey, canteen);
+                await canteen.save(); 
             }
         }
 
