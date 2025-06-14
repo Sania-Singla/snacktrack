@@ -75,7 +75,6 @@ const registerCanteen = tryCatch(
             hostelName: hostel.hostelName.trim(),
             hostelNumber: hostel.hostelNumber,
             hostelType: hostel.hostelType.trim(),
-            kitchenKey: randomkitchenKey,
         });
 
         const randomPassword = nanoid(8); // unique temporary random password
@@ -90,7 +89,8 @@ const registerCanteen = tryCatch(
             canteenId: canteen._id,
         });
 
-        // Link contractor to canteen
+        // save kitchen Key in canteen & link contractor
+        canteen.kitchenKey = `${canteen._id}-${randomkitchenKey}`;
         canteen.contractorId = contractor._id;
         await canteen.save();
 
@@ -253,9 +253,6 @@ const changeContractor = tryCatch(
             );
         }
 
-        const randomkitchenKey = nanoid(8);
-        const randomPassword = nanoid(8);
-
         const [contractor, canteen] = await Promise.all([
             Contractor.findByIdAndUpdate(
                 contractorId,
@@ -272,8 +269,11 @@ const changeContractor = tryCatch(
             Canteen.findById(contractor.canteenId),
         ]);
 
+        const randomkitchenKey = nanoid(8);
+        const randomPassword = nanoid(8);
+
         contractor.password = randomPassword;
-        canteen.kitchenKey = randomkitchenKey;
+        canteen.kitchenKey = `${canteen._id}-${randomkitchenKey}`;
 
         await Promise.all([contractor.save(), canteen.save()]);
 

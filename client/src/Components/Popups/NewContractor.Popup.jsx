@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { adminService } from '../../Services';
-import { useNavigate, Link } from 'react-router-dom';
-import Button from '../General/Button';
-import InputField from '../General/InputField';
+import { useNavigate } from 'react-router-dom';
+import { Button, InputField } from '..';
 import { verifyExpression } from '../../Utils';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -24,7 +23,7 @@ export default function NewContractorPopup() {
             (popupInfo.autoFill && popupInfo.contractor.phoneNumber) || '',
         email: (popupInfo.autoFill && popupInfo.contractor.email) || '',
     });
-    const [isVerified, setIsVerified] = useState(false);
+    const [isVerified, setIsVerified] = useState(popupInfo.isVerified || false);
     const [sendingMail, setSendingMail] = useState(false);
     const [isChecked, setIsChecked] = useState(false);
 
@@ -59,12 +58,12 @@ export default function NewContractorPopup() {
                     type: 'verifyEmail',
                     target: { email: inputs.email, fullName: inputs.fullName },
                     onVerify: () => {
-                        setIsVerified(true);
                         setPopupInfo({
                             contractor: {
                                 ...inputs,
                                 _id: popupInfo.contractor?._id,
                             },
+                            isVerified: true,
                             autoFill: true,
                             type: 'newContractor',
                         });
@@ -73,6 +72,8 @@ export default function NewContractorPopup() {
             }
         } catch (err) {
             toast.error('Failed to send verification email');
+        } finally {
+            setSendingMail(false);
         }
     }
 

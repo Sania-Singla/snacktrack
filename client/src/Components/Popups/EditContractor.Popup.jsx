@@ -76,9 +76,10 @@ export default function EditContractorPopup() {
                     },
                 });
             }
-            setSendingMail(false);
         } catch (err) {
             toast.error('Failed to send verification email');
+        } finally {
+            setSendingMail(false);
         }
     }
 

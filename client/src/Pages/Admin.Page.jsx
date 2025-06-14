@@ -115,6 +115,7 @@ export default function AdminPage() {
                                 setPopupInfo({
                                     type: 'newContractor',
                                     contractor: canteen.contractor,
+                                    autoFill: false,
                                 });
                             }}
                         />
