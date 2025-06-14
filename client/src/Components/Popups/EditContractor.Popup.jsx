@@ -147,13 +147,6 @@ export default function EditContractorPopup() {
             placeholder: 'Enter your Email',
             required: true,
         },
-        {
-            type: 'text',
-            name: 'kitchenKey',
-            label: 'Kitchen Key',
-            placeholder: 'Enter new Kitchen Key',
-            required: false,
-        },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -266,6 +259,35 @@ export default function EditContractorPopup() {
                                     {error.phoneNumber}
                                 </div>
                             )}
+                        </div>
+                        
+                        <div className="w-full shadow-md shadow-[#f8f0eb]">
+                            <div className="bg-white z-[10] text-[15px] ml-2 px-1 w-fit relative top-3 font-medium">
+                                <label htmlFor="kitchenKey">Kitchen Key</label>
+                            </div>
+                            <div className="relative flex items-center w-full justify-center mb-3">
+                                <input
+                                    name="kitchenKey"
+                                    id="kitchenKey"
+                                    type={showkitchenKey ? 'text' : 'password'}
+                                    autoFocus
+                                    onChange={(e) =>
+                                        setInputs((prev) => ({
+                                            ...prev,
+                                            kitchenKey: e.target.value,
+                                        }))
+                                    }
+                                    className="overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-500 bg-transparent placeholder:text-[15px]"
+                                />
+                                <div
+                                    onClick={() =>
+                                        setShowKitchenKey((prev) => !prev)
+                                    }
+                                    className="size-[20px] absolute right-3 top-[50%] transform translate-y-[-50%] cursor-pointer fill-gray-700"
+                                >
+                                    {showkitchenKey ? icons.eyeOff : icons.eye}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
