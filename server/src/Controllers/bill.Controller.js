@@ -1,9 +1,9 @@
-import moment from 'moment';
 import { NOT_FOUND, OK } from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Bill, Canteen, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
 import cron from 'node-cron';
+import moment from 'moment';
 
 const getStudentBills = tryCatch('get student bills', async (req, res) => {
     const { studentId } = req.params;
@@ -177,33 +177,6 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
     if (res) res.status(OK).json({ message: 'operation performed' });
 });
 
-const cleanOldBillsAndOrders = tryCatch(
-    'cleanup old bills and orders',
-    async () => {
-        const now = moment();
-        const isJan1 = now.month() === 0 && now.date() === 1;
-
-        if (!isJan1) {
-            console.log('🧹 Not January 1st - skipping cleanup');
-            return;
-        }
-
-        console.log(
-            '🧹 Starting full paid bill and order cleanup (January 1st)'
-        );
-
-        const paidBills = await Bill.find({ paid: true });
-        const paidBillIds = paidBills.map((b) => b._id);
-
-        await Promise.all([
-            Bill.deleteMany({ _id: { $in: paidBillIds } }),
-            Order.deleteMany({ billId: { $in: paidBillIds } }),
-        ]);
-
-        console.log(`🧹 Cleanup completed for ${now.year()}`);
-    }
-);
-
 const startBillingCronJob = () => {
     // Run at 12:05 on the 1st of every month
     cron.schedule('5 0 1 * *', generateBills, {
@@ -217,15 +190,35 @@ const startBillingCronJob = () => {
 };
 
 const startCleanupCronJob = () => {
-    // Run at 12:05 AM on January 1st
-    cron.schedule('5 0 1 1 *', cleanOldBillsAndOrders, {
-        scheduled: true,
-        timezone: 'Asia/Kolkata',
-    });
+    // Run at 12:05 AM on the 1st of every month
+    cron.schedule(
+        '5 0 1 * *',
+        tryCatch('cleanup old orders', async () => {
+            const now = moment();
 
-    console.log(
-        '🧹 Cleanup cron job scheduled to run at 12:05 AM on Jan 1st each year'
+            // Get the start of the month, two months ago
+            const thresholdDate = now
+                .clone()
+                .startOf('month')
+                .subtract(2, 'months');
+
+            console.log(
+                `🧹 Starting order cleanup. Deleting orders created before ${thresholdDate.format()}`
+            );
+
+            await Order.deleteMany({
+                createdAt: { $lt: thresholdDate.toDate() },
+            });
+
+            console.log('🧹 Cleanup completed');
+        }),
+        {
+            scheduled: true,
+            timezone: 'Asia/Kolkata',
+        }
     );
+
+    console.log('🧹 Cleanup scheduled for every month at 12:05 AM');
 };
 
 export {

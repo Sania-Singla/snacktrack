@@ -12,12 +12,11 @@ const PORT = process.env.PORT || 4000;
 
 await connectMongoDB();
 const redisClient = await connectRedis();
-const transporter = null;
-// await generateTransporter(); // nodemailer
+const transporter = await generateTransporter();
 
-// startBillingCronJob(); // cron job to generate bills every month at 12:05 AM
-// startCleanupCronJob(); // cron job to delete bills & orders every 6 months (july & jan) at 12:05 AM
+startBillingCronJob();
+startCleanupCronJob();
 
-http.listen(PORT, () => console.log(`✅ server listening on port ${PORT}...`));
+http.listen(PORT, () => console.log(`✅ Server listening on port ${PORT}...`));
 
 export { transporter, redisClient };
