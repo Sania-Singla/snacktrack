@@ -21,6 +21,8 @@ import UpdateKitchenKey from './User/UpdateKitchenKey';
 import EditSnackPopup from './Popups/EditSnack.Popup';
 import EditItemPopup from './Popups/EditItem.Popup';
 import RemoveSnackPopup from './Popups/RemoveSnack.Popup';
+import IntermediateBillPopup from './Popups/IntermediateBill.Popup';
+import IntermediateBillDetailPopup from './Popups/IntermediateBillDetail.Popup';
 import RemoveItemPopup from './Popups/RemoveItem.Popup';
 import EditCartItemPopup from './Popups/EditCartItem.Popup';
 import SnackView from './Views/SnackView';
@@ -61,6 +63,8 @@ export {
     ContributorCard,
     UpdateAccountDetails,
     UpdateKitchenKey,
+    IntermediateBillPopup,
+    IntermediateBillDetailPopup,
     ContractorOrderCard,
     UpdatePassword,
     Popup,

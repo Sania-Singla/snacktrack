@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { billService } from '../Services';
-import { BillCard, Filter } from '../Components';
+import { BillCard, Button, Filter } from '../Components';
 import { checkTokenExpired, paginate } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 import { icons } from '../Assets/icons';
-import { useSearchContext, useUserContext } from '../Contexts';
+import { usePopupContext, useSearchContext, useUserContext } from '../Contexts';
 import toast from 'react-hot-toast';
 
 export default function BillsPage() {
@@ -17,7 +17,7 @@ export default function BillsPage() {
     const { search } = useSearchContext();
     const { setUser } = useUserContext();
     const [searchParams] = useSearchParams();
-    // const [generatingBills, setGeneratingBills] = useState(false);
+    const { setShowPopup, setPopupInfo } = usePopupContext();
     const filter = searchParams.get('filter') || new Date().getMonth(); // Default to last month
     const months = [
         { value: 1, label: 'January' },
@@ -91,19 +91,10 @@ export default function BillsPage() {
         return () => controller.abort();
     }, [page]);
 
-    // async function generateBills() {
-    //     try {
-    //         setGeneratingBills(true);
-    //         const res = await billService.generateBills();
-    //         if (res && res.success === true) {
-    //             toast.success(res.message);
-    //         } else checkTokenExpired(res, setUser);
-    //     } catch (err) {
-    //         navigate('/server-error');
-    //     } finally {
-    //         setGeneratingBills(false);
-    //     }
-    // }
+    function generateIntermediateBill() {
+        setShowPopup(true);
+        setPopupInfo({ type: 'intermediateBill' });
+    }
 
     const billElements = useMemo(() => {
         return bills
@@ -146,31 +137,26 @@ export default function BillsPage() {
                             {new Date().getFullYear()}
                         </div>
                     </div>
-                    {/* <Button
-                        onClick={generateBills}
-                        className="text-white rounded-md py-2 px-4 mt-2 h-[40px] flex items-center justify-center text-lg transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
-                        btnText={
-                            generatingBills ? (
-                                <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                    {icons.loading}
-                                </div>
-                            ) : (
-                                `Generate Bills`
-                            )
-                        }
-                    /> */}
+
                     {bills.length > 0 && (
-                        <div className="hidden sm:flex text-lg w-full items-center justify-center font-semibold text-gray-800 ">
+                        <div className="hidden sm:flex text-lg w-full items-center justify-center font-semibold text-gray-800">
                             <div className="border border-blue-500 bg-blue-50 rounded-lg px-3 py-[5px]">
                                 Total: ₹{totalAmount.toFixed(2)}
                             </div>
                         </div>
                     )}
-                    <Filter options={months} defaultOption={filter} />
+                    <div className="flex gap-4 items-center">
+                        <Filter options={months} defaultOption={filter} />
+                        <Button
+                            onClick={generateIntermediateBill}
+                            className="text-white rounded-md py-2 font-medium text-nowrap px-4 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                            btnText="Generate Bill"
+                        />
+                    </div>
                 </div>
 
                 {bills.length > 0 && (
-                    <div className="sm:hidden text-xl w-full flex items-center justify-center pb-8 font-semibold text-gray-800 ">
+                    <div className="sm:hidden text-xl mt-8 w-full flex items-center justify-center pb-8 font-semibold text-gray-800 ">
                         <div className="border border-blue-500 bg-blue-50 rounded-lg px-3 py-2">
                             Total: ₹{totalAmount.toFixed(2)}
                         </div>

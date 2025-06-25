@@ -86,22 +86,16 @@ export default function StudentsPage() {
             {studentElements.length > 0 && (
                 <div className="w-full">
                     <div className=" w-full flex justify-between gap-4 mb-8">
-                        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <div className="bg-white px-3 py-2 rounded-lg shadow-sm">
                             <div className="flex items-center justify-between gap-2">
-                                <h3 className="text-base font-medium text-gray-800">
+                                <h3 className="text-sm font-medium text-gray-800">
                                     Total Students
                                 </h3>
-                                <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
+                                <div className="size-6 rounded-full bg-blue-50 text-sm flex items-center justify-center">
                                     <span className="text-blue-600 font-bold">
                                         {students.length}
                                     </span>
                                 </div>
-                            </div>
-                            <div className="h-1 w-full bg-gray-100 mt-4">
-                                <div
-                                    className="h-1 bg-blue-500 rounded-full"
-                                    style={{ width: '100%' }}
-                                />
                             </div>
                         </div>
 
@@ -116,7 +110,7 @@ export default function StudentsPage() {
                                     <p>Remove All Students</p>
                                 </div>
                             }
-                            className="bg-red-600 hover:bg-red-700 text-white p-2 h-fit rounded-lg"
+                            className="bg-red-600  shadow-sm hover:bg-red-700 text-white p-2 h-fit rounded-lg"
                         />
                     </div>
 

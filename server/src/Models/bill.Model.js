@@ -25,13 +25,6 @@ const billSchema = new Schema(
             type: Number,
             required: true,
         },
-        paid: {
-            type: Boolean,
-            default: false,
-        },
-        paidOn: {
-            type: Date,
-        },
     },
     { timestamps: true }
 );

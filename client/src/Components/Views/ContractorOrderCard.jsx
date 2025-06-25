@@ -153,25 +153,26 @@ export default function ContractorOrderCard({ order, reference }) {
                                     <div
                                         key={item.id}
                                         className={`relative space-y-2 p-4 ${
-                                            item.preparedCount ===
+                                            status === 'Pending' &&
+                                            (item.preparedCount ===
                                                 item.quantity ||
-                                            status === 'Prepared' ||
-                                            item.type === 'PackagedFood'
+                                                item.type === 'PackagedFood')
                                                 ? 'opacity-60'
                                                 : 'border-[0.01rem] border-transparent'
                                         }`}
                                     >
                                         {/* Overlay tick for prepared item */}
-                                        {(item.preparedCount ===
-                                            item.quantity ||
-                                            status === 'Prepared' ||
-                                            item.type === 'PackagedFood') && (
-                                            <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
-                                                <div className="fill-green-600 size-8 p-1">
-                                                    {icons.check}
+                                        {status === 'Pending' &&
+                                            (item.preparedCount ===
+                                                item.quantity ||
+                                                item.type ===
+                                                    'PackagedFood') && (
+                                                <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
+                                                    <div className="fill-green-600 size-8 p-1">
+                                                        {icons.check}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
@@ -198,7 +199,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                         )}
                                                     </h3>
                                                     <p className="text-xs text-gray-500">
-                                                        Qty: {item.quantity} 
+                                                        Qty: {item.quantity}
                                                     </p>
                                                 </div>
                                             </div>

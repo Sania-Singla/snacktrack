@@ -1,7 +1,7 @@
 import moment from 'moment';
-import { OK } from '../Constants/index.js';
-import { tryCatch } from '../Utils/index.js';
-import { Bill, Order } from '../Models/index.js';
+import { NOT_FOUND, OK } from '../Constants/index.js';
+import { ErrorHandler, tryCatch } from '../Utils/index.js';
+import { Bill, Canteen, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
 import cron from 'node-cron';
 
@@ -71,30 +71,56 @@ const getBills = tryCatch('get bills', async (req, res) => {
     }
 });
 
-const markPaid = tryCatch('mark bill paid', async (req, res) => {
-    const { billId } = req.params;
-    const contractor = req.user;
-
-    const bill = await Bill.findOneAndUpdate(
-        {
-            _id: new Types.ObjectId(billId),
-            canteenId: new Types.ObjectId(contractor.canteenId),
-        },
-        { paid: true, paidOn: moment().toDate() },
-        { new: true }
-    );
-    if (!bill) {
-        return res.status(404).json({ message: 'bill not found' });
-    }
-    return res.status(OK).json({ message: 'bill marked as paid' });
-});
-
 // todo: PENDING
 
-// generate bill for a specific student in mid of a month
-const generateBill = tryCatch(
-    'generate bill for student',
-    async (req, res) => {}
+// generate bill for a specific student in mid of the current month
+const generateIntermediateBill = tryCatch(
+    'generate intermediate bill for student',
+    async (req, res, next) => {
+        const { rollNo } = req.params;
+        const { canteenId } = req.user;
+
+        const canteen = await Canteen.findById(canteenId).select(
+            'hostelType hostelNumber'
+        );
+        const { hostelType, hostelNumber } = canteen;
+
+        const userName = `${hostelType}${hostelNumber}-${rollNo}`;
+
+        const student = await Student.findOne({ userName }).select(
+            '-refreshToken -password'
+        );
+
+        if (!student) {
+            return next(new ErrorHandler('Student Not found', NOT_FOUND));
+        }
+
+        // get orders of current month (picked up) and prepare bill
+        const [bill] = await Order.aggregate([
+            {
+                $match: {
+                    studentId: student._id,
+                    createdAt: {
+                        $gte: moment().startOf('month').toDate(),
+                        $lte: moment().endOf('month').toDate(),
+                    },
+                    status: 'PickedUp',
+                },
+            },
+            {
+                $group: {
+                    _id: '$studentId',
+                    totalAmount: { $sum: '$amount' },
+                },
+            },
+        ]);
+
+        return res.status(OK).json({
+            studentInfo: student,
+            canteenId,
+            amount: bill.totalAmount,
+        });
+    }
 );
 
 // generate bills for the previous month
@@ -205,9 +231,9 @@ const startCleanupCronJob = () => {
 };
 
 export {
-    markPaid,
     generateBills,
     getBills,
+    generateIntermediateBill,
     getStudentBills,
     startBillingCronJob,
     startCleanupCronJob,

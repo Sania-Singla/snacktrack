@@ -2,18 +2,15 @@ import express from 'express';
 export const billRouter = express.Router();
 
 import {
-    markPaid,
     getBills,
     getStudentBills,
-    generateBills,
+    generateIntermediateBill,
 } from '../Controllers/bill.Controller.js';
 import { verifyJwt } from '../Middlewares/index.js';
 
 billRouter.use(verifyJwt);
 
-billRouter.route('/generate').get(generateBills);
-
-billRouter.route('/:billId').patch(markPaid);
+billRouter.route('/generate/:rollNo').get(generateIntermediateBill);
 
 billRouter.route('/:studentId').get(getStudentBills);
 

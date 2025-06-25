@@ -21,21 +21,12 @@ class BillService {
         });
     }
 
-    async generateBills() {
+    async generateIntermediateBill(rollNo) {
         return await fetchWrapper({
-            endPoint: `/bills/generate`,
+            endPoint: `/bills/generate/${rollNo}`,
             method: 'GET',
             credentials: 'include',
-            aim: 'generateBills',
-        });
-    }
-
-    async markPaid(billId) {
-        return await fetchWrapper({
-            endPoint: `/bills/${billId}`,
-            method: 'PATCH',
-            credentials: 'include',
-            aim: 'markPaid',
+            aim: 'generateIntermediateBill',
         });
     }
 }

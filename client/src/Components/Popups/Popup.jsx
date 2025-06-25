@@ -16,6 +16,8 @@ import {
     OrderUnavailablePopup,
     EditContractorPopup,
     NewContractorPopup,
+    IntermediateBillPopup,
+    IntermediateBillDetailPopup,
 } from '..';
 import { usePopupContext } from '../../Contexts';
 
@@ -133,9 +135,21 @@ export default function Popup() {
         case 'newContractor':
             return (
                 <Wrapper>
-                    <NewContractorPopup/>
+                    <NewContractorPopup />
                 </Wrapper>
-            )
+            );
+        case 'intermediateBill':
+            return (
+                <Wrapper>
+                    <IntermediateBillPopup />
+                </Wrapper>
+            );
+        case 'intermediateBillDetail':
+            return (
+                <Wrapper>
+                    <IntermediateBillDetailPopup />
+                </Wrapper>
+            );
         default:
             return null;
     }
