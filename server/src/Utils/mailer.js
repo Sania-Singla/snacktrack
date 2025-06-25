@@ -1,27 +1,6 @@
-import nodemailer from 'nodemailer';
-import { transporter } from './server.js';
+import { transporter } from '../server.js';
 
-async function generateTransporter() {
-    try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            secure: true,
-            auth: {
-                user: process.env.ADMIN_EMAIL,
-                pass: process.env.ADMIN_EMAIL_PASSWORD,
-            },
-        });
-
-        // Test transporter
-        await transporter.verify();
-        console.log('✅ Mail transporter ready.');
-        return transporter;
-    } catch (err) {
-        console.error(`❌ Error generating mail transporter: ${err.message}`);
-    }
-}
-
-async function sendMail({
+export async function sendMail({
     senderName = 'Snack Track',
     senderMail = process.env.ADMIN_EMAIL,
     receiverName,
@@ -51,5 +30,3 @@ async function sendMail({
         throw new Error(`❌ Error sending mail: ${err.message}`);
     }
 }
-
-export { generateTransporter, sendMail };

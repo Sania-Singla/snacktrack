@@ -12,6 +12,7 @@ import {
     getOrderStats,
     verifyKitchenKey,
 } from '../Controllers/order.Controller.js';
+import { BAD_REQUEST } from '../Constants/errorCodes.js';
 
 orderRouter.route('/kitchen/verify-key/:canteenId').post(verifyKitchenKey);
 
@@ -25,7 +26,16 @@ orderRouter.route('/student/:studentId').get(getStudentOrders);
 
 orderRouter.route('/canteen/:canteenId').get(getCanteenOrders);
 
-orderRouter.route('/kitchen').get(getKitchenOrders);
+orderRouter
+    .route('/kitchen')
+    .all((req, res, next) => {
+        if (req.user?.role === 'student') {
+            return res.status(BAD_REQUEST).json({
+                message: 'You are not authorized for this data',
+            });
+        } else return next();
+    })
+    .get(getKitchenOrders);
 
 orderRouter.route('/stats/:canteenId').get(getOrderStats);
 

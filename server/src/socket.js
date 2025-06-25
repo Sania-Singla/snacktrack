@@ -2,8 +2,12 @@ import { app } from './app.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/index.js';
-import { deleteSocketId, addSocketId, addPreparedItem } from './Utils/index.js';
-import { sendSMS } from './sms.js';
+import {
+    deleteSocketId,
+    addSocketId,
+    addPreparedItem,
+    sendSMS,
+} from './Utils/index.js';
 
 const http = createServer(app);
 const io = new Server(http, { cors: CORS_OPTIONS });

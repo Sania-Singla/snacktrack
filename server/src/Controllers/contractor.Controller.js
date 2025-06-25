@@ -7,7 +7,12 @@ import {
     SNACK_PLACEHOLDER_IMAGE_URL,
 } from '../Constants/index.js';
 import bcrypt from 'bcrypt';
-import { verifyExpression, tryCatch, ErrorHandler } from '../Utils/index.js';
+import {
+    verifyExpression,
+    tryCatch,
+    ErrorHandler,
+    sendMail,
+} from '../Utils/index.js';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../Helpers/index.js';
 import { nanoid } from 'nanoid';
 import {
@@ -19,7 +24,6 @@ import {
 } from '../Models/index.js';
 import { Types } from 'mongoose';
 import fs from 'fs';
-import { sendMail } from '../mailer.js';
 
 const updateKitchenKey = tryCatch(
     'update kitchen key',

@@ -95,42 +95,52 @@ export default function StudentOrderCard({ order, reference }) {
                                                 </div>
                                             )}
                                         </div>
-                                        <div>
-                                            <h3 className="text-sm font-medium text-gray-800 capitalize">
-                                                {item.name}
+                                        <div className="space-y-[2px] pb-1">
+                                            <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
+                                                <span>{item.name}</span>
+                                                {item.isPacked && (
+                                                    <span className="flex items-center gap-1 text-[10px] bg-yellow-50 rounded-full font-medium border-[0.01rem] border-yellow-300 w-fit px-2 text-yellow-600">
+                                                        Pack
+                                                    </span>
+                                                )}
                                             </h3>
-                                            <p className="text-xs text-gray-500">
-                                                Qty: {item.quantity}
-                                            </p>
+                                            <div className="flex gap-1 items-center">
+                                                <p className="text-gray-600 text-xs">
+                                                    Qty: {item.quantity}
+                                                </p>
+                                                {item.preparedCount > 0 &&
+                                                    item.preparedCount <
+                                                        item.quantity && (
+                                                        <div className="flex gap-1 items-center">
+                                                            <span className="text-gray-400 text-xs">
+                                                                &bull;
+                                                            </span>
+                                                            <p className="text-xs text-green-500">
+                                                                Parepared:{' '}
+                                                                {
+                                                                    item.preparedCount
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-semibold text-gray-900">
-                                            ₹
-                                            {(
-                                                item.price * item.quantity
-                                            ).toFixed(2)}
-                                        </span>
-                                        {item.isPacked && (
-                                            <div className="flex items-center gap-1 text-xs">
-                                                <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
-                                                <span className="text-gray-500">
-                                                    Pack
-                                                </span>
-                                            </div>
+                                    <span className="text-sm font-semibold text-gray-900">
+                                        ₹
+                                        {(item.price * item.quantity).toFixed(
+                                            2
                                         )}
-                                    </div>
+                                    </span>
                                 </div>
 
                                 {item.specialInstructions && (
-                                    <div className="ml-13 pl-1">
-                                        <p className="text-xs text-gray-600 italic">
-                                            <span className="font-medium not-italic">
-                                                Note:{' '}
-                                            </span>
-                                            {item.specialInstructions}
-                                        </p>
-                                    </div>
+                                    <p className="ml-13 pl-1 italic text-xs text-gray-600">
+                                        <span className="font-medium">
+                                            Note:{' '}
+                                        </span>
+                                        {item.specialInstructions}
+                                    </p>
                                 )}
                             </div>
                         ))}

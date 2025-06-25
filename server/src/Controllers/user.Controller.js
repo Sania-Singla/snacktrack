@@ -5,7 +5,12 @@ import {
     BAD_REQUEST,
     USER_PLACEHOLDER_IMAGE_URL,
 } from '../Constants/index.js';
-import { tryCatch, verifyExpression, ErrorHandler } from '../Utils/index.js';
+import {
+    tryCatch,
+    verifyExpression,
+    ErrorHandler,
+    sendMail,
+} from '../Utils/index.js';
 import {
     generateTokens,
     uploadOnCloudinary,
@@ -13,7 +18,6 @@ import {
 } from '../Helpers/index.js';
 import { Canteen, Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcrypt';
-import { sendMail } from '../mailer.js';
 import { nanoid } from 'nanoid';
 
 const login = tryCatch('login as contractor', async (req, res, next) => {

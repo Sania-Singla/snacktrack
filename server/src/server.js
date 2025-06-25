@@ -1,8 +1,8 @@
-import './Config/envLoader.js';
-import { connectMongoDB } from './DB/connectMongoDB.js';
-import { generateTransporter } from './mailer.js';
+import 'dotenv/config';
+import { connectMongoDB } from './Config/mongodb.js';
+import { connectRedis } from './Config/redis.js';
+import { generateTransporter } from './Config/nodemailer.js';
 import { http } from './socket.js';
-import { connectRedis } from './DB/connectRedis.js';
 import {
     startBillingCronJob,
     startCleanupCronJob,

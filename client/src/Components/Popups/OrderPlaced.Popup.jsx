@@ -24,7 +24,7 @@ export default function OrderPlacedPopup() {
         visible: {
             pathLength: 1,
             opacity: 1,
-            transition: { duration: 0.5, ease: 'easeInOut' },
+            transition: { duration: 0.3, ease: 'easeInOut' },
         },
     };
 
@@ -86,7 +86,7 @@ export default function OrderPlacedPopup() {
                     <motion.div
                         className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: 1, transition: { delay: 0.3 } }}
+                        animate={{ opacity: 1 }}
                     >
                         {[...Array(25)].map((_, i) => (
                             <motion.div
@@ -108,18 +108,18 @@ export default function OrderPlacedPopup() {
                                     opacity: 0,
                                 }}
                                 animate={{
-                                    y: [0, window.innerHeight * 0.5],
+                                    y: [-20, window.innerHeight * 0.5],
                                     opacity: [1, 0],
                                     x: [
-                                        0,
+                                        -20,
                                         Math.random() * 40 - 20, // slight horizontal drift
                                         Math.random() * 40 - 20,
                                     ],
                                     transition: {
-                                        duration: 1.5 + Math.random(),
+                                        duration: 1.3 + Math.random(),
                                         delay: i * 0.05,
                                         repeat: Infinity,
-                                        repeatDelay: 2,
+                                        repeatDelay: 0.5,
                                         ease: 'linear',
                                     },
                                 }}
@@ -133,7 +133,7 @@ export default function OrderPlacedPopup() {
                         animate={{
                             y: 0,
                             opacity: 1,
-                            transition: { delay: 0.4 },
+                            transition: { delay: 0.1 },
                         }}
                     >
                         Order Placed!
@@ -145,7 +145,7 @@ export default function OrderPlacedPopup() {
                         animate={{
                             y: 0,
                             opacity: 1,
-                            transition: { delay: 0.5 },
+                            transition: { delay: 0.2 },
                         }}
                     >
                         <span className="font-semibold">Items:</span>{' '}
@@ -158,7 +158,7 @@ export default function OrderPlacedPopup() {
                         animate={{
                             y: 0,
                             opacity: 1,
-                            transition: { delay: 0.6 },
+                            transition: { delay: 0.3 },
                         }}
                     >
                         We'll notify you when your order is ready for pickup.
@@ -169,7 +169,7 @@ export default function OrderPlacedPopup() {
                         animate={{
                             y: 0,
                             opacity: 1,
-                            transition: { delay: 0.7 },
+                            transition: { delay: 0.4 },
                         }}
                         className="w-full"
                     >

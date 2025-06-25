@@ -189,7 +189,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="">
+                                                <div className="space-y-[2px] pb-1">
                                                     <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
                                                         <span>{item.name}</span>
                                                         {item.isPacked && (
@@ -198,9 +198,27 @@ export default function ContractorOrderCard({ order, reference }) {
                                                             </span>
                                                         )}
                                                     </h3>
-                                                    <p className="text-xs text-gray-500">
-                                                        Qty: {item.quantity}
-                                                    </p>
+                                                    <div className="flex gap-1 items-center">
+                                                        <p className="text-gray-600 text-xs">
+                                                            Qty: {item.quantity}
+                                                        </p>
+                                                        {item.preparedCount >
+                                                            0 &&
+                                                            item.preparedCount <
+                                                                item.quantity && (
+                                                                <div className="flex gap-1 items-center">
+                                                                    <span className="text-gray-400 text-xs">
+                                                                        &bull;
+                                                                    </span>
+                                                                    <p className="text-xs text-green-500">
+                                                                        Parepared:{' '}
+                                                                        {
+                                                                            item.preparedCount
+                                                                        }
+                                                                    </p>
+                                                                </div>
+                                                            )}
+                                                    </div>
                                                 </div>
                                             </div>
                                             <span className="text-sm font-semibold text-gray-900">
@@ -212,14 +230,12 @@ export default function ContractorOrderCard({ order, reference }) {
                                         </div>
 
                                         {item.specialInstructions && (
-                                            <div className="ml-13 pl-1">
-                                                <p className="text-xs text-gray-600 italic">
-                                                    <span className="font-medium not-italic">
-                                                        Note:{' '}
-                                                    </span>
-                                                    {item.specialInstructions}
-                                                </p>
-                                            </div>
+                                            <p className="ml-13 pl-1 italic text-xs text-gray-600">
+                                                <span className="font-medium">
+                                                    Note:{' '}
+                                                </span>
+                                                {item.specialInstructions}
+                                            </p>
                                         )}
                                     </div>
                                 ))}

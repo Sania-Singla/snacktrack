@@ -13,9 +13,9 @@ import {
     ErrorHandler,
     sendVerificationEmail,
     verifyEmail,
+    sendMail,
 } from '../Utils/index.js';
 import { Canteen, Contractor } from '../Models/index.js';
-import { sendMail } from '../mailer.js';
 import { customAlphabet, nanoid } from 'nanoid';
 import { Types } from 'mongoose';
 import bcrypt from 'bcrypt';
@@ -200,7 +200,7 @@ const updateContractor = tryCatch(
             if (!isKitchenKeySame) {
                 canteen = await Canteen.findById(contractor.canteenId);
                 canteen.kitchenKey = newKitchenKey;
-                await canteen.save(); 
+                await canteen.save();
             }
         }
 

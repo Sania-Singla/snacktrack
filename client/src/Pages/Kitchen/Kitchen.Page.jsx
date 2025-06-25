@@ -22,58 +22,68 @@ export default function KitchenPage() {
                 .map((i) => (
                     <div
                         key={`${o._id}-${i.id}`}
-                        className="flex justify-between items-center border-gray-200 border-[0.01rem] rounded-xl p-3"
+                        className="space-y-1 border-gray-200 border-[0.01rem] rounded-xl p-3"
                     >
-                        <div className="flex items-center gap-3">
-                            <div className="size-10 rounded-full overflow-hidden shadow-sm">
-                                <img
-                                    src={o.studentInfo.avatar}
-                                    alt={`${o.studentInfo.fullName} image`}
-                                    className="size-full object-cover"
-                                />
-                            </div>
-                            <div className="flex-1 space-y-[2px]">
-                                <h3 className="flex items-center gap-1">
-                                    <span className="font-medium text-[14px] text-gray-800 truncate">
-                                        {o.studentInfo.fullName}
-                                    </span>
-                                    <span className="text-sm text-gray-600">
-                                        •
-                                    </span>
-                                    <span className="text-xs text-gray-600">
-                                        Roll No:{' '}
-                                        {getRollNo(o.studentInfo.userName)}
-                                    </span>
-                                </h3>
-                                <div className="flex items-center gap-1 text-xs text-gray-600">
-                                    {o.studentInfo.phoneNumber}
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center gap-3">
+                                <div className="size-10 rounded-full overflow-hidden shadow-sm">
+                                    <img
+                                        src={o.studentInfo.avatar}
+                                        alt={`${o.studentInfo.fullName} image`}
+                                        className="size-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1 space-y-[2px]">
+                                    <h3 className="flex items-center gap-1">
+                                        <span className="font-medium text-[14px] text-gray-800 truncate">
+                                            {o.studentInfo.fullName}
+                                        </span>
+                                        <span className="text-sm text-gray-600">
+                                            •
+                                        </span>
+                                        <span className="text-xs text-gray-600">
+                                            Roll No:{' '}
+                                            {getRollNo(o.studentInfo.userName)}
+                                        </span>
+                                    </h3>
+                                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                                        {o.studentInfo.phoneNumber}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                            <div className="flex items-center justify-center gap-2">
-                                <p className="text-gray-800 font-medium text-[14px]">
-                                    {i.name}
-                                </p>
-                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
-                                    {i.quantity - i.preparedCount}
+                            <div className="flex flex-col items-end gap-2">
+                                <div className="flex items-center justify-center gap-2">
+                                    <p className="text-gray-800 font-medium text-[14px]">
+                                        {i.name}
+                                    </p>
+                                    <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
+                                        {i.quantity - i.preparedCount}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {user?.role !== 'contractor' && (
-                                <Button
-                                    className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
-                                    onClick={() =>
-                                        socket?.emit('itemPrepared', {
-                                            orderId: o._id,
-                                            itemId: i.id,
-                                            stuId: o.studentId,
-                                        })
-                                    }
-                                    btnText="-"
-                                />
-                            )}
+                                {user?.role !== 'contractor' && (
+                                    <Button
+                                        className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
+                                        onClick={() =>
+                                            socket?.emit('itemPrepared', {
+                                                orderId: o._id,
+                                                itemId: i.id,
+                                                stuId: o.studentId,
+                                            })
+                                        }
+                                        btnText="-"
+                                    />
+                                )}
+                            </div>
                         </div>
+                        {i.specialInstructions && (
+                            <div className="text-[13px] text-red-500 italic ml-13">
+                                <span className="font-medium mr-1">Note:</span>
+                                <span className="italic">
+                                    {i.specialInstructions}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 ))
         );
@@ -250,7 +260,7 @@ export default function KitchenPage() {
             {kitchenOrders.length > 0 ? (
                 <section className="p-4 overflow-scroll bg-white rounded-xl shadow-sm flex flex-col md:flex-row md:gap-0 gap-6">
                     {/* summary */}
-                    <section className="md:pr-4 p-2 w-full md:w-[70%] border-b-[0.01rem] md:border-r-[0.01rem] md:border-b-0 border-gray-200">
+                    <section className="md:pr-4 md:p-2 w-full md:w-[70%] border-b-[0.01rem] md:border-r-[0.01rem] md:border-b-0 border-gray-200">
                         <h2 className="text-center font-bold text-xl mb-6">
                             Summary
                         </h2>
@@ -276,7 +286,7 @@ export default function KitchenPage() {
                     </section>
 
                     {/* users wise */}
-                    <section className="w-full md:w-[30%] md:ml-2 p-2">
+                    <section className="w-full md:w-[30%] md:ml-2 md:p-2">
                         <h2 className="text-center font-bold text-xl mb-6">
                             Orders
                         </h2>
