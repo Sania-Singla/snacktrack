@@ -228,5 +228,4 @@ export {
     getStudentBills,
     startBillingCronJob,
     startCleanupCronJob,
-    cleanOldBillsAndOrders,
 };
