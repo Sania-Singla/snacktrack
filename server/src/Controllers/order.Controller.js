@@ -1,8 +1,16 @@
-import { FORBIDDEN, OK, NOT_FOUND } from '../Constants/index.js';
+import {
+    FORBIDDEN,
+    OK,
+    NOT_FOUND,
+    COOKIE_OPTIONS,
+} from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
-import { Order, PackagedFood, Snack } from '../Models/index.js';
+import { Canteen, Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment';
+import { redisClient } from '../server.js';
+import { generateStaffToken } from '../Helpers/tokens.js';
+import bcrypt from 'bcrypt';
 
 const checkAvailability = tryCatch('check availability', async (req, res) => {
     const { cartItems } = req.body;
@@ -50,17 +58,20 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         isPacked: i.isPacked,
     }));
 
+    const allPackaged = cartItems.every((i) => i.type === 'PackagedFood');
+
     const order = await Order.create({
         studentId: student._id,
         canteenId: student.canteenId,
         amount,
+        status: allPackaged ? 'Prepared' : 'Pending',
         items: updatedCartItems,
         packingCharges,
     });
 
     const data = {
         ...order.toObject(),
-        items: cartItems,
+        items: cartItems.map((i) => ({ ...i, preparedCount: 0 })),
         studentInfo: {
             fullName: student.fullName,
             phoneNumber: student.phoneNumber,
@@ -79,6 +90,8 @@ const updateOrderStatus = tryCatch(
         const { status } = req.query;
         const contractor = req.user;
 
+        console.log(orderId, status);
+
         const order = await Order.findOne({
             _id: new Types.ObjectId(orderId),
             canteenId: new Types.ObjectId(contractor.canteenId),
@@ -95,6 +108,15 @@ const updateOrderStatus = tryCatch(
 
         order.status = status;
         await order.save();
+
+        // delete prepared items from redis
+        if (order.status === 'Prepared') {
+            const preparedItems = await redisClient.sMembers(
+                `order_${order._id}`
+            );
+            if (preparedItems.length)
+                await redisClient.del(`order_${order._id}`);
+        }
 
         return res
             .status(OK)
@@ -204,18 +226,40 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
         }
     );
 
-    return res.status(OK).json(
-        result.docs.length
-            ? {
-                  orders: result.docs,
-                  ordersInfo: {
-                      hasNextPage: result.hasNextPage,
-                      hasPrevPage: result.hasPrevPage,
-                      totalOrders: result.totalDocs,
-                  },
-              }
-            : { message: 'No orders found' }
-    );
+    if (result.docs.length) {
+        result.docs = await Promise.all(
+            result.docs.map(async (order) => {
+                const preparedItems = await redisClient.sMembers(
+                    `order_${order._id}`
+                );
+
+                const updatedItems = order.items.map((item) => {
+                    const preparedItem = preparedItems
+                        .map((i) => JSON.parse(i))
+                        .find((i) => item.id.equals(i.itemId));
+
+                    if (order.status === 'Pending') {
+                        item.preparedCount =
+                            item.type === 'Snack'
+                                ? preparedItem?.quantity || 0
+                                : item.quantity;
+                    }
+                    return item;
+                });
+
+                return { ...order, items: updatedItems };
+            })
+        );
+
+        return res.status(OK).json({
+            orders: result.docs,
+            ordersInfo: {
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage,
+                totalOrders: result.totalDocs,
+            },
+        });
+    } else return res.status(OK).json({ message: 'No orders found' });
 });
 
 const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
@@ -321,18 +365,40 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
         }
     );
 
-    return res.status(OK).json(
-        result.docs.length
-            ? {
-                  orders: result.docs,
-                  ordersInfo: {
-                      hasNextPage: result.hasNextPage,
-                      hasPrevPage: result.hasPrevPage,
-                      totalOrders: result.totalDocs,
-                  },
-              }
-            : { message: 'No orders found' }
-    );
+    if (result.docs.length) {
+        result.docs = await Promise.all(
+            result.docs.map(async (order) => {
+                const preparedItems = await redisClient.sMembers(
+                    `order_${order._id}`
+                );
+
+                const updatedItems = order.items.map((item) => {
+                    const preparedItem = preparedItems
+                        .map((i) => JSON.parse(i))
+                        .find((i) => item.id.equals(i.itemId));
+
+                    if (order.status === 'Pending') {
+                        item.preparedCount =
+                            item.type === 'Snack'
+                                ? preparedItem?.quantity || 0
+                                : item.quantity;
+                    }
+                    return item;
+                });
+
+                return { ...order, items: updatedItems };
+            })
+        );
+
+        return res.status(OK).json({
+            orders: result.docs,
+            ordersInfo: {
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage,
+                totalOrders: result.totalDocs,
+            },
+        });
+    } else return res.status(OK).json({ message: 'No orders found' });
 });
 
 const getOrderStats = tryCatch('get order stats', async (req, res) => {
@@ -370,28 +436,28 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
     ]);
 
     const result = {
-        total: 0,
-        pending: 0,
-        prepared: 0,
-        pickedUp: 0,
-        rejected: 0,
+        Total: 0,
+        Pending: 0,
+        Prepared: 0,
+        PickedUp: 0,
+        Rejected: 0,
     };
 
     stats.forEach((stat) => {
-        result.total += stat.count;
-        result[stat.status.toLowerCase()] = stat.count;
+        result.Total += stat.count;
+        result[stat.status] = stat.count;
     });
 
     return res.status(OK).json(result);
 });
 
 const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
-    const { canteenId } = req;
+    const { canteenId } = req.user;
 
     const startOfDay = moment.utc().startOf('day').toDate();
     const endOfDay = moment.utc().endOf('day').toDate();
 
-    const orders = await Order.aggregatePaginate(
+    const result = await Order.aggregatePaginate(
         [
             {
                 $match: {
@@ -401,6 +467,25 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
                 },
             },
             { $unwind: '$items' },
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: 'studentId',
+                    foreignField: '_id',
+                    pipeline: [
+                        {
+                            $project: {
+                                fullName: 1,
+                                phoneNumber: 1,
+                                rollNo: 1,
+                                avatar: 1,
+                                userName: 1,
+                            },
+                        },
+                    ],
+                    as: 'studentInfo',
+                },
+            },
             { $match: { 'items.type': 'Snack' } },
             {
                 $lookup: {
@@ -431,6 +516,9 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
                     items: { $push: '$items' },
                     createdAt: { $first: '$createdAt' },
                     updatedAt: { $first: '$updatedAt' },
+                    studentInfo: {
+                        $first: { $arrayElemAt: ['$studentInfo', 0] },
+                    },
                 },
             },
             { $project: { snackDetails: 0 } },
@@ -438,8 +526,82 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
         { sort: { createdAt: 1 } }
     );
 
-    return res.status(OK).json({ orders: orders.docs, canteenId });
+    // filter out prepared items as well
+    if (result.docs.length) {
+        result.docs = await Promise.all(
+            result.docs.map(async (order) => {
+                const preparedItems = await redisClient.sMembers(
+                    `order_${order._id}`
+                );
+
+                const updatedItems = order.items.map((item) => {
+                    const preparedItem = preparedItems
+                        .map((i) => JSON.parse(i))
+                        .find((i) => item.id.equals(i.itemId));
+
+                    return {
+                        ...item,
+                        preparedCount: preparedItem?.quantity || 0,
+                    };
+                });
+
+                return { ...order, items: updatedItems };
+            })
+        );
+    }
+
+    return res.status(OK).json({ orders: result.docs });
 });
+
+const verifyKitchenKey = tryCatch(
+    'verify kitchen key',
+    async (req, res, next) => {
+        const { key } = req.body;
+        const { canteenId } = req.params;
+
+        if (!canteenId) {
+            return next(new ErrorHandler('missing canteenId', BAD_REQUEST));
+        }
+
+        if (!key) {
+            return next(new ErrorHandler('missing key', BAD_REQUEST));
+        }
+
+        const canteen = await Canteen.findById(canteenId);
+
+        const isValid = bcrypt.compareSync(key, canteen.kitchenKey);
+        if (!isValid) {
+            return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
+        }
+
+        const staffToken = await generateStaffToken({
+            key,
+            canteenId,
+            role: 'staff',
+        });
+
+        const { hostelName, hostelNumber, hostelType } = canteen;
+
+        return res
+            .status(OK)
+            .cookie('staffToken', staffToken, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.STAFF_TOKEN_MAXAGE),
+            })
+            .clearCookie('accessToken', COOKIE_OPTIONS)
+            .clearCookie('refreshToken', COOKIE_OPTIONS)
+            .json({
+                user: {
+                    userId: null,
+                    canteenId,
+                    role: 'staff',
+                    hostelType,
+                    hostelNumber,
+                    hostelName,
+                },
+            });
+    }
+);
 
 export {
     placeOrder,
@@ -449,4 +611,5 @@ export {
     getCanteenOrders,
     getKitchenOrders,
     checkAvailability,
+    verifyKitchenKey,
 };

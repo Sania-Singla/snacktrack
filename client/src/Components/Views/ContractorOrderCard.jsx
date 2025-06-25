@@ -23,7 +23,6 @@ export default function ContractorOrderCard({ order, reference }) {
         if (status === 'Pending') {
             setStatusOptions([
                 { value: '', label: 'Pending' },
-                { value: 'Prepared', label: 'Prepared' },
                 { value: 'Rejected', label: 'Rejected' },
             ]);
         } else {
@@ -65,7 +64,7 @@ export default function ContractorOrderCard({ order, reference }) {
                 <div className="flex justify-between items-center mb-3 w-full">
                     {/* User Info Section */}
                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full overflow-hidden drop-shadow-sm">
+                        <div className="size-10 rounded-full overflow-hidden shadow-sm">
                             <img
                                 src={studentInfo.avatar}
                                 alt={`${studentInfo.fullName} image`}
@@ -148,10 +147,32 @@ export default function ContractorOrderCard({ order, reference }) {
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                     >
-                        <div className="px-5 pb-5 border-t border-gray-100">
-                            <div className="space-y-4 mt-4">
+                        <div className="border-t border-gray-200">
+                            <div className="">
                                 {items.map((item) => (
-                                    <div key={item.id} className="space-y-2">
+                                    <div
+                                        key={item.id}
+                                        className={`relative space-y-2 p-4 ${
+                                            item.preparedCount ===
+                                                item.quantity ||
+                                            status === 'Prepared' ||
+                                            item.type === 'PackagedFood'
+                                                ? 'opacity-60'
+                                                : 'border-[0.01rem] border-transparent'
+                                        }`}
+                                    >
+                                        {/* Overlay tick for prepared item */}
+                                        {(item.preparedCount ===
+                                            item.quantity ||
+                                            status === 'Prepared' ||
+                                            item.type === 'PackagedFood') && (
+                                            <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
+                                                <div className="fill-green-600 size-8 p-1">
+                                                    {icons.check}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
                                                 <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
@@ -167,34 +188,26 @@ export default function ContractorOrderCard({ order, reference }) {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div>
-                                                    <h3 className="text-sm font-medium text-gray-800 capitalize">
-                                                        {item.name}
+                                                <div className="">
+                                                    <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
+                                                        <span>{item.name}</span>
+                                                        {item.isPacked && (
+                                                            <span className="flex items-center gap-1 text-[10px] bg-yellow-50 rounded-full font-medium border-[0.01rem] border-yellow-300 w-fit px-2 text-yellow-600">
+                                                                Pack
+                                                            </span>
+                                                        )}
                                                     </h3>
                                                     <p className="text-xs text-gray-500">
-                                                        Qty: {item.quantity} • ₹
-                                                        {item.price.toFixed(2)}{' '}
-                                                        each
+                                                        Qty: {item.quantity} 
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-semibold text-gray-900">
-                                                    ₹
-                                                    {(
-                                                        item.price *
-                                                        item.quantity
-                                                    ).toFixed(2)}
-                                                </span>
-                                                {item.isPacked && (
-                                                    <div className="flex items-center gap-1 text-xs">
-                                                        <span className="inline-block w-2 h-2 rounded-full bg-green-500" />
-                                                        <span className="text-gray-500">
-                                                            Pack
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <span className="text-sm font-semibold text-gray-900">
+                                                ₹
+                                                {(
+                                                    item.price * item.quantity
+                                                ).toFixed(2)}
+                                            </span>
                                         </div>
 
                                         {item.specialInstructions && (
@@ -211,7 +224,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                 ))}
                             </div>
 
-                            <div className="mt-6 pt-4 border-t border-gray-100">
+                            <div className="p-4 border-t border-gray-100">
                                 <div className="flex justify-between text-sm text-gray-600">
                                     <span>Subtotal</span>
                                     <span>₹{amount.toFixed(2)}</span>

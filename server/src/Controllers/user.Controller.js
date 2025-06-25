@@ -4,7 +4,6 @@ import {
     NOT_FOUND,
     BAD_REQUEST,
     USER_PLACEHOLDER_IMAGE_URL,
-    HOSTELS,
 } from '../Constants/index.js';
 import { tryCatch, verifyExpression, ErrorHandler } from '../Utils/index.js';
 import {
@@ -49,7 +48,7 @@ const login = tryCatch('login as contractor', async (req, res, next) => {
         Model.findByIdAndUpdate(
             user._id,
             { $set: { refreshToken } },
-            { new: true } 
+            { new: true }
         )
             .select('-password -refreshToken')
             .lean(),
@@ -68,6 +67,7 @@ const login = tryCatch('login as contractor', async (req, res, next) => {
             ...COOKIE_OPTIONS,
             maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
         })
+        .clearCookie('staffToken', COOKIE_OPTIONS)
         .json({ ...loggedInUser, role, ...canteen });
 });
 

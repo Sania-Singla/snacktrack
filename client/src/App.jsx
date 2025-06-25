@@ -1,16 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useSideBarContext, useUserContext, usePopupContext } from './Contexts';
+import {
+    useSideBarContext,
+    useUserContext,
+    usePopupContext,
+    useSocketContext,
+} from './Contexts';
 import { userService } from './Services';
 import { icons } from './Assets/icons';
 
 export default function App() {
     const [loading, setLoading] = useState(true);
-    const { setUser } = useUserContext();
+    const { setUser, user } = useUserContext();
     const { setShowSideBar } = useSideBarContext();
     const { setShowPopup } = usePopupContext();
     const navigate = useNavigate();
     const location = useLocation();
+    const { socket } = useSocketContext();
 
     useEffect(() => {
         (async function currentUser() {
@@ -37,7 +43,7 @@ export default function App() {
 
     return (
         <div className="bg-white h-[100vh] w-[100vw]">
-            {loading ? (
+            {loading || (user && !socket) ? (
                 <div className="text-black h-full w-full flex flex-col items-center justify-center">
                     <div className="size-[33px] fill-[#4977ec] dark:text-[#ececec]">
                         {icons.loading}

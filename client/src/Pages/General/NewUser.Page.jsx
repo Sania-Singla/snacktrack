@@ -6,15 +6,14 @@ export default function NewUserPage() {
 
     return (
         <div className="text-center min-h-screen bg-gradient-to-r from-sky-500 to-blue-600 flex items-center justify-center p-6">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full transform transition-all duration-500 hover:scale-105">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4 animate-fade-in">
+            <div className="bg-white rounded-2xl shadow-sm p-8 max-w-md w-full">
+                <h1 className="text-3xl font-bold text-gray-800 mb-6 animate-fade-in">
                     Welcome to SnackTrack!
                 </h1>
                 <p className="text-gray-600 mb-6 animate-fade-in animate-delay-100">
                     <Link
                         to="/login"
-                        style={{ color: '#3a67d8' }}
-                        className="font-semibold underline hover:opacity-80 transition-opacity duration-300"
+                        className="bg-[#f6f6f6] text-[#3a67d8] rounded-sm px-[10px] py-[3px] font-semibold hover:underline"
                     >
                         Login
                     </Link>{' '}

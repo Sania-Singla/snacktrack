@@ -5,7 +5,7 @@ import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { ContractorOrderCard } from '..';
 import {
-    useOrderContext,
+    useSocketContext,
     useSearchContext,
     useUserContext,
 } from '../../Contexts';
@@ -13,13 +13,14 @@ import { icons } from '../../Assets/icons';
 
 export default function PendingOrders() {
     const [searchParams] = useSearchParams();
-    const { pendingOrders, setPendingOrders } = useOrderContext();
+    const [pendingOrders, setPendingOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
+    const { socket } = useSocketContext();
     const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
@@ -33,6 +34,7 @@ export default function PendingOrders() {
                 setLoading(true);
                 setPendingOrders([]);
                 setPage(1);
+
                 const res = await orderService.getCanteenOrders(
                     'Pending',
                     user.canteenId,
@@ -84,6 +86,50 @@ export default function PendingOrders() {
 
         return () => controller.abort();
     }, [page]);
+
+    // socket event listeners
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('newOrder', async (order) => {
+            const existingOrder = pendingOrders.find(
+                (o) => o._id === order._id
+            );
+            if (existingOrder || order.status !== 'Pending') return;
+            setPendingOrders((prev) => [...prev, order]);
+        });
+
+        socket.on('orderRejected', (order) => {
+            setPendingOrders((prev) => prev.filter((o) => o._id === order._id));
+        });
+
+        socket.on('itemPrepared', ({ orderId, itemId }) => {
+            console.log(1);
+            setPendingOrders((prev) =>
+                prev
+                    .map((o) =>
+                        o._id === orderId
+                            ? {
+                                  ...o,
+                                  items: o.items.map((i) =>
+                                      i.id === itemId
+                                          ? {
+                                                ...i,
+                                                preparedCount:
+                                                    i.preparedCount + 1,
+                                            }
+                                          : i
+                                  ),
+                              }
+                            : o
+                    )
+                    .filter((o) =>
+                        // Keep orders where at least one item is not fully prepared
+                        o.items.some((i) => i.preparedCount < i.quantity)
+                    )
+            );
+        });
+    }, [socket]);
 
     const orderElements = pendingOrders
         .filter(

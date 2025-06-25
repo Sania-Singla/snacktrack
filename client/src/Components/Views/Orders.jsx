@@ -5,7 +5,11 @@ import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import { ContractorOrderCard } from '..';
-import { useSearchContext, useUserContext } from '../../Contexts';
+import {
+    useSearchContext,
+    useSocketContext,
+    useUserContext,
+} from '../../Contexts';
 
 export default function Orders() {
     const [searchParams] = useSearchParams();
@@ -15,6 +19,7 @@ export default function Orders() {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
+    const { socket } = useSocketContext();
     const { user, setUser } = useUserContext();
     const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
     const statusFilter = searchParams.get('status') || 'Pending';
@@ -80,6 +85,41 @@ export default function Orders() {
 
         return () => controller.abort();
     }, [page]);
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('newOrder', (order) => {
+            if (statusFilter === 'Prepared') {
+                const hasSnacks = order.items.some(
+                    (item) => item.type === 'Snacks'
+                );
+                if (!hasSnacks) setOrders((prev) => [...prev, order]);
+            }
+        });
+
+        socket.on('orderRejected', (order) => {
+            if (statusFilter === 'Prepared') {
+                setOrders((prev) => prev.filter((o) => o._id !== order._id));
+            } else if (statusFilter === 'Rejected') {
+                setOrders((prev) => [...prev, order]);
+            }
+        });
+
+        socket.on('orderPrepared', (order) => {
+            if (statusFilter === 'Prepared') {
+                setOrders((prev) => [...prev, order]);
+            }
+        });
+
+        socket.on('orderPickedUp', (order) => {
+            if (statusFilter === 'Prepared') {
+                setOrders((prev) => prev.filter((o) => o._id !== order._id));
+            } else if (statusFilter === 'PickedUp') {
+                setOrders((prev) => [...prev, order]);
+            }
+        });
+    }, [socket]);
 
     const orderElements = orders
         .filter(

@@ -24,6 +24,7 @@ import {
     KitchenPage,
     AdminPage,
     RegisterCanteenPage,
+    VerifyKitchenKeyPage,
 } from './Pages';
 
 import {
@@ -98,6 +99,7 @@ export const router = createBrowserRouter(
 
             <Route path="kitchen" element={<Layout renderTemplate={false} />}>
                 <Route path="" element={<KitchenPage />} />
+                <Route path="verify-key" element={<VerifyKitchenKeyPage />} />
             </Route>
 
             {/* public routes */}

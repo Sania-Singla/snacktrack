@@ -12,28 +12,25 @@ import {
     SearchContextProvider,
     StudentContextProvider,
     SnackContextProvider,
-    OrderContextProvider,
     SocketContextProvider,
 } from './Contexts';
 
 function Root() {
     return (
         <UserContextProvider>
-            <OrderContextProvider>
-                <PopupContextProvider>
-                    <SnackContextProvider>
-                        <SocketContextProvider>
-                            <StudentContextProvider>
-                                <SideBarContextProvider>
-                                    <SearchContextProvider>
-                                        <RouterProvider router={router} />
-                                    </SearchContextProvider>
-                                </SideBarContextProvider>
-                            </StudentContextProvider>
-                        </SocketContextProvider>
-                    </SnackContextProvider>
-                </PopupContextProvider>
-            </OrderContextProvider>
+            <PopupContextProvider>
+                <SnackContextProvider>
+                    <SocketContextProvider>
+                        <StudentContextProvider>
+                            <SideBarContextProvider>
+                                <SearchContextProvider>
+                                    <RouterProvider router={router} />
+                                </SearchContextProvider>
+                            </SideBarContextProvider>
+                        </StudentContextProvider>
+                    </SocketContextProvider>
+                </SnackContextProvider>
+            </PopupContextProvider>
         </UserContextProvider>
     );
 }

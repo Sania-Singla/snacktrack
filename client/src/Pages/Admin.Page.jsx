@@ -58,7 +58,7 @@ export default function AdminPage() {
                     <h2 className="text-[19px] font-bold text-gray-900">
                         {canteen.hostelName}
                     </h2>
-                    <p className="text-nowrap font-medium text-gray-800">
+                    <p className="text-nowrap text-[#4977ec] font-medium">
                         {canteen.hostelType} {canteen.hostelNumber}
                     </p>
                 </div>
@@ -178,9 +178,9 @@ export default function AdminPage() {
         // Admin Dashboard
         <div className="min-h-screen bg-gray-100 p-6">
             <div>
-                <section className="w-full bg-white shadow-md mb-8 rounded-xl p-8 md:px-12 flex justify-between">
+                <section className="w-full bg-white shadow-sm mb-8 rounded-xl p-8 md:px-12 flex justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                             Admin Dashboard
                         </h1>
                         <p className="mt-4 text-gray-700 max-w-3xl">

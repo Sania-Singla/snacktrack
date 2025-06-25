@@ -59,8 +59,8 @@ const generateAdminToken = async (key) => {
  * @returns JWT Token
  */
 
-const generateStaffToken = async (key) => {
-    return jwt.sign({ key }, process.env.STAFF_TOKEN_SECRET, {
+const generateStaffToken = async (data) => {
+    return jwt.sign(data, process.env.STAFF_TOKEN_SECRET, {
         expiresIn: process.env.STAFF_TOKEN_EXPIRY,
     });
 };

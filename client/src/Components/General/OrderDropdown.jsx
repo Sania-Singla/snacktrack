@@ -12,6 +12,7 @@ export default function OrderDropdown({
 
     const handleOptionClick = (value) => {
         onChange(value);
+        setSelectedValue(value);
         setIsDropdownOpen(false);
     };
 
@@ -43,7 +44,7 @@ export default function OrderDropdown({
                 <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full font-medium flex items-center gap-2 cursor-pointer justify-between bg-[#e0e0e010] border-[0.01rem] border-gray-500 hover:border-gray-400 px-2 py-1 rounded-md text-[14px] text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200"
+                    className="w-full font-medium flex items-center gap-2 cursor-pointer justify-between bg-[#e0e0e010] border-[0.01rem] border-gray-500 hover:border-gray-400 px-2 py-1 rounded-md text-[14px] text-gray-700 leading-tight focus:outline-none focus:ring-1 focus:ring-[#4977ec] focus:border-[#4977ec]"
                 >
                     {options.find((opt) => opt.value === selectedValue)?.label}
                     <div
@@ -64,7 +65,7 @@ export default function OrderDropdown({
                                         onClick={() =>
                                             handleOptionClick(option.value)
                                         }
-                                        className="px-2 py-1 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
+                                        className="px-2 py-1 cursor-pointer hover:bg-gray-100 bg-[#e0e0e010] font-medium text-gray-800"
                                     >
                                         {option.label}
                                     </div>

@@ -133,9 +133,8 @@ export default function LoginPage() {
     const inputElements = inputFields.map(
         (field) =>
             field.show && (
-                <div className="w-full">
+                <div className="w-full" key={field.name}>
                     <InputField
-                        key={field.name}
                         field={field}
                         handleChange={handleChange}
                         inputs={inputs}

@@ -2,7 +2,7 @@ import { app } from './app.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/index.js';
-import { deleteSocketId, addSocketId } from './Utils/index.js';
+import { deleteSocketId, addSocketId, addPreparedItem } from './Utils/index.js';
 import { sendSMS } from './sms.js';
 
 const http = createServer(app);
@@ -11,15 +11,17 @@ const io = new Server(http, { cors: CORS_OPTIONS });
 io.on('connection', async (socket) => {
     try {
         const { userId, canteenId, role } = socket.handshake.auth;
-
         console.log('[USER CONNECTED] ', socket.id);
 
-        // * EVENT LISTENERS
+        // Event Listeners
 
         socket.on('newOrder', async (order) => {
+            const sockets = io
+                .to(`contractor_${canteenId}`)
+                .to(`staff_${canteenId}`)
+                .to(`student_${order.studentId}`);
             await Promise.all([
-                io.to(`contractor_${canteenId}`).emit('newOrder', order),
-                io.to(`staff_${canteenId}`).emit('newOrder', order),
+                sockets.emit('newOrder', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order is placed and will be begin preparing soon',
@@ -29,26 +31,24 @@ io.on('connection', async (socket) => {
             ]);
         });
 
-        socket.on('itemPrepared', async ({ itemId, orderId }) => {
+        socket.on('itemPrepared', async ({ itemId, orderId, stuId }) => {
+            const sockets = io
+                .to(`contractor_${canteenId}`)
+                .to(`staff_${canteenId}`)
+                .to(`student_${stuId}`);
             await Promise.all([
-                io.to(`contractor_${canteenId}`).emit('itemPrepared', {
-                    itemId,
-                    orderId,
-                }),
-                io.to(`staff_${canteenId}`).emit('itemPrepared', {
-                    itemId,
-                    orderId,
-                }),
+                sockets.emit('itemPrepared', { itemId, orderId, stuId }),
+                addPreparedItem({ itemId, orderId }),
             ]);
         });
 
         socket.on('orderRejected', async (order) => {
+            const sockets = io
+                .to(`student_${order.studentId}`)
+                .to(`contractor_${canteenId}`)
+                .to(`staff_${canteenId}`);
             await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .emit('orderRejected', order),
-                io.to(`contractor_${canteenId}`).emit('orderRejected', order),
-                io.to(`staff_${canteenId}`).emit('orderRejected', order),
+                sockets.emit('orderRejected', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order has been rejected',
@@ -60,11 +60,7 @@ io.on('connection', async (socket) => {
 
         socket.on('orderPrepared', async (order) => {
             await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .emit('orderPrepared', order),
                 io.to(`contractor_${canteenId}`).emit('orderPrepared', order),
-                io.to(`staff_${canteenId}`).emit('orderPrepared', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order is ready for pickup',
@@ -75,12 +71,11 @@ io.on('connection', async (socket) => {
         });
 
         socket.on('orderPickedUp', async (order) => {
+            const sockets = io
+                .to(`student_${order.studentId}`)
+                .to(`contractor_${canteenId}`);
             await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .emit('orderPickedUp', order),
-                io.to(`contractor_${canteenId}`).emit('orderPickedUp', order),
-                io.to(`staff_${canteenId}`).emit('orderPickedUp', order),
+                sockets.emit('orderPickedUp', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order has been picked up',

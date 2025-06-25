@@ -8,9 +8,9 @@ export default function InputField({
     setShowPassword = null,
     showPassword = false,
     className = '',
-    ...props
 }) {
-    const { name, type, required, label, placeholder, id, ...rest } = field;
+    const { name, type, required, label, placeholder, id, show, ...rest } =
+        field;
 
     const passwordVariants = [
         'password',
@@ -40,7 +40,6 @@ export default function InputField({
                     onBlur={handleBlur}
                     placeholder={placeholder}
                     {...rest}
-                    {...props}
                     className="overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-500 bg-transparent placeholder:text-[15px]"
                 />
                 {passwordVariants.includes(name) && (

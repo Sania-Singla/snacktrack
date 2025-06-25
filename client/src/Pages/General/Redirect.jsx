@@ -8,7 +8,7 @@ export default function Redirect({ who = '' }) {
     const { pathname } = useLocation();
 
     useEffect(() => {
-        if (!user || user.role === 'staff') {
+        if (!user) {
             navigate(pathname === '/' ? '/new-user' : '/login', {
                 replace: true,
             });

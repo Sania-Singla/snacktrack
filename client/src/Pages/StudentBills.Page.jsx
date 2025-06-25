@@ -26,8 +26,8 @@ export default function StudentBillsPage() {
                 );
                 if (res && !res.message) {
                     setBills(res);
-                } else checkTokenExpired(res, setUser);                    setLoading(false);
-
+                } else checkTokenExpired(res, setUser);
+                setLoading(false);
             } catch (err) {
                 navigate('/server-error');
             }

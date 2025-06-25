@@ -1,19 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PendingOrders, Orders, Button, CalendarFilter } from '../Components';
-import { toggleAudio, getAudioState, subscribeToAudioChanges } from '../Utils';
-import { useOrderContext, useUserContext } from '../Contexts';
+import {
+    toggleAudio,
+    getAudioState,
+    subscribeToAudioChanges,
+    playSound,
+} from '../Utils';
+import { useSocketContext, useUserContext } from '../Contexts';
 import toast from 'react-hot-toast';
 import { orderService } from '../Services';
 
 export default function TodayOrdersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const { audioEnabled, setAudioEnabled, user } = useUserContext();
-    const { stats, setStats } = useOrderContext();
+    const [stats, setStats] = useState({
+        Total: 0,
+        Pending: 0,
+        Prepared: 0,
+        PickedUp: 0,
+        Rejected: 0,
+    });
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
     const statusFilter = searchParams.get('status') || 'Pending';
+    const { socket } = useSocketContext();
 
     useEffect(() => {
         setAudioEnabled(getAudioState());
@@ -42,6 +54,51 @@ export default function TodayOrdersPage() {
         return () => controller.abort();
     }, [dateFilter]);
 
+    // socket event listeners
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('newOrder', async (order) => {
+            await playSound();
+            setStats((prev) => ({
+                ...prev,
+                Total: prev.Total + 1,
+                [order.status]: prev[order.status] + 1, // Prepared or Pending
+            }));
+        });
+
+        socket.on('orderPrepared', (order) => {
+            setStats((prev) => ({
+                ...prev,
+                Pending: prev.Pending - 1,
+                Prepared: prev.Prepared + 1,
+            }));
+        });
+
+        socket.on('orderPickedUp', (order) => {
+            setStats((prev) => ({
+                ...prev,
+                Prepared: prev.Prepared - 1,
+                PickedUp: prev.PickedUp + 1,
+            }));
+        });
+
+        socket.on('orderRejected', (order) => {
+            if (order.status === 'Prepared') {
+                setStats((prev) => ({
+                    ...prev,
+                    Prepared: prev.Prepared - 1,
+                    Rejected: prev.Rejected + 1,
+                }));
+            } else
+                setStats((prev) => ({
+                    ...prev,
+                    Pending: prev.Pending - 1,
+                    Rejected: prev.Rejected + 1,
+                }));
+        });
+    }, [socket]);
+
     function handleStatusClick(status) {
         if (statusFilter === status) return; // do nothing
         const newParams = new URLSearchParams(searchParams);
@@ -59,13 +116,14 @@ export default function TodayOrdersPage() {
                     </div>
                 </div>
                 <div className="flex items-center justify-center gap-4">
+                    <CalendarFilter />
                     <div className="relative">
                         <Button
                             btnText="🔔"
                             title={
                                 audioEnabled ? 'Disable Audio' : 'Enable Audio'
                             }
-                            className={`bg-[#ffffff] flex items-center justify-center size-[40px] text-lg group rounded-full drop-shadow-sm ${
+                            className={`bg-[#ffffff] flex items-center justify-center size-[37px] text-[17px] group rounded-full drop-shadow-sm ${
                                 !audioEnabled ? 'opacity-70' : ''
                             }`}
                             onClick={() => {
@@ -81,7 +139,6 @@ export default function TodayOrdersPage() {
                             </div>
                         )}
                     </div>
-                    <CalendarFilter />
                 </div>
             </div>
 
@@ -100,7 +157,7 @@ export default function TodayOrdersPage() {
                             </h3>
                             <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
                                 <span className="text-blue-600 font-bold">
-                                    {stats.pending}
+                                    {stats.Pending}
                                 </span>
                             </div>
                         </div>
@@ -123,7 +180,7 @@ export default function TodayOrdersPage() {
                             </h3>
                             <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
                                 <span className="text-purple-600 font-bold">
-                                    {stats.prepared}
+                                    {stats.Prepared}
                                 </span>
                             </div>
                         </div>
@@ -146,7 +203,7 @@ export default function TodayOrdersPage() {
                             </h3>
                             <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
                                 <span className="text-green-600 font-bold">
-                                    {stats.pickedUp}
+                                    {stats.PickedUp}
                                 </span>
                             </div>
                         </div>
@@ -169,7 +226,7 @@ export default function TodayOrdersPage() {
                             </h3>
                             <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">
                                 <span className="text-red-600 font-bold">
-                                    {stats.rejected}
+                                    {stats.Rejected}
                                 </span>
                             </div>
                         </div>

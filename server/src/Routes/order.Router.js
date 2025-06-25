@@ -1,10 +1,6 @@
 import express from 'express';
 export const orderRouter = express.Router();
-import {
-    optionalVerifyJwt,
-    verifyJwt,
-    verifyStaffJwt,
-} from '../Middlewares/index.js';
+import { verifyJwt } from '../Middlewares/index.js';
 
 import {
     getStudentOrders,
@@ -14,11 +10,10 @@ import {
     checkAvailability,
     getKitchenOrders,
     getOrderStats,
+    verifyKitchenKey,
 } from '../Controllers/order.Controller.js';
 
-orderRouter
-    .route('/kitchen')
-    .post(optionalVerifyJwt, verifyStaffJwt, getKitchenOrders);
+orderRouter.route('/kitchen/verify-key/:canteenId').post(verifyKitchenKey);
 
 orderRouter.use(verifyJwt);
 
@@ -29,6 +24,8 @@ orderRouter.route('/availability').post(checkAvailability);
 orderRouter.route('/student/:studentId').get(getStudentOrders);
 
 orderRouter.route('/canteen/:canteenId').get(getCanteenOrders);
+
+orderRouter.route('/kitchen').get(getKitchenOrders);
 
 orderRouter.route('/stats/:canteenId').get(getOrderStats);
 

@@ -62,11 +62,24 @@ export default function StudentOrderCard({ order, reference }) {
                 <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="px-5 pb-5 border-t border-gray-100"
+                    className="border-t border-gray-200"
                 >
-                    <div className="space-y-4 mt-4">
+                    <div className="">
                         {items.map((item) => (
-                            <div key={item.id} className="space-y-2">
+                            <div
+                                key={item.id}
+                                className={`relative space-y-2 p-4 ${item.preparedCount === item.quantity || status === 'Prepared' || item.type === 'PackagedFood' ? 'opacity-55' : 'border-[0.01rem] border-transparent'}`}
+                            >
+                                {/* Overlay tick for prepared item */}
+                                {(item.preparedCount === item.quantity ||
+                                    status === 'Prepared' ||
+                                    item.type === 'PackagedFood') && (
+                                    <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
+                                        <div className="fill-green-600 size-8 p-1">
+                                            {icons.check}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-3">
                                         <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
@@ -87,8 +100,7 @@ export default function StudentOrderCard({ order, reference }) {
                                                 {item.name}
                                             </h3>
                                             <p className="text-xs text-gray-500">
-                                                Qty: {item.quantity} • ₹
-                                                {item.price.toFixed(2)} each
+                                                Qty: {item.quantity}
                                             </p>
                                         </div>
                                     </div>
@@ -124,7 +136,7 @@ export default function StudentOrderCard({ order, reference }) {
                         ))}
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-gray-100">
+                    <div className="p-4 border-t border-gray-100">
                         <div className="flex justify-between text-sm text-gray-600">
                             <span>Subtotal</span>
                             <span>₹{amount.toFixed(2)}</span>

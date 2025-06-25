@@ -1,7 +1,12 @@
 import jwt from 'jsonwebtoken';
 import { BAD_REQUEST, FORBIDDEN, COOKIE_OPTIONS } from '../Constants/index.js';
-import { extractTokens, generateAccessToken } from '../Helpers/index.js';
-import { Student, Contractor } from '../Models/index.js';
+import {
+    extractTokens,
+    generateAccessToken,
+    generateAdminToken,
+} from '../Helpers/index.js';
+import { Student, Contractor, Canteen } from '../Models/index.js';
+import bcrypt from 'bcrypt';
 
 /**
  * @param {String} token - token to verify
@@ -9,20 +14,13 @@ import { Student, Contractor } from '../Models/index.js';
  * @returns {Object} null or current user object with user role
  */
 
-const validateToken = async (token, type) => {
-    const decodedToken = jwt.verify(
-        token,
-        type === 'access'
-            ? process.env.ACCESS_TOKEN_SECRET
-            : process.env.REFRESH_TOKEN_SECRET
-    );
+const verifyToken = async (token, secret, type) => {
+    const decodedToken = jwt.verify(token, secret);
 
     if (!decodedToken) throw new Error(`invalid ${type} token`);
 
-    let currentUser = null;
-    if (decodedToken.role === 'student') {
-        currentUser = await Student.findById(decodedToken._id).lean();
-    } else currentUser = await Contractor.findById(decodedToken._id).lean();
+    const model = decodedToken.role === 'student' ? Student : Contractor;
+    const currentUser = await model.findById(decodedToken._id).lean();
 
     if (
         !currentUser ||
@@ -35,6 +33,28 @@ const validateToken = async (token, type) => {
 };
 
 /**
+ * @param {String} token - staff token to verify
+ * @returns {Object} null or current user object with user role
+ */
+
+const verifyStaffToken = async (token) => {
+    const decodedToken = jwt.verify(token, process.env.STAFF_TOKEN_SECRET);
+    if (!decodedToken) throw new Error(`invalid staff token`);
+
+    const canteen = await Canteen.findById(decodedToken.canteenId).lean();
+
+    if (!canteen || !bcrypt.compareSync(decodedToken.key, canteen.kitchenKey)) {
+        throw new Error(`invalid key`);
+    }
+
+    return {
+        userId: null,
+        canteenId: decodedToken.canteenId,
+        role: 'staff',
+    };
+};
+
+/**
  * @param {Object} res - http response object
  * @param {String} refreshToken  - refresh token
  * @returns {Object} null or current user object
@@ -42,7 +62,11 @@ const validateToken = async (token, type) => {
 
 const refreshAccessToken = async (res, refreshToken) => {
     try {
-        const user = await validateToken(refreshToken, 'refresh');
+        const user = await verifyToken(
+            refreshToken,
+            process.env.REFRESH_TOKEN_SECRET,
+            'refresh'
+        );
         res.cookie(
             'accessToken',
             await generateAccessToken({ _id: user._id, role: user.role }), // new access token
@@ -57,26 +81,31 @@ const refreshAccessToken = async (res, refreshToken) => {
     }
 };
 
+// Actual middlwares
 const verifyJwt = async (req, res, next) => {
     try {
-        const { accessToken, refreshToken } = extractTokens(req);
+        const { accessToken, refreshToken, staffToken } = extractTokens(req);
 
-        if (accessToken) {
-            // verify access token
-            req.user = await validateToken(accessToken, 'access');
-            return next();
+        if (staffToken) {
+            req.user = await verifyStaffToken(staffToken);
+        } else if (accessToken) {
+            req.user = await verifyToken(
+                accessToken,
+                process.env.ACCESS_TOKEN_SECRET,
+                'access'
+            );
         } else if (refreshToken) {
-            // generate new access token
-            req.user = await refreshAccessToken(res, refreshToken);
-            return next();
+            req.user = await refreshAccessToken(res, refreshToken); // generate new access token
         } else {
             return res.status(BAD_REQUEST).json({ message: 'tokens missing' });
         }
+        return next();
     } catch (err) {
         return res
             .status(FORBIDDEN)
             .clearCookie('accessToken', COOKIE_OPTIONS)
             .clearCookie('refreshToken', COOKIE_OPTIONS)
+            .clearCookie('staffToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid jwt token',
                 err: err.message,
@@ -86,14 +115,18 @@ const verifyJwt = async (req, res, next) => {
 
 const optionalVerifyJwt = async (req, res, next) => {
     try {
-        const { accessToken, refreshToken } = extractTokens(req);
+        const { accessToken, refreshToken, staffToken } = extractTokens(req);
 
         if (accessToken) {
-            // verify access token
-            req.user = await validateToken(accessToken, 'access');
+            req.user = await verifyToken(
+                accessToken,
+                process.env.ACCESS_TOKEN_SECRET,
+                'access'
+            );
         } else if (refreshToken) {
-            // generate new access token
-            req.user = await refreshAccessToken(res, refreshToken);
+            req.user = await refreshAccessToken(res, refreshToken); // generate new access token
+        } else if (staffToken) {
+            req.user = await verifyStaffToken(staffToken);
         }
         return next();
     } catch (err) {
@@ -101,6 +134,7 @@ const optionalVerifyJwt = async (req, res, next) => {
             .status(FORBIDDEN)
             .clearCookie('accessToken', COOKIE_OPTIONS)
             .clearCookie('refreshToken', COOKIE_OPTIONS)
+            .clearCookie('staffToken', COOKIE_OPTIONS)
             .json({
                 message: 'expired or invalid jwt token',
                 err: err.message,
@@ -108,4 +142,49 @@ const optionalVerifyJwt = async (req, res, next) => {
     }
 };
 
-export { verifyJwt, optionalVerifyJwt };
+const verifyAdminJwt = async (req, res, next) => {
+    try {
+        const { adminToken } = extractTokens(req);
+
+        if (adminToken) {
+            const decodedToken = jwt.verify(
+                adminToken,
+                process.env.ADMIN_TOKEN_SECRET
+            );
+            if (!decodedToken || decodedToken.key !== process.env.ADMIN_KEY) {
+                return res
+                    .status(FORBIDDEN)
+                    .clearCookie('adminToken', COOKIE_OPTIONS)
+                    .json({ message: 'Invalid admin key' });
+            }
+        } else {
+            const { key } = req.body;
+            if (!key) {
+                return res.status(BAD_REQUEST).json({ message: 'missing key' });
+            }
+
+            if (key !== process.env.ADMIN_KEY) {
+                return res
+                    .status(BAD_REQUEST)
+                    .json({ message: 'Invalid admin key' });
+            }
+
+            const adminToken = await generateAdminToken(key);
+            res.cookie('adminToken', adminToken, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.ADMIN_TOKEN_MAXAGE),
+            });
+        }
+        return next();
+    } catch (err) {
+        return res
+            .status(FORBIDDEN)
+            .clearCookie('adminToken', COOKIE_OPTIONS)
+            .json({
+                message: 'expired or invalid admin token',
+                err: err.message,
+            });
+    }
+};
+
+export { verifyJwt, optionalVerifyJwt, verifyAdminJwt };

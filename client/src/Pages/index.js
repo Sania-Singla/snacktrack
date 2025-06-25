@@ -11,7 +11,8 @@ import TodayOrdersPage from './TodayOrders.Page';
 import StudentOrdersPage from './StudentOrders.Page';
 import CartPage from './Cart.Page';
 import StudentBillsPage from './StudentBills.Page';
-import KitchenPage from './Kitchen.Page';
+import KitchenPage from './Kitchen/Kitchen.Page';
+import VerifyKitchenKeyPage from './Kitchen/VerifyKitchenKey.Page';
 import AdminPage from './Admin.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
 import BillsPage from './Bills.Page';
@@ -31,6 +32,7 @@ export {
     StudentOrdersPage,
     CartPage,
     KitchenPage,
+    VerifyKitchenKeyPage,
     BillsPage,
     AdminPage,
     RegisterCanteenPage,

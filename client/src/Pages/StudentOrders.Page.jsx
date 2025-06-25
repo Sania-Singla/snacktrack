@@ -1,7 +1,7 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { orderService } from '../Services';
-import { useUserContext, useOrderContext } from '../Contexts';
+import { useUserContext, useSocketContext } from '../Contexts';
 import { icons } from '../Assets/icons';
 import {
     Button,
@@ -13,7 +13,7 @@ import { paginate, checkTokenExpired } from '../Utils';
 import { LIMIT } from '../Constants/constants';
 
 export default function StudentOrdersPage() {
-    const { setStudentOrders, studentOrders } = useOrderContext();
+    const [studentOrders, setStudentOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function StudentOrdersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const monthFilter = searchParams.get('month') || new Date().getMonth() + 1;
     let dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
+    const { socket } = useSocketContext();
 
     const months = [
         { value: 1, label: 'January' },
@@ -49,6 +50,7 @@ export default function StudentOrdersPage() {
                 setLoading(true);
                 setStudentOrders([]);
                 setPage(1);
+
                 // reset date filter if it exists
                 if (searchParams.get('date')) {
                     searchParams.delete('date');
@@ -102,6 +104,67 @@ export default function StudentOrdersPage() {
 
         return () => controller.abort();
     }, [page]);
+
+    // socket event listeners
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('newOrder', async (order) => {
+            if (order.studentId === studentId) {
+                setStudentOrders((prev) => [...prev, order]);
+            }
+        });
+
+        socket.on('orderRejected', (order) => {
+            if (order.studentId === studentId) {
+                setStudentOrders((prev) =>
+                    prev.map((o) =>
+                        o._id === order._id ? { ...o, status: 'Rejected' } : o
+                    )
+                );
+            }
+        });
+
+        socket.on('orderPickedUp', (order) => {
+            if (order.studentId === studentId) {
+                setStudentOrders((prev) =>
+                    prev.map((o) =>
+                        o._id === order._id ? { ...o, status: 'PickedUp' } : o
+                    )
+                );
+            }
+        });
+
+        socket.on('itemPrepared', async ({ orderId, itemId, stuId }) => {
+            if (stuId !== studentId) return;
+
+            setStudentOrders((prev) => {
+                const updatedOrders = prev.map((o) => {
+                    if (o._id !== orderId) return o;
+
+                    const updatedItems = o.items.map((i) =>
+                        i.id === itemId
+                            ? {
+                                  ...i,
+                                  preparedCount: i.preparedCount + 1,
+                              }
+                            : i
+                    );
+
+                    const allPrepared = updatedItems.every(
+                        (i) => i.preparedCount === i.quantity
+                    );
+                    return {
+                        ...o,
+                        items: updatedItems,
+                        status: allPrepared ? 'Prepared' : o.status,
+                    };
+                });
+
+                return updatedOrders;
+            });
+        });
+    }, [socket]);
 
     const filteredOrders = dateFilter
         ? studentOrders.filter((order) => {
