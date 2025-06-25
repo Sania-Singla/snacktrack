@@ -71,8 +71,6 @@ const getBills = tryCatch('get bills', async (req, res) => {
     }
 });
 
-// todo: PENDING
-
 // generate bill for a specific student in mid of the current month
 const generateIntermediateBill = tryCatch(
     'generate intermediate bill for student',
@@ -118,7 +116,7 @@ const generateIntermediateBill = tryCatch(
         return res.status(OK).json({
             studentInfo: student,
             canteenId,
-            amount: bill.totalAmount,
+            amount: bill ? bill.totalAmount : 0,
         });
     }
 );

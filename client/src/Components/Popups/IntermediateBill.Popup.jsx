@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
 import { checkTokenExpired } from '../../Utils';
 import { icons } from '../../Assets/icons';
+import toast from 'react-hot-toast';
 
 export default function IntermediateBillPopup() {
     const { setPopupInfo, setShowPopup } = usePopupContext();
