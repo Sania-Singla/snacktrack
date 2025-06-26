@@ -12,7 +12,7 @@ export default function Redirect({ who = '' }) {
             navigate(pathname === '/' ? '/new-user' : '/login', {
                 replace: true,
             });
-        } else if (who && who !== user.role) {
+        } else if (who && (who !== user.role || user.role === 'staff')) {
             navigate('/not-found', { replace: true });
         }
     }, [user, navigate]);
