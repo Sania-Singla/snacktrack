@@ -20,12 +20,10 @@ io.on('connection', async (socket) => {
         // Event Listeners
 
         socket.on('newOrder', async (order) => {
-            const sockets = io
-                .to(`contractor_${canteenId}`)
-                .to(`staff_${canteenId}`)
-                .to(`student_${order.studentId}`);
             await Promise.all([
-                sockets.emit('newOrder', order),
+                io.to(`contractor_${order.canteenId}`).emit('newOrder', order),
+                io.to(`staff_${order.canteenId}`).emit('newOrder', order),
+                io.to(`student_${order.studentId}`).emit('newOrder', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order is placed and will be begin preparing soon',
@@ -35,24 +33,30 @@ io.on('connection', async (socket) => {
             ]);
         });
 
-        socket.on('itemPrepared', async ({ itemId, orderId, stuId }) => {
-            const sockets = io
-                .to(`contractor_${canteenId}`)
-                .to(`staff_${canteenId}`)
-                .to(`student_${stuId}`);
+        socket.on('itemPrepared', async ({ itemId, order }) => {
             await Promise.all([
-                sockets.emit('itemPrepared', { itemId, orderId, stuId }),
-                addPreparedItem({ itemId, orderId }),
+                io
+                    .to(`contractor_${order.canteenId}`)
+                    .emit('itemPrepared', { itemId, orderId: order._id }),
+                io
+                    .to(`staff_${order.canteenId}`)
+                    .emit('itemPrepared', { itemId, orderId: order._id }),
+                io
+                    .to(`student_${order.studentId}`)
+                    .emit('itemPrepared', { itemId, orderId: order._id }),
+                addPreparedItem({ itemId, orderId: order._id }),
             ]);
         });
 
         socket.on('orderRejected', async (order) => {
-            const sockets = io
-                .to(`student_${order.studentId}`)
-                .to(`contractor_${canteenId}`)
-                .to(`staff_${canteenId}`);
             await Promise.all([
-                sockets.emit('orderRejected', order),
+                io
+                    .to(`student_${order.studentId}`)
+                    .emit('orderRejected', order),
+                io
+                    .to(`contractor_${order.canteenId}`)
+                    .emit('orderRejected', order),
+                io.to(`staff_${order.canteenId}`).emit('orderRejected', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order has been rejected',
@@ -64,7 +68,9 @@ io.on('connection', async (socket) => {
 
         socket.on('orderPrepared', async (order) => {
             await Promise.all([
-                io.to(`contractor_${canteenId}`).emit('orderPrepared', order),
+                io
+                    .to(`contractor_${order.canteenId}`)
+                    .emit('orderPrepared', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order is ready for pickup',
@@ -75,11 +81,13 @@ io.on('connection', async (socket) => {
         });
 
         socket.on('orderPickedUp', async (order) => {
-            const sockets = io
-                .to(`student_${order.studentId}`)
-                .to(`contractor_${canteenId}`);
             await Promise.all([
-                sockets.emit('orderPickedUp', order),
+                io
+                    .to(`student_${order.studentId}`)
+                    .emit('orderPickedUp', order),
+                io
+                    .to(`contractor_${order.canteenId}`)
+                    .emit('orderPickedUp', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order has been picked up',

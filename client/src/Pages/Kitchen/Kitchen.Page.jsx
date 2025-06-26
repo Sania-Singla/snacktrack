@@ -65,10 +65,9 @@ export default function KitchenPage() {
                                     <Button
                                         className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
                                         onClick={() =>
-                                            socket?.emit('itemPrepared', {
-                                                orderId: o._id,
+                                            socket.emit('itemPrepared', {
+                                                order: o,
                                                 itemId: i.id,
-                                                stuId: o.studentId,
                                             })
                                         }
                                         btnText="-"
@@ -128,7 +127,7 @@ export default function KitchenPage() {
 
         socket.on('newOrder', (order) => {
             if (order.status === 'Pending') {
-                setKitchenOrders((prevOrders) => {
+                setKitchenOrders((prev) => {
                     // Filter to only include snack items
                     const filteredOrder = {
                         ...order,
@@ -138,12 +137,12 @@ export default function KitchenPage() {
                     // Skip if no snack items or order already exists
                     if (
                         filteredOrder.items.length === 0 ||
-                        prevOrders.some((o) => o._id === order._id)
+                        prev.some((o) => o._id === order._id)
                     ) {
-                        return prevOrders;
+                        return prev;
                     }
 
-                    const updatedOrders = [...prevOrders, filteredOrder];
+                    const updatedOrders = [...prev, filteredOrder];
 
                     // Update summary and elements
                     setSummary(updateSummary(updatedOrders));
@@ -159,11 +158,13 @@ export default function KitchenPage() {
         });
 
         socket.on('itemPrepared', async ({ orderId, itemId }) => {
-            setKitchenOrders((prevOrders) => {
+            console.log(1);
+            setKitchenOrders((prev) => {
                 // First find the order before modification (for potential complete preparation)
-                const originalOrder = prevOrders.find((o) => o._id === orderId);
+                const originalOrder = prev.find((o) => o._id === orderId);
+                if (!originalOrder) return prev;
 
-                const updatedOrders = prevOrders
+                const updatedOrders = prev
                     .map((o) => {
                         if (o._id === orderId) {
                             return {
@@ -187,38 +188,38 @@ export default function KitchenPage() {
                     })
                     .filter((o) => o.items.length > 0);
 
+                // Update summary and elements
+                setSummary(updateSummary(updatedOrders));
+                setOrderElements(generateOrderElements(updatedOrders));
+
                 // Check if order was completely prepared
                 const orderWasRemoved = !updatedOrders.some(
                     (o) => o._id === orderId
                 );
 
-                if (orderWasRemoved && originalOrder) {
-                    // IIFE to handle the async operation
-                    (async () => {
-                        try {
-                            const res = await orderService.updateOrderStatus(
-                                orderId,
-                                'Prepared'
-                            );
-                            if (
-                                res &&
-                                res.message ===
-                                    'order status updated successfully'
-                            ) {
-                                socket.emit('orderPrepared', originalOrder);
-                            }
-                        } catch (error) {
-                            console.error(
-                                'Failed to update order status:',
-                                error
-                            );
-                        }
-                    })();
-                }
-
-                // Update summary and elements
-                setSummary(updateSummary(updatedOrders));
-                setOrderElements(generateOrderElements(updatedOrders));
+                // if (orderWasRemoved) {
+                //     // IIFE to handle the async operation
+                //     (async () => {
+                //         try {
+                //             const res = await orderService.updateOrderStatus(
+                //                 orderId,
+                //                 'Prepared'
+                //             );
+                //             if (
+                //                 res &&
+                //                 res.message ===
+                //                     'order status updated successfully'
+                //             ) {
+                //                 socket.emit('orderPrepared', originalOrder);
+                //             }
+                //         } catch (error) {
+                //             console.error(
+                //                 'Failed to update order status:',
+                //                 error
+                //             );
+                //         }
+                //     })();
+                // }
 
                 return updatedOrders;
             });
