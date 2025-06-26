@@ -149,92 +149,60 @@ export default function TodayOrdersPage() {
                     {/* Pending Orders */}
                     <div
                         onClick={() => handleStatusClick('Pending')}
-                        className="bg-white p-4 cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
+                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
                     >
-                        <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg font-medium text-gray-800">
-                                Pending
-                            </h3>
-                            <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
-                                <span className="text-blue-600 font-bold">
-                                    {stats.Pending}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="h-1 w-full bg-gray-100 mt-4">
-                            <div
-                                className="h-1 bg-blue-500 rounded-full"
-                                style={{ width: '100%' }}
-                            />
+                        <h3 className="text-lg font-medium text-gray-800">
+                            Pending
+                        </h3>
+                        <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
+                            <span className="text-blue-600 font-bold">
+                                {stats.Pending}
+                            </span>
                         </div>
                     </div>
 
                     {/* Prepared Orders */}
                     <div
                         onClick={() => handleStatusClick('Prepared')}
-                        className="bg-white p-4 cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
+                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
                     >
-                        <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg font-medium text-gray-800">
-                                Prepared
-                            </h3>
-                            <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
-                                <span className="text-purple-600 font-bold">
-                                    {stats.Prepared}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="h-1 w-full bg-gray-100 mt-4">
-                            <div
-                                className="h-1 bg-purple-500 rounded-full"
-                                style={{ width: '50%' }}
-                            />
+                        <h3 className="text-lg font-medium text-gray-800">
+                            Prepared
+                        </h3>
+                        <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
+                            <span className="text-purple-600 font-bold">
+                                {stats.Prepared}
+                            </span>
                         </div>
                     </div>
 
                     {/* Picked Up Orders */}
                     <div
                         onClick={() => handleStatusClick('PickedUp')}
-                        className="bg-white p-4 cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
+                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
                     >
-                        <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg font-medium text-gray-800">
-                                Completed
-                            </h3>
-                            <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
-                                <span className="text-green-600 font-bold">
-                                    {stats.PickedUp}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="h-1 w-full bg-gray-100 mt-4">
-                            <div
-                                className="h-1 bg-green-500 rounded-full"
-                                style={{ width: '75%' }}
-                            />
+                        <h3 className="text-lg font-medium text-gray-800">
+                            Completed
+                        </h3>
+                        <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
+                            <span className="text-green-600 font-bold">
+                                {stats.PickedUp}
+                            </span>
                         </div>
                     </div>
 
                     {/* Rejected Orders */}
                     <div
                         onClick={() => handleStatusClick('Rejected')}
-                        className="bg-white p-4 cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
+                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
                     >
-                        <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg font-medium text-gray-800">
-                                Rejected
-                            </h3>
-                            <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">
-                                <span className="text-red-600 font-bold">
-                                    {stats.Rejected}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="h-1 w-full bg-gray-100 mt-4">
-                            <div
-                                className="h-1 bg-red-500 rounded-full"
-                                style={{ width: '15%' }}
-                            />
+                        <h3 className="text-lg font-medium text-gray-800">
+                            Rejected
+                        </h3>
+                        <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">
+                            <span className="text-red-600 font-bold">
+                                {stats.Rejected}
+                            </span>
                         </div>
                     </div>
                 </div>

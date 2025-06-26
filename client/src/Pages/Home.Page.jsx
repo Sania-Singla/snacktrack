@@ -103,7 +103,7 @@ export default function HomePage() {
                                 </div>
                             }
                             title="Add Snack"
-                            className="text-white rounded-md w-[160px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md px-2 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     ) : (
                         <Button
@@ -119,7 +119,7 @@ export default function HomePage() {
                                 </div>
                             }
                             title="Add Snack"
-                            className="text-white rounded-md w-[150px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md px-2 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     ))}
                 <div className="flex items-center gap-4 w-full place-content-end">

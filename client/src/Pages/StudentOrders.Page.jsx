@@ -176,7 +176,7 @@ export default function StudentOrdersPage() {
         : studentOrders;
 
     return (
-        <div className="w-full p-4">
+        <div className="w-full sm:p-4">
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">
                     {user._id === studentId ? 'My Orders' : 'Orders'}

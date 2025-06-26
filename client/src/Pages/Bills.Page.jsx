@@ -128,28 +128,34 @@ export default function BillsPage() {
     return (
         <div>
             <div className="w-full pt-2 sm:p-4">
-                <div className="flex items-center justify-between w-full mb-4 sm:mb-8">
-                    <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-gray-900">
-                            Bills
-                        </h1>
-                        <div className="px-3 py-[3px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
-                            {new Date().getFullYear()}
+                <div className="flex flex-col gap-6 sm:gap-4 sm:flex-row sm:items-center justify-between w-full mb-4 sm:mb-8">
+                    <div className="flex items-center justify-between gap-4 w-full">
+                        <div className="flex gap-2 items-center">
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-3xl font-bold text-gray-900">
+                                    Bills
+                                </h1>
+                                <div className="px-3 py-[3px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                                    {new Date().getFullYear()}
+                                </div>
+                            </div>
+
+                            {bills.length > 0 && (
+                                <div className="hidden sm:flex text-lg w-full items-center justify-center font-semibold text-gray-800">
+                                    <div className="border border-blue-500 bg-blue-50 rounded-lg px-3 py-[5px]">
+                                        Total: ₹{totalAmount.toFixed(2)}
+                                    </div>
+                                </div>
+                            )}
                         </div>
+
+                        <Filter options={months} defaultOption={filter} />
                     </div>
 
-                    {bills.length > 0 && (
-                        <div className="hidden sm:flex text-lg w-full items-center justify-center font-semibold text-gray-800">
-                            <div className="border border-blue-500 bg-blue-50 rounded-lg px-3 py-[5px]">
-                                Total: ₹{totalAmount.toFixed(2)}
-                            </div>
-                        </div>
-                    )}
-                    <div className="flex gap-4 items-center">
-                        <Filter options={months} defaultOption={filter} />
+                    <div className="flex justify-center">
                         <Button
                             onClick={generateIntermediateBill}
-                            className="text-white rounded-md py-2 font-medium text-nowrap px-4 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md py-2 w-fit font-medium text-nowrap px-4 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
                             btnText="Generate Bill"
                         />
                     </div>
