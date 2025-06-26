@@ -92,8 +92,10 @@ export default function KitchenPage() {
         const newSummary = {};
         orders.forEach((o) => {
             o.items.forEach((i) => {
-                newSummary[i.name] =
+                const remaining =
                     (newSummary[i.name] || 0) + i.quantity - i.preparedCount;
+                if (remaining !== 0) newSummary[i.name] = remaining;
+                else delete newSummary[i.name];
             });
         });
         return newSummary;
@@ -197,29 +199,29 @@ export default function KitchenPage() {
                     (o) => o._id === orderId
                 );
 
-                // if (orderWasRemoved) {
-                //     // IIFE to handle the async operation
-                //     (async () => {
-                //         try {
-                //             const res = await orderService.updateOrderStatus(
-                //                 orderId,
-                //                 'Prepared'
-                //             );
-                //             if (
-                //                 res &&
-                //                 res.message ===
-                //                     'order status updated successfully'
-                //             ) {
-                //                 socket.emit('orderPrepared', originalOrder);
-                //             }
-                //         } catch (error) {
-                //             console.error(
-                //                 'Failed to update order status:',
-                //                 error
-                //             );
-                //         }
-                //     })();
-                // }
+                if (orderWasRemoved) {
+                    // IIFE to handle the async operation
+                    (async () => {
+                        try {
+                            const res = await orderService.updateOrderStatus(
+                                orderId,
+                                'Prepared'
+                            );
+                            if (
+                                res &&
+                                res.message ===
+                                    'order status updated successfully'
+                            ) {
+                                socket.emit('orderPrepared', originalOrder);
+                            }
+                        } catch (error) {
+                            console.error(
+                                'Failed to update order status:',
+                                error
+                            );
+                        }
+                    })();
+                }
 
                 return updatedOrders;
             });

@@ -12,12 +12,13 @@ export default function Redirect({ who = '' }) {
             navigate(pathname === '/' ? '/new-user' : '/login', {
                 replace: true,
             });
-        } else if (who && (who !== user.role || user.role === 'staff')) {
+        } else if (user.role === 'staff' || (who && who !== user.role)) {
             navigate('/not-found', { replace: true });
         }
     }, [user, navigate]);
 
-    if (!user || (who && who !== user.role)) return null; // removes that fraction of seconds lag
+    if (!user || user.role === 'staff' || (who && who !== user.role))
+        return null; // removes that fraction of seconds lag
 
     return <Outlet />;
 }
