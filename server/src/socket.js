@@ -21,9 +21,11 @@ io.on('connection', async (socket) => {
 
         socket.on('newOrder', async (order) => {
             await Promise.all([
-                io.to(`contractor_${order.canteenId}`).emit('newOrder', order),
-                io.to(`staff_${order.canteenId}`).emit('newOrder', order),
-                io.to(`student_${order.studentId}`).emit('newOrder', order),
+                io
+                    .to(`contractor_${order.canteenId}`)
+                    .to(`staff_${order.canteenId}`)
+                    .to(`student_${order.studentId}`)
+                    .emit('newOrder', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order is placed and will be begin preparing soon',
@@ -37,13 +39,13 @@ io.on('connection', async (socket) => {
             await Promise.all([
                 io
                     .to(`contractor_${order.canteenId}`)
-                    .emit('itemPrepared', { itemId, orderId: order._id }),
-                io
                     .to(`staff_${order.canteenId}`)
-                    .emit('itemPrepared', { itemId, orderId: order._id }),
-                io
                     .to(`student_${order.studentId}`)
-                    .emit('itemPrepared', { itemId, orderId: order._id }),
+                    .emit('itemPrepared', {
+                        itemId,
+                        orderId: order._id,
+                        stuId: order.studentId,
+                    }),
                 addPreparedItem({ itemId, orderId: order._id }),
             ]);
         });
@@ -52,11 +54,9 @@ io.on('connection', async (socket) => {
             await Promise.all([
                 io
                     .to(`student_${order.studentId}`)
-                    .emit('orderRejected', order),
-                io
                     .to(`contractor_${order.canteenId}`)
+                    .to(`staff_${order.canteenId}`)
                     .emit('orderRejected', order),
-                io.to(`staff_${order.canteenId}`).emit('orderRejected', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
                     text: 'Your Order has been rejected',
@@ -84,8 +84,6 @@ io.on('connection', async (socket) => {
             await Promise.all([
                 io
                     .to(`student_${order.studentId}`)
-                    .emit('orderPickedUp', order),
-                io
                     .to(`contractor_${order.canteenId}`)
                     .emit('orderPickedUp', order),
                 sendSMS({
