@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
 import { useSocketContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
-import { getRollNo } from '../../Utils';
 import { Button } from '../../Components';
 
 export default function KitchenPage() {
@@ -22,61 +21,33 @@ export default function KitchenPage() {
                 .map((i) => (
                     <div
                         key={`${o._id}-${i.id}`}
-                        className="space-y-1 border-gray-200 border-[0.01rem] rounded-xl p-3"
+                        className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
                     >
                         <div className="flex justify-between items-center">
-                            <div className="flex items-center gap-3">
-                                <div className="size-10 rounded-full overflow-hidden shadow-sm">
-                                    <img
-                                        src={o.studentInfo.avatar}
-                                        alt={`${o.studentInfo.fullName} image`}
-                                        className="size-full object-cover"
-                                    />
-                                </div>
-                                <div className="flex-1 space-y-[2px]">
-                                    <h3 className="flex items-center gap-1">
-                                        <span className="font-medium text-[14px] text-gray-800 truncate">
-                                            {o.studentInfo.fullName}
-                                        </span>
-                                        <span className="text-sm text-gray-600">
-                                            •
-                                        </span>
-                                        <span className="text-xs text-gray-600">
-                                            Roll No:{' '}
-                                            {getRollNo(o.studentInfo.userName)}
-                                        </span>
-                                    </h3>
-                                    <div className="flex items-center gap-1 text-xs text-gray-600">
-                                        {o.studentInfo.phoneNumber}
-                                    </div>
+                            <div className="flex items-center justify-center gap-2">
+                                <p className="text-gray-800 font-medium text-[14px]">
+                                    {i.name}
+                                </p>
+                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
+                                    {i.quantity - i.preparedCount}
                                 </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
-                                <div className="flex items-center justify-center gap-2">
-                                    <p className="text-gray-800 font-medium text-[14px]">
-                                        {i.name}
-                                    </p>
-                                    <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
-                                        {i.quantity - i.preparedCount}
-                                    </div>
-                                </div>
 
-                                {user?.role !== 'contractor' && (
-                                    <Button
-                                        className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
-                                        onClick={() =>
-                                            socket.emit('itemPrepared', {
-                                                order: o,
-                                                itemId: i.id,
-                                            })
-                                        }
-                                        btnText="-"
-                                    />
-                                )}
-                            </div>
+                            {user.role === 'staff' && (
+                                <Button
+                                    className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
+                                    onClick={() =>
+                                        socket.emit('itemPrepared', {
+                                            order: o,
+                                            itemId: i.id,
+                                        })
+                                    }
+                                    btnText="-"
+                                />
+                            )}
                         </div>
                         {i.specialInstructions && (
-                            <div className="text-[13px] text-red-500 italic ml-13">
+                            <div className="text-[13px] text-red-500 italic">
                                 <span className="font-medium mr-1">Note:</span>
                                 <span className="italic">
                                     {i.specialInstructions}
@@ -160,7 +131,6 @@ export default function KitchenPage() {
         });
 
         socket.on('itemPrepared', async ({ orderId, itemId }) => {
-            console.log(1);
             setKitchenOrders((prev) => {
                 // First find the order before modification (for potential complete preparation)
                 const originalOrder = prev.find((o) => o._id === orderId);

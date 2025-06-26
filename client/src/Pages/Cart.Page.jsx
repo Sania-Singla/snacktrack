@@ -15,7 +15,6 @@ import { checkTokenExpired } from '../Utils';
 export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
     const navigate = useNavigate();
-    const { socket } = useSocketContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
     const [loading, setLoading] = useState(true);
@@ -98,9 +97,6 @@ export default function CartPage() {
                 cartItems.forEach((i) => (count += i.quantity));
                 setShowPopup(true);
                 setPopupInfo({ type: 'orderPlaced', count });
-                localStorage.removeItem('cartItems');
-                setCartItems([]);
-                socket?.emit('newOrder', res);
             } else checkTokenExpired(res, setUser);
             setOrdering(false);
         } catch (err) {
@@ -123,6 +119,7 @@ export default function CartPage() {
             quantity,
             isPacked,
             isAvailable,
+            specialInstructions,
         } = item;
 
         const isUnavailable = type === 'Snack' && !isAvailable;
@@ -147,7 +144,7 @@ export default function CartPage() {
                 <div className="w-full flex items-center gap-4 justify-between">
                     <div className="flex items-center gap-4">
                         {/* image */}
-                        <div className="size-[50px] overflow-hidden border-[0.01rem] border-gray-400 rounded-lg flex items-center justify-center">
+                        <div className="size-[40px] overflow-hidden border-[0.01rem] border-gray-400 rounded-lg flex items-center justify-center">
                             {type === 'Snack' ? (
                                 <img
                                     src={image}
@@ -161,19 +158,21 @@ export default function CartPage() {
                             )}
                         </div>
                         {/* info */}
-                        <div>
-                            <h3 className="text-lg font-medium text-gray-900">
-                                {name}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                                ₹{price.toFixed(2)}
+                        <div className="space-y-[2px]">
+                            <h3 className="font-medium text-gray-900 flex gap-2 items-center">
+                                <span>{name}</span>
                                 {isPacked && (
-                                    <span className="text-xs text-gray-500 ml-1">
-                                        ( +₹{PER_ITEM_PACKAGING_CHARGES} for
-                                        packing )
+                                    <span className="flex items-center gap-1 text-[10px] bg-yellow-50 rounded-full font-medium border-[0.01rem] border-yellow-300 w-fit px-2 text-yellow-600">
+                                        Pack
                                     </span>
                                 )}
-                            </p>
+                            </h3>
+                            {specialInstructions && (
+                                <p className="text-xs text-red-600 italic">
+                                    <span className="font-medium">Note: </span>
+                                    <span>{specialInstructions}</span>
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -220,15 +219,6 @@ export default function CartPage() {
                         />
                     </div>
                     <div className="flex items-center gap-1">
-                        <p className="text-lg font-semibold mr-1 text-gray-900">
-                            ₹
-                            {(
-                                price * quantity +
-                                (isPacked
-                                    ? PER_ITEM_PACKAGING_CHARGES * quantity
-                                    : 0)
-                            ).toFixed(2)}
-                        </p>
                         <Button
                             btnText={
                                 <div className="size-[18px] fill-[#4977ec]">
@@ -260,19 +250,19 @@ export default function CartPage() {
             </div>
         </div>
     ) : cartItems.length > 0 ? (
-        <div className="bg-gray-100 rounded-xl drop-shadow-sm w-full py-10 px-4 sm:px-6 lg:px-8">
+        <div className="bg-gray-100 rounded-xl shadow-sm w-full py-10 px-4 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Cart</h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Product List */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-md pb-3">
-                    <h2 className="text-xl font-semibold text-gray-900 p-6">
+                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">
+                    <h2 className="text-xl font-semibold text-gray-900 px-6 pt-6 pb-4">
                         Cart Items
                     </h2>
                     <div className="px-3">{cartItemElements}</div>
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-white rounded-lg shadow-md p-6">
+                <div className="bg-white rounded-xl shadow-sm p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">
                         Order Summary
                     </h2>

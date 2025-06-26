@@ -34,7 +34,7 @@ export default function EditCartItem() {
                 onClick={() => setShowPopup(false)}
                 className="absolute top-2 right-2"
             />
-            <h3 className="text-lg font-medium mb-2">Edit Item Details</h3>
+            <h3 className="text-xl font-bold mb-2">Edit Item Details</h3>
 
             {item.type === 'Snack' && (
                 <div className="w-full">
@@ -63,7 +63,7 @@ export default function EditCartItem() {
                     htmlFor="packItem"
                     className="ml-2 text-sm text-gray-700"
                 >
-                    Pack this item ( ₹{PER_ITEM_PACKAGING_CHARGES} per item)
+                    Pack this item
                 </label>
             </div>
 
