@@ -237,7 +237,7 @@ export default function KitchenPage() {
                         <h2 className="text-center font-bold text-xl mb-6">
                             Summary
                         </h2>
-                        <div className="flex flex-wrap justify-center gap-4 mb-7 md:mb-0">
+                        <div className="grid grid-flow-dense grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 mb-7 md:mb-0">
                             {Object.entries(summary)
                                 .sort(([nameA], [nameB]) =>
                                     nameA.localeCompare(nameB)
@@ -245,9 +245,9 @@ export default function KitchenPage() {
                                 .map(([name, quantity]) => (
                                     <div
                                         key={name}
-                                        className="border-[0.01rem] w-[120px] rounded-xl border-gray-200 p-4 flex flex-col items-center justify-center gap-3"
+                                        className="border-[0.01rem] rounded-xl text-center border-gray-200 p-4 flex flex-col items-center justify-center gap-3"
                                     >
-                                        <h3 className="font-semibold text-gray-900 text-lg truncate max-w-[120px]">
+                                        <h3 className="font-semibold text-gray-900 text-lg w-fit">
                                             {name}
                                         </h3>
                                         <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[30px] rounded-full font-bold text-sm">

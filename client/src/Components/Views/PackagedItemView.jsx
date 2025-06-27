@@ -1,4 +1,3 @@
-import toast from 'react-hot-toast';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
 import {
@@ -64,7 +63,6 @@ export default function PackagedItemView({ item, reference }) {
             JSON.stringify(cartItems.concat(newCartItem))
         );
         setCartItems((prev) => prev.concat(newCartItem));
-        toast.success('Added to cart');
     }
 
     function updateQuantity(newQuantity) {

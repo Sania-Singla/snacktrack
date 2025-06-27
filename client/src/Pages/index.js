@@ -1,6 +1,6 @@
 import NotFoundPage from './General/NotFound.Page';
 import ServerErrorPage from './General/ServerError.Page';
-import Redirect from './General/Redirect';
+import ProtectedRoute from './General/ProtectedRoute';
 import NewUserPage from './General/NewUser.Page';
 import HomePage from './Home.Page';
 import LoginPage from './Login.Page';
@@ -25,7 +25,7 @@ export {
     SettingsPage,
     NotFoundPage,
     ServerErrorPage,
-    Redirect,
+    ProtectedRoute,
     NewUserPage,
     StudentsPage,
     TodayOrdersPage,

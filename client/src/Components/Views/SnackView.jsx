@@ -9,7 +9,6 @@ import {
 } from '../../Contexts';
 import { contractorService } from '../../Services';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 import { checkTokenExpired } from '../../Utils';
 
 export default function SnackView({ snack, reference }) {
@@ -65,7 +64,6 @@ export default function SnackView({ snack, reference }) {
             JSON.stringify(cartItems.concat(newCartItem))
         );
         setCartItems((prev) => prev.concat(newCartItem));
-        toast.success('Added to cart');
     }
 
     function updateQuantity(newQuantity) {

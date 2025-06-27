@@ -14,7 +14,7 @@ import {
     StudentsPage,
     ServerErrorPage,
     NotFoundPage,
-    Redirect,
+    ProtectedRoute,
     BillsPage,
     NewUserPage,
     TodayOrdersPage,
@@ -37,10 +37,18 @@ import {
 export const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
-            {/* private routes */}
-            <Route element={<Redirect />}>
+            {/* Authenticated Routes */}
+            <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
                     <Route path="" element={<HomePage />} />
+                </Route>
+            </Route>
+
+            {/* Redirect staff */}
+            <Route
+                element={<ProtectedRoute roles={['student', 'contractor']} />}
+            >
+                <Route element={<Layout />}>
                     <Route path="settings" element={<SettingsPage />}>
                         <Route path="" element={<UpdateAccountDetails />} />
                         <Route path="password" element={<UpdatePassword />} />
@@ -58,51 +66,50 @@ export const router = createBrowserRouter(
                         element={<StudentBillsPage />}
                     />
                 </Route>
+            </Route>
 
-                {/* accessable to student only */}
-
-                <Route element={<Redirect who="student" />}>
-                    {/* who => who can access the page */}
-                    <Route element={<Layout />}>
-                        <Route path="cart" element={<CartPage />} />
-                    </Route>
+            {/* Contractor only */}
+            <Route element={<ProtectedRoute roles={['contractor']} />}>
+                <Route element={<Layout />}>
+                    <Route path="today-orders" element={<TodayOrdersPage />} />
+                    <Route path="all-bills" element={<BillsPage />} />
+                    <Route path="students" element={<StudentsPage />} />
                 </Route>
 
-                {/* accessable to contractor only */}
-
-                <Route element={<Redirect who="contractor" />}>
-                    <Route element={<Layout />}>
-                        <Route
-                            path="today-orders"
-                            element={<TodayOrdersPage />}
-                        />
-                        <Route path="all-bills" element={<BillsPage />} />
-                        <Route path="students" element={<StudentsPage />} />
-                    </Route>
-                    <Route
-                        path="register-student"
-                        element={<Layout renderTemplate={false} />}
-                    >
-                        <Route path="" element={<RegisterStudentPage />} />
-                    </Route>
+                <Route
+                    path="register-student"
+                    element={<Layout renderTemplate={false} />}
+                >
+                    <Route path="" element={<RegisterStudentPage />} />
                 </Route>
             </Route>
 
-            {/* accessable after admin key verificaiton */}
+            {/* Student only */}
+            <Route element={<ProtectedRoute roles={['student']} />}>
+                <Route path="cart" element={<CartPage />} />
+            </Route>
 
+            {/* Admin only (with admin key verification) */}
             <Route path="admin" element={<Layout renderTemplate={false} />}>
                 <Route path="" element={<AdminPage />} />
                 <Route path="new-canteen" element={<RegisterCanteenPage />} />
             </Route>
 
-            {/* accessable after staff key verificaiton */}
-
-            <Route path="kitchen" element={<Layout renderTemplate={false} />}>
-                <Route path="" element={<KitchenPage />} />
-                <Route path="verify-key" element={<VerifyKitchenKeyPage />} />
+            {/* Kitchen Staff only */}
+            <Route
+                path="kitchen"
+                element={<ProtectedRoute roles={['staff', 'contractor']} />}
+            >
+                <Route element={<Layout renderTemplate={false} />}>
+                    <Route path="" element={<KitchenPage />} />
+                    <Route
+                        path="verify-key"
+                        element={<VerifyKitchenKeyPage />}
+                    />
+                </Route>
             </Route>
 
-            {/* public routes */}
+            {/* Public Routes */}
             <Route element={<Layout renderTemplate={false} />}>
                 <Route path="login" element={<LoginPage />} />
                 <Route path="new-user" element={<NewUserPage />} />
