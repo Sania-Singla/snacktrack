@@ -2,18 +2,44 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Snacks, PackagedItems, Button } from '../Components';
 import { icons } from '../Assets/icons';
 import { useEffect, useState } from 'react';
-import { usePopupContext, useSnackContext, useUserContext } from '../Contexts';
+import {
+    usePopupContext,
+    useSnackContext,
+    useStudentContext,
+    useUserContext,
+} from '../Contexts';
 import { snackService } from '../Services';
 import { checkTokenExpired } from '../Utils';
 
 export default function HomePage() {
     const [searchParams, setSearchParams] = useSearchParams();
     const filter = searchParams.get('filter') || 'snacks';
-    const { setSnacks, setItems } = useSnackContext();
+    const { setSnacks, setItems, snacks, items } = useSnackContext();
     const navigate = useNavigate();
     const { user, setUser } = useUserContext();
     const [loading, setLoading] = useState(true);
     const { setShowPopup, setPopupInfo } = usePopupContext();
+    const { cartItems, orderPlaced } = useStudentContext();
+
+    function computeItems(data) {
+        setItems(
+            data.map((item) => ({
+                ...item,
+                quantity:
+                    cartItems.find((i) => i._id === item._id)?.quantity || 0,
+            }))
+        );
+    }
+
+    function computeSnacks(data) {
+        setSnacks(
+            data.map((snack) => ({
+                ...snack,
+                quantity:
+                    cartItems.find((i) => i._id === snack._id)?.quantity || 0,
+            }))
+        );
+    }
 
     useEffect(() => {
         setLoading(true);
@@ -23,42 +49,18 @@ export default function HomePage() {
 
         (async function () {
             try {
-                let items = [],
-                    cartItems = [];
+                let data = [];
 
                 if (filter === 'snacks') {
-                    [items, cartItems] = await Promise.all([
-                        snackService.getSnacks(signal),
-                        JSON.parse(localStorage.getItem('cartItems')) || [],
-                    ]);
+                    data = await snackService.getSnacks(signal);
                 } else {
-                    [items, cartItems] = await Promise.all([
-                        snackService.getPackagedFoodItems(signal),
-                        JSON.parse(localStorage.getItem('cartItems')) || [],
-                    ]);
+                    data = await snackService.getPackagedFoodItems(signal);
                 }
 
-                if (items && !items.message) {
-                    if (filter === 'snacks') {
-                        setSnacks(
-                            items.map((snack) => ({
-                                ...snack,
-                                quantity:
-                                    cartItems.find((i) => i._id === snack._id)
-                                        ?.quantity || 0,
-                            }))
-                        );
-                    } else {
-                        setItems(
-                            items.map((item) => ({
-                                ...item,
-                                quantity:
-                                    cartItems.find((i) => i._id === item._id)
-                                        ?.quantity || 0,
-                            }))
-                        );
-                    }
-                } else checkTokenExpired(items, setUser);
+                if (data && !data.message) {
+                    if (filter === 'snacks') computeSnacks(data);
+                    else computeItems(data);
+                } else checkTokenExpired(data, setUser);
 
                 setLoading(false);
             } catch (err) {
@@ -67,7 +69,12 @@ export default function HomePage() {
         })();
 
         return () => controller.abort();
-    }, [filter]);
+    }, [filter, navigate]);
+
+    useEffect(() => {
+        if (filter === 'snacks') computeSnacks(snacks);
+        else computeItems(items);
+    }, [orderPlaced]);
 
     function addItem() {
         setShowPopup(true);

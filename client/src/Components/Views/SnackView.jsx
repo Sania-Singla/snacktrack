@@ -8,7 +8,7 @@ import {
     useUserContext,
 } from '../../Contexts';
 import { contractorService } from '../../Services';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { checkTokenExpired } from '../../Utils';
 
@@ -38,6 +38,8 @@ export default function SnackView({ snack, reference }) {
             navigate('/server-error');
         }
     }
+
+    useEffect(() => setQuantityInCart(snack.quantity), [snack]);
 
     function editSnack() {
         setShowPopup(true);

@@ -2,20 +2,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
-import {
-    usePopupContext,
-    useSocketContext,
-    useStudentContext,
-    useUserContext,
-} from '../../Contexts';
-import { useEffect } from 'react';
+import { usePopupContext, useUserContext } from '../../Contexts';
 
 export default function OrderPlacedPopup() {
     const { setShowPopup, popupInfo } = usePopupContext();
     const navigate = useNavigate();
     const { user } = useUserContext();
-    const { setCartItems } = useStudentContext();
-    const { socket } = useSocketContext();
 
     const containerVariants = {
         hidden: { opacity: 0, scale: 0.95 },
@@ -35,12 +27,6 @@ export default function OrderPlacedPopup() {
             transition: { duration: 0.3, ease: 'easeInOut' },
         },
     };
-
-    useEffect(() => {
-        localStorage.removeItem('cartItems');
-        setCartItems([]);
-        socket?.emit('newOrder', popupInfo.order);
-    }, []);
 
     return (
         <AnimatePresence>

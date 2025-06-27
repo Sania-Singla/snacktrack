@@ -7,7 +7,7 @@ import {
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { contractorService } from '../../Services';
 import { useNavigate } from 'react-router-dom';
 import { checkTokenExpired } from '../../Utils';
@@ -48,6 +48,8 @@ export default function PackagedItemView({ item, reference }) {
         setShowPopup(true);
         setPopupInfo({ type: 'removeItem', item });
     }
+
+    useEffect(() => setQuantityInCart(item.quantity), [item]);
 
     function addToCart() {
         setQuantityInCart(1);

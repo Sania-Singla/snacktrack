@@ -16,9 +16,10 @@ export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
     const navigate = useNavigate();
     const { setShowPopup, setPopupInfo } = usePopupContext();
-    const { cartItems, setCartItems } = useStudentContext();
+    const { cartItems, setCartItems, setOrderPlaced } = useStudentContext();
     const [loading, setLoading] = useState(true);
     const { setUser } = useUserContext();
+    const { socket } = useSocketContext();
 
     async function checkAvailability() {
         try {
@@ -93,10 +94,14 @@ export default function CartPage() {
                 packingCharges
             );
             if (res && !res.message) {
+                localStorage.removeItem('cartItems');
+                socket?.emit('newOrder', res);
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
                 setShowPopup(true);
-                setPopupInfo({ type: 'orderPlaced', order: res, count });
+                setPopupInfo({ type: 'orderPlaced', count });
+                setCartItems([]);
+                setOrderPlaced(true);
             } else checkTokenExpired(res, setUser);
             setOrdering(false);
         } catch (err) {
