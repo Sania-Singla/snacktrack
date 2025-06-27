@@ -96,7 +96,7 @@ export default function CartPage() {
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
                 setShowPopup(true);
-                setPopupInfo({ type: 'orderPlaced', count });
+                setPopupInfo({ type: 'orderPlaced', order: res, count });
             } else checkTokenExpired(res, setUser);
             setOrdering(false);
         } catch (err) {

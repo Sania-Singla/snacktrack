@@ -39,7 +39,7 @@ export default function OrderPlacedPopup() {
     useEffect(() => {
         localStorage.removeItem('cartItems');
         setCartItems([]);
-        socket?.emit('newOrder', res);
+        socket?.emit('newOrder', popupInfo.order);
     }, []);
 
     return (

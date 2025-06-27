@@ -1,8 +1,8 @@
-import { client } from '../Config/twilio.js';
+import { twilioClient } from '../server.js';
 
 export async function sendSMS({ to, text, link }) {
     try {
-        // const msg = await client.messages.create({
+        // const msg = await twilioClient.messages.create({
         //     from: process.env.TWILIO_PHONE_NUMBER,
         //     to,
         //     body: `📢 Snack Track \n${text} \n🔗 Click here: ${link}`,

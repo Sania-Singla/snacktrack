@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 
 export async function connectRedis() {
     try {
-        const redisClient = createClient({
+        const client = createClient({
             username: process.env.REDIS_USERNAME,
             password: process.env.REDIS_PASSWORD,
             socket: {
@@ -10,20 +10,16 @@ export async function connectRedis() {
                 port: process.env.REDIS_PORT,
             },
         });
-
-        // for connection error
-        redisClient.on('error', (err) =>
-            console.log('Redis Client Error', err)
-        );
-
+        
         // avoid creating multiple connections
-        if (!redisClient.isOpen) {
-            await redisClient.connect();
-            console.log('✅ Connected to Redis Successfully.');
+        if (!client.isOpen) {
+            await client.connect();
+            console.log('✅ Redis client ready.');
         } else console.log('Already have a Redis connection.');
 
-        return redisClient;
+        return client;
     } catch (err) {
-        return console.log(err);
+        console.log('❌ Redis connection failed !!', err);
+        process.exit(1);
     }
 }

@@ -123,9 +123,8 @@ const generateIntermediateBill = tryCatch(
 
 // generate bills for the previous month
 const generateBills = tryCatch('generate bills', async (req, res) => {
-    const now = moment();
-    const lastMonth = now.clone().subtract(1, 'month');
-    const month = lastMonth.month();
+    const lastMonth = moment().subtract(1, 'month');
+    const month = lastMonth.month() + 1; // month is 0-indexed in moment.js
     const year = lastMonth.year();
 
     const studentsWithOrders = await Order.aggregate([
@@ -147,6 +146,12 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
         },
     ]);
 
+    if (!studentsWithOrders.length) {
+        console.log('ℹ️ No students with picked up orders for billing period.');
+        if (res) res.status(OK).json({ message: 'No bills generated' });
+        return;
+    }
+
     const operations = studentsWithOrders.map((student) => ({
         updateOne: {
             filter: {
@@ -167,14 +172,14 @@ const generateBills = tryCatch('generate bills', async (req, res) => {
         },
     }));
 
-    if (operations.length > 0) {
-        await Bill.bulkWrite(operations);
-        console.log(`👍 Automated billing completed for ${month + 1}/${year}`);
-    } else {
-        console.log('ℹ️ No students with picked up orders for billing period.');
-    }
+    await Bill.bulkWrite(operations);
+    console.log(`💸 Automated billing completed for ${month + 1}/${year}`);
 
-    if (res) res.status(OK).json({ message: 'operation performed' });
+    if (res)
+        res.status(OK).json({
+            message: `bills generated for ${month + 1}/${year}`,
+        });
+    return;
 });
 
 const startBillingCronJob = () => {
@@ -184,26 +189,21 @@ const startBillingCronJob = () => {
         timezone: 'Asia/Kolkata',
     });
 
-    console.log(
-        '✨ Billing cron job scheduled to run on the 1st at 12:05 AM of every month'
-    );
+    console.log('💵 Billing scheduled for every month at 12:05 AM');
 };
 
 const startCleanupCronJob = () => {
     // Run at 12:05 AM on the 1st of every month
     cron.schedule(
         '5 0 1 * *',
-        tryCatch('cleanup old orders', async () => {
-            const now = moment();
-
+        tryCatch('clean old orders', async () => {
             // Get the start of the month, two months ago
-            const thresholdDate = now
-                .clone()
-                .startOf('month')
-                .subtract(2, 'months');
+            const thresholdDate = moment()
+                .subtract(2, 'months')
+                .startOf('month');
 
             console.log(
-                `🧹 Starting order cleanup. Deleting orders created before ${thresholdDate.format()}`
+                `🧹 Cleaning up... Deleting orders created before ${thresholdDate.format()}`
             );
 
             await Order.deleteMany({

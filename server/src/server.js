@@ -1,7 +1,10 @@
 import 'dotenv/config';
-import { connectMongoDB } from './Config/mongodb.js';
-import { connectRedis } from './Config/redis.js';
-import { generateTransporter } from './Config/nodemailer.js';
+import {
+    connectMongoDB,
+    connectRedis,
+    generateTransporter,
+    connectTwilio,
+} from './Config/index.js';
 import { http } from './socket.js';
 import {
     startBillingCronJob,
@@ -10,13 +13,16 @@ import {
 
 const PORT = process.env.PORT || 4000;
 
-await connectMongoDB();
-const redisClient = await connectRedis();
-const transporter = await generateTransporter();
+const [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
+    connectMongoDB(),
+    connectRedis(),
+    generateTransporter(),
+    // connectTwilio(),
+]);
 
 startBillingCronJob();
 startCleanupCronJob();
 
-http.listen(PORT, () => console.log(`✅ Server listening on port ${PORT}...`));
+http.listen(PORT, () => console.log(`💻 Server listening on port ${PORT}...`));
 
-export { transporter, redisClient };
+export { mongoConn, transporter, redisClient, twilioClient };

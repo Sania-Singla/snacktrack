@@ -5,10 +5,12 @@ export const connectMongoDB = async () => {
         const conn = await mongoose.connect(
             `${process.env.MONGODB_URL}${process.env.MONGODB_NAME}`
         );
-        return console.log(
-            `✅ MongoDB connected, host: ${conn.connection.host}`
+        console.log(
+            `✅ Mongodb connection ready. Host: ${conn.connection.host}`
         );
+        return conn;
     } catch (err) {
-        return console.log('❌ MongoDB connection Failed !!', err);
+        console.log('❌ MongoDB connection failed !!', err);
+        process.exit(1);
     }
 };
