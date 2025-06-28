@@ -62,27 +62,34 @@ export default function StudentOrderCard({ order, reference }) {
                 <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="border-t border-gray-200"
+                    className="border-t border-gray-100"
                 >
-                    <div className="">
+                    <div>
                         {items.map((item) => (
                             <div
                                 key={item.id}
-                                className={`relative space-y-2 p-4 ${status === 'Pending' && (item.preparedCount === item.quantity || item.type === 'PackagedFood') ? 'opacity-55' : 'border-[0.01rem] border-transparent'}`}
+                                className={`relative p-3 ${
+                                    (order.status === 'Pending' ||
+                                        order.status === 'Prepared') &&
+                                    item.pickedUpCount === item.quantity
+                                        ? 'opacity-60'
+                                        : 'border-[0.01rem] border-transparent'
+                                }`}
                             >
-                                {/* Overlay tick for prepared item */}
-                                {status === 'Pending' &&
-                                    (item.preparedCount === item.quantity ||
-                                        item.type === 'PackagedFood') && (
+                                {/* ✅ Complete: Show green tick */}
+                                {(order.status === 'Pending' ||
+                                    order.status === 'Prepared') &&
+                                    item.pickedUpCount === item.quantity && (
                                         <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
                                             <div className="fill-green-600 size-8 p-1">
                                                 {icons.check}
                                             </div>
                                         </div>
                                     )}
+
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
+                                        <div className="size-10 bg-gray-50 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
                                             {item.type === 'Snack' ? (
                                                 <img
                                                     src={item.image}
@@ -90,12 +97,12 @@ export default function StudentOrderCard({ order, reference }) {
                                                     className="object-cover size-full"
                                                 />
                                             ) : (
-                                                <div className="size-5 stroke-gray-800">
+                                                <div className="size-5 stroke-gray-300">
                                                     {icons.soda}
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="space-y-[2px] pb-1">
+                                        <div className="space-y-[2px] pb-[5px]">
                                             <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
                                                 <span>{item.name}</span>
                                                 {item.isPacked && (
@@ -103,27 +110,34 @@ export default function StudentOrderCard({ order, reference }) {
                                                         Pack
                                                     </span>
                                                 )}
-                                            </h3>
-                                            <div className="flex gap-1 items-center">
-                                                <p className="text-gray-600 text-xs">
-                                                    Qty: {item.quantity}
-                                                </p>
-                                                {item.preparedCount > 0 &&
-                                                    item.preparedCount <
+                                                {order.status === 'Pending' &&
+                                                    item.preparedCount > 0 &&
+                                                    item.pickedUpCount <
                                                         item.quantity && (
-                                                        <div className="flex gap-1 items-center">
-                                                            <span className="text-gray-400 text-xs">
-                                                                &bull;
-                                                            </span>
-                                                            <p className="text-xs text-green-500">
-                                                                Parepared:{' '}
-                                                                {
-                                                                    item.preparedCount
-                                                                }
-                                                            </p>
-                                                        </div>
+                                                        <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
+                                                            {item.preparedCount ===
+                                                            item.quantity
+                                                                ? 'Prepared'
+                                                                : `Prepared - ${
+                                                                      item.preparedCount
+                                                                  }`}
+                                                        </span>
                                                     )}
-                                            </div>
+                                                {(order.status === 'Pending' ||
+                                                    order.status ===
+                                                        'Prepared') &&
+                                                    item.pickedUpCount > 0 &&
+                                                    item.pickedUpCount <
+                                                        item.quantity && (
+                                                        <span className="flex items-center gap-1 text-[10px] bg-blue-50 rounded-full font-medium border-[0.01rem] border-blue-300 w-fit px-2 text-blue-600">
+                                                            Taken -{' '}
+                                                            {item.pickedUpCount}
+                                                        </span>
+                                                    )}
+                                            </h3>
+                                            <p className="text-gray-600 text-xs">
+                                                Qty: {item.quantity}
+                                            </p>
                                         </div>
                                     </div>
                                     <span className="text-sm font-semibold text-gray-900">
@@ -135,7 +149,7 @@ export default function StudentOrderCard({ order, reference }) {
                                 </div>
 
                                 {item.specialInstructions && (
-                                    <p className="ml-13 pl-1 italic text-xs text-gray-600">
+                                    <p className="ml-13 pt-1 italic text-xs text-red-600">
                                         <span className="font-medium">
                                             Note:{' '}
                                         </span>

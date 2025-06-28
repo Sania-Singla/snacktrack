@@ -21,6 +21,7 @@ export default function StudentsPage() {
     const { search } = useSearchContext();
     const navigate = useNavigate();
     const { setUser } = useUserContext();
+    const [count, setCount] = useState(0);
 
     // pagination
     const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
@@ -39,6 +40,7 @@ export default function StudentsPage() {
                     LIMIT
                 );
                 if (res && !res.message) {
+                    setCount(res.totalCount);
                     setStudents((prev) => prev.concat(res.students));
                     setStudentsInfo(res.studentsInfo);
                 } else checkTokenExpired(res, setUser);
@@ -93,7 +95,7 @@ export default function StudentsPage() {
                                 </h3>
                                 <div className="size-6 rounded-full bg-blue-50 text-sm flex items-center justify-center">
                                     <span className="text-blue-600 font-bold">
-                                        {students.length}
+                                        {count}
                                     </span>
                                 </div>
                             </div>

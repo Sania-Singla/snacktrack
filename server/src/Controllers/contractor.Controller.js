@@ -55,6 +55,15 @@ const getStudents = tryCatch('get students', async (req, res) => {
             { $match: { canteenId: new Types.ObjectId(req.user.canteenId) } },
             { $project: { password: 0, refreshToken: 0 } },
             {
+                $addFields: {
+                    userNumber: {
+                        $toInt: {
+                            $arrayElemAt: [{ $split: ['$userName', '-'] }, 1],
+                        },
+                    },
+                },
+            },
+            {
                 $lookup: {
                     from: 'bills',
                     localField: '_id',
@@ -78,12 +87,13 @@ const getStudents = tryCatch('get students', async (req, res) => {
         {
             page: parseInt(page),
             limit: parseInt(limit),
-            sort: { userName: 1 },
+            sort: { userNumber: 1 },
         }
     );
 
     if (result.docs.length) {
         const data = {
+            totalCount: result.totalDocs,
             students: result.docs,
             studentsInfo: {
                 hasNextPage: result.hasNextPage,

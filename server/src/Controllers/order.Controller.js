@@ -3,9 +3,9 @@ import {
     OK,
     NOT_FOUND,
     COOKIE_OPTIONS,
-    BAD_REQUEST
+    BAD_REQUEST,
 } from '../Constants/index.js';
-import { ErrorHandler, tryCatch } from '../Utils/index.js';
+import { addPreparedItem, ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Canteen, Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment';
@@ -59,7 +59,8 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         isPacked: i.isPacked,
     }));
 
-    const allPackaged = cartItems.every((i) => i.type === 'PackagedFood');
+    const packagedItems = cartItems.filter((i) => i.type === 'PackagedFood');
+    const allPackaged = packagedItems.length === cartItems.length;
 
     const order = await Order.create({
         studentId: student._id,
@@ -70,9 +71,28 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         packingCharges,
     });
 
+    await Promise.all([
+        packagedItems.map((item) => {
+            redisClient.sAdd(
+                `order_${order._id}`,
+                JSON.stringify({
+                    itemId: item._id,
+                    prepared: item.quantity,
+                    pickedUp: 0,
+                })
+            );
+        }),
+    ]);
+
+    const items = cartItems.map((item) => ({
+        ...item,
+        preparedCount: item.type === 'Snack' ? 0 : item.quantity,
+        pickedUpCount: 0,
+    }));
+
     const data = {
         ...order.toObject(),
-        items: cartItems.map((i) => ({ ...i, preparedCount: 0 })),
+        items,
         studentInfo: {
             fullName: student.fullName,
             phoneNumber: student.phoneNumber,
@@ -111,7 +131,7 @@ const updateOrderStatus = tryCatch(
         await order.save();
 
         // delete prepared items from redis
-        if (order.status === 'Prepared') {
+        if (order.status === 'PickedUp') {
             const preparedItems = await redisClient.sMembers(
                 `order_${order._id}`
             );
@@ -239,11 +259,12 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                         .map((i) => JSON.parse(i))
                         .find((i) => item.id.equals(i.itemId));
 
-                    if (order.status === 'Pending') {
-                        item.preparedCount =
-                            item.type === 'Snack'
-                                ? preparedItem?.quantity || 0
-                                : item.quantity;
+                    if (
+                        order.status === 'Pending' ||
+                        order.status === 'Prepared'
+                    ) {
+                        item.preparedCount = preparedItem?.prepared || 0;
+                        item.pickedUpCount = preparedItem?.pickedUp || 0;
                     }
                     return item;
                 });
@@ -378,11 +399,12 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                         .map((i) => JSON.parse(i))
                         .find((i) => item.id.equals(i.itemId));
 
-                    if (order.status === 'Pending') {
-                        item.preparedCount =
-                            item.type === 'Snack'
-                                ? preparedItem?.quantity || 0
-                                : item.quantity;
+                    if (
+                        order.status === 'Pending' ||
+                        order.status === 'Prepared'
+                    ) {
+                        item.preparedCount = preparedItem?.prepared || 0;
+                        item.pickedUpCount = preparedItem?.pickedUp || 0;
                     }
                     return item;
                 });
@@ -542,7 +564,7 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
 
                     return {
                         ...item,
-                        preparedCount: preparedItem?.quantity || 0,
+                        preparedCount: preparedItem?.prepared || 0,
                     };
                 });
 

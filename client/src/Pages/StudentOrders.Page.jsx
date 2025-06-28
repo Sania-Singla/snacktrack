@@ -111,7 +111,11 @@ export default function StudentOrdersPage() {
 
         socket.on('newOrder', async (order) => {
             if (order.studentId === studentId) {
-                setStudentOrders((prev) => [...prev, order]);
+                setStudentOrders((prev) => {
+                    const exists = prev.find((o) => o._id === order._id);
+                    if (exists) return prev;
+                    else return [order, ...prev];
+                });
             }
         });
 
@@ -164,6 +168,44 @@ export default function StudentOrdersPage() {
                 return updatedOrders;
             });
         });
+
+        socket.on('itemPickedUp', ({ orderId, itemId, stuId }) => {
+            if (stuId !== studentId) return;
+
+            setStudentOrders((prev) => {
+                const updatedOrders = prev.map((o) => {
+                    if (o._id !== orderId) return o;
+
+                    const updatedItems = o.items.map((i) =>
+                        i.id === itemId
+                            ? {
+                                  ...i,
+                                  pickedUpCount: i.preparedCount,
+                              }
+                            : i
+                    );
+
+                    const allPickedUp = updatedItems.every(
+                        (i) => i.pickedUpCount === i.quantity
+                    );
+                    return {
+                        ...o,
+                        items: updatedItems,
+                        status: allPickedUp ? 'PickedUp' : o.status,
+                    };
+                });
+
+                return updatedOrders;
+            });
+        });
+
+        return () => {
+            socket.off('newOrder');
+            socket.off('orderRejected');
+            socket.off('orderPickedUp');
+            socket.off('itemPrepared');
+            socket.off('itemPickedUp');
+        };
     }, [socket]);
 
     const filteredOrders = dateFilter

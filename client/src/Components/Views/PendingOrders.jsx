@@ -92,19 +92,18 @@ export default function PendingOrders() {
         if (!socket) return;
 
         socket.on('newOrder', async (order) => {
-            const existingOrder = pendingOrders.find(
-                (o) => o._id === order._id
-            );
-            if (existingOrder || order.status !== 'Pending') return;
-            setPendingOrders((prev) => [...prev, order]);
+            setPendingOrders((prev) => {
+                const exists = prev.find((o) => o._id === order._id);
+                if (exists) return prev;
+                else return [...prev, order];
+            });
         });
 
         socket.on('orderRejected', (order) => {
-            setPendingOrders((prev) => prev.filter((o) => o._id === order._id));
+            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
         });
 
         socket.on('itemPrepared', ({ orderId, itemId }) => {
-            console.log(1);
             setPendingOrders((prev) =>
                 prev
                     .map((o) =>
@@ -129,6 +128,33 @@ export default function PendingOrders() {
                     )
             );
         });
+
+        socket.on('itemPickedUp', ({ orderId, itemId }) => {
+            setPendingOrders((prev) =>
+                prev.map((o) =>
+                    o._id === orderId
+                        ? {
+                              ...o,
+                              items: o.items.map((i) =>
+                                  i.id === itemId
+                                      ? {
+                                            ...i,
+                                            pickedUpCount: i.preparedCount,
+                                        }
+                                      : i
+                              ),
+                          }
+                        : o
+                )
+            );
+        });
+
+        return () => {
+            socket.off('newOrder');
+            socket.off('orderRejected');
+            socket.off('itemPrepared');
+            socket.off('itemPickedUp');
+        };
     }, [socket]);
 
     const orderElements = pendingOrders

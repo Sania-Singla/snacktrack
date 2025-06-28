@@ -22,23 +22,17 @@ export default function HomePage() {
     const { cartItems, orderPlaced } = useStudentContext();
 
     function computeItems(data) {
-        setItems(
-            data.map((item) => ({
-                ...item,
-                quantity:
-                    cartItems.find((i) => i._id === item._id)?.quantity || 0,
-            }))
-        );
+        return data.map((item) => ({
+            ...item,
+            quantity: cartItems.find((i) => i._id === item._id)?.quantity || 0,
+        }));
     }
 
     function computeSnacks(data) {
-        setSnacks(
-            data.map((snack) => ({
-                ...snack,
-                quantity:
-                    cartItems.find((i) => i._id === snack._id)?.quantity || 0,
-            }))
-        );
+        return data.map((snack) => ({
+            ...snack,
+            quantity: cartItems.find((i) => i._id === snack._id)?.quantity || 0,
+        }));
     }
 
     useEffect(() => {
@@ -58,8 +52,8 @@ export default function HomePage() {
                 }
 
                 if (data && !data.message) {
-                    if (filter === 'snacks') computeSnacks(data);
-                    else computeItems(data);
+                    if (filter === 'snacks') setSnacks(computeSnacks(data));
+                    else setItems(computeItems(data));
                 } else checkTokenExpired(data, setUser);
 
                 setLoading(false);

@@ -1,18 +1,22 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useUserContext } from '../../Contexts';
 
-export default function ProtectedRoute({ roles = [] }) {
+export function ProtectedRoute({ roles = [] }) {
     const { user } = useUserContext();
     const location = useLocation();
 
     if (!user) {
         // Unauthenticated
-        return (
-            <Navigate
-                to={location.pathname === '/' ? '/new-user' : '/login'}
-                replace
-            />
-        );
+        if (location.pathname.includes('kitchen')) {
+            return <Navigate to="/kitchen/verify-key" replace />;
+        } else {
+            return (
+                <Navigate
+                    to={location.pathname === '/' ? '/new-user' : '/login'}
+                    replace
+                />
+            );
+        }
     }
 
     if (location.pathname === '/' && user.role === 'staff') {
@@ -25,5 +29,15 @@ export default function ProtectedRoute({ roles = [] }) {
     }
 
     // Authorized
+    return <Outlet />;
+}
+
+export function NewUserPageRedirect() {
+    const { user } = useUserContext();
+
+    if (user) {
+        return <Navigate to="/not-found" replace />;
+    }
+
     return <Outlet />;
 }

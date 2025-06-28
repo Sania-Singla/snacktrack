@@ -7,6 +7,7 @@ import {
     addSocketId,
     addPreparedItem,
     sendSMS,
+    addPickedUpItem,
 } from './Utils/index.js';
 
 const http = createServer(app);
@@ -47,6 +48,20 @@ io.on('connection', async (socket) => {
                         stuId: order.studentId,
                     }),
                 addPreparedItem({ itemId, orderId: order._id }),
+            ]);
+        });
+
+        socket.on('itemPickedUp', async ({ itemId, order }) => {
+            await Promise.all([
+                io
+                    .to(`contractor_${order.canteenId}`)
+                    .to(`student_${order.studentId}`)
+                    .emit('itemPickedUp', {
+                        itemId,
+                        orderId: order._id,
+                        stuId: order.studentId,
+                    }),
+                addPickedUpItem({ itemId, orderId: order._id }),
             ]);
         });
 
@@ -131,8 +146,10 @@ io.on('connection', async (socket) => {
                 room = `staff_${canteenId}`;
                 break;
         }
-        await socket.join(room);
+
         await addSocketId(room, socket.id);
+        await socket.join(room);
+        
         console.log(
             `[ADDED TO REDIS] ${role === 'student' ? userId : canteenId}`
         );

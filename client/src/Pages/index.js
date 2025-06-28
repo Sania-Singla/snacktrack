@@ -1,6 +1,6 @@
 import NotFoundPage from './General/NotFound.Page';
 import ServerErrorPage from './General/ServerError.Page';
-import ProtectedRoute from './General/ProtectedRoute';
+import { ProtectedRoute, NewUserPageRedirect } from './General/ProtectedRoute';
 import NewUserPage from './General/NewUser.Page';
 import HomePage from './Home.Page';
 import LoginPage from './Login.Page';
@@ -26,6 +26,7 @@ export {
     NotFoundPage,
     ServerErrorPage,
     ProtectedRoute,
+    NewUserPageRedirect,
     NewUserPage,
     StudentsPage,
     TodayOrdersPage,

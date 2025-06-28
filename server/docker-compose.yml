@@ -1,0 +1,25 @@
+services:
+    mongo:
+        image: mongo:7.0
+        container_name: my-mongodb
+        ports:
+            - '27017:27017'
+        environment:
+            MONGO_INITDB_DATABASE: ${MONGODB_NAME}
+        volumes:
+            - mongo-data:/data/db
+
+    app:
+        build: .
+        container_name: snackTrack-app
+        ports:
+            - '3000:3000'
+        depends_on:
+            - mongo
+        env_file: .env
+        volumes:
+            - .:/usr/src/app
+        command: npm run dev
+
+volumes:
+    mongo-data:

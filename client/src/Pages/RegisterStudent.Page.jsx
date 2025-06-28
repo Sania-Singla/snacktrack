@@ -27,7 +27,12 @@ export default function RegisterStudentPage() {
     const { setUser } = useUserContext();
 
     function handleChange(e) {
-        const { value, name } = e.target;
+        let { value, name } = e.target;
+
+        // ✅ Remove leading zeroes only for rollNo
+        if (name === 'rollNo') {
+            value = value.replace(/^0+/, '');
+        }
         setInputs((prev) => ({ ...prev, [name]: value }));
         if (value) verifyExpression(name, value, setError);
         else setError((prev) => ({ ...prev, [name]: '' }));

@@ -28,6 +28,10 @@ export default function LoginPage() {
 
     function handleChange(e) {
         const { value, name } = e.target;
+        // ✅ Remove leading zeroes only for rollNo
+        if (name === 'rollNo') {
+            value = value.replace(/^0+/, '');
+        }
         setInputs((prev) => ({ ...prev, [name]: value }));
         onMouseOver();
     }

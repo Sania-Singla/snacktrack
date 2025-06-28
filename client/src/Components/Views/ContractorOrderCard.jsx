@@ -1,5 +1,5 @@
 import { icons } from '../../Assets/icons';
-import { OrderDropdown } from '..';
+import { Button, OrderDropdown } from '..';
 import { getRollNo, formatTime, checkTokenExpired } from '../../Utils';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,14 +13,11 @@ export default function ContractorOrderCard({ order, reference }) {
     const { amount, _id, createdAt, items, studentInfo, packingCharges } =
         order;
     const { socket } = useSocketContext();
-    const [status, setStatus] = useState(order.status);
     const { setUser } = useUserContext();
     const [statusOptions, setStatusOptions] = useState([]);
 
-    useEffect(() => setStatus(order.status), [order]);
-
     useEffect(() => {
-        if (status === 'Pending') {
+        if (order.status === 'Pending') {
             setStatusOptions([
                 { value: '', label: 'Pending' },
                 { value: 'Rejected', label: 'Rejected' },
@@ -32,7 +29,7 @@ export default function ContractorOrderCard({ order, reference }) {
                 { value: 'Rejected', label: 'Rejected' },
             ]);
         }
-    }, [status]);
+    }, [order]);
 
     const navigate = useNavigate();
 
@@ -40,7 +37,6 @@ export default function ContractorOrderCard({ order, reference }) {
         try {
             const res = await orderService.updateOrderStatus(_id, status);
             if (res && res.message === 'order status updated successfully') {
-                setStatus(status);
                 socket.emit(`order${status}`, order);
             } else if (res && res.message === 'too late') {
                 toast.error(
@@ -86,7 +82,8 @@ export default function ContractorOrderCard({ order, reference }) {
                             </div>
                         </div>
                     </div>
-                    {status === 'Pending' || status === 'Prepared' ? (
+                    {order.status === 'Pending' ||
+                    order.status === 'Prepared' ? (
                         <div
                             className="w-fit"
                             onClick={(e) => e.stopPropagation()}
@@ -99,12 +96,12 @@ export default function ContractorOrderCard({ order, reference }) {
                     ) : (
                         <span
                             className={`px-2 pt-[2px] pb-[3px] text-xs font-bold rounded-full ${
-                                status === 'Rejected'
+                                order.status === 'Rejected'
                                     ? 'bg-red-50 text-red-700'
                                     : 'bg-green-50 text-green-700'
                             }`}
                         >
-                            {status}
+                            {order.status}
                         </span>
                     )}
                 </div>
@@ -147,26 +144,24 @@ export default function ContractorOrderCard({ order, reference }) {
                         transition={{ duration: 0.3 }}
                         className="overflow-hidden"
                     >
-                        <div className="border-t border-gray-200">
-                            <div className="">
+                        <div className="border-t border-gray-100">
+                            <div>
                                 {items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className={`relative space-y-2 p-4 ${
-                                            status === 'Pending' &&
-                                            (item.preparedCount ===
-                                                item.quantity ||
-                                                item.type === 'PackagedFood')
+                                        className={`relative p-3 ${
+                                            (order.status === 'Pending' ||
+                                                order.status === 'Prepared') &&
+                                            item.pickedUpCount === item.quantity
                                                 ? 'opacity-60'
                                                 : 'border-[0.01rem] border-transparent'
                                         }`}
                                     >
-                                        {/* Overlay tick for prepared item */}
-                                        {status === 'Pending' &&
-                                            (item.preparedCount ===
-                                                item.quantity ||
-                                                item.type ===
-                                                    'PackagedFood') && (
+                                        {/* ✅ Complete: Show green tick */}
+                                        {(order.status === 'Pending' ||
+                                            order.status === 'Prepared') &&
+                                            item.pickedUpCount ===
+                                                item.quantity && (
                                                 <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
                                                     <div className="fill-green-600 size-8 p-1">
                                                         {icons.check}
@@ -176,7 +171,7 @@ export default function ContractorOrderCard({ order, reference }) {
 
                                         <div className="flex justify-between items-center">
                                             <div className="flex items-center gap-3">
-                                                <div className="size-10 bg-gray-100 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
+                                                <div className="size-10 bg-gray-50 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
                                                     {item.type === 'Snack' ? (
                                                         <img
                                                             src={item.image}
@@ -184,12 +179,12 @@ export default function ContractorOrderCard({ order, reference }) {
                                                             className="object-cover size-full"
                                                         />
                                                     ) : (
-                                                        <div className="size-5 stroke-gray-800">
+                                                        <div className="size-5 stroke-gray-300">
                                                             {icons.soda}
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div className="space-y-[2px] pb-1">
+                                                <div className="space-y-[2px] pb-[5px]">
                                                     <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
                                                         <span>{item.name}</span>
                                                         {item.isPacked && (
@@ -197,40 +192,76 @@ export default function ContractorOrderCard({ order, reference }) {
                                                                 Pack
                                                             </span>
                                                         )}
-                                                    </h3>
-                                                    <div className="flex gap-1 items-center">
-                                                        <p className="text-gray-600 text-xs">
-                                                            Qty: {item.quantity}
-                                                        </p>
-                                                        {item.preparedCount >
-                                                            0 &&
-                                                            item.preparedCount <
+                                                        {order.status ===
+                                                            'Pending' &&
+                                                            item.preparedCount >
+                                                                0 &&
+                                                            item.pickedUpCount <
                                                                 item.quantity && (
-                                                                <div className="flex gap-1 items-center">
-                                                                    <span className="text-gray-400 text-xs">
-                                                                        &bull;
-                                                                    </span>
-                                                                    <p className="text-xs text-green-500">
-                                                                        Parepared:{' '}
-                                                                        {
-                                                                            item.preparedCount
-                                                                        }
-                                                                    </p>
-                                                                </div>
+                                                                <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
+                                                                    {item.preparedCount ===
+                                                                    item.quantity
+                                                                        ? 'Prepared'
+                                                                        : `Prepared - ${
+                                                                              item.preparedCount
+                                                                          }`}
+                                                                </span>
                                                             )}
-                                                    </div>
+                                                        {(order.status ===
+                                                            'Pending' ||
+                                                            order.status ===
+                                                                'Prepared') &&
+                                                            item.pickedUpCount >
+                                                                0 &&
+                                                            item.pickedUpCount <
+                                                                item.quantity && (
+                                                                <span className="flex items-center gap-1 text-[10px] bg-blue-50 rounded-full font-medium border-[0.01rem] border-blue-300 w-fit px-2 text-blue-600">
+                                                                    Taken -{' '}
+                                                                    {
+                                                                        item.pickedUpCount
+                                                                    }
+                                                                </span>
+                                                            )}
+                                                    </h3>
+                                                    <p className="text-gray-600 text-xs">
+                                                        Qty: {item.quantity}
+                                                    </p>
                                                 </div>
                                             </div>
-                                            <span className="text-sm font-semibold text-gray-900">
-                                                ₹
-                                                {(
-                                                    item.price * item.quantity
-                                                ).toFixed(2)}
-                                            </span>
+                                            <div className="flex flex-col items-end justify-between gap-[5px]">
+                                                <div className="text-sm font-semibold text-gray-900">
+                                                    ₹
+                                                    {(
+                                                        item.price *
+                                                        item.quantity
+                                                    ).toFixed(2)}
+                                                </div>
+                                                {(order.status === 'Pending' ||
+                                                    order.status ===
+                                                        'Prepared') &&
+                                                    item.preparedCount > 0 &&
+                                                    item.pickedUpCount <
+                                                        item.quantity && (
+                                                        <Button
+                                                            btnText="Taken"
+                                                            className="rounded-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] text-[12px] font-medium text-center px-2 py-[2px]"
+                                                            onClick={() =>
+                                                                socket.emit(
+                                                                    'itemPickedUp',
+                                                                    {
+                                                                        itemId: item.id,
+                                                                        order,
+                                                                        stuId: studentInfo._id,
+                                                                    }
+                                                                )
+                                                            }
+                                                        />
+                                                    )}
+                                            </div>
                                         </div>
 
                                         {item.specialInstructions && (
-                                            <p className="ml-13 pl-1 italic text-xs text-gray-600">
+                                            <p className="ml-13 pt-1 italic text-xs text-red-600">
                                                 <span className="font-medium">
                                                     Note:{' '}
                                                 </span>

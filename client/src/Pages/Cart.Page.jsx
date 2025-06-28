@@ -80,6 +80,7 @@ export default function CartPage() {
 
     async function placeOrder() {
         try {
+            if (ordering) return;
             setOrdering(true);
             const items = await checkAvailability();
             const hasUnavailableItems = items.some((i) => !i.isAvailable);
@@ -95,7 +96,7 @@ export default function CartPage() {
             );
             if (res && !res.message) {
                 localStorage.removeItem('cartItems');
-                socket?.emit('newOrder', res);
+                socket.emit('newOrder', res);
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
                 setShowPopup(true);
@@ -149,7 +150,7 @@ export default function CartPage() {
                 <div className="w-full flex items-center gap-4 justify-between">
                     <div className="flex items-center gap-4">
                         {/* image */}
-                        <div className="size-[40px] overflow-hidden border-[0.01rem] border-gray-400 rounded-lg flex items-center justify-center">
+                        <div className="size-[40px] bg-gray-50 overflow-hidden border-[0.01rem] border-gray-400 rounded-lg flex items-center justify-center">
                             {type === 'Snack' ? (
                                 <img
                                     src={image}
@@ -157,7 +158,7 @@ export default function CartPage() {
                                     className="object-cover size-full"
                                 />
                             ) : (
-                                <div className="size-5 text-gray-400">
+                                <div className="size-5 stroke-gray-300">
                                     {icons.soda}
                                 </div>
                             )}

@@ -119,6 +119,78 @@ export default function Orders() {
                 setOrders((prev) => [...prev, order]);
             }
         });
+
+        socket.on('itemPickedUp', ({ orderId, itemId }) => {
+            if (statusFilter === 'Prepared') {
+                setOrders((prev) => {
+                    const originalOrder = prev.find((o) => o._id === orderId);
+                    if (!originalOrder) return prev;
+
+                    const updatedOrders = prev
+                        .map((o) => {
+                            if (o._id === orderId) {
+                                return {
+                                    ...o,
+                                    items: o.items.map((i) =>
+                                        i.id === itemId
+                                            ? {
+                                                  ...i,
+                                                  pickedUpCount:
+                                                      i.preparedCount,
+                                              }
+                                            : i
+                                    ),
+                                };
+                            }
+                            return o;
+                        })
+                        .filter((o) =>
+                            // Keep orders where at least one item is not fully picked up
+                            o.items.some((i) => i.pickedUpCount < i.quantity)
+                        );
+
+                    // Check if order was completely picked up
+                    const orderWasRemoved = !updatedOrders.some(
+                        (o) => o._id === orderId
+                    );
+
+                    if (orderWasRemoved) {
+                        // IIFE to handle the async operation
+                        (async () => {
+                            try {
+                                const res =
+                                    await orderService.updateOrderStatus(
+                                        orderId,
+                                        'PickedUp'
+                                    );
+                                if (
+                                    res &&
+                                    res.message ===
+                                        'order status updated successfully'
+                                ) {
+                                    socket.emit('orderPickedUp', originalOrder);
+                                }
+                            } catch (error) {
+                                console.error(
+                                    'Failed to update order status:',
+                                    error
+                                );
+                            }
+                        })();
+                    }
+
+                    return updatedOrders;
+                });
+            }
+        });
+
+        return () => {
+            socket.off('newOrder');
+            socket.off('orderRejected');
+            socket.off('orderPrepared');
+            socket.off('orderPickedUp');
+            socket.off('itemPickedUp');
+        };
     }, [socket]);
 
     const orderElements = orders

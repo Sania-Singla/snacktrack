@@ -97,6 +97,13 @@ export default function TodayOrdersPage() {
                     Rejected: prev.Rejected + 1,
                 }));
         });
+
+        return () => {
+            socket.off('newOrder');
+            socket.off('orderPrepared');
+            socket.off('orderPickedUp');
+            socket.off('orderRejected');
+        };
     }, [socket]);
 
     function handleStatusClick(status) {

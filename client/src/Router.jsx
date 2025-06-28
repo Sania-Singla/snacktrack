@@ -25,6 +25,7 @@ import {
     AdminPage,
     RegisterCanteenPage,
     VerifyKitchenKeyPage,
+    NewUserPageRedirect,
 } from './Pages';
 
 import {
@@ -86,7 +87,9 @@ export const router = createBrowserRouter(
 
             {/* Student only */}
             <Route element={<ProtectedRoute roles={['student']} />}>
-                <Route path="cart" element={<CartPage />} />
+                <Route element={<Layout />}>
+                    <Route path="cart" element={<CartPage />} />
+                </Route>
             </Route>
 
             {/* Admin only (with admin key verification) */}
@@ -102,17 +105,22 @@ export const router = createBrowserRouter(
             >
                 <Route element={<Layout renderTemplate={false} />}>
                     <Route path="" element={<KitchenPage />} />
-                    <Route
-                        path="verify-key"
-                        element={<VerifyKitchenKeyPage />}
-                    />
                 </Route>
+            </Route>
+
+            <Route
+                path="/kitchen/verify-key"
+                element={<VerifyKitchenKeyPage />}
+            />
+
+            {/* so that already logged in user can't get this page again */}
+            <Route element={<NewUserPageRedirect />}>
+                <Route path="new-user" element={<NewUserPage />} />
             </Route>
 
             {/* Public Routes */}
             <Route element={<Layout renderTemplate={false} />}>
                 <Route path="login" element={<LoginPage />} />
-                <Route path="new-user" element={<NewUserPage />} />
                 <Route path="server-error" element={<ServerErrorPage />} />
                 <Route path="*" element={<NotFoundPage />} />
             </Route>
