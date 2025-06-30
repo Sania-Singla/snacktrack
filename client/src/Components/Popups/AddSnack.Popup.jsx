@@ -20,7 +20,7 @@ import {
 } from '../../Constants/constants';
 
 export default function AddSnackPopup() {
-    const { setSnacks } = useSnackContext();
+    const { setItems } = useSnackContext();
     const { setShowPopup } = usePopupContext();
     const ref = useRef();
     const [imagePreview, setImagePreview] = useState(SNACK_PLACEHOLDER_IMAGE);
@@ -89,7 +89,7 @@ export default function AddSnackPopup() {
             const res = await contractorService.addSnack(inputs);
             if (res && !res.message) {
                 toast.success('Snack added successfully 👍');
-                setSnacks((prev) => [res, ...prev]);
+                setItems((prev) => [res, ...prev]);
                 setShowPopup(false);
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));

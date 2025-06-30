@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { LIMIT } from '../../Constants/constants';
 import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { icons } from '../../Assets/icons';
@@ -35,14 +34,13 @@ export default function Orders() {
                 setLoading(true);
                 setOrders([]);
                 setPage(1);
-                const res = await orderService.getCanteenOrders(
-                    statusFilter,
-                    user.canteenId,
-                    dateFilter,
-                    1,
-                    LIMIT,
-                    signal
-                );
+                const res = await orderService.getCanteenOrders({
+                    status: statusFilter,
+                    canteenId: user.canteenId,
+                    date: dateFilter,
+                    page: 1,
+                    signal,
+                });
                 if (res && !res.message) {
                     setOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
@@ -65,14 +63,13 @@ export default function Orders() {
         (async function () {
             try {
                 setLoading(true);
-                const res = await orderService.getCanteenOrders(
-                    statusFilter,
-                    user.canteenId,
-                    dateFilter,
+                const res = await orderService.getCanteenOrders({
+                    status: statusFilter,
+                    canteenId: user.canteenId,
+                    date: dateFilter,
                     page,
-                    LIMIT,
-                    signal
-                );
+                    signal,
+                });
                 if (res && !res.message) {
                     setOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
@@ -159,10 +156,10 @@ export default function Orders() {
                         (async () => {
                             try {
                                 const res =
-                                    await orderService.updateOrderStatus(
+                                    await orderService.updateOrderStatus({
                                         orderId,
-                                        'PickedUp'
-                                    );
+                                        status: 'PickedUp',
+                                    });
                                 if (
                                     res &&
                                     res.message ===

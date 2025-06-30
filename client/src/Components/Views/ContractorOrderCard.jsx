@@ -35,7 +35,10 @@ export default function ContractorOrderCard({ order, reference }) {
 
     async function handleStatusChange(status) {
         try {
-            const res = await orderService.updateOrderStatus(_id, status);
+            const res = await orderService.updateOrderStatus({
+                orderId: _id,
+                status,
+            });
             if (res && res.message === 'order status updated successfully') {
                 socket.emit(`order${status}`, order);
             } else if (res && res.message === 'too late') {

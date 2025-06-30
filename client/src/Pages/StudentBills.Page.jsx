@@ -20,10 +20,10 @@ export default function StudentBillsPage() {
         (async function () {
             try {
                 setLoading(true);
-                const res = await billService.getStudentBills(
+                const res = await billService.getStudentBills({
                     studentId,
-                    signal
-                );
+                    signal,
+                });
                 if (res && !res.message) {
                     setBills(res);
                 } else checkTokenExpired(res, setUser);
@@ -34,7 +34,7 @@ export default function StudentBillsPage() {
         })();
 
         return () => controller.abort();
-    }, []);
+    }, [studentId, navigate]);
 
     const billElements = useMemo(() => {
         return bills.map((bill) => (

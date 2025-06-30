@@ -1,15 +1,18 @@
 import { getRollNo } from '../../Utils';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../../Contexts';
 import Button from '../General/Button';
 
-export default function StudentBillCard({ bill, studentInfo }) {
+export default function StudentBillCard({ bill, studentInfo,  }) {
     const { _id, month, year, amount } = bill;
     const { user } = useUserContext();
+    const { studentId } = useParams();
     const navigate = useNavigate();
 
     return (
-        <div className="rounded-xl shadow-sm transition-all hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between">
+        <div
+            className="rounded-xl shadow-sm transition-all hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between"
+        >
             <div className="flex items-center gap-3">
                 {/* Month/year badge */}
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-12 rounded-lg flex items-center justify-center border border-blue-400">
@@ -29,7 +32,7 @@ export default function StudentBillCard({ bill, studentInfo }) {
                 </div>
 
                 <div className="h-[60px] flex items-center justify-between pb-[5px]">
-                    {user.role === 'student' ? (
+                    {user._id !== studentId ? (
                         <div className="leading-5">
                             <div className="hover:text-[#5c5c5c] text-[15px] font-semibold text-black">
                                 {studentInfo.fullName}

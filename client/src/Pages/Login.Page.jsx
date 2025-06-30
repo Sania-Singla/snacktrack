@@ -2,7 +2,7 @@ import { LOGO } from '../Constants/constants';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { usePopupContext, useUserContext } from '../Contexts';
+import { useUserContext } from '../Contexts';
 import { userService } from '../Services';
 import { Button, Dropdown, InputField } from '../Components';
 import { icons } from '../Assets/icons';
@@ -27,7 +27,7 @@ export default function LoginPage() {
     ];
 
     function handleChange(e) {
-        const { value, name } = e.target;
+        let { value, name } = e.target;
         // ✅ Remove leading zeroes only for rollNo
         if (name === 'rollNo') {
             value = value.replace(/^0+/, '');

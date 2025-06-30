@@ -3,13 +3,14 @@ import { motion } from 'framer-motion';
 import { Button } from '..';
 import { useNavigate } from 'react-router-dom';
 
-export default function BillCard({ bill }) {
+export default function BillCard({ bill, reference }) {
     const { _id, month, year, amount, studentInfo } = bill;
     const { avatar, fullName, userName, email, phoneNumber } = studentInfo;
     const navigate = useNavigate();
 
     return (
         <motion.div
+            ref={reference}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}

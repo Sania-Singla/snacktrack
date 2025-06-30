@@ -47,7 +47,10 @@ export default function VerifyKitchenKeyPage() {
         try {
             if (!key || !canteen) return;
             setVerifying(true);
-            const res = await orderService.verifyKitchenKey(key, canteen._id);
+            const res = await orderService.verifyKitchenKey({
+                key,
+                canteenId: canteen._id,
+            });
             if (res && !res.message) {
                 setUser(res.user);
                 navigate('/kitchen');

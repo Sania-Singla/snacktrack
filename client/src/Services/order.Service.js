@@ -1,21 +1,18 @@
+import { LIMIT } from '../Constants/constants';
 import { fetchWrapper } from '../Utils';
 
 class OrderService {
-    async placeOrder(cartItems, total, packingCharges) {
+    async placeOrder({ cartItems, amount, packingCharges }) {
         return await fetchWrapper({
             endPoint: `/orders/place`,
             method: 'POST',
             credentials: 'include',
-            body: {
-                cartItems,
-                amount: total,
-                packingCharges,
-            },
+            body: { cartItems, amount, packingCharges },
             aim: 'placeOrder',
         });
     }
 
-    async updateOrderStatus(orderId, status) {
+    async updateOrderStatus({ orderId, status }) {
         return await fetchWrapper({
             endPoint: `/orders/${orderId}?status=${status}`,
             method: 'PATCH',
@@ -24,7 +21,13 @@ class OrderService {
         });
     }
 
-    async getStudentOrders(studentId, month, page, limit, signal) {
+    async getStudentOrders({
+        studentId,
+        month,
+        page = 1,
+        limit = LIMIT,
+        signal,
+    }) {
         return await fetchWrapper({
             endPoint: `/orders/student/${studentId}?month=${month}&page=${page}&limit=${limit}`,
             method: 'GET',
@@ -34,7 +37,14 @@ class OrderService {
         });
     }
 
-    async getCanteenOrders(status, canteenId, date, page, limit, signal) {
+    async getCanteenOrders({
+        status,
+        canteenId,
+        date,
+        page = 1,
+        limit = LIMIT,
+        signal,
+    }) {
         return await fetchWrapper({
             endPoint: `/orders/canteen/${canteenId}?limit=${limit}&page=${page}&status=${status}&date=${date}`,
             method: 'GET',
@@ -55,7 +65,7 @@ class OrderService {
         });
     }
 
-    async verifyKitchenKey(key, canteenId) {
+    async verifyKitchenKey({ key, canteenId }) {
         return await fetchWrapper({
             endPoint: `/orders/kitchen/verify-key/${canteenId}`,
             body: { key },
@@ -75,7 +85,7 @@ class OrderService {
         });
     }
 
-    async getOrderStats(canteenId, date, signal) {
+    async getOrderStats({ canteenId, date, signal }) {
         return await fetchWrapper({
             endPoint: `/orders/stats/${canteenId}?date=${date}`,
             method: 'GET',

@@ -49,10 +49,33 @@ const updateKitchenKey = tryCatch(
 // student management
 
 const getStudents = tryCatch('get students', async (req, res) => {
-    const { limit = 10, page = 1 } = req.query;
+    const { limit = 10, page = 1, search = '' } = req.query;
     const result = await Student.aggregatePaginate(
         [
-            { $match: { canteenId: new Types.ObjectId(req.user.canteenId) } },
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(req.user.canteenId),
+                    ...(search && {
+                        $or: [
+                            { fullName: { $regex: search, $options: 'i' } },
+                            {
+                                $expr: {
+                                    $regexMatch: {
+                                        input: {
+                                            $arrayElemAt: [
+                                                { $split: ['$userName', '-'] },
+                                                1,
+                                            ],
+                                        },
+                                        regex: `^${search}$`, // strict match with roll number only
+                                        options: 'i',
+                                    },
+                                },
+                            },
+                        ],
+                    }),
+                },
+            },
             { $project: { password: 0, refreshToken: 0 } },
             {
                 $addFields: {
@@ -93,12 +116,11 @@ const getStudents = tryCatch('get students', async (req, res) => {
 
     if (result.docs.length) {
         const data = {
-            totalCount: result.totalDocs,
             students: result.docs,
             studentsInfo: {
                 hasNextPage: result.hasNextPage,
                 hasPrevPage: result.hasPrevPage,
-                totalStudents: result.totalDocs,
+                totalCount: result.totalDocs,
             },
         };
         return res.status(OK).json(data);

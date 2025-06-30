@@ -3,12 +3,11 @@ import { adminService } from '../../Services';
 import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
 import { verifyExpression } from '../../Utils';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
 import { usePopupContext } from '../../Contexts';
-import { motion } from 'framer-motion';
 import { icons } from '../../Assets/icons';
 import toast from 'react-hot-toast';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function NewContractorPopup() {
     const [error, setError] = useState({});
@@ -17,15 +16,15 @@ export default function NewContractorPopup() {
     const [loading, setLoading] = useState(false);
     const { popupInfo } = usePopupContext();
     const navigate = useNavigate();
+    const [isVerified, setIsVerified] = useState(popupInfo.isVerified || false);
+    const [sendingMail, setSendingMail] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
     const [inputs, setInputs] = useState({
         fullName: (popupInfo.autoFill && popupInfo.contractor.fullName) || '',
         phoneNumber:
             (popupInfo.autoFill && popupInfo.contractor.phoneNumber) || '',
         email: (popupInfo.autoFill && popupInfo.contractor.email) || '',
     });
-    const [isVerified, setIsVerified] = useState(popupInfo.isVerified || false);
-    const [sendingMail, setSendingMail] = useState(false);
-    const [isChecked, setIsChecked] = useState(false);
 
     function handleChange(e) {
         const { value, name } = e.target;
@@ -111,10 +110,10 @@ export default function NewContractorPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await adminService.changeContractor(
-                popupInfo.contractor._id,
-                inputs
-            );
+            const res = await adminService.changeContractor({
+                contractorId: popupInfo.contractor._id,
+                inputs,
+            });
             if (res && !res.message) {
                 toast.success('Contractor chnaged Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
@@ -198,9 +197,7 @@ export default function NewContractorPopup() {
                 onClick={() => setShowPopup(false)}
                 className="absolute top-3 right-3"
             />
-            <p className="text-center text-2xl font-bold">
-                Change Contractor
-            </p>
+            <p className="text-center text-2xl font-bold">Change Contractor</p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (
                     <div className="text-red-500 w-full text-center">

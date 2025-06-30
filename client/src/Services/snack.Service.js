@@ -1,23 +1,20 @@
+import { LIMIT } from '../Constants/constants';
 import { fetchWrapper } from '../Utils';
 
 class SnackService {
-    async getSnacks(signal) {
+    async getItems({
+        page = 1,
+        filter = 'snacks',
+        limit = LIMIT,
+        search = '',
+        signal,
+    }) {
         return await fetchWrapper({
-            endPoint: `/snacks`,
+            endPoint: `/snacks?filter=${filter}&page=${page}&limit=${limit}&search=${search}`,
             method: 'GET',
             credentials: 'include',
             signal,
-            aim: 'getSnacks',
-        });
-    }
-
-    async getPackagedFoodItems(signal) {
-        return await fetchWrapper({
-            endPoint: `/snacks/packaged`,
-            method: 'GET',
-            credentials: 'include',
-            signal,
-            aim: 'getPackagedFoodItems',
+            aim: 'getItems',
         });
     }
 }

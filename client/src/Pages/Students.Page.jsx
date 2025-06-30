@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { contractorService } from '../Services';
 import { paginate, checkTokenExpired, getRollNo } from '../Utils';
 import { useNavigate } from 'react-router-dom';
@@ -8,75 +8,99 @@ import {
     useSearchContext,
     useUserContext,
 } from '../Contexts';
-import { LIMIT } from '../Constants/constants';
 import { Button, StudentView } from '../Components';
 import { icons } from '../Assets/icons';
 
 export default function StudentsPage() {
-    const { students, setStudents } = useStudentContext();
+    const { students, setStudents, studentsInfo, setStudentsInfo } =
+        useStudentContext();
     const { setPopupInfo, setShowPopup } = usePopupContext();
-    const [studentsInfo, setStudentsInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
     const navigate = useNavigate();
     const { setUser } = useUserContext();
-    const [count, setCount] = useState(0);
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500); // 500ms delay
+
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [search]);
 
     // pagination
     const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
+
+    const fetchStudents = useCallback(
+        async (signal, currentPage = 1) => {
+            try {
+                setLoading(true);
+                if (currentPage === 1) setStudents([]);
+                const res = await contractorService.getStudents({
+                    signal,
+                    page: currentPage,
+                    search: debouncedSearch,
+                });
+                if (res && !res.message) {
+                    if (currentPage === 1) {
+                        setStudents(res.students);
+                    } else {
+                        setStudents((prev) => prev.concat(res.students));
+                    }
+                    setStudentsInfo(res.studentsInfo);
+                } else {
+                    checkTokenExpired(res, setUser);
+                }
+                setLoading(false);
+            } catch (err) {
+                navigate('/server-error');
+            }
+        },
+        [debouncedSearch, setStudents, setStudentsInfo, setUser, navigate]
+    );
 
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function () {
-            try {
-                setLoading(true);
-                if (page === 1) setStudents([]);
-                const res = await contractorService.getStudents(
-                    signal,
-                    page,
-                    LIMIT
-                );
-                if (res && !res.message) {
-                    setCount(res.totalCount);
-                    setStudents((prev) => prev.concat(res.students));
-                    setStudentsInfo(res.studentsInfo);
-                } else checkTokenExpired(res, setUser);
-                setLoading(false);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+        fetchStudents(signal);
 
         return () => controller.abort();
-    }, [page]);
+    }, [debouncedSearch, fetchStudents]);
+
+    useEffect(() => {
+        if (page === 1) return;
+
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        fetchStudents(signal, page);
+
+        return () => controller.abort();
+    }, [page, fetchStudents]);
+
+    useEffect(() => {
+        if (search !== debouncedSearch) setLoading(true);
+    }, [search]);
 
     const studentElements = useMemo(() => {
-        return students
-            ?.filter(
-                (student) =>
-                    !search ||
-                    student.fullName
-                        .toLowerCase()
-                        .includes(search.toLowerCase()) ||
-                    getRollNo(student.userName)
-                        .toLowerCase()
-                        .includes(search.toLowerCase())
-            )
-            .map((student, i) => (
-                <StudentView
-                    key={student._id}
-                    student={student}
-                    reference={
-                        i + 1 === students.length && studentsInfo?.hasNextPage
-                            ? paginateRef
-                            : null
-                    }
-                />
-            ));
-    });
+        return students?.map((student, i) => (
+            <StudentView
+                key={student._id}
+                student={student}
+                reference={
+                    i + 1 === students.length && studentsInfo?.hasNextPage
+                        ? paginateRef
+                        : null
+                }
+            />
+        ));
+    }, [students, studentsInfo, paginateRef]);
 
     async function removeAllStudents() {
         setPopupInfo({ type: 'removeAllStudents' });
@@ -95,7 +119,7 @@ export default function StudentsPage() {
                                 </h3>
                                 <div className="size-6 rounded-full bg-blue-50 text-sm flex items-center justify-center">
                                     <span className="text-blue-600 font-bold">
-                                        {count}
+                                        {studentsInfo?.totalCount || 0}
                                     </span>
                                 </div>
                             </div>

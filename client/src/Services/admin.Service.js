@@ -31,7 +31,7 @@ class AdminService {
         });
     }
 
-    async updateContractor(contractorId, inputs) {
+    async updateContractor({ contractorId, inputs }) {
         return await fetchWrapper({
             endPoint: `/admins/contractor/${contractorId}`,
             method: 'PATCH',
@@ -41,7 +41,7 @@ class AdminService {
         });
     }
 
-    async changeContractor(contractorId, inputs) {
+    async changeContractor({ contractorId, inputs }) {
         return await fetchWrapper({
             endPoint: `/admins/contractor/new/${contractorId}`,
             method: 'PATCH',

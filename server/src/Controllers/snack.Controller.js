@@ -3,33 +3,37 @@ import { tryCatch } from '../Utils/index.js';
 import { Snack, PackagedFood } from '../Models/index.js';
 import { Types } from 'mongoose';
 
-const getSnacks = tryCatch('get snacks', async (req, res) => {
-    const user = req.user; // could be student or contractor
-    const snacks = await Snack.find({
-        canteenId: new Types.ObjectId(user.canteenId),
-    }).sort({ createdAt: -1 });
+const getItems = tryCatch('get food items', async (req, res) => {
+    const user = req.user;
+    const { page = 1, limit = 50, search = '', filter = 'snacks' } = req.query;
 
-    if (snacks.length) {
-        return res.status(OK).json(snacks);
-    } else {
-        return res.status(OK).json({ message: 'no snacks found' });
-    }
+    const model = filter === 'snacks' ? Snack : PackagedFood;
+    const result = await model.aggregatePaginate(
+        [
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(user.canteenId),
+                    ...(search && {
+                        name: { $regex: search, $options: 'i' }, // case-insensitive
+                    }),
+                },
+            },
+        ],
+        {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            sort: { createdAt: 1 },
+        }
+    );
+
+    return res.status(OK).json({
+        items: result.docs,
+        itemsInfo: {
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            totalCount: result.totalDocs,
+        },
+    });
 });
 
-const getPackagedItems = tryCatch(
-    'get packaged food items',
-    async (req, res) => {
-        const user = req.user; // could be student or contractor
-        const items = await PackagedFood.find({
-            canteenId: new Types.ObjectId(user.canteenId),
-        }).sort({ createdAt: -1 });
-
-        if (items.length) {
-            return res.status(OK).json(items);
-        } else {
-            return res.status(OK).json({ message: 'no items found' });
-        }
-    }
-);
-
-export { getSnacks, getPackagedItems };
+export { getItems };

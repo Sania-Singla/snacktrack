@@ -14,7 +14,7 @@ import toast from 'react-hot-toast';
 export default function RemoveStudentPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
-    const { setStudents } = useStudentContext();
+    const { setStudents, setStudentsInfo } = useStudentContext();
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(true);
@@ -37,6 +37,10 @@ export default function RemoveStudentPopup() {
                         (student) => student._id !== popupInfo.student._id
                     )
                 );
+                setStudentsInfo((prev) => ({
+                    ...prev,
+                    totalCount: prev.totalCount - 1,
+                }));
                 toast.success('Account Deleted Successfully 😕');
             } else if (res && res.message !== 'tokens missing') {
                 toast.error(res?.message);

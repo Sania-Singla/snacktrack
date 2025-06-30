@@ -14,7 +14,7 @@ import { checkTokenExpired } from '../../Utils';
 export default function RemoveSnackPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
-    const { setSnacks } = useSnackContext();
+    const { setItems } = useSnackContext();
     const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(true);
@@ -32,7 +32,7 @@ export default function RemoveSnackPopup() {
                 popupInfo.snack._id
             );
             if (res && res.message === 'snack deleted successfully') {
-                setSnacks((prev) =>
+                setItems((prev) =>
                     prev.filter((snack) => snack._id !== popupInfo.snack._id)
                 );
                 toast.success('Snack Deleted Successfully 😕');

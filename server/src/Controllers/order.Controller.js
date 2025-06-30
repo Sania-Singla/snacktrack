@@ -5,7 +5,7 @@ import {
     COOKIE_OPTIONS,
     BAD_REQUEST,
 } from '../Constants/index.js';
-import { addPreparedItem, ErrorHandler, tryCatch } from '../Utils/index.js';
+import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Canteen, Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment';

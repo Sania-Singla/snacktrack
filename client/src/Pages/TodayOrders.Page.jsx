@@ -39,11 +39,11 @@ export default function TodayOrdersPage() {
         (async function () {
             try {
                 setLoading(true);
-                const res = await orderService.getOrderStats(
-                    user.canteenId,
-                    dateFilter,
-                    signal
-                );
+                const res = await orderService.getOrderStats({
+                    canteenId: user.canteenId,
+                    date: dateFilter,
+                    signal,
+                });
                 if (res && !res.message) setStats(res);
                 setLoading(false);
             } catch (err) {

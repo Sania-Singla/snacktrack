@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { PER_ITEM_PACKAGING_CHARGES } from '../../Constants/constants';
 import { Button } from '..';
 import { icons } from '../../Assets/icons';
 import { usePopupContext, useStudentContext } from '../../Contexts';

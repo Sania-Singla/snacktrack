@@ -16,12 +16,12 @@ const PORT = process.env.PORT || 4000;
 const [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
     connectMongoDB(),
     connectRedis(),
-    generateTransporter(),
+    // generateTransporter(),
     // connectTwilio(),
 ]);
 
-startBillingCronJob();
-startCleanupCronJob();
+// startBillingCronJob();
+// startCleanupCronJob();
 
 http.listen(PORT, () => console.log(`💻 Server listening on port ${PORT}...`));
 

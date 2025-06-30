@@ -28,8 +28,6 @@ import EditCartItemPopup from './Popups/EditCartItem.Popup';
 import SnackView from './Views/SnackView';
 import PackagedItemView from './Views/PackagedItemView';
 import StudentView from './Views/StudentView';
-import Snacks from './Views/Snacks';
-import PackagedItems from './Views/PackagedItems';
 import PendingOrders from './Views/PendingOrders';
 import Orders from './Views/Orders';
 import StudentOrderCard from './Views/StudentOrderCard';
@@ -78,8 +76,6 @@ export {
     StudentView,
     BillCard,
     PackagedItemView,
-    Snacks,
-    PackagedItems,
     PendingOrders,
     Orders,
     RemoveItemPopup,

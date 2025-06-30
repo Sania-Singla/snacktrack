@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { LIMIT } from '../../Constants/constants';
 import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { ContractorOrderCard } from '..';
@@ -35,14 +34,13 @@ export default function PendingOrders() {
                 setPendingOrders([]);
                 setPage(1);
 
-                const res = await orderService.getCanteenOrders(
-                    'Pending',
-                    user.canteenId,
-                    dateFilter,
-                    1,
-                    LIMIT,
-                    signal
-                );
+                const res = await orderService.getCanteenOrders({
+                    status: 'Pending',
+                    canteenId: user.canteenId,
+                    date: dateFilter,
+                    page: 1,
+                    signal,
+                });
                 if (res && !res.message) {
                     setPendingOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
@@ -66,14 +64,13 @@ export default function PendingOrders() {
             try {
                 setLoading(true);
 
-                const res = await orderService.getCanteenOrders(
-                    'Pending',
-                    user.canteenId,
-                    dateFilter,
+                const res = await orderService.getCanteenOrders({
+                    status: 'Pending',
+                    canteenId: user.canteenId,
+                    date: dateFilter,
                     page,
-                    LIMIT,
-                    signal
-                );
+                    signal,
+                });
                 if (res && !res.message) {
                     setPendingOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);

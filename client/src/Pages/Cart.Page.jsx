@@ -89,11 +89,11 @@ export default function CartPage() {
                 setPopupInfo({ type: 'orderUnavailable' });
                 return;
             }
-            const res = await orderService.placeOrder(
+            const res = await orderService.placeOrder({
                 cartItems,
-                total,
-                packingCharges
-            );
+                amount: total,
+                packingCharges,
+            });
             if (res && !res.message) {
                 localStorage.removeItem('cartItems');
                 socket.emit('newOrder', res);

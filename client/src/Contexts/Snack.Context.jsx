@@ -3,11 +3,13 @@ import { useContext, createContext, useState } from 'react';
 const SnackContext = createContext();
 
 const SnackContextProvider = ({ children }) => {
-    const [snacks, setSnacks] = useState([]);
     const [items, setItems] = useState([]);
+    const [itemsInfo, setItemsInfo] = useState({});
 
     return (
-        <SnackContext.Provider value={{ snacks, setSnacks, items, setItems }}>
+        <SnackContext.Provider
+            value={{ items, setItems, itemsInfo, setItemsInfo }}
+        >
             {children}
         </SnackContext.Provider>
     );

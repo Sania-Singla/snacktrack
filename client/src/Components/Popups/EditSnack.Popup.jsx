@@ -20,7 +20,7 @@ import {
 } from '../../Constants/constants';
 
 export default function EditSnackPopup() {
-    const { setSnacks } = useSnackContext();
+    const { setItems } = useSnackContext();
     const { setShowPopup, popupInfo } = usePopupContext();
     const ref = useRef();
     const [imagePreview, setImagePreview] = useState(popupInfo.snack.image);
@@ -91,7 +91,7 @@ export default function EditSnackPopup() {
             );
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
-                setSnacks((prev) =>
+                setItems((prev) =>
                     prev.map((snack) => {
                         if (snack._id === popupInfo.snack._id) {
                             return {

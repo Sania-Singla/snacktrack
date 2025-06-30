@@ -1,7 +1,8 @@
+import { LIMIT } from '../Constants/constants';
 import { fetchWrapper } from '../Utils';
 
 class BillService {
-    async getStudentBills(studentId, signal) {
+    async getStudentBills({ studentId, signal }) {
         return await fetchWrapper({
             endPoint: `/bills/${studentId}`,
             method: 'GET',
@@ -11,9 +12,9 @@ class BillService {
         });
     }
 
-    async getBills(month, page, limit, signal) {
+    async getBills({ month, page = 1, search = '', limit = LIMIT, signal }) {
         return await fetchWrapper({
-            endPoint: `/bills?month=${month}&page=${page}&limit=${limit}`,
+            endPoint: `/bills?search=${search}&month=${month}&page=${page}&limit=${limit}`,
             method: 'GET',
             signal,
             credentials: 'include',

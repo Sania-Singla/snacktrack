@@ -1,3 +1,4 @@
+import { LIMIT } from '../Constants/constants';
 import { fetchWrapper } from '../Utils';
 
 class ContractorService {
@@ -13,9 +14,9 @@ class ContractorService {
 
     // student management tasks
 
-    async getStudents(signal, page = 1, limit = 10) {
+    async getStudents({ signal, search, page = 1, limit = LIMIT }) {
         return await fetchWrapper({
-            endPoint: `/contractors/students?page=${page}&limit=${limit}`,
+            endPoint: `/contractors/students?search=${search}&page=${page}&limit=${limit}`,
             method: 'GET',
             signal,
             credentials: 'include',

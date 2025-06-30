@@ -1,15 +1,13 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../../Services';
-import { useNavigate, Link } from 'react-router-dom';
-import Button from '../General/Button';
-import InputField from '../General/InputField';
+import { useNavigate } from 'react-router-dom';
 import { verifyExpression } from '../../Utils';
-import PhoneInput from 'react-phone-input-2';
-import 'react-phone-input-2/lib/style.css';
+import { Button, InputField } from '..';
 import { usePopupContext } from '../../Contexts';
-import { motion } from 'framer-motion';
 import { icons } from '../../Assets/icons';
 import toast from 'react-hot-toast';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 
 export default function EditContractorPopup() {
     const [error, setError] = useState({});
@@ -40,10 +38,6 @@ export default function EditContractorPopup() {
         }
         onMouseOver();
     }
-
-    useEffect(() => {
-        onMouseOver();
-    }, []);
 
     async function sendVerifyEmail() {
         try {
@@ -107,6 +101,10 @@ export default function EditContractorPopup() {
         setDisabled(handleDisable());
     }
 
+    useEffect(() => {
+        onMouseOver();
+    }, []);
+
     async function handleSubmit(e) {
         e.preventDefault();
         if (handleDisable()) {
@@ -117,10 +115,10 @@ export default function EditContractorPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await adminService.updateContractor(
-                popupInfo.contractor?._id,
-                inputs
-            );
+            const res = await adminService.updateContractor({
+                contractorId: popupInfo.contractor?._id,
+                inputs,
+            });
             if (res && !res.message) {
                 toast.success('Contractor Updated Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
@@ -214,9 +212,7 @@ export default function EditContractorPopup() {
                 className="absolute top-3 right-3"
             />
 
-            <p className="text-center text-2xl font-bold">
-                Edit Contractor
-            </p>
+            <p className="text-center text-2xl font-bold">Edit Contractor</p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (
                     <div className="text-red-500 w-full text-center">

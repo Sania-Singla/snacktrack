@@ -18,50 +18,102 @@ const getStudentBills = tryCatch('get student bills', async (req, res) => {
 
 const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
-    const { page = 1, limit = 10, month = moment().month() } = req.query;
+    const {
+        page = 1,
+        limit = 10,
+        month = moment().month(),
+        search = '',
+    } = req.query;
 
-    const bills = await Bill.aggregatePaginate(
-        [
-            {
-                $match: {
-                    canteenId: new Types.ObjectId(contractor.canteenId),
-                    month: parseInt(month),
-                    year: moment().year(),
-                },
-            },
-            {
-                $lookup: {
-                    from: 'students',
-                    localField: 'studentId',
-                    foreignField: '_id',
-                    as: 'studentInfo',
-                    pipeline: [
-                        {
-                            $project: {
-                                fullName: 1,
-                                userName: 1,
-                                email: 1,
-                                phoneNumber: 1,
-                                avatar: 1,
+    const matchStage = {
+        canteenId: new Types.ObjectId(contractor.canteenId),
+        month: parseInt(month),
+        year: moment().year(),
+    };
+
+    const [bills, [totalBills]] = await Promise.all([
+        Bill.aggregatePaginate(
+            [
+                { $match: matchStage },
+                {
+                    $lookup: {
+                        from: 'students',
+                        localField: 'studentId',
+                        foreignField: '_id',
+                        as: 'studentInfo',
+                        pipeline: [
+                            {
+                                $project: {
+                                    fullName: 1,
+                                    userName: 1,
+                                    email: 1,
+                                    phoneNumber: 1,
+                                    avatar: 1,
+                                },
                             },
-                        },
-                    ],
+                            {
+                                $addFields: {
+                                    rollSuffix: {
+                                        $arrayElemAt: [
+                                            { $split: ['$userName', '-'] },
+                                            1,
+                                        ],
+                                    },
+                                },
+                            },
+                            {
+                                $addFields: {
+                                    rollNumber: { $toInt: '$rollSuffix' },
+                                },
+                            },
+                            ...(search
+                                ? [
+                                      {
+                                          $match: {
+                                              $or: [
+                                                  {
+                                                      fullName: {
+                                                          $regex: search,
+                                                          $options: 'i',
+                                                      },
+                                                  },
+                                                  { rollSuffix: search },
+                                              ],
+                                          },
+                                      },
+                                  ]
+                                : []),
+                        ],
+                    },
+                },
+                { $unwind: '$studentInfo' },
+                {
+                    $sort: { 'studentInfo.rollNumber': 1, createdAt: -1 },
+                },
+            ],
+            {
+                page: parseInt(page),
+                limit: parseInt(limit),
+            }
+        ),
+        // total amount
+        Bill.aggregate([
+            { $match: matchStage },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' },
                 },
             },
-            { $unwind: '$studentInfo' },
-        ],
-        {
-            page: parseInt(page),
-            limit: parseInt(limit),
-            sort: { createdAt: -1 },
-        }
-    );
+        ]),
+    ]);
 
     if (bills.docs.length) {
         return res.status(OK).json({
             bills: bills.docs,
             billsInfo: {
-                totalPages: bills.totalPages,
+                totalAmount: totalBills.totalAmount || 0,
+                totalCount: bills.totalDocs,
                 hasNextPage: bills.hasNextPage,
                 hasPrevPage: bills.hasPrevPage,
             },

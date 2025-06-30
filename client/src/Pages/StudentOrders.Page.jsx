@@ -10,7 +10,6 @@ import {
     StudentOrderCard,
 } from '../Components';
 import { paginate, checkTokenExpired } from '../Utils';
-import { LIMIT } from '../Constants/constants';
 
 export default function StudentOrdersPage() {
     const [studentOrders, setStudentOrders] = useState([]);
@@ -56,13 +55,12 @@ export default function StudentOrdersPage() {
                     searchParams.delete('date');
                     setSearchParams(searchParams);
                 }
-                const res = await orderService.getStudentOrders(
+                const res = await orderService.getStudentOrders({
                     studentId,
-                    monthFilter,
-                    1,
-                    LIMIT,
-                    signal
-                );
+                    month: monthFilter,
+                    page: 1,
+                    signal,
+                });
                 if (res && !res.message) {
                     setStudentOrders(res.orders);
                     setOrdersInfo(res.ordersInfo);
@@ -85,13 +83,12 @@ export default function StudentOrdersPage() {
         (async function () {
             try {
                 setLoading(true);
-                const res = await orderService.getStudentOrders(
+                const res = await orderService.getStudentOrders({
                     studentId,
-                    monthFilter,
+                    month: monthFilter,
                     page,
-                    LIMIT,
-                    signal
-                );
+                    signal,
+                });
                 if (res && !res.message) {
                     setStudentOrders((prev) => prev.concat(res.orders));
                     setOrdersInfo(res.ordersInfo);
@@ -219,11 +216,11 @@ export default function StudentOrdersPage() {
 
     return (
         <div className="w-full sm:p-4">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex sm:items-center flex-col sm:flex-row gap-5 justify-between mb-7">
                 <h1 className="text-3xl font-bold text-gray-900">
                     {user._id === studentId ? 'My Orders' : 'Orders'}
                 </h1>
-                <div className="flex items-center gap-4 justify-center">
+                <div className="flex items-center gap-4 justify-end">
                     <CalendarFilter month={monthFilter} />
                     <Filter
                         options={months}

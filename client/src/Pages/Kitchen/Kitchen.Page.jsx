@@ -173,10 +173,10 @@ export default function KitchenPage() {
                     // IIFE to handle the async operation
                     (async () => {
                         try {
-                            const res = await orderService.updateOrderStatus(
+                            const res = await orderService.updateOrderStatus({
                                 orderId,
-                                'Prepared'
-                            );
+                                status: 'Prepared',
+                            });
                             if (
                                 res &&
                                 res.message ===
