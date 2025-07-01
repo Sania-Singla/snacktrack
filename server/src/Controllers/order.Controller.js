@@ -573,24 +573,47 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
             {
                 $addFields: { student: { $first: '$studentInfo' } },
             },
-            { $match: { 'items.type': 'Snack' } },
             {
                 $lookup: {
                     from: 'snacks',
                     localField: 'items.id',
                     foreignField: '_id',
+                    pipeline: [{ $project: { name: 1, image: 1 } }],
                     as: 'snack',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'packagedfoods',
+                    localField: 'items.id',
+                    foreignField: '_id',
                     pipeline: [{ $project: { name: 1 } }],
+                    as: 'packaged',
                 },
             },
             {
                 $addFields: {
-                    'items.name': { $first: '$snack.name' },
+                    'items.name': {
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $first: '$snack.name' },
+                            { $first: '$packaged.name' },
+                        ],
+                    },
+                    'items.image': {
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $first: '$snack.image' },
+                            null,
+                        ],
+                    },
                 },
             },
             {
                 $group: {
                     _id: '$_id',
+                    amount: { $first: '$amount' },
+                    packingCharges: { $first: '$packingCharges' },
                     status: { $first: '$status' },
                     canteenId: { $first: '$canteenId' },
                     studentId: { $first: '$studentId' },

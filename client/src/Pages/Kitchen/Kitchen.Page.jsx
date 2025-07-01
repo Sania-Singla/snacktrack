@@ -17,7 +17,9 @@ export default function KitchenPage() {
     function generateOrderElements(orders) {
         return orders.flatMap((o) =>
             o.items
-                .filter((i) => i.preparedCount < i.quantity)
+                .filter(
+                    (i) => i.type === 'Snack' && i.preparedCount < i.quantity
+                )
                 .map((i) => (
                     <div
                         key={`${o._id}-${i.id}`}
@@ -62,12 +64,16 @@ export default function KitchenPage() {
     function updateSummary(orders) {
         const newSummary = {};
         orders.forEach((o) => {
-            o.items.forEach((i) => {
-                const remaining =
-                    (newSummary[i.name] || 0) + i.quantity - i.preparedCount;
-                if (remaining !== 0) newSummary[i.name] = remaining;
-                else delete newSummary[i.name];
-            });
+            o.items
+                .filter((i) => i.type === 'Snack')
+                .forEach((i) => {
+                    const remaining =
+                        (newSummary[i.name] || 0) +
+                        i.quantity -
+                        i.preparedCount;
+                    if (remaining !== 0) newSummary[i.name] = remaining;
+                    else delete newSummary[i.name];
+                });
         });
         return newSummary;
     }
