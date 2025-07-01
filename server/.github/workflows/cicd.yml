@@ -39,7 +39,6 @@ jobs:
             TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
             TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
             PORT: ${{ secrets.PORT }}
-            ENV: ${{ secrets.ENV }}
             FRONTEND_URL: ${{secrets.FRONTEND_URL}}
 
         steps:
@@ -81,11 +80,10 @@ jobs:
                   echo "TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}" >> .env
                   echo "TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}" >> .env
                   echo "PORT=${PORT}" >> .env
-                  echo "ENV=${ENV}" >> .env
                   echo "FRONTEND_URL=${FRONTEND_URL}" >> .env
 
             - name: 🛠️ Build Docker image
               run: docker compose build
 
-            - name: ✅ Run app in Docker # (optional - remove if deploying to server)
-              run: docker compose up -d
+            # - name: ✅ Run app in Docker # (optional - remove if deploying to server)
+            #   run: docker compose up -d
