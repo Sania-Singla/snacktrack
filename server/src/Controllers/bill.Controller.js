@@ -157,8 +157,14 @@ const generateIntermediateBill = tryCatch(
                 $match: {
                     studentId: student._id,
                     createdAt: {
-                        $gte: moment().startOf('month').toDate(),
-                        $lte: moment().endOf('month').toDate(),
+                        $gte: moment()
+                            .tz('Asia/Kolkata')
+                            .startOf('month')
+                            .toDate(),
+                        $lte: moment()
+                            .tz('Asia/Kolkata')
+                            .endOf('month')
+                            .toDate(),
                     },
                     status: 'PickedUp',
                 },
