@@ -111,8 +111,6 @@ const updateOrderStatus = tryCatch(
         const { status } = req.query;
         const contractor = req.user;
 
-        console.log(orderId, status);
-
         const order = await Order.findOne({
             _id: new Types.ObjectId(orderId),
             canteenId: new Types.ObjectId(contractor.canteenId),
@@ -120,8 +118,8 @@ const updateOrderStatus = tryCatch(
 
         if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
 
-        const orderDate = moment.utc(order.createdAt).startOf('day');
-        const todayDate = moment.utc().startOf('day');
+        const orderDate = moment().utc(order.createdAt).startOf('day');
+        const todayDate = moment().utc().startOf('day');
 
         if (!orderDate.isSame(todayDate)) {
             return next(new ErrorHandler('too late', FORBIDDEN));
@@ -572,6 +570,9 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
                     as: 'studentInfo',
                 },
             },
+            {
+                $addFields: { student: { $first: '$studentInfo' } },
+            },
             { $match: { 'items.type': 'Snack' } },
             {
                 $lookup: {
@@ -596,7 +597,7 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
                     items: { $push: '$items' },
                     createdAt: { $first: '$createdAt' },
                     updatedAt: { $first: '$updatedAt' },
-                    studentInfo: { $first: '$studentInfo' },
+                    studentInfo: { $first: '$student' },
                 },
             },
             { $project: { snack: 0 } },
