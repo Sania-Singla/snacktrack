@@ -99,10 +99,10 @@ export default function CartPage() {
                 socket.emit('newOrder', res);
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
-                setShowPopup(true);
-                setPopupInfo({ type: 'orderPlaced', count });
                 setCartItems([]);
                 setOrderPlaced(true);
+                setShowPopup(true);
+                setPopupInfo({ type: 'orderPlaced', count });
             } else checkTokenExpired(res, setUser);
             setOrdering(false);
         } catch (err) {

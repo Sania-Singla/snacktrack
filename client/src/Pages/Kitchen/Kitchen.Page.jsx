@@ -15,50 +15,55 @@ export default function KitchenPage() {
     const { socket } = useSocketContext();
 
     function generateOrderElements(orders) {
-        return orders.flatMap((o) =>
-            o.items
-                .filter(
-                    (i) => i.type === 'Snack' && i.preparedCount < i.quantity
-                )
-                .map((i) => (
-                    <div
-                        key={`${o._id}-${i.id}`}
-                        className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
-                    >
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center justify-center gap-2">
-                                <p className="text-gray-800 font-medium text-[14px]">
-                                    {i.name}
-                                </p>
-                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
-                                    {i.quantity - i.preparedCount}
+        return orders
+            .flatMap((o) =>
+                o.items
+                    .filter(
+                        (i) =>
+                            i.type === 'Snack' && i.preparedCount < i.quantity
+                    )
+                    .map((i) => (
+                        <div
+                            key={`${o._id}-${i.id}`}
+                            className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
+                        >
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center justify-center gap-2">
+                                    <p className="text-gray-800 font-medium text-[14px]">
+                                        {i.name}
+                                    </p>
+                                    <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
+                                        {i.quantity - i.preparedCount}
+                                    </div>
                                 </div>
-                            </div>
 
-                            {user.role === 'staff' && (
-                                <Button
-                                    className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
-                                    onClick={() =>
-                                        socket.emit('itemPrepared', {
-                                            order: o,
-                                            itemId: i.id,
-                                        })
-                                    }
-                                    btnText="-"
-                                />
+                                {user.role === 'staff' && (
+                                    <Button
+                                        className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
+                                        onClick={() =>
+                                            socket.emit('itemPrepared', {
+                                                order: o,
+                                                itemId: i.id,
+                                            })
+                                        }
+                                        btnText="-"
+                                    />
+                                )}
+                            </div>
+                            {i.specialInstructions && (
+                                <div className="text-[13px] text-red-500 italic">
+                                    <span className="font-medium mr-1">
+                                        Note:
+                                    </span>
+                                    <span className="italic">
+                                        {i.specialInstructions}
+                                    </span>
+                                </div>
                             )}
                         </div>
-                        {i.specialInstructions && (
-                            <div className="text-[13px] text-red-500 italic">
-                                <span className="font-medium mr-1">Note:</span>
-                                <span className="italic">
-                                    {i.specialInstructions}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                ))
-        );
+                    ))
+            )
+            .filter(({ items }) => items.length > 0);
     }
 
     function updateSummary(orders) {
@@ -140,29 +145,22 @@ export default function KitchenPage() {
                 const originalOrder = prev.find((o) => o._id === orderId);
                 if (!originalOrder) return prev;
 
-                const updatedOrders = prev
-                    .map((o) => {
-                        if (o._id === orderId) {
-                            return {
-                                ...o,
-                                items: o.items
-                                    .map((i) =>
-                                        i.id === itemId
-                                            ? {
-                                                  ...i,
-                                                  preparedCount:
-                                                      i.preparedCount + 1,
-                                              }
-                                            : i
-                                    )
-                                    .filter(
-                                        (i) => i.preparedCount < i.quantity
-                                    ),
-                            };
-                        }
-                        return o;
-                    })
-                    .filter((o) => o.items.length > 0);
+                const updatedOrders = prev.map((o) => {
+                    if (o._id === orderId) {
+                        return {
+                            ...o,
+                            items: o.items.map((i) =>
+                                i.id === itemId
+                                    ? {
+                                          ...i,
+                                          preparedCount: i.preparedCount + 1,
+                                      }
+                                    : i
+                            ),
+                        };
+                    }
+                    return o;
+                });
 
                 // Update summary and elements
                 setSummary(updateSummary(updatedOrders));
