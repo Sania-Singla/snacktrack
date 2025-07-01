@@ -121,8 +121,6 @@ export default function KitchenPage() {
                         return prev;
                     }
 
-                    const updatedOrders = [...prev, filteredOrder];
-
                     // Update summary and elements
                     setSummary(updateSummary([...prev, order]));
                     setOrderElements(generateOrderElements([...prev, order]));
