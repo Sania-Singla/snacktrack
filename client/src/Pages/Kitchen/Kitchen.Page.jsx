@@ -124,10 +124,10 @@ export default function KitchenPage() {
                     const updatedOrders = [...prev, filteredOrder];
 
                     // Update summary and elements
-                    setSummary(updateSummary(updatedOrders));
-                    setOrderElements(generateOrderElements(updatedOrders));
+                    setSummary(updateSummary([...prev, order]));
+                    setOrderElements(generateOrderElements([...prev, order]));
 
-                    return updatedOrders;
+                    return order;
                 });
             }
         });
