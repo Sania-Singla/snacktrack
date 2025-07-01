@@ -85,7 +85,7 @@ jobs:
                   echo "FRONTEND_URL=${FRONTEND_URL}" >> .env
 
             - name: 🛠️ Build Docker image
-              run: docker-compose build
+              run: docker compose build
 
             - name: ✅ Run app in Docker # (optional - remove if deploying to server)
-              run: docker-compose up -d
+              run: docker compose up -d
