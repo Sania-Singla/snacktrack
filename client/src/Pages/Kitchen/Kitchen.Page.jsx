@@ -237,7 +237,7 @@ export default function KitchenPage() {
             </section>
 
             {/* orders */}
-            {kitchenOrders.length > 0 ? (
+            {orderElements.length > 0 ? (
                 <section className="p-4 overflow-scroll bg-white rounded-xl shadow-sm flex flex-col md:flex-row md:gap-0 gap-6">
                     {/* summary */}
                     <section className="md:pr-4 md:p-2 w-full md:w-[70%] border-b-[0.01rem] md:border-r-[0.01rem] md:border-b-0 border-gray-200">

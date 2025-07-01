@@ -631,24 +631,30 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
     // filter out prepared items as well
     if (result.docs.length) {
         result.docs = await Promise.all(
-            result.docs.map(async (order) => {
-                const preparedItems = await redisClient.sMembers(
-                    `order_${order._id}`
-                );
+            result.docs
+                .map(async (order) => {
+                    const preparedItems = await redisClient.sMembers(
+                        `order_${order._id}`
+                    );
 
-                const updatedItems = order.items.map((item) => {
-                    const preparedItem = preparedItems
-                        .map((i) => JSON.parse(i))
-                        .find((i) => item.id.equals(i.itemId));
+                    const updatedItems = order.items.map((item) => {
+                        const preparedItem = preparedItems
+                            .map((i) => JSON.parse(i))
+                            .find((i) => item.id.equals(i.itemId));
 
-                    return {
-                        ...item,
-                        preparedCount: preparedItem?.prepared || 0,
-                    };
-                });
+                        return {
+                            ...item,
+                            preparedCount: preparedItem?.prepared || 0,
+                        };
+                    });
 
-                return { ...order, items: updatedItems };
-            })
+                    return { ...order, items: updatedItems };
+                })
+                .filter((order) =>
+                    order.items.some(
+                        (item) => item.preparedCount < item.quantity
+                    )
+                )
         );
     }
 
