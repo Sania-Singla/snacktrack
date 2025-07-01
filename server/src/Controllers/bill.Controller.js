@@ -78,7 +78,12 @@ const getBills = tryCatch('get bills', async (req, res) => {
                                                           $options: 'i',
                                                       },
                                                   },
-                                                  { rollSuffix: search },
+                                                  {
+                                                      rollSuffix: {
+                                                          $regex: search,
+                                                          $options: 'i',
+                                                      },
+                                                  },
                                               ],
                                           },
                                       },
