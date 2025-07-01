@@ -1,7 +1,11 @@
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { orderService } from '../Services';
-import { useUserContext, useSocketContext } from '../Contexts';
+import {
+    useUserContext,
+    useSocketContext,
+    useSearchContext,
+} from '../Contexts';
 import { icons } from '../Assets/icons';
 import {
     Button,
@@ -19,102 +23,76 @@ export default function StudentOrdersPage() {
     const { studentId } = useParams();
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
-    const [searchParams, setSearchParams] = useSearchParams();
+    const { search } = useSearchContext();
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
+    const [searchParams] = useSearchParams();
     const monthFilter = searchParams.get('month') || new Date().getMonth() + 1;
-    let dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
+    const dateFilter = searchParams.get('date') || undefined;
     const { socket } = useSocketContext();
-
-    const months = [
-        { value: 1, label: 'January' },
-        { value: 2, label: 'February' },
-        { value: 3, label: 'March' },
-        { value: 4, label: 'April' },
-        { value: 5, label: 'May' },
-        { value: 6, label: 'June' },
-        { value: 7, label: 'July' },
-        { value: 8, label: 'August' },
-        { value: 9, label: 'September' },
-        { value: 10, label: 'October' },
-        { value: 11, label: 'November' },
-        { value: 12, label: 'December' },
-    ];
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
+    // Debounce search input
     useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [search]);
 
-        (async function () {
-            try {
-                setLoading(true);
-                setStudentOrders([]);
-                setPage(1);
+    // Extracted reusable fetch function
+    const fetchStudentOrders = async ({ pageNum, signal }) => {
+        try {
+            setLoading(true);
+            const res = await orderService.getStudentOrders({
+                studentId,
+                month: monthFilter,
+                date: dateFilter || undefined,
+                page: pageNum,
+                search: debouncedSearch,
+                signal,
+            });
 
-                // reset date filter if it exists
-                if (searchParams.get('date')) {
-                    searchParams.delete('date');
-                    setSearchParams(searchParams);
-                }
-                const res = await orderService.getStudentOrders({
-                    studentId,
-                    month: monthFilter,
-                    page: 1,
-                    signal,
-                });
-                if (res && !res.message) {
+            if (res && !res.message) {
+                if (pageNum === 1) {
                     setStudentOrders(res.orders);
-                    setOrdersInfo(res.ordersInfo);
-                } else checkTokenExpired(res, setUser);
-                setLoading(false);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+                } else {
+                    setStudentOrders((prev) => prev.concat(res.orders));
+                }
+                setOrdersInfo(res.ordersInfo);
+            } else checkTokenExpired(res, setUser);
+        } catch (err) {
+            navigate('/server-error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        return () => controller.abort();
-    }, [monthFilter]);
-
+    // Fetch when filters change (initial + new filters)
     useEffect(() => {
-        if (page === 1) return; // Already handled in filter use effect
-
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function () {
-            try {
-                setLoading(true);
-                const res = await orderService.getStudentOrders({
-                    studentId,
-                    month: monthFilter,
-                    page,
-                    signal,
-                });
-                if (res && !res.message) {
-                    setStudentOrders((prev) => prev.concat(res.orders));
-                    setOrdersInfo(res.ordersInfo);
-                } else checkTokenExpired(res, setUser);
-                setLoading(false);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+        setStudentOrders([]);
+        setPage(1);
+        fetchStudentOrders({ pageNum: 1, signal });
 
         return () => controller.abort();
-    }, [page]);
+    }, [monthFilter, dateFilter, studentId, debouncedSearch]);
+
+    // Fetch on page change (pagination)
+    useEffect(() => {
+        if (page === 1) return;
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        fetchStudentOrders({ pageNum: page, signal });
+
+        return () => controller.abort();
+    }, [page, debouncedSearch, studentId]);
 
     // socket event listeners
     useEffect(() => {
         if (!socket) return;
-
-        socket.on('newOrder', async (order) => {
-            if (order.studentId === studentId) {
-                setStudentOrders((prev) => {
-                    const exists = prev.find((o) => o._id === order._id);
-                    if (exists) return prev;
-                    else return [order, ...prev];
-                });
-            }
-        });
 
         socket.on('orderRejected', (order) => {
             if (order.studentId === studentId) {
@@ -197,22 +175,12 @@ export default function StudentOrdersPage() {
         });
 
         return () => {
-            socket.off('newOrder');
             socket.off('orderRejected');
             socket.off('orderPickedUp');
             socket.off('itemPrepared');
             socket.off('itemPickedUp');
         };
     }, [socket]);
-
-    const filteredOrders = dateFilter
-        ? studentOrders.filter((order) => {
-              const orderDate = new Date(order.createdAt).toLocaleDateString(
-                  'en-CA'
-              ); // Format: 'YYYY-MM-DD'
-              return orderDate === dateFilter;
-          })
-        : studentOrders;
 
     return (
         <div className="w-full sm:p-4">
@@ -223,21 +191,34 @@ export default function StudentOrdersPage() {
                 <div className="flex items-center gap-4 justify-end">
                     <CalendarFilter month={monthFilter} />
                     <Filter
-                        options={months}
+                        options={[
+                            { value: 1, label: 'January' },
+                            { value: 2, label: 'February' },
+                            { value: 3, label: 'March' },
+                            { value: 4, label: 'April' },
+                            { value: 5, label: 'May' },
+                            { value: 6, label: 'June' },
+                            { value: 7, label: 'July' },
+                            { value: 8, label: 'August' },
+                            { value: 9, label: 'September' },
+                            { value: 10, label: 'October' },
+                            { value: 11, label: 'November' },
+                            { value: 12, label: 'December' },
+                        ]}
                         defaultOption={monthFilter}
                         queryParamName="month"
                     />
                 </div>
             </div>
 
-            {filteredOrders.length > 0 && (
+            {studentOrders.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {filteredOrders.map((order, i) => (
+                    {studentOrders.map((order, i) => (
                         <StudentOrderCard
                             order={order}
                             key={order._id}
                             reference={
-                                i + 1 === filteredOrders.length &&
+                                i + 1 === studentOrders.length &&
                                 ordersInfo?.hasNextPage
                                     ? paginateRef
                                     : null
@@ -254,7 +235,7 @@ export default function StudentOrdersPage() {
                     </div>
                 </div>
             ) : (
-                filteredOrders.length === 0 && (
+                studentOrders.length === 0 && (
                     <div className="text-center py-16">
                         <div className="mx-auto size-20 text-gray-300 mb-4">
                             {icons.package}

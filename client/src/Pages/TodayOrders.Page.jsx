@@ -23,7 +23,7 @@ export default function TodayOrdersPage() {
     });
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
+    const dateFilter = searchParams.get('date') || undefined; // could be null or e.g., '2025-06-05'
     const statusFilter = searchParams.get('status') || 'Pending';
     const { socket } = useSocketContext();
 
@@ -156,6 +156,10 @@ export default function TodayOrdersPage() {
                     {/* Pending Orders */}
                     <div
                         onClick={() => handleStatusClick('Pending')}
+                        style={{
+                            borderColor:
+                                statusFilter === 'Pending' ? 'blue' : '',
+                        }}
                         className="bg-white p-4 flex justify-between cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
                     >
                         <h3 className="text-lg font-medium text-gray-800">
@@ -171,6 +175,10 @@ export default function TodayOrdersPage() {
                     {/* Prepared Orders */}
                     <div
                         onClick={() => handleStatusClick('Prepared')}
+                        style={{
+                            borderColor:
+                                statusFilter === 'Prepared' ? '#9810fa' : '',
+                        }}
                         className="bg-white p-4 flex justify-between cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
                     >
                         <h3 className="text-lg font-medium text-gray-800">
@@ -186,6 +194,12 @@ export default function TodayOrdersPage() {
                     {/* Picked Up Orders */}
                     <div
                         onClick={() => handleStatusClick('PickedUp')}
+                        style={{
+                            borderColor:
+                                statusFilter === 'PickedUp'
+                                    ? 'oklch(62.7% 0.194 149.214)'
+                                    : '',
+                        }}
                         className="bg-white p-4 flex justify-between cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
                     >
                         <h3 className="text-lg font-medium text-gray-800">
@@ -201,6 +215,10 @@ export default function TodayOrdersPage() {
                     {/* Rejected Orders */}
                     <div
                         onClick={() => handleStatusClick('Rejected')}
+                        style={{
+                            borderColor:
+                                statusFilter === 'Rejected' ? 'red' : '',
+                        }}
                         className="bg-white p-4 flex justify-between cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
                     >
                         <h3 className="text-lg font-medium text-gray-800">

@@ -1,6 +1,7 @@
 FROM node:20
 WORKDIR /app
 COPY package*.json .
+COPY nodemon.json .
 RUN npm install --legacy-peer-deps
 COPY . .
 EXPOSE 3000

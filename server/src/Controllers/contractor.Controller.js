@@ -6,7 +6,7 @@ import {
     USER_PLACEHOLDER_IMAGE_URL,
     SNACK_PLACEHOLDER_IMAGE_URL,
 } from '../Constants/index.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import {
     verifyExpression,
     tryCatch,

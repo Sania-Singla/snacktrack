@@ -17,7 +17,7 @@ import {
     deleteFromCloudinary,
 } from '../Helpers/index.js';
 import { Canteen, Student, Contractor } from '../Models/index.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 
 const login = tryCatch('login as contractor', async (req, res, next) => {

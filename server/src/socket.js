@@ -21,15 +21,17 @@ io.on('connection', async (socket) => {
         // Event Listeners
 
         socket.on('newOrder', async (order) => {
+            order.items.forEach((i) => {
+                i.id = i._id;
+            });
             await Promise.all([
                 io
                     .to(`contractor_${order.canteenId}`)
                     .to(`staff_${order.canteenId}`)
-                    .to(`student_${order.studentId}`)
                     .emit('newOrder', order),
                 sendSMS({
                     to: order.studentInfo.phoneNumber,
-                    text: 'Your Order is placed and will be begin preparing soon',
+                    text: 'Your Order is placed and will be prepared soon',
                     link:
                         process.env.FRONTEND_URL + `/orders/${order.studentId}`,
                 }),
@@ -149,7 +151,7 @@ io.on('connection', async (socket) => {
 
         await addSocketId(room, socket.id);
         await socket.join(room);
-        
+
         console.log(
             `[ADDED TO REDIS] ${role === 'student' ? userId : canteenId}`
         );

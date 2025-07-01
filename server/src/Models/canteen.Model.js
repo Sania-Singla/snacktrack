@@ -1,5 +1,5 @@
 import { Schema, Types, model } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const canteenSchema = new Schema(
     {

@@ -2,12 +2,13 @@ import { NOT_FOUND, OK } from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Bill, Canteen, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
-import cron from 'node-cron';
 import moment from 'moment';
 
 const getStudentBills = tryCatch('get student bills', async (req, res) => {
     const { studentId } = req.params;
-    const bills = await Bill.find({ studentId: new Types.ObjectId(studentId) });
+    const bills = await Bill.find({
+        studentId: new Types.ObjectId(studentId),
+    }).sort({ month: -1, year: -1 });
 
     if (bills.length) {
         return res.status(OK).json(bills);
@@ -173,111 +174,4 @@ const generateIntermediateBill = tryCatch(
     }
 );
 
-// generate bills for the previous month
-const generateBills = tryCatch('generate bills', async (req, res) => {
-    const lastMonth = moment().subtract(1, 'month');
-    const month = lastMonth.month() + 1; // month is 0-indexed in moment.js
-    const year = lastMonth.year();
-
-    const studentsWithOrders = await Order.aggregate([
-        {
-            $match: {
-                status: 'PickedUp',
-                createdAt: {
-                    $gte: lastMonth.clone().startOf('month').toDate(),
-                    $lte: lastMonth.clone().endOf('month').toDate(),
-                },
-            },
-        },
-        {
-            $group: {
-                _id: '$studentId',
-                totalAmount: { $sum: '$amount' },
-                canteenId: { $first: '$canteenId' },
-            },
-        },
-    ]);
-
-    if (!studentsWithOrders.length) {
-        console.log('ℹ️ No students with picked up orders for billing period.');
-        if (res) res.status(OK).json({ message: 'No bills generated' });
-        return;
-    }
-
-    const operations = studentsWithOrders.map((student) => ({
-        updateOne: {
-            filter: {
-                studentId: student._id,
-                month,
-                year,
-            },
-            update: {
-                $setOnInsert: {
-                    studentId: student._id,
-                    canteenId: student.canteenId,
-                    month,
-                    year,
-                    amount: student.totalAmount,
-                },
-            },
-            upsert: true,
-        },
-    }));
-
-    await Bill.bulkWrite(operations);
-    console.log(`💸 Automated billing completed for ${month + 1}/${year}`);
-
-    if (res)
-        res.status(OK).json({
-            message: `bills generated for ${month + 1}/${year}`,
-        });
-    return;
-});
-
-const startBillingCronJob = () => {
-    // Run at 12:05 on the 1st of every month
-    cron.schedule('5 0 1 * *', generateBills, {
-        scheduled: true,
-        timezone: 'Asia/Kolkata',
-    });
-
-    console.log('💵 Billing scheduled for every month at 12:05 AM');
-};
-
-const startCleanupCronJob = () => {
-    // Run at 12:05 AM on the 1st of every month
-    cron.schedule(
-        '5 0 1 * *',
-        tryCatch('clean old orders', async () => {
-            // Get the start of the month, two months ago
-            const thresholdDate = moment()
-                .subtract(2, 'months')
-                .startOf('month');
-
-            console.log(
-                `🧹 Cleaning up... Deleting orders created before ${thresholdDate.format()}`
-            );
-
-            await Order.deleteMany({
-                createdAt: { $lt: thresholdDate.toDate() },
-            });
-
-            console.log('🧹 Cleanup completed');
-        }),
-        {
-            scheduled: true,
-            timezone: 'Asia/Kolkata',
-        }
-    );
-
-    console.log('🧹 Cleanup scheduled for every month at 12:05 AM');
-};
-
-export {
-    generateBills,
-    getBills,
-    generateIntermediateBill,
-    getStudentBills,
-    startBillingCronJob,
-    startCleanupCronJob,
-};
+export { getBills, generateIntermediateBill, getStudentBills };

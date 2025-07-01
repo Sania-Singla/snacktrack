@@ -18,70 +18,72 @@ export default function Orders() {
     const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { search } = useSearchContext();
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
     const { socket } = useSocketContext();
     const { user, setUser } = useUserContext();
-    const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
-    const statusFilter = searchParams.get('status') || 'Pending';
+    const dateFilter = searchParams.get('date') || undefined; // could be null or e.g., '2025-06-05'
+    const statusFilter = searchParams.get('status');
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
+    // Debounce search input
     useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [search]);
 
-        (async function () {
-            try {
-                setLoading(true);
-                setOrders([]);
-                setPage(1);
-                const res = await orderService.getCanteenOrders({
-                    status: statusFilter,
-                    canteenId: user.canteenId,
-                    date: dateFilter,
-                    page: 1,
-                    signal,
-                });
-                if (res && !res.message) {
+    // Extracted reusable fetch function
+    const fetchCanteenOrders = async ({ pageNum, signal }) => {
+        try {
+            setLoading(true);
+            const res = await orderService.getCanteenOrders({
+                status: statusFilter,
+                canteenId: user.canteenId,
+                date: dateFilter || undefined,
+                page: pageNum,
+                signal,
+                search: debouncedSearch,
+            });
+
+            if (res && !res.message) {
+                if (pageNum === 1) {
                     setOrders(res.orders);
-                    setOrdersInfo(res.ordersInfo);
-                } else checkTokenExpired(res, setUser);
-                setLoading(false);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+                } else {
+                    setOrders((prev) => prev.concat(res.orders));
+                }
+                setOrdersInfo(res.ordersInfo);
+            } else checkTokenExpired(res, setUser);
+        } catch (err) {
+            navigate('/server-error');
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        return () => controller.abort();
-    }, [statusFilter, dateFilter]);
-
+    // Fetch when filters change (initial + new filters)
     useEffect(() => {
-        if (page === 1) return; // Already handled in filter use effect
-
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function () {
-            try {
-                setLoading(true);
-                const res = await orderService.getCanteenOrders({
-                    status: statusFilter,
-                    canteenId: user.canteenId,
-                    date: dateFilter,
-                    page,
-                    signal,
-                });
-                if (res && !res.message) {
-                    setOrders((prev) => prev.concat(res.orders));
-                    setOrdersInfo(res.ordersInfo);
-                    setLoading(false);
-                } else checkTokenExpired(res, setUser);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+        setOrders([]);
+        setPage(1);
+        fetchCanteenOrders({ pageNum: 1, signal });
 
         return () => controller.abort();
-    }, [page]);
+    }, [dateFilter, statusFilter, debouncedSearch]);
+
+    // Fetch on page change (pagination)
+    useEffect(() => {
+        if (page === 1) return;
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        fetchCanteenOrders({ pageNum: page, signal });
+
+        return () => controller.abort();
+    }, [page, debouncedSearch]);
 
     useEffect(() => {
         if (!socket) return;
@@ -190,32 +192,17 @@ export default function Orders() {
         };
     }, [socket]);
 
-    const orderElements = orders
-        .filter(
-            (o) =>
-                !search ||
-                o.studentInfo.fullName
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                o.studentInfo.userName
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                o.items.some((item) =>
-                    item.name?.toLowerCase().includes(search.toLowerCase())
-                ) ||
-                o._id.slice(-8).toLowerCase().includes(search.toLowerCase())
-        )
-        .map((order, i) => (
-            <ContractorOrderCard
-                order={order}
-                key={order._id}
-                reference={
-                    i + 1 === orders.length && ordersInfo?.hasNextPage
-                        ? paginateRef
-                        : null
-                }
-            />
-        ));
+    const orderElements = orders.map((order, i) => (
+        <ContractorOrderCard
+            order={order}
+            key={order._id}
+            reference={
+                i + 1 === orders.length && ordersInfo?.hasNextPage
+                    ? paginateRef
+                    : null
+            }
+        />
+    ));
     return (
         <div className="w-full">
             {orderElements.length > 0 && (

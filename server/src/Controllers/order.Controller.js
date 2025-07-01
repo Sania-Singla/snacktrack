@@ -8,10 +8,10 @@ import {
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Canteen, Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { redisClient } from '../server.js';
 import { generateStaffToken } from '../Helpers/tokens.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const checkAvailability = tryCatch('check availability', async (req, res) => {
     const { cartItems } = req.body;
@@ -28,7 +28,7 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
         PackagedFood.find({
             _id: {
                 $in: cartItems
-                    .filter((i) => i.type !== 'Snack')
+                    .filter((i) => i.type === 'PackagedFood')
                     .map((i) => i._id),
             },
             isAvailable: true,
@@ -146,30 +146,65 @@ const updateOrderStatus = tryCatch(
 );
 
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
-    const { limit = 10, page = 1, month } = req.query;
+    const { limit = 10, page = 1, month, date, search = '' } = req.query;
     const { studentId } = req.params;
 
-    const monthIndex = parseInt(month, 10) - 1;
-    const currentYear = moment.utc().year();
+    const matchConditions = { studentId: new Types.ObjectId(studentId) };
 
-    const startDate = moment
-        .utc({ year: currentYear, month: monthIndex, day: 1 })
-        .startOf('day')
-        .toDate();
+    if (search) {
+        const searchRegex = new RegExp(search.toLowerCase(), 'i'); // case-insensitive
 
-    const endDate = moment
-        .utc({ year: currentYear, month: monthIndex })
-        .endOf('month')
-        .endOf('day')
-        .toDate();
+        matchConditions.$expr = {
+            $regexMatch: {
+                input: {
+                    $substr: [{ $toString: '$_id' }, 16, 8], // formatted ID: last 8 chars
+                },
+                regex: searchRegex,
+            },
+        };
+    }
+
+    if (date && date !== 'undefined') {
+        // Specific date filtering
+        const istStart = moment
+            .tz(date, 'Asia/Kolkata')
+            .startOf('day')
+            .utc()
+            .toDate();
+        const istEnd = moment
+            .tz(date, 'Asia/Kolkata')
+            .endOf('day')
+            .utc()
+            .toDate();
+        matchConditions.createdAt = { $gte: istStart, $lte: istEnd };
+    } else if (month) {
+        // Month-based filtering (fallback)
+        const monthIndex = parseInt(month, 10) - 1;
+        const currentYear = moment.utc().year();
+
+        const istStart = moment
+            .tz(
+                { year: currentYear, month: monthIndex, day: 1 },
+                'Asia/Kolkata'
+            )
+            .startOf('day')
+            .utc()
+            .toDate();
+
+        const istEnd = moment
+            .tz({ year: currentYear, month: monthIndex }, 'Asia/Kolkata')
+            .endOf('month')
+            .endOf('day')
+            .utc()
+            .toDate();
+
+        matchConditions.createdAt = { $gte: istStart, $lte: istEnd };
+    }
 
     const result = await Order.aggregatePaginate(
         [
             {
-                $match: {
-                    studentId: new Types.ObjectId(studentId),
-                    createdAt: { $gte: startDate, $lte: endDate },
-                },
+                $match: matchConditions,
             },
             { $unwind: '$items' },
             {
@@ -177,7 +212,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                     from: 'snacks',
                     localField: 'items.id',
                     foreignField: '_id',
-                    as: 'snackDetails',
+                    as: 'snack',
                     pipeline: [{ $project: { name: 1, image: 1 } }],
                 },
             },
@@ -186,40 +221,23 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                     from: 'packagedfoods',
                     localField: 'items.id',
                     foreignField: '_id',
-                    as: 'packagedFoodDetails',
+                    as: 'packaged',
                     pipeline: [{ $project: { name: 1 } }],
                 },
             },
             {
                 $addFields: {
                     'items.name': {
-                        $switch: {
-                            branches: [
-                                {
-                                    case: { $eq: ['$items.type', 'Snack'] },
-                                    then: {
-                                        $arrayElemAt: ['$snackDetails.name', 0],
-                                    },
-                                },
-                                {
-                                    case: {
-                                        $eq: ['$items.type', 'PackagedFood'],
-                                    },
-                                    then: {
-                                        $arrayElemAt: [
-                                            '$packagedFoodDetails.name',
-                                            0,
-                                        ],
-                                    },
-                                },
-                            ],
-                            default: null,
-                        },
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $first: '$snack.name' },
+                            { $first: '$packaged.name' },
+                        ],
                     },
                     'items.image': {
                         $cond: [
                             { $eq: ['$items.type', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.image', 0] },
+                            { $first: '$snack.image' },
                             null,
                         ],
                     },
@@ -238,7 +256,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                     updatedAt: { $first: '$updatedAt' },
                 },
             },
-            { $project: { snackDetails: 0, packagedFoodDetails: 0 } },
+            { $project: { snack: 0, packaged: 0 } },
         ],
         {
             page: parseInt(page),
@@ -272,29 +290,28 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                 return { ...order, items: updatedItems };
             })
         );
-
-        return res.status(OK).json({
-            orders: result.docs,
-            ordersInfo: {
-                hasNextPage: result.hasNextPage,
-                hasPrevPage: result.hasPrevPage,
-                totalOrders: result.totalDocs,
-            },
-        });
-    } else return res.status(OK).json({ message: 'No orders found' });
+    }
+    return res.status(OK).json({
+        orders: result.docs,
+        ordersInfo: {
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            totalOrders: result.totalDocs,
+        },
+    });
 });
 
 const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
-    const { limit = 10, page = 1, status = 'Pending' } = req.query;
+    const { limit = 10, page = 1, status = 'Pending', search = '' } = req.query;
     let { date } = req.query;
 
-    const parsedDate =
+    const istDate =
         !date || !moment(date, 'YYYY-MM-DD', true).isValid()
-            ? moment.utc()
-            : moment.utc(date);
+            ? moment.tz('Asia/Kolkata')
+            : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
 
-    const startOfDay = parsedDate.clone().startOf('day').toDate();
-    const endOfDay = parsedDate.clone().endOf('day').toDate();
+    const startOfDay = istDate.clone().startOf('day').utc().toDate();
+    const endOfDay = istDate.clone().endOf('day').utc().toDate();
 
     const canteenId = req.user.canteenId;
 
@@ -323,9 +340,59 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                                 userName: 1,
                             },
                         },
+                        {
+                            $addFields: {
+                                rollNumber: {
+                                    $arrayElemAt: [
+                                        { $split: ['$userName', '-'] },
+                                        1,
+                                    ],
+                                },
+                            },
+                        },
                     ],
                     as: 'studentInfo',
                 },
+            },
+            {
+                $addFields: { student: { $first: '$studentInfo' } },
+            },
+            {
+                $match: search
+                    ? {
+                          $or: [
+                              {
+                                  'student.fullName': {
+                                      $regex: search,
+                                      $options: 'i',
+                                  },
+                              },
+                              {
+                                  'student.rollNumber': {
+                                      $regex: search,
+                                      $options: 'i',
+                                  },
+                              },
+                              {
+                                  $expr: {
+                                      $regexMatch: {
+                                          input: {
+                                              $substr: [
+                                                  { $toString: '$_id' },
+                                                  16,
+                                                  8,
+                                              ],
+                                          },
+                                          regex: new RegExp(
+                                              search.toLowerCase(),
+                                              'i'
+                                          ),
+                                      },
+                                  },
+                              },
+                          ],
+                      }
+                    : {},
             },
             {
                 $lookup: {
@@ -350,14 +417,14 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                     'items.name': {
                         $cond: [
                             { $eq: ['$items.type', 'Snack'] },
-                            { $arrayElemAt: ['$snack.name', 0] },
-                            { $arrayElemAt: ['$packaged.name', 0] },
+                            { $first: '$snack.name' },
+                            { $first: '$packaged.name' },
                         ],
                     },
                     'items.image': {
                         $cond: [
                             { $eq: ['$items.type', 'Snack'] },
-                            { $arrayElemAt: ['$snack.image', 0] },
+                            { $first: '$snack.image' },
                             null,
                         ],
                     },
@@ -374,17 +441,12 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                     items: { $push: '$items' },
                     createdAt: { $first: '$createdAt' },
                     updatedAt: { $first: '$updatedAt' },
-                    studentInfo: {
-                        $first: { $arrayElemAt: ['$studentInfo', 0] },
-                    },
+                    studentInfo: { $first: '$student' },
                 },
             },
+            { $project: { snack: 0, packaged: 0 } },
         ],
-        {
-            page: parseInt(page),
-            limit: parseInt(limit),
-            sort: { createdAt: 1 },
-        }
+        { page: parseInt(page), limit: parseInt(limit), sort: { createdAt: 1 } }
     );
 
     if (result.docs.length) {
@@ -412,29 +474,29 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 return { ...order, items: updatedItems };
             })
         );
+    }
 
-        return res.status(OK).json({
-            orders: result.docs,
-            ordersInfo: {
-                hasNextPage: result.hasNextPage,
-                hasPrevPage: result.hasPrevPage,
-                totalOrders: result.totalDocs,
-            },
-        });
-    } else return res.status(OK).json({ message: 'No orders found' });
+    return res.status(OK).json({
+        orders: result.docs,
+        ordersInfo: {
+            hasNextPage: result.hasNextPage,
+            hasPrevPage: result.hasPrevPage,
+            totalOrders: result.totalDocs,
+        },
+    });
 });
 
 const getOrderStats = tryCatch('get order stats', async (req, res) => {
     const { canteenId } = req.params;
     let { date } = req.query;
 
-    const parsedDate =
+    const istDate =
         !date || !moment(date, 'YYYY-MM-DD', true).isValid()
-            ? moment.utc()
-            : moment.utc(date);
+            ? moment.tz('Asia/Kolkata')
+            : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
 
-    const startOfDay = parsedDate.clone().startOf('day').toDate();
-    const endOfDay = parsedDate.clone().endOf('day').toDate();
+    const startOfDay = istDate.clone().startOf('day').utc().toDate();
+    const endOfDay = istDate.clone().endOf('day').utc().toDate();
 
     const stats = await Order.aggregate([
         {
@@ -477,8 +539,9 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
 const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
     const { canteenId } = req.user;
 
-    const startOfDay = moment.utc().startOf('day').toDate();
-    const endOfDay = moment.utc().endOf('day').toDate();
+    const istNow = moment.tz('Asia/Kolkata');
+    const startOfDay = istNow.clone().startOf('day').utc().toDate();
+    const endOfDay = istNow.clone().endOf('day').utc().toDate();
 
     const result = await Order.aggregatePaginate(
         [
@@ -515,19 +578,13 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
                     from: 'snacks',
                     localField: 'items.id',
                     foreignField: '_id',
-                    as: 'snackDetails',
+                    as: 'snack',
                     pipeline: [{ $project: { name: 1 } }],
                 },
             },
             {
                 $addFields: {
-                    'items.name': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $arrayElemAt: ['$snackDetails.name', 0] },
-                            null,
-                        ],
-                    },
+                    'items.name': { $first: '$snack.name' },
                 },
             },
             {
@@ -539,12 +596,10 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
                     items: { $push: '$items' },
                     createdAt: { $first: '$createdAt' },
                     updatedAt: { $first: '$updatedAt' },
-                    studentInfo: {
-                        $first: { $arrayElemAt: ['$studentInfo', 0] },
-                    },
+                    studentInfo: { $first: '$studentInfo' },
                 },
             },
-            { $project: { snackDetails: 0 } },
+            { $project: { snack: 0 } },
         ],
         { sort: { createdAt: 1 } }
     );

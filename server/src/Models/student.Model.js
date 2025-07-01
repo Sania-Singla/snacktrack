@@ -1,5 +1,5 @@
 import { model, Schema, Types } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import mongooseAggregatePaginate from 'mongoose-aggregate-paginate-v2';
 
 const studentSchema = new Schema(

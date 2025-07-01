@@ -9,17 +9,28 @@ services:
         volumes:
             - mongo-data:/data/db
 
+    redis:
+        image: redis:7.2
+        container_name: my-redis
+        ports:
+            - '6379:6379'
+        volumes:
+            - redis-data:/data
+
     app:
         build: .
+        image: snacktrack
         container_name: snackTrack-app
         ports:
             - '3000:3000'
         depends_on:
             - mongo
+            - redis
         env_file: .env
         volumes:
-            - .:/usr/src/app
+            - .:/app
         command: npm run dev
 
 volumes:
     mongo-data:
+    redis-data:

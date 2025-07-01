@@ -19,70 +19,71 @@ export default function PendingOrders() {
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
     const { socket } = useSocketContext();
-    const dateFilter = searchParams.get('date'); // could be null or e.g., '2025-06-05'
+    const dateFilter = searchParams.get('date') || undefined; // could be null or e.g., '2025-06-05'
 
+    // pagination
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
+    // Debounce search input
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [search]);
+
+    // Extracted reusable fetch function
+    const fetchCanteenOrders = async ({ pageNum, signal }) => {
+        try {
+            setLoading(true);
+            const res = await orderService.getCanteenOrders({
+                status: 'Pending',
+                canteenId: user.canteenId,
+                date: dateFilter || undefined,
+                page: pageNum,
+                signal,
+                search: debouncedSearch,
+            });
+
+            if (res && !res.message) {
+                if (pageNum === 1) {
+                    setPendingOrders(res.orders);
+                } else {
+                    setPendingOrders((prev) => prev.concat(res.orders));
+                }
+                setOrdersInfo(res.ordersInfo);
+            } else checkTokenExpired(res, setUser);
+        } catch (err) {
+            navigate('/server-error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch when filters change (initial + new filters)
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function () {
-            try {
-                setLoading(true);
-                setPendingOrders([]);
-                setPage(1);
-
-                const res = await orderService.getCanteenOrders({
-                    status: 'Pending',
-                    canteenId: user.canteenId,
-                    date: dateFilter,
-                    page: 1,
-                    signal,
-                });
-                if (res && !res.message) {
-                    setPendingOrders(res.orders);
-                    setOrdersInfo(res.ordersInfo);
-                } else checkTokenExpired(res, setUser);
-                setLoading(false);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+        setPendingOrders([]);
+        setPage(1);
+        fetchCanteenOrders({ pageNum: 1, signal });
 
         return () => controller.abort();
-    }, [dateFilter]);
+    }, [dateFilter, debouncedSearch]);
 
+    // Fetch on page change (pagination)
     useEffect(() => {
         if (page === 1) return;
-
         const controller = new AbortController();
         const signal = controller.signal;
 
-        (async function () {
-            try {
-                setLoading(true);
-
-                const res = await orderService.getCanteenOrders({
-                    status: 'Pending',
-                    canteenId: user.canteenId,
-                    date: dateFilter,
-                    page,
-                    signal,
-                });
-                if (res && !res.message) {
-                    setPendingOrders((prev) => prev.concat(res.orders));
-                    setOrdersInfo(res.ordersInfo);
-                } else checkTokenExpired(res, setUser);
-                setLoading(false);
-            } catch (err) {
-                navigate('/server-error');
-            }
-        })();
+        fetchCanteenOrders({ pageNum: page, signal });
 
         return () => controller.abort();
-    }, [page]);
+    }, [page, debouncedSearch]);
 
     // socket event listeners
     useEffect(() => {
@@ -154,32 +155,17 @@ export default function PendingOrders() {
         };
     }, [socket]);
 
-    const orderElements = pendingOrders
-        .filter(
-            (o) =>
-                !search ||
-                o.studentInfo.fullName
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                o.studentInfo.userName
-                    .toLowerCase()
-                    .includes(search.toLowerCase()) ||
-                o.items.some((item) =>
-                    item.name?.toLowerCase().includes(search.toLowerCase())
-                ) ||
-                o._id.slice(-8).toLowerCase().includes(search.toLowerCase())
-        )
-        .map((order, i) => (
-            <ContractorOrderCard
-                order={order}
-                key={order._id}
-                reference={
-                    i + 1 === pendingOrders.length && ordersInfo?.hasNextPage
-                        ? paginateRef
-                        : null
-                }
-            />
-        ));
+    const orderElements = pendingOrders.map((order, i) => (
+        <ContractorOrderCard
+            order={order}
+            key={order._id}
+            reference={
+                i + 1 === pendingOrders.length && ordersInfo?.hasNextPage
+                    ? paginateRef
+                    : null
+            }
+        />
+    ));
 
     return (
         <div className="w-full">

@@ -13,7 +13,7 @@
     "license": "ISC",
     "description": "A web application to track your snacks",
     "dependencies": {
-        "bcrypt": "^5.1.1",
+        "bcryptjs": "^3.0.2",
         "cloudinary": "^2.5.1",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
@@ -22,6 +22,7 @@
         "jsonwebtoken": "^9.0.2",
         "libphonenumber-js": "^1.12.6",
         "moment": "^2.30.1",
+        "moment-timezone": "^0.6.0",
         "mongodb": "^6.14.2",
         "mongoose": "^8.12.1",
         "mongoose-aggregate-paginate-v2": "^1.1.4",

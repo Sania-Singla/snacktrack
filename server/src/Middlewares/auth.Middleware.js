@@ -6,7 +6,7 @@ import {
     generateAdminToken,
 } from '../Helpers/index.js';
 import { Student, Contractor, Canteen } from '../Models/index.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 /**
  * @param {String} token - token to verify

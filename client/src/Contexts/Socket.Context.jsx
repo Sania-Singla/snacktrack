@@ -10,7 +10,6 @@ const SocketContextProvider = ({ children }) => {
 
     function connectSocket() {
         if (!user) return;
-        else if (socket) disconnectSocket(); // disconnect existing socket if any
 
         const socketInstance = io(import.meta.env.VITE_BACKEND_URL, {
             withCredentials: true,

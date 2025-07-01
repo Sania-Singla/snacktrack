@@ -24,12 +24,14 @@ class OrderService {
     async getStudentOrders({
         studentId,
         month,
+        date,
+        search = '',
         page = 1,
         limit = LIMIT,
         signal,
     }) {
         return await fetchWrapper({
-            endPoint: `/orders/student/${studentId}?month=${month}&page=${page}&limit=${limit}`,
+            endPoint: `/orders/student/${studentId}?search=${search}&date=${date}&month=${month}&page=${page}&limit=${limit}`,
             method: 'GET',
             signal,
             credentials: 'include',
@@ -44,9 +46,10 @@ class OrderService {
         page = 1,
         limit = LIMIT,
         signal,
+        search = '',
     }) {
         return await fetchWrapper({
-            endPoint: `/orders/canteen/${canteenId}?limit=${limit}&page=${page}&status=${status}&date=${date}`,
+            endPoint: `/orders/canteen/${canteenId}?limit=${limit}&page=${page}&status=${status}&date=${date}&search=${search}`,
             method: 'GET',
             signal,
             credentials: 'include',

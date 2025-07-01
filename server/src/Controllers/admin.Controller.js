@@ -18,7 +18,7 @@ import {
 import { Canteen, Contractor } from '../Models/index.js';
 import { customAlphabet, nanoid } from 'nanoid';
 import { Types } from 'mongoose';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 const registerCanteen = tryCatch(
     'register as contractor',

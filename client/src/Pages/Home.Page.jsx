@@ -78,6 +78,7 @@ export default function HomePage() {
     );
 
     useEffect(() => {
+        setItems([]); // Clear current items immediately for new search and filter
         const controller = new AbortController();
         const signal = controller.signal;
 
