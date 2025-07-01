@@ -15,9 +15,9 @@ export default function KitchenPage() {
     const { socket } = useSocketContext();
 
     function generateOrderElements(orders) {
-        return orders
-            .flatMap((o) =>
-                o.items
+        const orderElements = orders
+            .map((o) => {
+                const filteredItems = o.items
                     .filter(
                         (i) =>
                             i.type === 'Snack' && i.preparedCount < i.quantity
@@ -61,9 +61,14 @@ export default function KitchenPage() {
                                 </div>
                             )}
                         </div>
-                    ))
-            )
-            .filter(({ items }) => items.length > 0);
+                    ));
+
+                return filteredItems.length > 0 ? filteredItems : null;
+            })
+            .filter(Boolean) // remove nulls
+            .flat(); // flatten nested arrays
+
+        return orderElements;
     }
 
     function updateSummary(orders) {
