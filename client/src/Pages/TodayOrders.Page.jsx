@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { PendingOrders, Orders, Button, CalendarFilter } from '../Components';
 import {
@@ -23,11 +23,25 @@ export default function TodayOrdersPage() {
         PickedUp: 0,
         Rejected: 0,
     });
+    const { socket } = useSocketContext();
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const dateFilter = searchParams.get('date') || undefined; // could be null or e.g., '2025-06-05'
-    const statusFilter = searchParams.get('status') || 'Pending';
-    const { socket } = useSocketContext();
+    const dateFilter = searchParams.get('date') || undefined;
+    const [statusFilter, setStatusFilter] = useState(
+        searchParams.get('status') || 'Pending'
+    );
+
+    // Ref to hold the current statusFilter for use inside socket event handlers
+    const statusFilterRef = useRef(statusFilter);
+
+    useEffect(() => {
+        const status = searchParams.get('status') || 'Pending';
+        setStatusFilter(status);
+    }, [searchParams]);
+
+    useEffect(() => {
+        statusFilterRef.current = statusFilter; // update ref whenever state changes
+    }, [statusFilter]);
 
     useEffect(() => {
         setAudioEnabled(getAudioState());
@@ -57,13 +71,12 @@ export default function TodayOrdersPage() {
     }, [dateFilter]);
 
     function handleStatusClick(status) {
-        if (statusFilter === status) return; // do nothing
         const newParams = new URLSearchParams(searchParams);
         newParams.set('status', status);
         setSearchParams(newParams);
     }
 
-    // socket event listeners
+    // Socket event listeners
     useEffect(() => {
         if (!socket) return;
 
@@ -72,18 +85,19 @@ export default function TodayOrdersPage() {
                 setStats((prev) => ({
                     ...prev,
                     Total: prev.Total + 1,
-                    [order.status]: prev[order.status] + 1, // Prepared or Pending
+                    [order.status]: prev[order.status] + 1,
                 }));
 
                 const hasSnacks = order.items.some(
                     (item) => item.type === 'Snack'
                 );
 
-                if (hasSnacks) {
-                    if (statusFilter === 'Pending') {
-                        setPendingOrders((prev) => [...prev, order]);
-                    }
-                } else if (statusFilter === 'Prepared') {
+                if (hasSnacks && statusFilterRef.current === 'Pending') {
+                    setPendingOrders((prev) => [...prev, order]);
+                } else if (
+                    !hasSnacks &&
+                    statusFilterRef.current === 'Prepared'
+                ) {
                     setOrders((prev) => [...prev, order]);
                 }
 
@@ -98,11 +112,12 @@ export default function TodayOrdersPage() {
                     Pending: prev.Pending - 1,
                     Prepared: prev.Prepared + 1,
                 }));
-                if (statusFilter === 'Pending') {
+
+                if (statusFilterRef.current === 'Pending') {
                     setPendingOrders((prev) =>
                         prev.filter((o) => o._id !== order._id)
                     );
-                } else if (statusFilter === 'Prepared') {
+                } else if (statusFilterRef.current === 'Prepared') {
                     setOrders((prev) => [...prev, order]);
                 }
             }
@@ -115,11 +130,11 @@ export default function TodayOrdersPage() {
                     Prepared: prev.Prepared - 1,
                     PickedUp: prev.PickedUp + 1,
                 }));
-                if (statusFilter === 'Prepared') {
+                if (statusFilterRef.current === 'Prepared') {
                     setOrders((prev) =>
                         prev.filter((o) => o._id !== order._id)
                     );
-                } else if (statusFilter === 'PickedUp') {
+                } else if (statusFilterRef.current === 'PickedUp') {
                     setOrders((prev) => [...prev, order]);
                 }
             }
@@ -133,19 +148,21 @@ export default function TodayOrdersPage() {
                         Prepared: prev.Prepared - 1,
                         Rejected: prev.Rejected + 1,
                     }));
-                } else
+                } else {
                     setStats((prev) => ({
                         ...prev,
                         Pending: prev.Pending - 1,
                         Rejected: prev.Rejected + 1,
                     }));
-                if (statusFilter === 'Prepared') {
+                }
+
+                if (statusFilterRef.current === 'Prepared') {
                     setOrders((prev) =>
                         prev.filter((o) => o._id !== order._id)
                     );
-                } else if (statusFilter === 'Rejected') {
+                } else if (statusFilterRef.current === 'Rejected') {
                     setOrders((prev) => [...prev, order]);
-                } else if (statusFilter === 'Pending') {
+                } else if (statusFilterRef.current === 'Pending') {
                     setPendingOrders((prev) =>
                         prev.filter((o) => o._id !== order._id)
                     );
@@ -174,7 +191,7 @@ export default function TodayOrdersPage() {
         }
 
         function itemPickedUp({ orderId, itemId }) {
-            if (statusFilter === 'Pending') {
+            if (statusFilterRef.current === 'Pending') {
                 setPendingOrders((prev) =>
                     prev.map((o) =>
                         o._id === orderId
@@ -192,7 +209,7 @@ export default function TodayOrdersPage() {
                             : o
                     )
                 );
-            } else if (statusFilter === 'Prepared') {
+            } else if (statusFilterRef.current === 'Prepared') {
                 setOrders((prev) => {
                     const originalOrder = prev.find((o) => o._id === orderId);
                     if (!originalOrder) return prev;
@@ -215,17 +232,14 @@ export default function TodayOrdersPage() {
                                 : o
                         )
                         .filter((o) =>
-                            // Keep orders where at least one item is not fully picked up
                             o.items.some((i) => i.pickedUpCount < i.quantity)
                         );
 
-                    // Check if order was completely picked up
                     const orderWasRemoved = !updatedOrders.some(
                         (o) => o._id === orderId
                     );
 
                     if (orderWasRemoved) {
-                        // IIFE to handle the async operation
                         (async () => {
                             try {
                                 const res =
