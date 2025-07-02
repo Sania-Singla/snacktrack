@@ -10,7 +10,7 @@ export async function connectRedis() {
                 port: process.env.REDIS_PORT,
             },
         });
-        
+
         // avoid creating multiple connections
         if (!client.isOpen) {
             await client.connect();
@@ -19,7 +19,6 @@ export async function connectRedis() {
 
         return client;
     } catch (err) {
-        console.log('❌ Redis connection failed !!', err);
-        process.exit(1);
+        throw new Error(`❌ Redis connection failed: ${err}`);
     }
 }

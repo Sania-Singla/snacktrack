@@ -16,7 +16,6 @@ export async function generateTransporter() {
         console.log('📧 Mail transporter ready.');
         return transporter;
     } catch (err) {
-        console.log('❌ Mail transporter connection failed !!', err);
-        process.exit(1);
+        throw new Error(`❌ Mail transporter connection failed: ${err}`);
     }
 }

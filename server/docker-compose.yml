@@ -20,13 +20,13 @@ services:
     app:
         build: .
         image: snacktrack
-        container_name: snackTrack-app
+        container_name: snacktrack-app
         ports:
             - '3000:3000'
         depends_on:
             - mongo
             - redis
-        env_file: .env
+        env_file: .env.local
         volumes:
             - .:/app
         command: npm run dev

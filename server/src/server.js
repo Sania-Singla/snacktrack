@@ -10,16 +10,25 @@ import {
 
 const PORT = process.env.PORT || 4000;
 
-const [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
-    connectMongoDB(),
-    connectRedis(),
-    generateTransporter(),
-    // connectTwilio(),
-]);
+let mongoConn, redisClient, transporter, twilioClient;
 
-startBillingCronJob();
-startCleanupCronJob();
+try {
+    [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
+        connectMongoDB(),
+        connectRedis(),
+        generateTransporter(),
+        // connectTwilio(),
+    ]);
 
-http.listen(PORT, () => console.log(`💻 Server listening on port ${PORT}...`));
+    startBillingCronJob();
+    startCleanupCronJob();
+
+    http.listen(PORT, () =>
+        console.log(`💻 Server listening on port ${PORT}...`)
+    );
+} catch (err) {
+    console.error('❌ Server startup failed:', err);
+    process.exit(1); 
+}
 
 export { mongoConn, transporter, redisClient, twilioClient };

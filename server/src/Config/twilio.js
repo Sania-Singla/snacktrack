@@ -17,7 +17,6 @@ export async function connectTwilio() {
         console.log('📞 Twilio client ready.');
         return client;
     } catch (err) {
-        console.log('❌ Twilio connetion failed !!', err);
-        process.exit(1);
+        throw new Error(`❌ Twilio connection failed: ${err}`);
     }
 }
