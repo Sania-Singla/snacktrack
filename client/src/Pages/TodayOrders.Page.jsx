@@ -13,6 +13,8 @@ import { orderService } from '../Services';
 
 export default function TodayOrdersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
+    const [pendingOrders, setPendingOrders] = useState([]);
+    const [orders, setOrders] = useState([]);
     const { audioEnabled, setAudioEnabled, user } = useUserContext();
     const [stats, setStats] = useState({
         Total: 0,
@@ -54,64 +56,220 @@ export default function TodayOrdersPage() {
         return () => controller.abort();
     }, [dateFilter]);
 
-    // socket event listeners
-    useEffect(() => {
-        if (!socket) return;
-
-        socket.on('newOrder', async (order) => {
-            await playSound();
-            setStats((prev) => ({
-                ...prev,
-                Total: prev.Total + 1,
-                [order.status]: prev[order.status] + 1, // Prepared or Pending
-            }));
-        });
-
-        socket.on('orderPrepared', (order) => {
-            setStats((prev) => ({
-                ...prev,
-                Pending: prev.Pending - 1,
-                Prepared: prev.Prepared + 1,
-            }));
-        });
-
-        socket.on('orderPickedUp', (order) => {
-            setStats((prev) => ({
-                ...prev,
-                Prepared: prev.Prepared - 1,
-                PickedUp: prev.PickedUp + 1,
-            }));
-        });
-
-        socket.on('orderRejected', (order) => {
-            if (order.status === 'Prepared') {
-                setStats((prev) => ({
-                    ...prev,
-                    Prepared: prev.Prepared - 1,
-                    Rejected: prev.Rejected + 1,
-                }));
-            } else
-                setStats((prev) => ({
-                    ...prev,
-                    Pending: prev.Pending - 1,
-                    Rejected: prev.Rejected + 1,
-                }));
-        });
-
-        return () => {
-            socket.off('newOrder');
-            socket.off('orderPrepared');
-            socket.off('orderPickedUp');
-            socket.off('orderRejected');
-        };
-    }, [socket]);
-
     function handleStatusClick(status) {
         if (statusFilter === status) return; // do nothing
         const newParams = new URLSearchParams(searchParams);
         newParams.set('status', status);
         setSearchParams(newParams);
     }
+
+    // socket event listeners
+    useEffect(() => {
+        if (!socket) return;
+
+        async function newOrder(order) {
+            if (user.role === 'contractor') {
+                setStats((prev) => ({
+                    ...prev,
+                    Total: prev.Total + 1,
+                    [order.status]: prev[order.status] + 1, // Prepared or Pending
+                }));
+
+                const hasSnacks = order.items.some(
+                    (item) => item.type === 'Snack'
+                );
+
+                if (hasSnacks) {
+                    if (statusFilter === 'Pending') {
+                        setPendingOrders((prev) => [...prev, order]);
+                    }
+                } else if (statusFilter === 'Prepared') {
+                    setOrders((prev) => [...prev, order]);
+                }
+
+                await playSound();
+            }
+        }
+
+        function orderPrepared(order) {
+            if (user.role === 'contractor') {
+                setStats((prev) => ({
+                    ...prev,
+                    Pending: prev.Pending - 1,
+                    Prepared: prev.Prepared + 1,
+                }));
+                if (statusFilter === 'Pending') {
+                    setPendingOrders((prev) =>
+                        prev.filter((o) => o._id !== order._id)
+                    );
+                } else if (statusFilter === 'Prepared') {
+                    setOrders((prev) => [...prev, order]);
+                }
+            }
+        }
+
+        function orderPickedUp(order) {
+            if (user.role === 'contractor') {
+                setStats((prev) => ({
+                    ...prev,
+                    Prepared: prev.Prepared - 1,
+                    PickedUp: prev.PickedUp + 1,
+                }));
+                if (statusFilter === 'Prepared') {
+                    setOrders((prev) =>
+                        prev.filter((o) => o._id !== order._id)
+                    );
+                } else if (statusFilter === 'PickedUp') {
+                    setOrders((prev) => [...prev, order]);
+                }
+            }
+        }
+
+        function orderRejected(order) {
+            if (user.role === 'contractor') {
+                if (order.status === 'Prepared') {
+                    setStats((prev) => ({
+                        ...prev,
+                        Prepared: prev.Prepared - 1,
+                        Rejected: prev.Rejected + 1,
+                    }));
+                } else
+                    setStats((prev) => ({
+                        ...prev,
+                        Pending: prev.Pending - 1,
+                        Rejected: prev.Rejected + 1,
+                    }));
+                if (statusFilter === 'Prepared') {
+                    setOrders((prev) =>
+                        prev.filter((o) => o._id !== order._id)
+                    );
+                } else if (statusFilter === 'Rejected') {
+                    setOrders((prev) => [...prev, order]);
+                } else if (statusFilter === 'Pending') {
+                    setPendingOrders((prev) =>
+                        prev.filter((o) => o._id !== order._id)
+                    );
+                }
+            }
+        }
+
+        function itemPrepared({ orderId, itemId }) {
+            setPendingOrders((prev) =>
+                prev.map((o) =>
+                    o._id === orderId
+                        ? {
+                              ...o,
+                              items: o.items.map((i) =>
+                                  i.id === itemId
+                                      ? {
+                                            ...i,
+                                            preparedCount: i.preparedCount + 1,
+                                        }
+                                      : i
+                              ),
+                          }
+                        : o
+                )
+            );
+        }
+
+        function itemPickedUp({ orderId, itemId }) {
+            if (statusFilter === 'Pending') {
+                setPendingOrders((prev) =>
+                    prev.map((o) =>
+                        o._id === orderId
+                            ? {
+                                  ...o,
+                                  items: o.items.map((i) =>
+                                      i.id === itemId
+                                          ? {
+                                                ...i,
+                                                pickedUpCount: i.preparedCount,
+                                            }
+                                          : i
+                                  ),
+                              }
+                            : o
+                    )
+                );
+            } else if (statusFilter === 'Prepared') {
+                setOrders((prev) => {
+                    const originalOrder = prev.find((o) => o._id === orderId);
+                    if (!originalOrder) return prev;
+
+                    const updatedOrders = prev
+                        .map((o) =>
+                            o._id === orderId
+                                ? {
+                                      ...o,
+                                      items: o.items.map((i) =>
+                                          i.id === itemId
+                                              ? {
+                                                    ...i,
+                                                    pickedUpCount:
+                                                        i.preparedCount,
+                                                }
+                                              : i
+                                      ),
+                                  }
+                                : o
+                        )
+                        .filter((o) =>
+                            // Keep orders where at least one item is not fully picked up
+                            o.items.some((i) => i.pickedUpCount < i.quantity)
+                        );
+
+                    // Check if order was completely picked up
+                    const orderWasRemoved = !updatedOrders.some(
+                        (o) => o._id === orderId
+                    );
+
+                    if (orderWasRemoved) {
+                        // IIFE to handle the async operation
+                        (async () => {
+                            try {
+                                const res =
+                                    await orderService.updateOrderStatus({
+                                        orderId,
+                                        status: 'PickedUp',
+                                    });
+                                if (
+                                    res &&
+                                    res.message ===
+                                        'order status updated successfully'
+                                ) {
+                                    socket.emit('orderPickedUp', originalOrder);
+                                }
+                            } catch (error) {
+                                console.error(
+                                    'Failed to update order status:',
+                                    error
+                                );
+                            }
+                        })();
+                    }
+
+                    return updatedOrders;
+                });
+            }
+        }
+
+        socket.on('newOrder', newOrder);
+        socket.on('orderPrepared', orderPrepared);
+        socket.on('orderPickedUp', orderPickedUp);
+        socket.on('orderRejected', orderRejected);
+        socket.on('itemPrepared', itemPrepared);
+        socket.on('itemPickedUp', itemPickedUp);
+
+        return () => {
+            socket.off('newOrder', newOrder);
+            socket.off('orderPrepared', orderPrepared);
+            socket.off('orderPickedUp', orderPickedUp);
+            socket.off('orderRejected', orderRejected);
+            socket.off('itemPrepared', itemPrepared);
+            socket.off('itemPickedUp', itemPickedUp);
+        };
+    }, [socket]);
 
     return (
         <div className="w-full sm:p-4">
@@ -233,7 +391,14 @@ export default function TodayOrdersPage() {
                 </div>
             )}
 
-            {statusFilter === 'Pending' ? <PendingOrders /> : <Orders />}
+            {statusFilter === 'Pending' ? (
+                <PendingOrders
+                    pendingOrders={pendingOrders}
+                    setPendingOrders={setPendingOrders}
+                />
+            ) : (
+                <Orders orders={orders} setOrders={setOrders} />
+            )}
         </div>
     );
 }

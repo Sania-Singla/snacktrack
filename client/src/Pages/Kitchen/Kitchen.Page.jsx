@@ -15,60 +15,50 @@ export default function KitchenPage() {
     const { socket } = useSocketContext();
 
     function generateOrderElements(orders) {
-        const orderElements = orders
-            .map((o) => {
-                const filteredItems = o.items
-                    .filter(
-                        (i) =>
-                            i.type === 'Snack' && i.preparedCount < i.quantity
-                    )
-                    .map((i) => (
-                        <div
-                            key={`${o._id}-${i.id}`}
-                            className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
-                        >
-                            <div className="flex justify-between items-center">
-                                <div className="flex items-center justify-center gap-2">
-                                    <p className="text-gray-800 font-medium text-[14px]">
-                                        {i.name}
-                                    </p>
-                                    <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
-                                        {i.quantity - i.preparedCount}
-                                    </div>
+        return orders.flatMap((o) =>
+            o.items
+                .filter(
+                    (i) => i.type === 'Snack' && i.preparedCount < i.quantity
+                )
+                .map((i) => (
+                    <div
+                        key={`${o._id}-${i.id}`}
+                        className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
+                    >
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-center gap-2">
+                                <p className="text-gray-800 font-medium text-[14px]">
+                                    {i.name}
+                                </p>
+                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
+                                    {i.quantity - i.preparedCount}
                                 </div>
-
-                                {user.role === 'staff' && (
-                                    <Button
-                                        className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
-                                        onClick={() =>
-                                            socket.emit('itemPrepared', {
-                                                order: o,
-                                                itemId: i.id,
-                                            })
-                                        }
-                                        btnText="-"
-                                    />
-                                )}
                             </div>
-                            {i.specialInstructions && (
-                                <div className="text-[13px] text-red-500 italic">
-                                    <span className="font-medium mr-1">
-                                        Note:
-                                    </span>
-                                    <span className="italic">
-                                        {i.specialInstructions}
-                                    </span>
-                                </div>
+
+                            {user.role === 'staff' && (
+                                <Button
+                                    className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
+                                    onClick={() =>
+                                        socket.emit('itemPrepared', {
+                                            order: o,
+                                            itemId: i.id,
+                                        })
+                                    }
+                                    btnText="-"
+                                />
                             )}
                         </div>
-                    ));
-
-                return filteredItems.length > 0 ? filteredItems : null;
-            })
-            .filter(Boolean) // remove nulls
-            .flat(); // flatten nested arrays
-
-        return orderElements;
+                        {i.specialInstructions && (
+                            <div className="text-[13px] text-red-500 italic">
+                                <span className="font-medium mr-1">Note:</span>
+                                <span className="italic">
+                                    {i.specialInstructions}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                ))
+        );
     }
 
     function updateSummary(orders) {
@@ -114,7 +104,7 @@ export default function KitchenPage() {
     useEffect(() => {
         if (!socket) return;
 
-        socket.on('newOrder', (order) => {
+        function newOrder(order) {
             if (order.status === 'Pending') {
                 setKitchenOrders((prev) => {
                     // Filter to only include snack items
@@ -125,47 +115,56 @@ export default function KitchenPage() {
 
                     // Skip if no snack items or order already exists
                     if (
-                        filteredOrder.items.length === 0 ||
+                        !filteredOrder.items.length ||
                         prev.some((o) => o._id === order._id)
                     ) {
                         return prev;
                     }
 
-                    // Update summary and elements
-                    setSummary(updateSummary([...prev, order]));
-                    setOrderElements(generateOrderElements([...prev, order]));
+                    const updatedOrders = [...prev, filteredOrder];
 
-                    return order;
+                    // Update summary and elements
+                    setSummary(updateSummary(updatedOrders));
+                    setOrderElements(generateOrderElements(updatedOrders));
+
+                    return updatedOrders;
                 });
             }
-        });
+        }
 
-        socket.on('orderRejected', (order) => {
+        function orderRejected(order) {
             setKitchenOrders((prev) => prev.filter((o) => o._id !== order._id));
-        });
+        }
 
-        socket.on('itemPrepared', async ({ orderId, itemId }) => {
+        async function itemPrepared({ orderId, itemId }) {
             setKitchenOrders((prev) => {
                 // First find the order before modification (for potential complete preparation)
                 const originalOrder = prev.find((o) => o._id === orderId);
                 if (!originalOrder) return prev;
 
-                const updatedOrders = prev.map((o) => {
-                    if (o._id === orderId) {
-                        return {
-                            ...o,
-                            items: o.items.map((i) =>
-                                i.id === itemId
-                                    ? {
-                                          ...i,
-                                          preparedCount: i.preparedCount + 1,
-                                      }
-                                    : i
-                            ),
-                        };
-                    }
-                    return o;
-                });
+                const updatedOrders = prev
+                    .map((o) => {
+                        if (o._id === orderId) {
+                            return {
+                                ...o,
+                                items: o.items
+                                    .map((i) =>
+                                        i.id === itemId
+                                            ? {
+                                                  ...i,
+                                                  preparedCount:
+                                                      i.preparedCount + 1,
+                                              }
+                                            : i
+                                    )
+                                    .filter(
+                                        (i) => i.preparedCount < i.quantity
+                                    ),
+                            };
+                        }
+                        return o;
+                    })
+                    .filter((o) => o.items.length > 0);
 
                 // Update summary and elements
                 setSummary(updateSummary(updatedOrders));
@@ -189,7 +188,7 @@ export default function KitchenPage() {
                                 res.message ===
                                     'order status updated successfully'
                             ) {
-                                socket.emit('orderPrepared', originalOrder);
+                                socket.emit('orderPrepared', res.order);
                             }
                         } catch (error) {
                             console.error(
@@ -202,7 +201,17 @@ export default function KitchenPage() {
 
                 return updatedOrders;
             });
-        });
+        }
+
+        socket.on('newOrder', newOrder);
+        socket.on('orderRejected', orderRejected);
+        socket.on('itemPrepared', itemPrepared);
+
+        return () => {
+            socket.off('newOrder', newOrder);
+            socket.off('orderRejected', orderRejected);
+            socket.off('itemPrepared', itemPrepared);
+        };
     }, [socket]);
 
     return loading ? (
@@ -237,7 +246,7 @@ export default function KitchenPage() {
             </section>
 
             {/* orders */}
-            {orderElements.length > 0 ? (
+            {kitchenOrders.length > 0 ? (
                 <section className="p-4 overflow-scroll bg-white rounded-xl shadow-sm flex flex-col md:flex-row md:gap-0 gap-6">
                     {/* summary */}
                     <section className="md:pr-4 md:p-2 w-full md:w-[70%] border-b-[0.01rem] md:border-r-[0.01rem] md:border-b-0 border-gray-200">

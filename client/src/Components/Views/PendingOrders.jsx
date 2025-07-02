@@ -3,16 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { ContractorOrderCard } from '..';
-import {
-    useSocketContext,
-    useSearchContext,
-    useUserContext,
-} from '../../Contexts';
+import { useSearchContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 
-export default function PendingOrders() {
+export default function PendingOrders({ pendingOrders, setPendingOrders }) {
     const [searchParams] = useSearchParams();
-    const [pendingOrders, setPendingOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
@@ -20,13 +15,11 @@ export default function PendingOrders() {
     const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
     const [debouncedSearch, setDebouncedSearch] = useState(search);
-    const { socket } = useSocketContext();
     const dateFilter = searchParams.get('date') || undefined; // could be null or e.g., '2025-06-05'
 
     // pagination
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
-    // Debounce search input
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedSearch(search);
@@ -34,7 +27,6 @@ export default function PendingOrders() {
         return () => clearTimeout(handler);
     }, [search]);
 
-    // Extracted reusable fetch function
     const fetchCanteenOrders = async ({ pageNum, signal }) => {
         try {
             setLoading(true);
@@ -84,76 +76,6 @@ export default function PendingOrders() {
 
         return () => controller.abort();
     }, [page, debouncedSearch]);
-
-    // socket event listeners
-    useEffect(() => {
-        if (!socket) return;
-
-        socket.on('newOrder', async (order) => {
-            setPendingOrders((prev) => {
-                const exists = prev.find((o) => o._id === order._id);
-                if (exists) return prev;
-                else return [...prev, order];
-            });
-        });
-
-        socket.on('orderRejected', (order) => {
-            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
-        });
-
-        socket.on('itemPrepared', ({ orderId, itemId }) => {
-            setPendingOrders((prev) =>
-                prev
-                    .map((o) =>
-                        o._id === orderId
-                            ? {
-                                  ...o,
-                                  items: o.items.map((i) =>
-                                      i.id === itemId
-                                          ? {
-                                                ...i,
-                                                preparedCount:
-                                                    i.preparedCount + 1,
-                                            }
-                                          : i
-                                  ),
-                              }
-                            : o
-                    )
-                    .filter((o) =>
-                        // Keep orders where at least one item is not fully prepared
-                        o.items.some((i) => i.preparedCount < i.quantity)
-                    )
-            );
-        });
-
-        socket.on('itemPickedUp', ({ orderId, itemId }) => {
-            setPendingOrders((prev) =>
-                prev.map((o) =>
-                    o._id === orderId
-                        ? {
-                              ...o,
-                              items: o.items.map((i) =>
-                                  i.id === itemId
-                                      ? {
-                                            ...i,
-                                            pickedUpCount: i.preparedCount,
-                                        }
-                                      : i
-                              ),
-                          }
-                        : o
-                )
-            );
-        });
-
-        return () => {
-            socket.off('newOrder');
-            socket.off('orderRejected');
-            socket.off('itemPrepared');
-            socket.off('itemPickedUp');
-        };
-    }, [socket]);
 
     const orderElements = pendingOrders.map((order, i) => (
         <ContractorOrderCard
