@@ -8,7 +8,6 @@ import {
     addPreparedItem,
     addPickedUpItem,
 } from './redis.js';
-import { retry } from './retry.js';
 import { sendMail } from './mailer.js';
 import { sendSMS } from './sms.js';
 
@@ -21,7 +20,6 @@ export {
     addSocketId,
     deleteSocketId,
     addPreparedItem,
-    retry,
     sendMail,
     sendSMS,
     addPickedUpItem,
