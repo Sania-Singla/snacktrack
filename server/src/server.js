@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { http } from './socket.js';
-import { startBillingCronJob, startCleanupCronJob } from './CronJobs/bills.js';
+import { startBillingCronJob, startCleanupCronJob, test } from './CronJobs/bills.js';
 import {
     connectMongoDB,
     connectRedis,
@@ -22,6 +22,7 @@ try {
 
     startBillingCronJob();
     startCleanupCronJob();
+    test();
 
     http.listen(PORT, () =>
         console.log(`💻 Server listening on port ${PORT}...`)

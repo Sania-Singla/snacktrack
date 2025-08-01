@@ -111,14 +111,9 @@ export const startCleanupCronJob = () => {
     });
 };
 
-export const test = () => {
-    cron.schedule(
-        '* * * * * *',
-        async () => {
-            console.log(`[TEST] Running at ${new Date().toISOString()}`);
-        },
-        { timezone: 'Asia/Kolkata' }
-    );
+export const testCronJob = () => {
+    // Every second
+    cron.schedule('* * * * * *', async () => {
+        console.log(`[TEST] Running at ${new Date().toISOString()}`);
+    });
 };
-
-test();
