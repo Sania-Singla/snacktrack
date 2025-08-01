@@ -1,6 +1,10 @@
 import 'dotenv/config';
 import { http } from './socket.js';
-import { startBillingCronJob, startCleanupCronJob, test } from './CronJobs/bills.js';
+import {
+    startBillingCronJob,
+    startCleanupCronJob,
+    testCronJob,
+} from './CronJobs/bills.js';
 import {
     connectMongoDB,
     connectRedis,
@@ -22,14 +26,14 @@ try {
 
     startBillingCronJob();
     startCleanupCronJob();
-    test();
+    testCronJob();
 
     http.listen(PORT, () =>
         console.log(`💻 Server listening on port ${PORT}...`)
     );
 } catch (err) {
     console.error('❌ Server startup failed:', err);
-    process.exit(1); 
+    process.exit(1);
 }
 
 export { mongoConn, transporter, redisClient, twilioClient };
