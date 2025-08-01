@@ -110,10 +110,3 @@ export const startCleanupCronJob = () => {
         await deleteOldOrders();
     });
 };
-
-export const testCronJob = () => {
-    // Every second
-    cron.schedule('* * * * * *', async () => {
-        console.log(`[TEST] Running at ${new Date().toISOString()}`);
-    });
-};
