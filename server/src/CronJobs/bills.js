@@ -98,7 +98,7 @@ async function deleteOldOrders() {
 export const startBillingCronJob = () => {
     console.log('💵 Billing scheduled on 1st of every month at 12:05 AM');
 
-    cron.schedule('5 0 1 * *', async () => {
+    return cron.schedule('5 0 1 * *', async () => {
         await generateBills();
     });
 };
@@ -106,7 +106,7 @@ export const startBillingCronJob = () => {
 export const startCleanupCronJob = () => {
     console.log('🧹 Cleanup scheduled on 1st of every month at 12:05 AM');
 
-    cron.schedule('10 0 1 * *', async () => {
+    return cron.schedule('10 0 1 * *', async () => {
         await deleteOldOrders();
     });
 };
