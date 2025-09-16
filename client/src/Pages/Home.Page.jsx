@@ -210,7 +210,7 @@ export default function HomePage() {
             <div className="pb-8">
                 {itemElements.length > 0 && (
                     <div
-                        className={`grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-[repeat(auto-fit,minmax(250px,1fr))]`}
+                        className={`grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`}
                     >
                         {itemElements}
                     </div>
