@@ -7,35 +7,48 @@ export default function Layout({ renderTemplate = true }) {
     const { pathname } = useLocation();
     const layoutRef = useRef(null);
 
-    // scrolling both window and layout container to the top
+    // scrolling to top on route change
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        layoutRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        if (layoutRef.current) {
+            layoutRef.current.scrollTop = 0;
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
     }, [pathname]);
 
     const staticPages = ['/settings', '/statistics', '/cart'];
-
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 
-    return renderTemplate ? (
-        <div ref={layoutRef} className="overflow-y-scroll h-full w-full">
-            <Header />
-            <hr className="w-full" />
-            <Sidebar />
-            <main className="mt-[60px] p-4 min-h-[calc(100%-60px)] w-full bg-gray-50">
-                <div
-                    className={`mb-6 mt-2 w-full sm:hidden ${isStaticPage && 'hidden'}`}
-                >
-                    <Searchbar />
+    if (renderTemplate) {
+        return (
+            <div className="flex flex-col h-screen w-screen">
+                <Header />
+                <hr className="w-full" />
+                <div className="flex flex-1 overflow-hidden">
+                    <Sidebar />
+                    <main
+                        ref={layoutRef}
+                        className="flex-1 p-4 mt-[60px] overflow-y-auto bg-gray-50"
+                    >
+                        {!isStaticPage && (
+                            <div className="mb-6 mt-2 w-full sm:hidden">
+                                <Searchbar />
+                            </div>
+                        )}
+                        <div className="min-h-[calc(100vh-60px)]">
+                            <Outlet />
+                        </div>
+                        <Footer />
+                    </main>
                 </div>
-                <Outlet />
-            </main>
-            <Footer />
-            <Popup />
-            <Toaster />
-        </div>
-    ) : (
-        <div ref={layoutRef} className="overflow-y-scroll h-full w-full">
+                <Popup />
+                <Toaster />
+            </div>
+        );
+    }
+
+    return (
+        <div ref={layoutRef} className="h-screen w-screen overflow-y-auto">
             <Outlet />
             <Popup />
             <Toaster />

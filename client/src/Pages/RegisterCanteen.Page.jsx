@@ -133,10 +133,13 @@ export default function RegisterCanteenPage() {
             if (res && !res.message) {
                 toast.success('Canteen Registered Successfully');
                 navigate('/admin');
-            } else setError((prev) => ({ ...prev, root: res.message }));
+            } else {
+                setError((prev) => ({ ...prev, root: res.message }));
+            }
         } catch (err) {
             navigate('/server-error');
         } finally {
+            setIsVerified(false);
             setInputs(initialInputs);
             setDisabled(false);
             setLoading(false);
