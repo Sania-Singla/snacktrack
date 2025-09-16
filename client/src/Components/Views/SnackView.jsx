@@ -15,7 +15,7 @@ export default function SnackView({ snack, reference }) {
     const { _id, image, name, isAvailable } = snack;
     const [quantityInCart, setQuantityInCart] = useState(snack.quantity);
     const { user, setUser } = useUserContext();
-    const { setSnacks } = useSnackContext();
+    const { setItems } = useSnackContext();
     const navigate = useNavigate();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
@@ -27,13 +27,14 @@ export default function SnackView({ snack, reference }) {
                 res &&
                 res.message === 'snack availability toggled successfully'
             ) {
-                setSnacks((prev) =>
+                setItems((prev) =>
                     prev.map((s) =>
                         s._id === _id ? { ...s, isAvailable: !isAvailable } : s
                     )
                 );
             } else checkTokenExpired(res, setUser);
         } catch (err) {
+            console.log(err);
             navigate('/server-error');
         }
     }

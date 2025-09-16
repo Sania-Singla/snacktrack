@@ -15,7 +15,9 @@ export async function connectRedis() {
         if (!client.isOpen) {
             await client.connect();
             console.log('✅ Redis client ready.');
-        } else console.log('Already have a Redis connection.');
+        } else {
+            console.log('Already have a Redis connection.');
+        }
 
         return client;
     } catch (err) {
