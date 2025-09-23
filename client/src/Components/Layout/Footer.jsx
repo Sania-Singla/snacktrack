@@ -20,7 +20,7 @@ export default function Footer() {
     );
 
     return (
-        <footer className="bg-gray-50 border-t border-gray-200 w-full py-6 mt-4 sm:mt-0">
+        <footer className="bg-gray-50 border-t border-gray-200 w-full pt-6 mt-4 sm:mt-0">
             <div className="w-[90%] max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
                 {/* Left: Branding and Socials */}
                 <div className="flex flex-col items-center sm:items-start gap-3">
