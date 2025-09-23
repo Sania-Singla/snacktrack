@@ -185,7 +185,7 @@ export default function StudentOrdersPage() {
     return (
         <div className="w-full sm:p-4">
             <div className="flex sm:items-center flex-col sm:flex-row gap-5 justify-between mb-7">
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl font-semibold text-gray-900">
                     {user._id === studentId ? 'My Orders' : 'Orders'}
                 </h1>
                 <div className="flex items-center gap-4 justify-end">
@@ -243,14 +243,14 @@ export default function StudentOrdersPage() {
                         <h3 className="text-xl font-medium text-gray-700 mb-2">
                             No orders yet
                         </h3>
-                        <p className="text-gray-500 mb-6">
+                        <p className="text-gray-500 mb-5">
                             Your order history will appear here
                         </p>
                         {user._id === studentId && (
                             <Button
                                 btnText="Order Now"
                                 onClick={() => navigate('/')}
-                                className="px-4 py-2 bg-[#4977ec] hover:bg-[#3b62c2] text-white rounded-lg font-medium"
+                                className="px-3 py-1.5 bg-[#4977ec] hover:bg-[#3b62c2] text-white rounded-md text-sm font-medium"
                             />
                         )}
                     </div>

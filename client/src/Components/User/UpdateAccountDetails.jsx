@@ -16,7 +16,7 @@ export default function UpdateAccountDetails() {
     };
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
@@ -130,10 +130,10 @@ export default function UpdateAccountDetails() {
         <div className="w-full p-2">
             <div className="rounded-xl drop-shadow-md flex flex-col sm:flex-row bg-white py-6 px-8 sm:gap-14">
                 <div className="w-full py-4">
-                    <h3 className="text-2xl font-bold">
+                    <h3 className="text-2xl font-semibold">
                         Update Personal Information
                     </h3>
-                    <p className="mt-2">
+                    <p className="mt-4 text-gray-600">
                         Update your personal details here. Please note that
                         changes cannot be undone.
                     </p>
@@ -150,7 +150,7 @@ export default function UpdateAccountDetails() {
                                 setError({});
                             }}
                             disabled={loading}
-                            className="text-white rounded-md h-[40px] text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md h-9 w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                         <Button
                             btnText={
@@ -167,7 +167,7 @@ export default function UpdateAccountDetails() {
                             disabled={disabled}
                             type="submit"
                             onMouseOver={onMouseOver}
-                            className="text-white rounded-md h-[40px] text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md h-9 w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     </div>
                 </form>

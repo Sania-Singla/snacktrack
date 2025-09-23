@@ -84,7 +84,7 @@ export default function EmptyCart() {
                     variants={textAnimation}
                     initial="initial"
                     animate="animate"
-                    className="text-2xl font-bold text-gray-900 mb-3"
+                    className="text-xl font-semibold text-gray-900 mb-3"
                 >
                     Your Cart is Empty
                 </motion.h1>
@@ -93,7 +93,7 @@ export default function EmptyCart() {
                     variants={textAnimation}
                     initial="initial"
                     animate="animate"
-                    className="text-gray-600 mb-8"
+                    className="text-gray-600 mb-6 text-sm"
                 >
                     Looks like you haven't added anything to your cart yet.
                 </motion.p>
@@ -101,7 +101,7 @@ export default function EmptyCart() {
                 <Button
                     btnText="Continue Shopping"
                     onClick={() => navigate('/')}
-                    className="text-white rounded-md py-2 h-[40px] text-lg flex items-center justify-center w-[70%] bg-[#4977ec] hover:bg-[#3b62c2]"
+                    className="text-white rounded-md py-2 h-9 text-sm font-medium flex items-center justify-center w-fit px-6 bg-[#4977ec] hover:bg-[#3b62c2]"
                 />
             </div>
         </div>

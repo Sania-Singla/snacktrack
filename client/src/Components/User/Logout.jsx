@@ -42,7 +42,7 @@ export default function Logout() {
                 )
             }
             title="Logout"
-            className="text-white rounded-md w-[80px] h-[35px] bg-[#4977ec] hover:bg-[#3b62c2]"
+            className="text-white font-normal rounded-md w-[75px] h-8 bg-[#4977ec] hover:bg-[#3b62c2]"
         />
     );
 }

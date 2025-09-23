@@ -166,7 +166,7 @@ export default function LoginPage() {
                 to={'/'}
                 className="w-fit flex items-center justify-center hover:brightness-95"
             >
-                <div className="overflow-hidden rounded-full size-[90px] shadow-sm">
+                <div className="overflow-hidden rounded-full size-18 shadow-sm">
                     <img
                         src={LOGO}
                         alt="peer connect logo"
@@ -175,7 +175,7 @@ export default function LoginPage() {
                 </div>
             </Link>
             <div className="w-fit">
-                <p className="text-center px-3 text-[28px] font-medium">
+                <p className="text-center text-2xl font-medium">
                     Login to Your Account
                 </p>
                 <motion.div
@@ -204,11 +204,7 @@ export default function LoginPage() {
 
                     <div>
                         <Button
-                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full transition-all duration-200 ${
-                                disabled
-                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
-                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
-                            }`}
+                            className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
                             onMouseOver={onMouseOver}
                             type="submit"
                             btnText={

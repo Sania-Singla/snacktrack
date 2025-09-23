@@ -46,7 +46,7 @@ export default function StudentBillsPage() {
         <div>
             <div className="w-full p-2 md:p-4">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">
+                    <h1 className="text-2xl font-semibold text-gray-900">
                         My Bills
                     </h1>
                 </div>
@@ -62,7 +62,7 @@ export default function StudentBillsPage() {
                         {billElements}
                     </div>
                 ) : (
-                    <div>No bills found.</div>
+                    <div className="italic text-gray-600">No bills found.</div>
                 )}
             </div>
         </div>

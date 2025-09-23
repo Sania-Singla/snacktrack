@@ -145,40 +145,23 @@ export default function HomePage() {
     return (
         <>
             <div className="mb-4 w-full flex justify-between">
-                {user.role === 'contractor' &&
-                    (filter === 'snacks' ? (
-                        <Button
-                            onClick={addSnack}
-                            btnText={
-                                <div className="flex items-center justify-center gap-2">
-                                    <div className="size-[16px] fill-white">
-                                        {icons.plus}
-                                    </div>
-                                    <span className="text-[18px]">
-                                        Add Snack
-                                    </span>
+                {user.role === 'contractor' && (
+                    <Button
+                        onClick={filter === 'snacks' ? addSnack : addItem}
+                        btnText={
+                            <div className="flex items-center justify-center gap-1.5 px-1">
+                                <div className="size-3 fill-white">
+                                    {icons.plus}
                                 </div>
-                            }
-                            title="Add Snack"
-                            className="text-white rounded-md px-2 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
-                        />
-                    ) : (
-                        <Button
-                            onClick={addItem}
-                            btnText={
-                                <div className="flex items-center justify-center gap-2">
-                                    <div className="size-[16px] fill-white">
-                                        {icons.plus}
-                                    </div>
-                                    <span className="text-[18px]">
-                                        Add Item
-                                    </span>
-                                </div>
-                            }
-                            title="Add Snack"
-                            className="text-white rounded-md px-2 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
-                        />
-                    ))}
+                                <span>
+                                    {filter === 'snacks' ? 'Snack' : 'Item'}
+                                </span>
+                            </div>
+                        }
+                        title={filter === 'snacks' ? 'Add Snack' : 'Add Item'}
+                        className="text-white rounded-md px-2 h-8 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
+                    />
+                )}
                 <div className="flex items-center gap-4 w-full place-content-end">
                     <Button
                         onClick={() => handleOptionClick('snacks')}

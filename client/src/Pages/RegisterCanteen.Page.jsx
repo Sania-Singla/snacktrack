@@ -165,37 +165,42 @@ export default function RegisterCanteenPage() {
 
     const inputElements = inputFields.map((field) => (
         <div className="w-full" key={field.name}>
-            <div className="flex w-full justify-center items-center gap-4">
+            <div className="relative flex w-full justify-center items-center gap-4">
                 <InputField
                     field={field}
                     handleChange={handleChange}
                     inputs={inputs}
                     className="w-full"
+                    inputStyling={field.name === 'email' ? 'pr-18' : ''}
                 />
                 {field.name === 'email' && (
-                    <Button
-                        title={!isVerified && 'Verify email'}
-                        btnText={
-                            sendingMail ? (
-                                <div className="flex items-center justify-center">
-                                    <div className="size-4 fill-[#4977ec] dark:text-[#a2bdff]">
-                                        {icons.loading}
-                                    </div>
+                    <div className="absolute right-2">
+                        {isVerified ? (
+                            <div className="flex items-center justify-center ">
+                                <div className="size-5 stroke-green-600 fill-none mt-6 mr-2">
+                                    {icons.tick}
                                 </div>
-                            ) : isVerified ? (
-                                'Verified'
-                            ) : (
-                                'Verify'
-                            )
-                        }
-                        onClick={sendVerifyEmail}
-                        className={`rounded-md mt-[22px] w-[100px] h-[40px] text-sm flex items-center justify-center ${
-                            isVerified
-                                ? 'bg-green-600 cursor-not-allowed text-white border'
-                                : 'bg-[#4977ec] text-white hover:bg-[#3b62c2] active:scale-[98%]'
-                        }`}
-                        disabled={isVerified || sendingMail}
-                    />
+                            </div>
+                        ) : (
+                            <Button
+                                title="Verify email"
+                                btnText={
+                                    sendingMail ? (
+                                        <div className="flex items-center justify-center">
+                                            <div className="size-3 fill-[#4977ec] dark:text-[#a2bdff]">
+                                                {icons.loading}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        'Verify'
+                                    )
+                                }
+                                onClick={sendVerifyEmail}
+                                className="rounded-sm mt-[22px] w-13 h-6.5 font-medium text-[12px] flex items-center justify-center bg-[#4977ec] text-white hover:bg-[#3b62c2] active:scale-[98%]"
+                                disabled={sendingMail}
+                            />
+                        )}
+                    </div>
                 )}
             </div>
             {error[field.name] && (
@@ -209,7 +214,7 @@ export default function RegisterCanteenPage() {
     return (
         <div className="py-10 text-black flex flex-col items-center justify-center gap-4 min-h-screen">
             <Link to={'/'}>
-                <div className="overflow-hidden rounded-full size-[90px] hover:brightness-95 shadow-sm">
+                <div className="overflow-hidden rounded-full size-18 hover:brightness-95 shadow-sm">
                     <img
                         src={LOGO}
                         alt="peer connect logo"
@@ -218,14 +223,14 @@ export default function RegisterCanteenPage() {
                 </div>
             </Link>
             <div>
-                <p className="text-center px-2 text-[28px] font-medium">
+                <p className="text-center text-2xl font-semibold">
                     Register a New Canteen
                 </p>
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
                     transition={{ duration: 0.3 }}
-                    className="relative -top-1 h-[0.1rem] bg-[#333333]"
+                    className="h-[0.05rem] relative -top-1 bg-[#333333]"
                 />
             </div>
 
@@ -281,11 +286,7 @@ export default function RegisterCanteenPage() {
                     <div className="w-full mt-2">
                         <Button
                             type="submit"
-                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
-                                disabled
-                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
-                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
-                            }`}
+                            className="text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 hover:shadow-md active:scale-[98%]"
                             disabled={disabled}
                             onMouseOver={onMouseOver}
                             btnText={

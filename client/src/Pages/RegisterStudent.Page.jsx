@@ -132,7 +132,7 @@ export default function RegisterStudentPage() {
                 to={'/'}
                 className="w-fit flex items-center justify-center hover:brightness-95"
             >
-                <div className="overflow-hidden rounded-full size-[90px] shadow-sm">
+                <div className="overflow-hidden rounded-full size-18 shadow-sm">
                     <img
                         src={LOGO}
                         alt="peer connect logo"
@@ -141,14 +141,14 @@ export default function RegisterStudentPage() {
                 </div>
             </Link>
             <div className="w-fit">
-                <p className="text-center px-2 text-[28px] font-medium">
+                <p className="text-center text-2xl font-semibold">
                     Register a New Student
                 </p>
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: '100%' }}
                     transition={{ duration: 0.3 }}
-                    className="relative -top-1 h-[0.1rem] bg-[#333333]"
+                    className="relative -top-1 h-[0.05rem] bg-[#333333]"
                 />
             </div>
 
@@ -163,7 +163,7 @@ export default function RegisterStudentPage() {
                     onSubmit={handleSubmit}
                     className="flex flex-col items-start justify-center gap-4 w-full"
                 >
-                    <div className="w-full flex flex-col gap-1">
+                    <div className="w-full flex flex-col gap-2">
                         {inputElements}
 
                         {/* phone number field */}
@@ -198,27 +198,21 @@ export default function RegisterStudentPage() {
                         </div>
                     </div>
 
-                    <div className="w-full">
-                        <Button
-                            type="submit"
-                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
-                                disabled
-                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
-                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
-                            }`}
-                            disabled={disabled}
-                            onMouseOver={onMouseOver}
-                            btnText={
-                                loading ? (
-                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                        {icons.loading}
-                                    </div>
-                                ) : (
-                                    'Register'
-                                )
-                            }
-                        />
-                    </div>
+                    <Button
+                        type="submit"
+                        className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                        disabled={disabled}
+                        onMouseOver={onMouseOver}
+                        btnText={
+                            loading ? (
+                                <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                    {icons.loading}
+                                </div>
+                            ) : (
+                                'Register'
+                            )
+                        }
+                    />
                 </form>
             </div>
         </div>

@@ -20,10 +20,10 @@ export default function Footer() {
     );
 
     return (
-        <footer className="bg-gray-50 border-t border-gray-200 w-full py-6">
-            <div className="w-[90%] max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <footer className="bg-gray-50 border-t border-gray-200 w-full py-6 mt-4 sm:mt-0">
+            <div className="w-[90%] max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
                 {/* Left: Branding and Socials */}
-                <div className="flex flex-col items-center md:items-start gap-3">
+                <div className="flex flex-col items-center sm:items-start gap-3">
                     <div className="flex items-center gap-2">
                         <img
                             src={LOGO}
@@ -41,8 +41,8 @@ export default function Footer() {
                 </div>
 
                 {/* Right: University Info */}
-                <div className="flex flex-col items-center md:items-end gap-3">
-                    <div className="flex gap-2">
+                <div className="flex flex-col items-center sm:items-end gap-3">
+                    <div className="flex gap-3">
                         <img
                             src={PU}
                             alt="PU Logo"
@@ -63,7 +63,7 @@ export default function Footer() {
             {/* Bottom Bar */}
             <div className="border-t border-gray-200 mt-6 pt-4 text-center text-xs text-gray-500">
                 <p>
-                    &copy; {new Date().getFullYear()} Snack Track. Made with ❤️
+                    &copy; {new Date().getFullYear()} SnackTrack. Made with ❤️
                     for Panjab University.
                 </p>
             </div>

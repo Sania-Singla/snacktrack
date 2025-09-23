@@ -33,7 +33,7 @@ export default function EditCartItem() {
                 onClick={() => setShowPopup(false)}
                 className="absolute top-2 right-2"
             />
-            <h3 className="text-xl font-bold mb-2">Edit Item Details</h3>
+            <h3 className="text-xl font-semibold mb-2">Edit Item Details</h3>
 
             {item.type === 'Snack' && (
                 <div className="w-full">

@@ -102,11 +102,7 @@ export default function RemoveSnackPopup() {
                     }
                     onClick={removeSnack}
                     disabled={disabled}
-                    className={`text-white relative -top-2 rounded-md py-2 px-3 flex items-center justify-center w-full bg-red-700 hover:bg-red-800 transition-all duration-200 ${
-                        disabled
-                            ? 'bg-gray-400 cursor-not-allowed opacity-50 grayscale-[30%] saturate-50'
-                            : 'bg-red-700 hover:bg-red-800 hover:shadow-md active:scale-[98%]'
-                    }`}
+                    className="text-white relative -top-2 rounded-md py-2 px-3 flex items-center justify-center w-full bg-red-700 hover:bg-red-800 transition-all duration-200 hover:shadow-md active:scale-[98%]"
                 />
             </div>
         </div>

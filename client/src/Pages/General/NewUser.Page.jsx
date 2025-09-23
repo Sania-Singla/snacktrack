@@ -1,32 +1,50 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
 
 export default function NewUserPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="text-center min-h-screen bg-gradient-to-r from-sky-500 to-blue-600 flex items-center justify-center p-6">
-            <div className="bg-white rounded-2xl shadow-sm p-8 max-w-md w-full">
-                <h1 className="text-3xl font-bold text-gray-800 mb-6 animate-fade-in">
+        <div className="text-center min-h-screen bg-gradient-to-r from-sky-500 to-blue-600 flex items-center justify-center p-5">
+            <div className="bg-white rounded-xl shadow-sm p-7 w-fit">
+                <h1 className="text-2xl font-bold text-gray-800 mb-6 animate-fade-in">
                     Welcome to SnackTrack!
                 </h1>
-                <p className="text-gray-600 mb-6 animate-fade-in animate-delay-100">
-                    <Link
-                        to="/login"
-                        className="bg-[#f6f6f6] text-[#3a67d8] rounded-sm px-[10px] py-[3px] font-semibold hover:underline"
-                    >
-                        Login
-                    </Link>{' '}
-                    if you have an account or visit your nearest POC for
-                    registration.
+
+                <div className="mb-5">
+                    <p className="text-gray-600 mb-5 text-sm">
+                        Already registered ? Sign in to continue your
+                        experience.
+                    </p>
+                    <Button
+                        onClick={() => navigate('/login')}
+                        className="bg-[#3a67d8] text-white px-4 py-1.5 rounded-md font-semibold hover:bg-[#2c4fa8] text-sm"
+                        btnText="Sign In"
+                    />
+                </div>
+
+                {/* Divider */}
+                <div className="relative mb-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300" />
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-3 bg-white text-gray-600 font-medium">
+                            New to SnackTrack ?
+                        </span>
+                    </div>
+                </div>
+
+                <p className="text-gray-500 mb-6 text-sm">
+                    Please visit your nearest Point of Contact to get started
                 </p>
 
                 {/* Animated Icon */}
-                <div className="mb-6 flex justify-center animate-bounce animate-infinite animate-duration-2000">
+                <div className="mb-3 flex justify-center animate-bounce animate-infinite animate-duration-2000">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         style={{ color: '#3a67d8' }}
-                        className="h-12 w-12"
+                        className="size-10"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -40,23 +58,28 @@ export default function NewUserPage() {
                     </svg>
                 </div>
 
-                {/* Staff Controls */}
-                <div className="animate-fade-in animate-delay-200">
-                    <p className="text-gray-600 mb-4">
-                        Staff member? Access your controls:
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                        <Button
-                            onClick={() => navigate('/admin')}
-                            btnText="Admin Panel"
-                            className="bg-[#3a67d8] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#2c4fa8] flex-1"
-                        />
-                        <Button
-                            onClick={() => navigate('/kitchen')}
-                            btnText="Kitchen Dashboard"
-                            className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-emerald-700 flex-1"
-                        />
+                <div className="relative mb-6">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300" />
                     </div>
+                    <div className="relative flex justify-center text-sm">
+                        <span className="px-3 bg-white text-gray-600 font-medium">
+                            Staff Access
+                        </span>
+                    </div>
+                </div>
+
+                <div className="flex gap-3 justify-center sm:px-4">
+                    <Button
+                        onClick={() => navigate('/admin')}
+                        btnText="Admin"
+                        className="bg-gray-700 text-white py-2 rounded-md hover:bg-gray-800 flex-1"
+                    />
+                    <Button
+                        onClick={() => navigate('/kitchen')}
+                        btnText="Kitchen"
+                        className="bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 flex-1"
+                    />
                 </div>
             </div>
         </div>

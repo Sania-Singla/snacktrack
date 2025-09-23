@@ -256,8 +256,8 @@ export default function CartPage() {
             </div>
         </div>
     ) : cartItems.length > 0 ? (
-        <div className="bg-gray-100 rounded-xl shadow-sm w-full py-10 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Cart</h1>
+        <div className="w-full py-6 px-4 sm:px-6">
+            <h1 className="text-2xl font-semibold text-gray-900 mb-8">Your Cart</h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Product List */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">

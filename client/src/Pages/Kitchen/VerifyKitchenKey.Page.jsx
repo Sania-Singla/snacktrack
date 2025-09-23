@@ -70,11 +70,11 @@ export default function VerifyKitchenKeyPage() {
     ) : (
         <div className="w-full h-full flex items-center justify-center bg-gray-100">
             <div className="sm:px-8 drop-shadow-md relative w-[350px] sm:w-[450px] bg-white rounded-xl text-black p-5 flex flex-col items-center justify-center gap-4">
-                <p className="text-2xl font-bold text-center mb-2">
+                <p className="text-2xl font-semibold text-center mb-2">
                     Verify Kitchen Key
                 </p>
-                <p className="text-[15px] text-gray-600 text-center mb-3">
-                    Enter the Kitchen Secret key to navigate to control panel
+                <p className="text-sm text-gray-600 text-center mb-3">
+                    Enter the Kitchen key to access the kitchen dashboard
                 </p>
 
                 <div className="w-full flex justify-center mb-4">

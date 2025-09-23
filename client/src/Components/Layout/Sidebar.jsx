@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useSideBarContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { Button, Logout } from '..';
@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useRef } from 'react';
 
 export default function Sidebar() {
+    const navigate = useNavigate();
     const { user } = useUserContext();
     const { showSideBar, setShowSideBar } = useSideBarContext();
     const items = [
@@ -136,12 +137,12 @@ export default function Sidebar() {
                         exit="exit"
                         className="h-full w-[265px] flex justify-start"
                     >
-                        <div className="w-full px-3 bg-gray-50 drop-shadow-sm flex flex-col items-start justify-start h-full">
-                            <div className="h-[60px] px-2 gap-5 w-full flex items-center justify-between">
+                        <div className="w-full bg-gray-50 drop-shadow-sm flex flex-col items-start justify-start h-full">
+                            <div className="h-[60px] px-5 gap-5 w-full flex items-center justify-between">
                                 {/* hamburgur menu btn */}
                                 <Button
                                     btnText={
-                                        <div className="size-[20px] fill-[#434343] hover:fill-[#4977ec]">
+                                        <div className="size-5 fill-[#434343] hover:fill-[#4977ec]">
                                             {icons.hamburgur}
                                         </div>
                                     }
@@ -158,7 +159,10 @@ export default function Sidebar() {
                                         <Logout />
                                     </div>
 
-                                    <div className="size-[35px] rounded-full overflow-hidden shadow-sm">
+                                    <div
+                                        onClick={() => navigate('/settings')}
+                                        className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
+                                    >
                                         <img
                                             src={user.avatar}
                                             alt="user avatar"
@@ -168,9 +172,9 @@ export default function Sidebar() {
                                 </div>
                             </div>
 
-                            <hr className="w-full border-gray-300" />
+                            <hr className="w-full border-gray-200" />
 
-                            <div className="text-[17px] py-3 h-[calc(100%-60px)] text-black overflow-y-scroll w-full flex flex-col gap-1 mb-1 items-start justify-start">
+                            <div className="text-[17px] px-2 py-3 h-[calc(100%-60px)] text-black overflow-y-scroll w-full flex flex-col gap-1 mb-1 items-start justify-start">
                                 {itemElements}
                             </div>
                         </div>

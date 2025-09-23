@@ -25,7 +25,6 @@ import {
     AdminPage,
     RegisterCanteenPage,
     VerifyKitchenKeyPage,
-    NewUserPageRedirect,
 } from './Pages';
 
 import {
@@ -38,14 +37,13 @@ import {
 export const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
-            {/* Authenticated Routes */}
             <Route element={<ProtectedRoute />}>
                 <Route element={<Layout />}>
                     <Route path="" element={<HomePage />} />
                 </Route>
             </Route>
 
-            {/* Redirect staff */}
+            {/* Student & Contractor only */}
             <Route
                 element={<ProtectedRoute roles={['student', 'contractor']} />}
             >
@@ -92,13 +90,7 @@ export const router = createBrowserRouter(
                 </Route>
             </Route>
 
-            {/* Admin only (with admin key verification) */}
-            <Route path="admin" element={<Layout renderTemplate={false} />}>
-                <Route path="" element={<AdminPage />} />
-                <Route path="new-canteen" element={<RegisterCanteenPage />} />
-            </Route>
-
-            {/* Kitchen Staff only */}
+            {/* Staff only */}
             <Route
                 path="kitchen"
                 element={<ProtectedRoute roles={['staff', 'contractor']} />}
@@ -108,17 +100,19 @@ export const router = createBrowserRouter(
                 </Route>
             </Route>
 
+            {/* Admin only (with admin key verification) */}
+            <Route path="admin" element={<Layout renderTemplate={false} />}>
+                <Route path="" element={<AdminPage />} />
+                <Route path="new-canteen" element={<RegisterCanteenPage />} />
+            </Route>
+
             <Route
                 path="/kitchen/verify-key"
                 element={<VerifyKitchenKeyPage />}
             />
 
-            {/* so that already logged in user can't get this page again */}
-            <Route element={<NewUserPageRedirect />}>
-                <Route path="new-user" element={<NewUserPage />} />
-            </Route>
+            <Route path="new-user" element={<NewUserPage />} />
 
-            {/* Public Routes */}
             <Route element={<Layout renderTemplate={false} />}>
                 <Route path="login" element={<LoginPage />} />
                 <Route path="server-error" element={<ServerErrorPage />} />

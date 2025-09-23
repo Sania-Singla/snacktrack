@@ -89,20 +89,43 @@ export default function PackagedItemView({ item, reference }) {
             {/* Content */}
             <div className="flex flex-col w-full">
                 <div className="flex items-center justify-between gap-4">
-                    <p className="text-xl font-bold text-gray-900 truncate">
+                    <p className="text-lg font-semibold text-gray-900 truncate">
                         {name}
                     </p>
 
-                    <div className="flex items-center gap-1 bg-gray-100 shadow-sm rounded-full px-3 py-1">
-                        <div
-                            className={`size-[6px] rounded-full ${isAvailable ? 'bg-green-600' : 'bg-red-500'}`}
-                        />
-                        <span
-                            className={`text-sm font-semibold ${isAvailable ? 'text-green-600' : 'text-red-600'}`}
-                        >
-                            {isAvailable ? 'Available' : 'UnAvailable'}
-                        </span>
-                    </div>
+                    {user.role === 'contractor' ? (
+                        <div className="flex gap-3">
+                            <Button
+                                btnText={
+                                    <div className="size-4 group-hover:stroke-[#4977ec] stroke-black fill-none">
+                                        {icons.editUnfilled}
+                                    </div>
+                                }
+                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                onClick={editItem}
+                            />
+                            <div>
+                                <Button
+                                    btnText={
+                                        <div className="size-4 group-hover:fill-red-700">
+                                            {icons.delete}
+                                        </div>
+                                    }
+                                    className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                    onClick={removeItem}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        !isAvailable && (
+                            <div className="flex items-center gap-1 w-fit bg-gray-100 shadow-sm rounded-full px-3 py-1">
+                                <div className="size-[6px] rounded-full bg-red-500" />
+                                <span className="text-sm font-semibold text-red-600">
+                                    UnAvailable
+                                </span>
+                            </div>
+                        )
+                    )}
                 </div>
 
                 {/* Add to Cart Button or Toggle Switch */}
@@ -136,8 +159,7 @@ export default function PackagedItemView({ item, reference }) {
                             ) : (
                                 <Button
                                     btnText={
-                                        <div className="flex items-center justify-center gap-2">
-                                            <span>Add to Cart</span>
+                                        <div className="py-1">
                                             <div className="size-4 fill-white">
                                                 {icons.plus}
                                             </div>
@@ -151,30 +173,6 @@ export default function PackagedItemView({ item, reference }) {
                     )
                 ) : (
                     <div className="mt-5 flex items-center justify-between w-full">
-                        {user.role === 'contractor' && (
-                            <div className="flex gap-3">
-                                <Button
-                                    btnText={
-                                        <div className="size-[15px] group-hover:fill-[#4977ec]">
-                                            {icons.edit}
-                                        </div>
-                                    }
-                                    className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
-                                    onClick={editItem}
-                                />
-                                <div>
-                                    <Button
-                                        btnText={
-                                            <div className="size-[15px] group-hover:fill-red-700">
-                                                {icons.delete}
-                                            </div>
-                                        }
-                                        className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
-                                        onClick={removeItem}
-                                    />
-                                </div>
-                            </div>
-                        )}
                         <label
                             htmlFor={_id}
                             className="relative inline-flex items-center cursor-pointer"

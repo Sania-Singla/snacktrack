@@ -31,7 +31,7 @@ export default function Layout({ renderTemplate = true }) {
                         className="flex-1 p-4 mt-[60px] overflow-y-auto bg-gray-50"
                     >
                         {!isStaticPage && (
-                            <div className="mb-6 mt-2 w-full sm:hidden">
+                            <div className="mb-6 mx-4 mt-2 sm:hidden">
                                 <Searchbar />
                             </div>
                         )}

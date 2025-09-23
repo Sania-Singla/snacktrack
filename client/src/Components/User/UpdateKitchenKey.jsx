@@ -16,7 +16,7 @@ export default function UpdatePassword() {
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const [loading, setLoading] = useState(false);
-    const [disabled, setDisabled] = useState(false);
+    const [disabled, setDisabled] = useState(true);
     const navigate = useNavigate();
     const { setUser } = useUserContext();
     const [showPassword, setShowPassword] = useState(false);
@@ -155,8 +155,10 @@ export default function UpdatePassword() {
         <div className="w-full p-2">
             <div className="rounded-xl drop-shadow-md flex flex-col sm:flex-row bg-white px-8 py-6 sm:gap-14">
                 <div className="w-full py-4">
-                    <h3 className="text-2xl font-bold">Change Kitchen Key</h3>
-                    <p className="mt-2">
+                    <h3 className="text-2xl font-semibold">
+                        Update Kitchen Key
+                    </h3>
+                    <p className="mt-4 text-gray-600">
                         Update your kitchen key to secure your kitchen controls.
                         Changes are final once saved and cannot be undone.
                     </p>
@@ -172,7 +174,7 @@ export default function UpdatePassword() {
                                 setInputs(initialInputs);
                                 setError({});
                             }}
-                            className="text-white rounded-md h-[40px] text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md h-9 w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                         <Button
                             btnText={
@@ -189,7 +191,7 @@ export default function UpdatePassword() {
                             type="submit"
                             disabled={disabled}
                             onMouseOver={onMouseOver}
-                            className="text-white rounded-md h-[40px] text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md h-9 w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     </div>
                 </form>

@@ -7,6 +7,7 @@ export default function InputField({
     handleBlur = null,
     setShowPassword = null,
     showPassword = false,
+    inputStyling = '',
     className = '',
 }) {
     const { name, type, required, label, placeholder, id, show, ...rest } =
@@ -40,7 +41,7 @@ export default function InputField({
                     onBlur={handleBlur}
                     placeholder={placeholder}
                     {...rest}
-                    className="overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-500 bg-transparent placeholder:text-[15px]"
+                    className={`overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-500 bg-transparent placeholder:text-[15px] ${inputStyling}`}
                 />
                 {passwordVariants.includes(name) && (
                     <div

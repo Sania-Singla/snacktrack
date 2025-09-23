@@ -88,31 +88,6 @@ export default function SnackView({ snack, reference }) {
             ref={reference}
             className="p-4 relative bg-white shadow-sm transition-all hover:shadow-md rounded-2xl overflow-hidden cursor-pointer"
         >
-            {user.role === 'contractor' && (
-                <div className="absolute right-6 top-6 flex gap-3 justify-end">
-                    <Button
-                        btnText={
-                            <div className="size-[15px] group-hover:fill-[#4977ec]">
-                                {icons.edit}
-                            </div>
-                        }
-                        className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
-                        onClick={editSnack}
-                    />
-                    <div>
-                        <Button
-                            btnText={
-                                <div className="size-[15px] group-hover:fill-red-700">
-                                    {icons.delete}
-                                </div>
-                            }
-                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
-                            onClick={removeSnack}
-                        />
-                    </div>
-                </div>
-            )}
-
             {/* Image */}
             <div className="aspect-[5/3] w-full rounded-xl overflow-hidden shadow-sm">
                 <img
@@ -125,25 +100,48 @@ export default function SnackView({ snack, reference }) {
             {/* Content */}
             <div className="flex flex-col w-full mt-4">
                 <div className="flex justify-between gap-4 items-center">
-                    <p className="text-xl font-bold text-gray-900 truncate">
+                    <p className="text-lg font-semibold text-gray-900 truncate">
                         {name}
                     </p>
 
-                    <div className="flex items-center gap-1 w-fit bg-gray-100 shadow-sm rounded-full px-3 py-1">
-                        <div
-                            className={`size-[6px] rounded-full ${isAvailable ? 'bg-green-600' : 'bg-red-500'}`}
-                        />
-                        <span
-                            className={`text-sm font-semibold ${isAvailable ? 'text-green-600' : 'text-red-600'}`}
-                        >
-                            {isAvailable ? 'Available' : 'UnAvailable'}
-                        </span>
-                    </div>
+                    {user.role === 'contractor' ? (
+                        <div className="flex gap-3 justify-end">
+                            <Button
+                                btnText={
+                                    <div className="size-4 group-hover:stroke-[#4977ec] stroke-black fill-none">
+                                        {icons.editUnfilled}
+                                    </div>
+                                }
+                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                onClick={editSnack}
+                            />
+                            <div>
+                                <Button
+                                    btnText={
+                                        <div className="size-4 group-hover:fill-red-700">
+                                            {icons.delete}
+                                        </div>
+                                    }
+                                    className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                    onClick={removeSnack}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        !isAvailable && (
+                            <div className="flex items-center gap-1 w-fit bg-gray-100 shadow-sm rounded-full px-3 py-1">
+                                <div className="size-[6px] rounded-full bg-red-500" />
+                                <span className="text-sm font-semibold text-red-600">
+                                    UnAvailable
+                                </span>
+                            </div>
+                        )
+                    )}
                 </div>
 
                 {/* Add to Cart Button or Toggle Switch */}
                 <div className="w-full flex items-center justify-end mt-5">
-                    {user.role !== 'contractor' ? (
+                    {user.role === 'student' ? (
                         isAvailable &&
                         (quantityInCart > 0 ? (
                             <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
@@ -170,8 +168,7 @@ export default function SnackView({ snack, reference }) {
                         ) : (
                             <Button
                                 btnText={
-                                    <div className="flex items-center justify-center gap-2">
-                                        <span>Add to Cart</span>
+                                    <div className="py-1">
                                         <div className="size-4 fill-white">
                                             {icons.plus}
                                         </div>
@@ -182,7 +179,7 @@ export default function SnackView({ snack, reference }) {
                             />
                         ))
                     ) : (
-                        <div className="flex items-center justify-center">
+                        <div className="flex items-center w-full">
                             <label
                                 htmlFor={_id}
                                 className="relative inline-flex items-center cursor-pointer"

@@ -209,29 +209,23 @@ export default function EditSnackPopup() {
 
                     {inputElements}
 
-                    <div className="w-full">
-                        <Button
-                            type="submit"
-                            className={`text-white rounded-md py-2 mt-2 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 ${
-                                disabled
-                                    ? 'bg-gray-400 cursor-not-allowed opacity-90 grayscale-[30%] saturate-50'
-                                    : 'bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]'
-                            }`}
-                            disabled={disabled}
-                            onMouseOver={onMouseOver}
-                            btnText={
-                                loading ? (
-                                    <div className="flex items-center justify-center w-full">
-                                        <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                            {icons.loading}
-                                        </div>
+                    <Button
+                        type="submit"
+                        className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2] transition-all duration-200 hover:shadow-md active:scale-[98%]"
+                        disabled={disabled}
+                        onMouseOver={onMouseOver}
+                        btnText={
+                            loading ? (
+                                <div className="flex items-center justify-center w-full">
+                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                        {icons.loading}
                                     </div>
-                                ) : (
-                                    'Update'
-                                )
-                            }
-                        />
-                    </div>
+                                </div>
+                            ) : (
+                                'Update'
+                            )
+                        }
+                    />
                 </form>
             </div>
         </div>

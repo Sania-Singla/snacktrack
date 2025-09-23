@@ -55,13 +55,14 @@ export default function AdminPage() {
             >
                 {/* Hostel Details */}
                 <div className="flex items-center justify-between gap-4 mb-4">
-                    <h2 className="text-[19px] font-bold text-gray-900">
+                    <h2 className="text-lg font-semibold text-gray-900">
                         {canteen.hostelName}
                     </h2>
                     <p className="text-nowrap text-[#4977ec] font-medium">
                         {canteen.hostelType} {canteen.hostelNumber}
                     </p>
                 </div>
+
                 {/* Contractor Details */}
                 <div className="relative flex justify-between">
                     <div className="flex items-center gap-4">
@@ -75,14 +76,14 @@ export default function AdminPage() {
                             </div>
                         </div>
                         <div>
-                            <p className="text-lg font-semibold text-gray-900">
+                            <p className="font-semibold text-gray-900">
                                 {canteen.contractor.fullName}
                             </p>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-[12px] text-gray-700">
                                 <span className="font-medium">Email:</span>{' '}
                                 {canteen.contractor.email}
                             </p>
-                            <p className="text-sm  text-gray-700">
+                            <p className="text-[12px]  text-gray-700">
                                 <span className="font-medium">Phone:</span>{' '}
                                 {canteen.contractor.phoneNumber}
                             </p>
@@ -92,8 +93,8 @@ export default function AdminPage() {
                     <div className="flex gap-2 flex-col h-fit self-end">
                         <Button
                             btnText={
-                                <div className="size-[14px] group-hover:fill-[#4977ec]">
-                                    {icons.edit}
+                                <div className="size-4 fill-none stroke-black group-hover:stroke-[#4977ec]">
+                                    {icons.editUnfilled}
                                 </div>
                             }
                             className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
@@ -133,7 +134,7 @@ export default function AdminPage() {
         // verify admin key
         <div className="w-full h-full flex items-center justify-center bg-gray-100">
             <div className="sm:px-8 drop-shadow-md relative w-[350px] sm:w-[450px] bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-4">
-                <p className="text-2xl font-bold text-center mb-2">
+                <p className="text-2xl font-semibold text-center mb-2">
                     Verify Admin Key
                 </p>
                 <p className="text-[15px] text-gray-600 text-center mb-3">
@@ -176,16 +177,16 @@ export default function AdminPage() {
         </div>
     ) : (
         // Admin Dashboard
-        <div className="min-h-screen bg-gray-100 p-6">
+        <div className="min-h-screen bg-gray-50 p-6">
             <div>
                 <section className="w-full bg-white shadow-sm mb-8 rounded-xl p-8 md:px-12 flex justify-between">
                     <div>
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                        <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">
                             Admin Dashboard
                         </h1>
-                        <p className="mt-4 text-gray-700 max-w-3xl">
-                            Welcome to the Admin Dashboard. Here you can manage
-                            canteens and contractors efficiently.
+                        <p className="mt-4 text-gray-500 max-w-3xl">
+                            Welcome to the Admin Dashboard, Here you can manage
+                            Resources efficiently.
                         </p>
                     </div>
                     <img src={LOGO_SVG} alt="logo svg" className="size-20" />
@@ -193,7 +194,7 @@ export default function AdminPage() {
 
                 <div className="flex justify-center w-full mb-8">
                     <Button
-                        className="w-fit bg-[#4977ec] text-white text-lg px-5 py-2 rounded-lg hover:bg-[#3b62c2]"
+                        className="w-fit bg-[#4977ec] text-white px-4 py-2 rounded-md hover:bg-[#3b62c2]"
                         btnText="Register New Canteen"
                         onClick={() => navigate('new-canteen')}
                     />

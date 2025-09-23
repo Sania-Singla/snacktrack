@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
 import { useSocketContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { Button } from '../../Components';
+import { LOGO } from '../../Constants/constants';
 
 export default function KitchenPage() {
     const navigate = useNavigate();
@@ -221,28 +222,35 @@ export default function KitchenPage() {
             </div>
         </div>
     ) : (
-        <div className="min-h-screen bg-gray-100 p-4 md:p-6">
+        <div className="min-h-screen bg-gray-50 p-4 md:p-6">
             <section className="w-full bg-white shadow-sm rounded-xl p-6 mb-8 h-fit">
-                <div className="">
-                    <div className="">
-                        <div className="flex justify-between gap-6 items-center">
-                            <h2 className="text-2xl font-bold text-gray-800 mb-3">
-                                Kitchen Summary
-                            </h2>
-                            <p className="text-sm md:text-base font-medium w-fit text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg">
-                                <span className="font-semibold text-blue-600">
-                                    {user.hostelType}
-                                    {user.hostelNumber}
-                                </span>{' '}
-                                - {user.hostelName}
-                            </p>
-                        </div>
-                        <p className="text-gray-500">
-                            Aggregated items for preparation, better kitchen
-                            management
-                        </p>
+                <div className="flex justify-between gap-6 items-center">
+                    <div className="flex items-center gap-3 mb-4">
+                        <Link
+                            to={'/'}
+                            className="overflow-hidden rounded-full size-[35px] border-gray-200 border shadow-sm"
+                        >
+                            <img
+                                src={LOGO}
+                                alt="Snack Track Logo"
+                                className="object-cover size-full hover:brightness-95"
+                            />
+                        </Link>
+                        <h2 className="text-2xl font-semibold text-gray-800">
+                            Kitchen Summary
+                        </h2>
                     </div>
+                    <p className="text-sm md:text-base font-medium w-fit text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg">
+                        <span className="font-semibold text-blue-600">
+                            {user.hostelType}
+                            {user.hostelNumber}
+                        </span>{' '}
+                        - {user.hostelName}
+                    </p>
                 </div>
+                <p className="text-gray-500 text-sm md:text-base">
+                    Aggregated items for preparation, better kitchen management
+                </p>
             </section>
 
             {/* orders */}
@@ -274,7 +282,7 @@ export default function KitchenPage() {
                         </div>
                     </section>
 
-                    {/* users wise */}
+                    {/* user wise */}
                     <section className="w-full md:w-[30%] md:ml-2 md:p-2">
                         <h2 className="text-center font-bold text-xl mb-6">
                             Orders
@@ -286,7 +294,7 @@ export default function KitchenPage() {
                 </section>
             ) : (
                 <p className="text-gray-400 italic text-center">
-                    No Items to Prepare, Chill
+                    Nothing to Prepare, Chill
                 </p>
             )}
         </div>

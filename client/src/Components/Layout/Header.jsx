@@ -26,12 +26,12 @@ export default function Header() {
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 
     return (
-        <header className="shadow-sm fixed top-0 z-[10] w-full bg-gray-50 text-black h-[60px] px-5 font-medium flex items-center justify-between gap-4">
+        <header className="border-b border-b-gray-200 fixed top-0 z-[10] w-full bg-gray-50 text-black h-[60px] px-5 font-medium flex items-center justify-between gap-4">
             <div className="flex items-center justify-center gap-4">
                 {/* hamburgur menu btn */}
                 <Button
                     btnText={
-                        <div className="size-[20px] fill-[#434343] hover:fill-[#4977ec]">
+                        <div className="size-5 fill-[#434343] hover:fill-[#4977ec]">
                             {icons.hamburgur}
                         </div>
                     }
@@ -44,7 +44,7 @@ export default function Header() {
                     to={'/'}
                     className="flex items-center justify-center gap-3 text-nowrap font-medium text-lg"
                 >
-                    <div className="overflow-hidden rounded-full size-[35px] shadow-sm">
+                    <div className="overflow-hidden rounded-full size-8 shadow-sm">
                         <img
                             src={LOGO}
                             alt="Snack Track Logo"
@@ -56,7 +56,7 @@ export default function Header() {
             </div>
 
             <div
-                className={`${isStaticPage ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] w-full`}
+                className={`${isStaticPage ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] mx-4 w-full`}
             >
                 <Searchbar />
             </div>
@@ -66,17 +66,17 @@ export default function Header() {
                     <div className="relative">
                         <Button
                             btnText={
-                                <div className="size-[20px] group-hover:fill-[#4977ec] fill-[#434343]">
+                                <div className="size-4 group-hover:fill-[#4977ec] fill-[#434343]">
                                     {icons.cart}
                                 </div>
                             }
                             title="View Cart"
                             onClick={() => navigate('/cart')}
-                            className="bg-[#ffffff] p-[9px] group rounded-full drop-shadow-sm w-fit"
+                            className="bg-[#ffffff] p-2 group rounded-full drop-shadow-sm w-fit"
                         />
                         {/* total quantity count */}
                         {totalQuantity > 0 && (
-                            <span className="text-[13px] flex items-center justify-center leading-3 text-white absolute -top-1 -right-1 size-5 bg-red-600 rounded-full">
+                            <span className="text-xs flex items-center justify-center leading-3 text-white absolute -top-1 -right-1 size-4 bg-red-600 rounded-full">
                                 {totalQuantity}
                             </span>
                         )}
@@ -87,14 +87,14 @@ export default function Header() {
                             onClick={() => navigate('/register-student')}
                             btnText={
                                 <div className="flex items-center justify-center gap-2">
-                                    <div className="size-[16px] fill-white">
+                                    <div className="size-4 fill-white">
                                         {icons.memberAdd}
                                     </div>
                                     <span>Student</span>
                                 </div>
                             }
                             title="Add Student"
-                            className="text-white rounded-md w-fit text-nowrap px-3 h-[35px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md w-fit text-nowrap font-normal px-3 h-8 bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     </div>
                 )}
