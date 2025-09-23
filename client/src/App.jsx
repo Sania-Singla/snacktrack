@@ -50,7 +50,7 @@ export default function App() {
                     </div>
                     <p className="mt-3 text-xl font-semibold">Please Wait...</p>
                     <p className="text-sm mt-2 text-gray-600">
-                        Due to free hosting, it might take up to 10 seconds.
+                        Due to free hosting, it might take long.
                     </p>
                 </div>
             ) : (
