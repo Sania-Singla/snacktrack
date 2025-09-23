@@ -45,14 +45,12 @@ export default function App() {
         <div className="bg-white h-[100vh] w-[100vw]">
             {loading || (user && !socket) ? (
                 <div className="text-black h-full w-full flex flex-col items-center justify-center">
-                    <div className="size-[33px] fill-[#4977ec] dark:text-[#ececec]">
+                    <div className="size-6 fill-[#4977ec] dark:text-[#ececec]">
                         {icons.loading}
                     </div>
-                    <p className="mt-2 text-2xl font-semibold">
-                        Please Wait...
-                    </p>
-                    <p className="text-[16px] mt-1">
-                        Please refresh the page, if it takes too long
+                    <p className="mt-3 text-xl font-semibold">Please Wait...</p>
+                    <p className="text-sm mt-2 text-gray-600">
+                        Due to free hosting, it might take up to 10 seconds.
                     </p>
                 </div>
             ) : (
