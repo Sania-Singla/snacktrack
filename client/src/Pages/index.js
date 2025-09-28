@@ -16,6 +16,7 @@ import VerifyKitchenKeyPage from './Kitchen/VerifyKitchenKey.Page';
 import AdminPage from './Admin.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
 import BillsPage from './Bills.Page';
+import DemoCredentialsPage from './General/DemoCredentials.Page';
 
 export {
     StudentBillsPage,
@@ -36,4 +37,5 @@ export {
     BillsPage,
     AdminPage,
     RegisterCanteenPage,
+    DemoCredentialsPage,
 };

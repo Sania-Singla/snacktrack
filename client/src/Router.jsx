@@ -25,6 +25,7 @@ import {
     AdminPage,
     RegisterCanteenPage,
     VerifyKitchenKeyPage,
+    DemoCredentialsPage,
 } from './Pages';
 
 import {
@@ -111,9 +112,9 @@ export const router = createBrowserRouter(
                 element={<VerifyKitchenKeyPage />}
             />
 
-            <Route path="new-user" element={<NewUserPage />} />
-
             <Route element={<Layout renderTemplate={false} />}>
+                <Route path="new-user" element={<NewUserPage />} />
+                <Route path="demo" element={<DemoCredentialsPage />} />
                 <Route path="login" element={<LoginPage />} />
                 <Route path="server-error" element={<ServerErrorPage />} />
                 <Route path="*" element={<NotFoundPage />} />

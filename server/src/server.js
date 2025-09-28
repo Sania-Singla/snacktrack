@@ -4,7 +4,7 @@ import { startBillingCronJob, startCleanupCronJob } from './CronJobs/bills.js';
 import {
     connectMongoDB,
     connectRedis,
-    // generateTransporter,
+    generateTransporter,
     // connectTwilio,
 } from './Config/index.js';
 
@@ -16,7 +16,7 @@ try {
     [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
         connectMongoDB(),
         connectRedis(),
-        // generateTransporter(),
+        generateTransporter(),
         // connectTwilio(),
     ]);
 

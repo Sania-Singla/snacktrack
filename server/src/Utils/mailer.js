@@ -10,22 +10,24 @@ export async function sendMail({
     text = '',
     html = '',
 }) {
-    if (!transporter) throw new Error('❌ Transporter not initialized.');
-
     try {
-        const mailOptions = {
-            from: `${senderName} <${senderMail}>`, // although would always show admin email
-            to: `${receiverName} <${receiverMail}>`,
-            replyTo: replyToMail || senderMail,
-            subject,
-            text,
-            html,
-            headers: {
-                'X-Entity-Ref-ID': new Date().getTime().toString(),
-            },
-        };
+        if (transporter) {
+            const mailOptions = {
+                from: `${senderName} <${senderMail}>`, // although would always show admin email
+                to: `${receiverName} <${receiverMail}>`,
+                replyTo: replyToMail || senderMail,
+                subject,
+                text,
+                html,
+                headers: {
+                    'X-Entity-Ref-ID': new Date().getTime().toString(),
+                },
+            };
 
-        return await transporter.sendMail(mailOptions);
+            return await transporter.sendMail(mailOptions);
+        } else {
+            // throw new Error('❌ Transporter not initialized.');  // ⚠️ Render blocked SMTP ports on free plan
+        }
     } catch (err) {
         throw new Error(`❌ Error sending mail: ${err.message}`);
     }
