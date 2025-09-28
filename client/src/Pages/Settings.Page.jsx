@@ -71,7 +71,9 @@ export default function SettingsPage() {
                             @{user.hostelType}
                             {user.hostelNumber} - {user.hostelName}
                         </p>
-                        <p>Roll No: {getRollNo(user.userName)}</p>
+                        {user.role === 'student' && (
+                            <p>Roll No: {getRollNo(user.userName)}</p>
+                        )}
                     </div>
                 </div>
             </div>
