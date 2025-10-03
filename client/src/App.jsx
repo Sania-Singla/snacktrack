@@ -8,6 +8,7 @@ import {
 } from './Contexts';
 import { userService } from './Services';
 import { icons } from './Assets/icons';
+import { LOGO } from './Constants/constants';
 
 export default function App() {
     const [loading, setLoading] = useState(true);
@@ -44,14 +45,12 @@ export default function App() {
     return (
         <div className="bg-white h-[100vh] w-[100vw]">
             {loading || (user && !socket) ? (
-                <div className="text-black h-full w-full flex flex-col items-center justify-center">
-                    <div className="size-6 fill-[#4977ec] dark:text-[#ececec]">
-                        {icons.loading}
-                    </div>
-                    <p className="mt-3 text-xl font-semibold">Please Wait...</p>
-                    <p className="text-sm mt-2 text-gray-600">
-                        Due to free hosting, it might take long.
-                    </p>
+                <div className="animate-pulse text-black h-full w-full flex flex-col items-center justify-center">
+                    <img
+                        src={LOGO}
+                        alt="snacktrack logo"
+                        className="size-20 shadow-sm rounded-full"
+                    />
                 </div>
             ) : (
                 <Outlet />
