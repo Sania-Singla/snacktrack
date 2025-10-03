@@ -11,23 +11,21 @@ export async function sendMail({
     html = '',
 }) {
     try {
-        if (transporter) {
-            const mailOptions = {
-                from: `${senderName} <${senderMail}>`, // although would always show admin email
-                to: `${receiverName} <${receiverMail}>`,
-                replyTo: replyToMail || senderMail,
-                subject,
-                text,
-                html,
-                headers: {
-                    'X-Entity-Ref-ID': new Date().getTime().toString(),
-                },
-            };
+        if (!transporter) throw new Error('❌ Transporter not initialized.');
 
-            return await transporter.sendMail(mailOptions);
-        } else {
-            // throw new Error('❌ Transporter not initialized.');  // ⚠️ Render blocked SMTP ports on free plan
-        }
+        const mailOptions = {
+            from: `${senderName} <${senderMail}>`, // although would always show admin email
+            to: `${receiverName} <${receiverMail}>`,
+            replyTo: replyToMail || senderMail,
+            subject,
+            text,
+            html,
+            headers: {
+                'X-Entity-Ref-ID': new Date().getTime().toString(),
+            },
+        };
+
+        return await transporter.sendMail(mailOptions);
     } catch (err) {
         throw new Error(`❌ Error sending mail: ${err.message}`);
     }
