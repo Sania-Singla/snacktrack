@@ -72,7 +72,7 @@ const refreshAccessToken = async (res, refreshToken) => {
             await generateAccessToken({ _id: user._id, role: user.role }), // new access token
             {
                 ...COOKIE_OPTIONS,
-                maxAge: parseInt(process.env.ACCESS_TOKEN_MAXAGE),
+                maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
             }
         );
         return user;

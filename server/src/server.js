@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './Config/env.js';
 import { http } from './socket.js';
 import { startBillingCronJob, startCleanupCronJob } from './CronJobs/bills.js';
 import {

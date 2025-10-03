@@ -3,7 +3,7 @@ const COOKIE_OPTIONS = {
     path: '/',
     secure: true,
     sameSite: 'None',
-    domain: '.snacktrack.live', // required for iOS
+    domain: process.env.ENV === 'production' ? '.snacktrack.live' : '', // required for iOS
 };
 
 const CORS_OPTIONS = {
