@@ -84,7 +84,7 @@ export default function PackagedItemView({ item, reference }) {
     return (
         <div
             ref={reference}
-            className="p-4 relative bg-white shadow-sm transition-all hover:shadow-md rounded-2xl overflow-hidden cursor-pointer"
+            className={`${!isAvailable ? 'brightness-95 opacity-50' : 'shadow-sm hover:shadow-md'} p-4 relative bg-white transition-all rounded-2xl overflow-hidden cursor-pointer`}
         >
             {/* Content */}
             <div className="flex flex-col w-full">
@@ -93,7 +93,7 @@ export default function PackagedItemView({ item, reference }) {
                         {name}
                     </p>
 
-                    {user.role === 'contractor' ? (
+                    {user.role === 'contractor' && (
                         <div className="flex gap-3">
                             <Button
                                 btnText={
@@ -116,15 +116,6 @@ export default function PackagedItemView({ item, reference }) {
                                 />
                             </div>
                         </div>
-                    ) : (
-                        !isAvailable && (
-                            <div className="flex items-center gap-1 w-fit bg-gray-100 shadow-sm rounded-full px-3 py-1">
-                                <div className="size-[6px] rounded-full bg-red-500" />
-                                <span className="text-sm font-semibold text-red-600">
-                                    UnAvailable
-                                </span>
-                            </div>
-                        )
                     )}
                 </div>
 

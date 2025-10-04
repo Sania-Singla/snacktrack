@@ -7,7 +7,6 @@ import { useCallback } from 'react';
  * @param {Function} setPage - State function to update the page number.
  * @returns {Function} A useCallback method to perform the page updation operation.
  */
-
 export function paginate(hasNextPage, loading, setPage) {
     let observer;
     return useCallback(

@@ -11,7 +11,7 @@ export default function StudentBillCard({ bill, studentInfo,  }) {
 
     return (
         <div
-            className="rounded-xl shadow-sm transition-all hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between"
+            className="rounded-xl shadow-sm transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between"
         >
             <div className="flex items-center gap-3">
                 {/* Month/year badge */}

@@ -6,7 +6,10 @@ import {
     deleteSocketId,
     addSocketId,
     addPreparedItem,
-    sendSMS,
+    sendOrderPickedUpSMS,
+    sendOrderPlacedSMS,
+    sendOrderPreparedSMS,
+    sendOrderRejectedSMS,
     addPickedUpItem,
 } from './Utils/index.js';
 
@@ -29,11 +32,9 @@ io.on('connection', async (socket) => {
                     .to(`contractor_${order.canteenId}`)
                     .to(`staff_${order.canteenId}`)
                     .emit('newOrder', order),
-                sendSMS({
+                sendOrderPlacedSMS({
                     to: order.studentInfo.phoneNumber,
-                    text: 'Your Order is placed and will be prepared soon',
-                    link:
-                        process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+                    orderId: order._id,
                 }),
             ]);
         });
@@ -74,11 +75,9 @@ io.on('connection', async (socket) => {
                     .to(`contractor_${order.canteenId}`)
                     .to(`staff_${order.canteenId}`)
                     .emit('orderRejected', order),
-                sendSMS({
+                sendOrderRejectedSMS({
                     to: order.studentInfo.phoneNumber,
-                    text: 'Your Order has been rejected',
-                    link:
-                        process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+                    orderId: order._id,
                 }),
             ]);
         });
@@ -88,11 +87,9 @@ io.on('connection', async (socket) => {
                 io
                     .to(`contractor_${order.canteenId}`)
                     .emit('orderPrepared', order),
-                sendSMS({
+                sendOrderPreparedSMS({
                     to: order.studentInfo.phoneNumber,
-                    text: 'Your Order is ready for pickup',
-                    link:
-                        process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+                    orderId: order._id,
                 }),
             ]);
         });
@@ -103,11 +100,9 @@ io.on('connection', async (socket) => {
                     .to(`student_${order.studentId}`)
                     .to(`contractor_${order.canteenId}`)
                     .emit('orderPickedUp', order),
-                sendSMS({
+                sendOrderPickedUpSMS({
                     to: order.studentInfo.phoneNumber,
-                    text: 'Your Order has been picked up',
-                    link:
-                        process.env.FRONTEND_URL + `/orders/${order.studentId}`,
+                    orderId: order._id,
                 }),
             ]);
         });
