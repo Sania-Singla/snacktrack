@@ -1,17 +1,9 @@
-import {
-    FORBIDDEN,
-    OK,
-    NOT_FOUND,
-    COOKIE_OPTIONS,
-    BAD_REQUEST,
-} from '../Constants/index.js';
+import { FORBIDDEN, OK, NOT_FOUND } from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
-import { Canteen, Order, PackagedFood, Snack } from '../Models/index.js';
+import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment-timezone';
 import { redisClient } from '../server.js';
-import { generateStaffToken } from '../Helpers/tokens.js';
-import bcrypt from 'bcryptjs';
 
 const checkAvailability = tryCatch('check availability', async (req, res) => {
     const { cartItems } = req.body;
@@ -724,56 +716,6 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
     return res.status(OK).json({ orders: result.docs });
 });
 
-const verifyKitchenKey = tryCatch(
-    'verify kitchen key',
-    async (req, res, next) => {
-        const { key } = req.body;
-        const { canteenId } = req.params;
-
-        if (!canteenId) {
-            return next(new ErrorHandler('missing canteenId', BAD_REQUEST));
-        }
-
-        if (!key) {
-            return next(new ErrorHandler('missing key', BAD_REQUEST));
-        }
-
-        const canteen = await Canteen.findById(canteenId);
-
-        const isValid = bcrypt.compareSync(key, canteen.kitchenKey);
-        if (!isValid) {
-            return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
-        }
-
-        const staffToken = await generateStaffToken({
-            key,
-            canteenId,
-            role: 'staff',
-        });
-
-        const { hostelName, hostelNumber, hostelType } = canteen;
-
-        return res
-            .status(OK)
-            .cookie('staffToken', staffToken, {
-                ...COOKIE_OPTIONS,
-                maxAge: Number(process.env.STAFF_TOKEN_MAXAGE),
-            })
-            .clearCookie('accessToken', COOKIE_OPTIONS)
-            .clearCookie('refreshToken', COOKIE_OPTIONS)
-            .json({
-                user: {
-                    userId: null,
-                    canteenId,
-                    role: 'staff',
-                    hostelType,
-                    hostelNumber,
-                    hostelName,
-                },
-            });
-    }
-);
-
 export {
     placeOrder,
     getOrderStats,
@@ -782,5 +724,4 @@ export {
     getCanteenOrders,
     getKitchenOrders,
     checkAvailability,
-    verifyKitchenKey,
 };

@@ -10,12 +10,15 @@ import {
     getCanteens,
     resetPassword,
     updateAccountDetails,
+    verifyKitchenKey,
 } from '../Controllers/user.Controller.js';
 
 // for dropdowns
 userRouter.route('/canteens').get(getCanteens);
 
 userRouter.route('/login').patch(login);
+
+userRouter.route('/kitchen/verify-key/:canteenId').post(verifyKitchenKey);
 
 userRouter.use(verifyJwt);
 

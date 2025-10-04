@@ -7,7 +7,6 @@ import {
     useSocketContext,
 } from './Contexts';
 import { userService } from './Services';
-import { icons } from './Assets/icons';
 import { LOGO } from './Constants/constants';
 
 export default function App() {
@@ -44,7 +43,7 @@ export default function App() {
 
     return (
         <div className="bg-white h-[100vh] w-[100vw]">
-            {loading || (user && !socket) ? (
+            {loading || (user && user.role !== 'admin' && !socket) ? (
                 <div className="animate-pulse text-black h-full w-full flex flex-col items-center justify-center">
                     <img
                         src={LOGO}

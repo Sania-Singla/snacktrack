@@ -1,6 +1,16 @@
 import { fetchWrapper } from '../Utils';
 
 class AdminService {
+    async verifyAdminKey({ key }) {
+        return await fetchWrapper({
+            endPoint: `/admins/verify-key`,
+            method: 'POST',
+            credentials: 'include',
+            body: { key },
+            aim: 'verifyAdminKey',
+        });
+    }
+
     async registerCanteen({ fullName, phoneNumber, email, hostel }) {
         return await fetchWrapper({
             endPoint: `/admins/canteen/register`,
@@ -51,11 +61,10 @@ class AdminService {
         });
     }
 
-    async getContractors(key = '') {
+    async getContractors() {
         return await fetchWrapper({
             endPoint: `/admins/contractor`,
-            method: 'POST',
-            body: { key },
+            method: 'GET',
             aim: 'getContractors',
             credentials: 'include',
         });

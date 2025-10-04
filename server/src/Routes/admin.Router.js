@@ -1,6 +1,6 @@
 import express from 'express';
 export const adminRouter = express.Router();
-import { verifyAdminJwt } from '../Middlewares/index.js';
+import { verifyJwt } from '../Middlewares/index.js';
 
 import {
     registerCanteen,
@@ -9,12 +9,15 @@ import {
     updateContractor,
     getContractors,
     getHostels,
+    verifyAdminKey,
     changeContractor,
 } from '../Controllers/admin.Controller.js';
 
-adminRouter.use(verifyAdminJwt);
+adminRouter.route('/verify-key').post(verifyAdminKey);
 
-adminRouter.route('/contractor').post(getContractors);
+adminRouter.use(verifyJwt);
+
+adminRouter.route('/contractor').get(getContractors);
 
 adminRouter.route('/contractor/:contractorId').patch(updateContractor);
 

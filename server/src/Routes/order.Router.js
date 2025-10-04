@@ -10,11 +10,8 @@ import {
     checkAvailability,
     getKitchenOrders,
     getOrderStats,
-    verifyKitchenKey,
 } from '../Controllers/order.Controller.js';
 import { BAD_REQUEST } from '../Constants/errorCodes.js';
-
-orderRouter.route('/kitchen/verify-key/:canteenId').post(verifyKitchenKey);
 
 orderRouter.use(verifyJwt);
 

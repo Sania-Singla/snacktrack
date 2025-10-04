@@ -9,12 +9,13 @@ const SocketContextProvider = ({ children }) => {
     const { user } = useUserContext();
 
     function connectSocket() {
-        if (!user) return;
+        if (socket) disconnectSocket();
+        if (!user || user.role === 'admin') return;
 
         const socketInstance = io(import.meta.env.VITE_BACKEND_URL, {
             withCredentials: true,
             auth: {
-                userId: user._id,
+                userId: user._id || null,
                 canteenId: user.canteenId,
                 role: user.role,
             },

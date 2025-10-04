@@ -6,6 +6,7 @@ import {
     USER_PLACEHOLDER_IMAGE_URL,
     FORBIDDEN,
     HOSTELS,
+    COOKIE_OPTIONS,
 } from '../Constants/index.js';
 import {
     verifyExpression,
@@ -19,6 +20,34 @@ import { Canteen, Contractor } from '../Models/index.js';
 import { customAlphabet, nanoid } from 'nanoid';
 import { Types } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { generateAccessToken } from '../Helpers/tokens.js';
+
+const verifyAdminKey = tryCatch('verify admin key', async (req, res, next) => {
+    const { key } = req.body;
+
+    if (!key) {
+        return next(new ErrorHandler('missing key', BAD_REQUEST));
+    }
+
+    if (key !== process.env.ADMIN_KEY) {
+        return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
+    }
+
+    const token = await generateAccessToken({ role: 'admin', key });
+
+    return res
+        .status(OK)
+        .cookie('accessToken', token, {
+            ...COOKIE_OPTIONS,
+            maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+        })
+        .clearCookie('refreshToken', COOKIE_OPTIONS)
+        .json({
+            user: {
+                role: 'admin',
+            },
+        });
+});
 
 const registerCanteen = tryCatch(
     'register as contractor',
@@ -300,6 +329,7 @@ const changeContractor = tryCatch(
 );
 
 const getContractors = tryCatch('get contractors', async (req, res) => {
+    console.log(1);
     const canteens = await Canteen.aggregate([
         {
             $lookup: {
@@ -322,6 +352,7 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
         { $unwind: '$contractor' },
         { $project: { snacks: 0, packagedItems: 0 } },
     ]);
+console.log(canteens)
     return res.status(OK).json(canteens);
 });
 
@@ -337,4 +368,5 @@ export {
     sendVerificationCode,
     changeContractor,
     verifyCode,
+    verifyAdminKey,
 };

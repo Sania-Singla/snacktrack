@@ -5,11 +5,12 @@ import jwt from 'jsonwebtoken';
  * @param {Object} data - The data which needs to be in the tokens
  * @returns Tokens as {accessToken, refreshToken}
  */
-
 const generateTokens = async (data) => {
     try {
-        const accessToken = await generateAccessToken(data);
-        const refreshToken = await generateRefreshToken(data);
+        const [accessToken, refreshToken] = await Promise.all([
+            generateAccessToken(data),
+            generateRefreshToken(data),
+        ]);
 
         return { accessToken, refreshToken };
     } catch (err) {
@@ -22,7 +23,6 @@ const generateTokens = async (data) => {
  * @param {Object} data - The data which needs to be in the token
  * @returns JWT Token
  */
-
 const generateAccessToken = async (data) => {
     return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
@@ -34,7 +34,6 @@ const generateAccessToken = async (data) => {
  * @param {Object} data - The data which needs to be in the token
  * @returns JWT Token
  */
-
 const generateRefreshToken = async (data) => {
     return jwt.sign(data, process.env.REFRESH_TOKEN_SECRET, {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
@@ -42,42 +41,15 @@ const generateRefreshToken = async (data) => {
 };
 
 /**
- * Util to generate admin key Token
- * @param {Object} key - The admin key
- * @returns JWT Token
- */
-
-const generateAdminToken = async (key) => {
-    return jwt.sign({ key }, process.env.ADMIN_TOKEN_SECRET, {
-        expiresIn: process.env.ADMIN_TOKEN_EXPIRY,
-    });
-};
-
-/**
- * Util to generate staff key Token
- * @param {Object} key - The staff key
- * @returns JWT Token
- */
-
-const generateStaffToken = async (data) => {
-    return jwt.sign(data, process.env.STAFF_TOKEN_SECRET, {
-        expiresIn: process.env.STAFF_TOKEN_EXPIRY,
-    });
-};
-
-/**
  * @param {object} req - The http req object to extract the token from.
  * @returns all Tokens
  */
-
 const extractTokens = (req) => {
     return {
         accessToken:
             req.cookies?.accessToken ||
             req.headers['authorization']?.split(' ')[1],
         refreshToken: req.cookies?.refreshToken || req.headers['x-refresh'],
-        adminToken: req.cookies?.adminToken || req.headers['x-admin'],
-        staffToken: req.cookies?.staffToken || req.headers['x-staff'],
     };
 };
 
@@ -86,6 +58,4 @@ export {
     generateTokens,
     generateAccessToken,
     generateRefreshToken,
-    generateAdminToken,
-    generateStaffToken,
 };

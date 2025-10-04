@@ -15,77 +15,12 @@ export default function KitchenPage() {
     const [summary, setSummary] = useState({});
     const { socket } = useSocketContext();
 
-    function generateOrderElements(orders) {
-        return orders.flatMap((o) =>
-            o.items
-                .filter(
-                    (i) => i.type === 'Snack' && i.preparedCount < i.quantity
-                )
-                .map((i) => (
-                    <div
-                        key={`${o._id}-${i.id}`}
-                        className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
-                    >
-                        <div className="flex justify-between items-center">
-                            <div className="flex items-center justify-center gap-2">
-                                <p className="text-gray-800 font-medium text-[14px]">
-                                    {i.name}
-                                </p>
-                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
-                                    {i.quantity - i.preparedCount}
-                                </div>
-                            </div>
-
-                            {user.role === 'staff' && (
-                                <Button
-                                    className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
-                                    onClick={() =>
-                                        socket.emit('itemPrepared', {
-                                            order: o,
-                                            itemId: i.id,
-                                        })
-                                    }
-                                    btnText="-"
-                                />
-                            )}
-                        </div>
-                        {i.specialInstructions && (
-                            <div className="text-[13px] text-red-500 italic">
-                                <span className="font-medium mr-1">Note:</span>
-                                <span className="italic">
-                                    {i.specialInstructions}
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                ))
-        );
-    }
-
-    function updateSummary(orders) {
-        const newSummary = {};
-        orders.forEach((o) => {
-            o.items
-                .filter((i) => i.type === 'Snack')
-                .forEach((i) => {
-                    const remaining =
-                        (newSummary[i.name] || 0) +
-                        i.quantity -
-                        i.preparedCount;
-                    if (remaining !== 0) newSummary[i.name] = remaining;
-                    else delete newSummary[i.name];
-                });
-        });
-        return newSummary;
-    }
-
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
 
         (async function () {
             try {
-                if (!user) navigate('/kitchen/verify-key');
                 const res = await orderService.getKitchenOrders(signal);
                 if (res && !res.message) {
                     setKitchenOrders(res.orders);
@@ -214,6 +149,70 @@ export default function KitchenPage() {
             socket.off('itemPrepared', itemPrepared);
         };
     }, [socket]);
+
+    function generateOrderElements(orders) {
+        return orders.flatMap((o) =>
+            o.items
+                .filter(
+                    (i) => i.type === 'Snack' && i.preparedCount < i.quantity
+                )
+                .map((i) => (
+                    <div
+                        key={`${o._id}-${i.id}`}
+                        className="space-y-2 border-gray-200 border-[0.01rem] rounded-xl p-3"
+                    >
+                        <div className="flex justify-between items-center">
+                            <div className="flex items-center justify-center gap-2">
+                                <p className="text-gray-800 font-medium text-[14px]">
+                                    {i.name}
+                                </p>
+                                <div className="bg-[#4977ec]/10 text-[#4977ec] flex items-center justify-center size-[20px] rounded-full font-bold text-[12px]">
+                                    {i.quantity - i.preparedCount}
+                                </div>
+                            </div>
+
+                            {user.role === 'staff' && (
+                                <Button
+                                    className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
+                                    onClick={() =>
+                                        socket.emit('itemPrepared', {
+                                            order: o,
+                                            itemId: i.id,
+                                        })
+                                    }
+                                    btnText="-"
+                                />
+                            )}
+                        </div>
+                        {i.specialInstructions && (
+                            <div className="text-[13px] text-red-500 italic">
+                                <span className="font-medium mr-1">Note:</span>
+                                <span className="italic">
+                                    {i.specialInstructions}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                ))
+        );
+    }
+
+    function updateSummary(orders) {
+        const newSummary = {};
+        orders.forEach((o) => {
+            o.items
+                .filter((i) => i.type === 'Snack')
+                .forEach((i) => {
+                    const remaining =
+                        (newSummary[i.name] || 0) +
+                        i.quantity -
+                        i.preparedCount;
+                    if (remaining !== 0) newSummary[i.name] = remaining;
+                    else delete newSummary[i.name];
+                });
+        });
+        return newSummary;
+    }
 
     return loading ? (
         <div className="flex items-center justify-center w-full mt-10">

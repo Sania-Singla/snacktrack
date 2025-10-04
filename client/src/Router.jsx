@@ -14,7 +14,7 @@ import {
     StudentsPage,
     ServerErrorPage,
     NotFoundPage,
-    ProtectedRoute,
+    AccessTo,
     BillsPage,
     NewUserPage,
     TodayOrdersPage,
@@ -25,6 +25,7 @@ import {
     AdminPage,
     RegisterCanteenPage,
     VerifyKitchenKeyPage,
+    VerifyAdminKeyPage,
     DemoCredentialsPage,
 } from './Pages';
 
@@ -38,16 +39,15 @@ import {
 export const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
-            <Route element={<ProtectedRoute />}>
+            {/* all */}
+            <Route element={<AccessTo roles={['student', 'contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="" element={<HomePage />} />
                 </Route>
             </Route>
 
             {/* Student & Contractor only */}
-            <Route
-                element={<ProtectedRoute roles={['student', 'contractor']} />}
-            >
+            <Route element={<AccessTo roles={['student', 'contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="settings" element={<SettingsPage />}>
                         <Route path="" element={<UpdateAccountDetails />} />
@@ -69,7 +69,7 @@ export const router = createBrowserRouter(
             </Route>
 
             {/* Contractor only */}
-            <Route element={<ProtectedRoute roles={['contractor']} />}>
+            <Route element={<AccessTo roles={['contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="today-orders" element={<TodayOrdersPage />} />
                     <Route path="all-bills" element={<BillsPage />} />
@@ -85,34 +85,38 @@ export const router = createBrowserRouter(
             </Route>
 
             {/* Student only */}
-            <Route element={<ProtectedRoute roles={['student']} />}>
+            <Route element={<AccessTo roles={['student']} />}>
                 <Route element={<Layout />}>
                     <Route path="cart" element={<CartPage />} />
                 </Route>
             </Route>
 
-            {/* Staff only */}
-            <Route
-                path="kitchen"
-                element={<ProtectedRoute roles={['staff', 'contractor']} />}
-            >
-                <Route element={<Layout renderTemplate={false} />}>
-                    <Route path="" element={<KitchenPage />} />
-                </Route>
-            </Route>
-
-            {/* Admin only (with admin key verification) */}
-            <Route path="admin" element={<Layout renderTemplate={false} />}>
-                <Route path="" element={<AdminPage />} />
-                <Route path="new-canteen" element={<RegisterCanteenPage />} />
-            </Route>
-
-            <Route
-                path="/kitchen/verify-key"
-                element={<VerifyKitchenKeyPage />}
-            />
-
             <Route element={<Layout renderTemplate={false} />}>
+                <Route path="kitchen">
+                    <Route
+                        path="verify-key"
+                        element={<VerifyKitchenKeyPage />}
+                    />
+
+                    <Route
+                        element={<AccessTo roles={['staff', 'contractor']} />}
+                    >
+                        <Route path="" element={<KitchenPage />} />
+                    </Route>
+                </Route>
+
+                <Route path="admin">
+                    <Route path="verify-key" element={<VerifyAdminKeyPage />} />
+
+                    <Route element={<AccessTo roles={['admin']} />}>
+                        <Route path="" element={<AdminPage />} />
+                        <Route
+                            path="new-canteen"
+                            element={<RegisterCanteenPage />}
+                        />
+                    </Route>
+                </Route>
+
                 <Route path="new-user" element={<NewUserPage />} />
                 <Route path="demo" element={<DemoCredentialsPage />} />
                 <Route path="login" element={<LoginPage />} />

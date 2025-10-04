@@ -4,8 +4,6 @@ import {
     generateRefreshToken,
     generateTokens,
     extractTokens,
-    generateAdminToken,
-    generateStaffToken,
 } from './tokens.js';
 
 export {
@@ -14,7 +12,5 @@ export {
     generateAccessToken,
     generateRefreshToken,
     generateTokens,
-    generateAdminToken,
     extractTokens,
-    generateStaffToken,
 };
