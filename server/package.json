@@ -4,21 +4,18 @@
     "main": "src/server.js",
     "type": "module",
     "scripts": {
-        "format": "prettier --write .",
-        "dev": "cross-env ENV=development nodemon src/server.js",
-        "start": "cross-env ENV=production node src/server.js"
+        "dev": "nodemon -r dotenv/config src/server.js",
+        "start": "node src/server.js"
     },
     "keywords": [],
     "author": "Sania",
     "license": "ISC",
     "description": "A web application to track your snacks",
     "dependencies": {
-        "axios": "^1.12.2",
         "bcryptjs": "^3.0.2",
         "cloudinary": "^2.5.1",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
-        "dotenv": "^16.4.7",
         "express": "^4.21.2",
         "jsonwebtoken": "^9.0.2",
         "libphonenumber-js": "^1.12.6",
@@ -31,13 +28,11 @@
         "node-cron": "^3.0.3",
         "nodemailer": "^6.10.0",
         "redis": "^4.7.0",
-        "snack-track": "file:..",
         "socket.io": "^4.8.1",
         "twilio": "^5.5.1"
     },
     "devDependencies": {
-        "cross-env": "^10.1.0",
-        "nodemon": "^3.1.9",
-        "prettier": "^3.5.3"
+        "dotenv": "^17.2.3",
+        "nodemon": "^3.1.9"
     }
 }

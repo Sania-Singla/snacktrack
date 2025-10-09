@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
+        "format": "prettier --write .",
         "client": "cd client && npm run dev",
         "server": "cd server && npm run dev",
         "dev": "concurrently \"npm run client\" \"npm run server\"",
@@ -12,7 +13,8 @@
     "author": "Sania",
     "license": "ISC",
     "description": "A web application to track your snacks",
-    "dependencies": {
-        "concurrently": "^9.1.2"
+    "devDependencies": {
+        "concurrently": "^9.2.1",
+        "prettier": "^3.6.2"
     }
 }

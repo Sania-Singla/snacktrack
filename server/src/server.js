@@ -1,4 +1,4 @@
-import './Config/env.js';
+// import 'dotenv/config';  // specified in package.json as dotenv will need to be install on prod as well otherwise
 import { http } from './socket.js';
 import { startBillingCronJob, startCleanupCronJob } from './CronJobs/bills.js';
 import {
