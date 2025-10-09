@@ -1,89 +1,58 @@
 name: CI/CD Pipeline
+run-name: ${{ github.actor }} ran this pipeline
 
 on:
-    push:
-        branches:
-            - main # deploy branch
+  push:
+    branches:
+      - main
 
 jobs:
-    build-and-deploy:
-        runs-on: ubuntu-latest
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📃 Checkout code
+        uses: actions/checkout@v3
 
-        env: # all env variables from GitHub Secrets
-            MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
-            MONGODB_URL: ${{ secrets.MONGODB_URL }}
-            ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-            ACCESS_TOKEN_EXPIRY: ${{ secrets.ACCESS_TOKEN_EXPIRY }}
-            ACCESS_TOKEN_MAXAGE: ${{ secrets.ACCESS_TOKEN_MAXAGE }}
-            REFRESH_TOKEN_SECRET: ${{ secrets.REFRESH_TOKEN_SECRET }}
-            REFRESH_TOKEN_EXPIRY: ${{ secrets.REFRESH_TOKEN_EXPIRY }}
-            REFRESH_TOKEN_MAXAGE: ${{ secrets.REFRESH_TOKEN_MAXAGE }}
-            ADMIN_TOKEN_SECRET: ${{ secrets.ADMIN_TOKEN_SECRET }}
-            ADMIN_TOKEN_EXPIRY: ${{ secrets.ADMIN_TOKEN_EXPIRY }}
-            ADMIN_TOKEN_MAXAGE: ${{ secrets.ADMIN_TOKEN_MAXAGE }}
-            STAFF_TOKEN_SECRET: ${{ secrets.STAFF_TOKEN_SECRET }}
-            STAFF_TOKEN_EXPIRY: ${{ secrets.STAFF_TOKEN_EXPIRY }}
-            STAFF_TOKEN_MAXAGE: ${{ secrets.STAFF_TOKEN_MAXAGE }}
-            CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
-            CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
-            CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-            REDIS_HOST: ${{ secrets.REDIS_HOST }}
-            REDIS_PORT: ${{ secrets.REDIS_PORT }}
-            REDIS_USERNAME: ${{ secrets.REDIS_USERNAME }}
-            REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-            ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
-            ADMIN_EMAIL_PASSWORD: ${{ secrets.ADMIN_EMAIL_PASSWORD }}
-            ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
-            ADMIN_PHONE_NUMBER: ${{ secrets.ADMIN_PHONE_NUMBER }}
-            TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
-            TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
-            TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
-            PORT: ${{ secrets.PORT }}
-            FRONTEND_URL: ${{secrets.FRONTEND_URL}}
+      - name: 🔢 Get app version from package.json
+        id: vars
+        run: |
+          VERSION=$(jq -r .version package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-        steps:
-            - name: 📥 Checkout code
-              uses: actions/checkout@v4
+      - name: 🔐 Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-            - name: 🧱 Set up Docker Buildx
-              uses: docker/setup-buildx-action@v3
+      - name: 🛠️ Build Docker Image
+        run: |
+          echo "Building Docker image version $VERSION"
+          docker build -t saniasingla/snacktrack-server:latest \
+                       -t saniasingla/snacktrack-server:$VERSION .
 
-            - name: 📝 Create .env file from secrets
-              run: |
-                  touch .env
-                  echo "MONGODB_NAME=${MONGODB_NAME}" >> .env
-                  echo "MONGODB_URL=${MONGODB_URL}" >> .env
-                  echo "ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}" >> .env
-                  echo "ACCESS_TOKEN_EXPIRY=${ACCESS_TOKEN_EXPIRY}" >> .env
-                  echo "ACCESS_TOKEN_MAXAGE=${ACCESS_TOKEN_MAXAGE}" >> .env
-                  echo "REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}" >> .env
-                  echo "REFRESH_TOKEN_EXPIRY=${REFRESH_TOKEN_EXPIRY}" >> .env
-                  echo "REFRESH_TOKEN_MAXAGE=${REFRESH_TOKEN_MAXAGE}" >> .env
-                  echo "ADMIN_TOKEN_SECRET=${ADMIN_TOKEN_SECRET}" >> .env
-                  echo "ADMIN_TOKEN_EXPIRY=${ADMIN_TOKEN_EXPIRY}" >> .env
-                  echo "ADMIN_TOKEN_MAXAGE=${ADMIN_TOKEN_MAXAGE}" >> .env
-                  echo "STAFF_TOKEN_SECRET=${STAFF_TOKEN_SECRET}" >> .env
-                  echo "STAFF_TOKEN_EXPIRY=${STAFF_TOKEN_EXPIRY}" >> .env
-                  echo "STAFF_TOKEN_MAXAGE=${STAFF_TOKEN_MAXAGE}" >> .env
-                  echo "CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}" >> .env
-                  echo "CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}" >> .env
-                  echo "CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}" >> .env
-                  echo "REDIS_HOST=${REDIS_HOST}" >> .env
-                  echo "REDIS_PORT=${REDIS_PORT}" >> .env
-                  echo "REDIS_USERNAME=${REDIS_USERNAME}" >> .env
-                  echo "REDIS_PASSWORD=${REDIS_PASSWORD}" >> .env
-                  echo "ADMIN_EMAIL=${ADMIN_EMAIL}" >> .env
-                  echo "ADMIN_EMAIL_PASSWORD=${ADMIN_EMAIL_PASSWORD}" >> .env
-                  echo "ADMIN_KEY=${ADMIN_KEY}" >> .env
-                  echo "ADMIN_PHONE_NUMBER=${ADMIN_PHONE_NUMBER}" >> .env
-                  echo "TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}" >> .env
-                  echo "TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}" >> .env
-                  echo "TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}" >> .env
-                  echo "PORT=${PORT}" >> .env
-                  echo "FRONTEND_URL=${FRONTEND_URL}" >> .env
+      - name: 🚀 Push Docker Image
+        run: |
+          docker push saniasingla/snacktrack-server:latest
+          docker push saniasingla/snacktrack-server:$VERSION
 
-            - name: 🛠️ Build Docker image
-              run: docker compose build
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: 🔐 Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/snacktrack_server_key.pem
+          chmod 400 ~/.ssh/snacktrack_server_key.pem
 
-            # - name: ✅ Run app in Docker # (optional - remove if deploying to server)
-            #   run: docker compose up -d
+      - name: 🎉 SSH into EC2 and Deploy via Docker Compose
+        run: |
+          echo "Using the snacktrack-server/docker-compose.yml file on the server"
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/snacktrack_server_key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+            cd ~/snacktrack-server
+            docker compose pull       # Pull latest image
+            docker compose up -d      # Recreate container if image changed
+
+            docker system prune -f    # removes previous (dangling) 
+          EOF
