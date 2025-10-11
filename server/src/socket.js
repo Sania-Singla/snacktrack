@@ -13,8 +13,8 @@ import {
     addPickedUpItem,
 } from './Utils/index.js';
 
-const http = createServer(app);
-const io = new Server(http, { cors: CORS_OPTIONS });
+export const http = createServer(app);
+export const io = new Server(http, { cors: CORS_OPTIONS });
 
 io.on('connection', async (socket) => {
     try {
@@ -40,32 +40,26 @@ io.on('connection', async (socket) => {
         });
 
         socket.on('itemPrepared', async ({ itemId, order }) => {
-            await Promise.all([
-                io
-                    .to(`contractor_${order.canteenId}`)
-                    .to(`staff_${order.canteenId}`)
-                    .to(`student_${order.studentId}`)
-                    .emit('itemPrepared', {
-                        itemId,
-                        orderId: order._id,
-                        stuId: order.studentId,
-                    }),
-                addPreparedItem({ itemId, orderId: order._id }),
-            ]);
+            await addPreparedItem({ itemId, orderId: order._id });
+            io.to(`contractor_${order.canteenId}`)
+                .to(`staff_${order.canteenId}`)
+                .to(`student_${order.studentId}`)
+                .emit('itemPrepared', {
+                    itemId,
+                    orderId: order._id,
+                    stuId: order.studentId,
+                });
         });
 
         socket.on('itemPickedUp', async ({ itemId, order }) => {
-            await Promise.all([
-                io
-                    .to(`contractor_${order.canteenId}`)
-                    .to(`student_${order.studentId}`)
-                    .emit('itemPickedUp', {
-                        itemId,
-                        orderId: order._id,
-                        stuId: order.studentId,
-                    }),
-                addPickedUpItem({ itemId, orderId: order._id }),
-            ]);
+            await addPickedUpItem({ itemId, orderId: order._id });
+            io.to(`contractor_${order.canteenId}`)
+                .to(`student_${order.studentId}`)
+                .emit('itemPickedUp', {
+                    itemId,
+                    orderId: order._id,
+                    stuId: order.studentId,
+                });
         });
 
         socket.on('orderRejected', async (order) => {
@@ -123,8 +117,8 @@ io.on('connection', async (socket) => {
                     room = `staff_${canteenId}`;
                     break;
             }
-            await socket.leave(room);
             await deleteSocketId(room, socket.id);
+            await socket.leave(room);
             console.log(
                 `[REMOVED FROM REDIS] ${role === 'student' ? userId : canteenId}`
             );
@@ -146,14 +140,11 @@ io.on('connection', async (socket) => {
 
         await addSocketId(room, socket.id);
         await socket.join(room);
-
         console.log(
             `[ADDED TO REDIS] ${role === 'student' ? userId : canteenId}`
         );
     } catch (err) {
         console.error('[SOCKET ERROR] ', err);
-        process.exit(1);
+        // process.exit(1);
     }
 });
-
-export { io, http };

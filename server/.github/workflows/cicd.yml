@@ -48,7 +48,8 @@ jobs:
 
       - name: 🎉 SSH into EC2 and Deploy via Docker Compose
         run: |
-          echo "Using the snacktrack-server/docker-compose.yml file on the server"
+          echo "Using the snacktrack-server/docker-compose.yml file and /etc/snacktrack-server.env on the server"
+      
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/snacktrack_server_key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
             cd ~/snacktrack-server
             docker compose pull       # Pull latest image

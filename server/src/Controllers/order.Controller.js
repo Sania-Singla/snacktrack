@@ -199,7 +199,7 @@ const updateOrderStatus = tryCatch(
             { $project: { snack: 0, packaged: 0 } },
         ]);
 
-        // delete items from redis if the order is picked up
+        // delete items from redis if complete order is picked up
         if (status === 'PickedUp') {
             completeOrder.items = completeOrder.items.map((i) => ({
                 ...i,
