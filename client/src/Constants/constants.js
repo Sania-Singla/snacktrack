@@ -7,18 +7,17 @@ import SNACK_PLACEHOLDER_IMAGE from '../Assets/images/snack.png';
 import USER_PLACEHOLDER_IMAGE from '../Assets/images/user.png';
 import AUDIO_FILE from '../Assets/audios/notification.wav';
 
-const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api/v1';
-const EMAIL = 'snacktrack@gmail.com';
-const CONTACTNUMBER = '+91 **********';
-const ADDRESS = 'UIET, Panjab University, Chandigarh, India';
-const MAX_FILE_SIZE = 5;
-const LIMIT = 20; // Pagination limit
-const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
-const SERVER_ERROR = 500;
-const PER_ITEM_PACKAGING_CHARGES = 0; // ex: 0.5 rupees
-const TAX = 0; // ex: 0.05 for 5% tax on total amount
-
-const CONTRIBUTORS = [
+export const BASE_BACKEND_URL = import.meta.env.VITE_BACKEND_URL + '/api/v1';
+export const EMAIL = 'snacktrack@gmail.com';
+export const CONTACTNUMBER = '+91 **********';
+export const ADDRESS = 'UIET, Panjab University, Chandigarh, India';
+export const MAX_FILE_SIZE = 5;
+export const LIMIT = 20; // Pagination limit
+export const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
+export const SERVER_ERROR = 500;
+export const PER_ITEM_PACKAGING_CHARGES = 0; // ex: 0.5 rupees
+export const TAX = 0; // ex: 0.05 for 5% tax on total amount
+export const CONTRIBUTORS = [
     {
         image: SANIAIMAGE,
         role: 'Lead Developer',
@@ -33,11 +32,16 @@ const CONTRIBUTORS = [
         },
     },
 ];
+export const SOCKET_EVENTS = {
+    NEW_ORDER: 'newOrder',
+    ITEM_PREPARED: 'itemPrepared',
+    ITEM_PICKEDUP: 'itemPickedUp',
+    ORDER_REJECTED: 'orderRejected',
+    ORDER_PREPARED: 'orderPrepared',
+    ORDER_PICKEDUP: 'orderPickedUp',
+};
 
 export {
-    CONTRIBUTORS,
-    BASE_BACKEND_URL,
-    LIMIT,
     LOGO,
     LOGO_SVG,
     UIET,
@@ -45,12 +49,4 @@ export {
     AUDIO_FILE,
     SNACK_PLACEHOLDER_IMAGE,
     USER_PLACEHOLDER_IMAGE,
-    MAX_FILE_SIZE,
-    PER_ITEM_PACKAGING_CHARGES,
-    ALLOWED_EXT,
-    EMAIL,
-    CONTACTNUMBER,
-    ADDRESS,
-    SERVER_ERROR,
-    TAX,
 };

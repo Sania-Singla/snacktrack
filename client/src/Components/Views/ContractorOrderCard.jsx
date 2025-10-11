@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
 import { useSocketContext, useUserContext } from '../../Contexts';
 import toast from 'react-hot-toast';
+import { SOCKET_EVENTS } from '../../Constants/constants';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
@@ -40,7 +41,10 @@ export default function ContractorOrderCard({ order, reference }) {
                 status,
             });
             if (res && res.message === 'order status updated successfully') {
-                socket.emit(`order${status}`, order);
+                socket.emit(
+                    SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`],
+                    order
+                );
             } else if (res && res.message === 'too late') {
                 toast.error(
                     'You cannot change the status of this order anymore.'
@@ -250,7 +254,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                             className="rounded-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] text-[12px] font-medium text-center px-2 py-[2px]"
                                                             onClick={() =>
                                                                 socket.emit(
-                                                                    'itemPickedUp',
+                                                                    SOCKET_EVENTS.ITEM_PICKEDUP,
                                                                     {
                                                                         itemId: item.id,
                                                                         order,

@@ -14,6 +14,7 @@ import {
     StudentOrderCard,
 } from '../Components';
 import { paginate, checkTokenExpired } from '../Utils';
+import { SOCKET_EVENTS } from '../Constants/constants';
 
 export default function StudentOrdersPage() {
     const [studentOrders, setStudentOrders] = useState([]);
@@ -94,7 +95,7 @@ export default function StudentOrdersPage() {
     useEffect(() => {
         if (!socket) return;
 
-        socket.on('orderRejected', (order) => {
+        socket.on(SOCKET_EVENTS.ORDER_REJECTED, (order) => {
             if (order.studentId === studentId) {
                 setStudentOrders((prev) =>
                     prev.map((o) =>
@@ -104,7 +105,7 @@ export default function StudentOrdersPage() {
             }
         });
 
-        socket.on('orderPickedUp', (order) => {
+        socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, (order) => {
             if (order.studentId === studentId) {
                 setStudentOrders((prev) =>
                     prev.map((o) =>
@@ -114,37 +115,40 @@ export default function StudentOrdersPage() {
             }
         });
 
-        socket.on('itemPrepared', async ({ orderId, itemId, stuId }) => {
-            if (stuId !== studentId) return;
+        socket.on(
+            SOCKET_EVENTS.ITEM_PREPARED,
+            async ({ orderId, itemId, stuId }) => {
+                if (stuId !== studentId) return;
 
-            setStudentOrders((prev) => {
-                const updatedOrders = prev.map((o) => {
-                    if (o._id !== orderId) return o;
+                setStudentOrders((prev) => {
+                    const updatedOrders = prev.map((o) => {
+                        if (o._id !== orderId) return o;
 
-                    const updatedItems = o.items.map((i) =>
-                        i.id === itemId
-                            ? {
-                                  ...i,
-                                  preparedCount: i.preparedCount + 1,
-                              }
-                            : i
-                    );
+                        const updatedItems = o.items.map((i) =>
+                            i.id === itemId
+                                ? {
+                                      ...i,
+                                      preparedCount: i.preparedCount + 1,
+                                  }
+                                : i
+                        );
 
-                    const allPrepared = updatedItems.every(
-                        (i) => i.preparedCount === i.quantity
-                    );
-                    return {
-                        ...o,
-                        items: updatedItems,
-                        status: allPrepared ? 'Prepared' : o.status,
-                    };
+                        const allPrepared = updatedItems.every(
+                            (i) => i.preparedCount === i.quantity
+                        );
+                        return {
+                            ...o,
+                            items: updatedItems,
+                            status: allPrepared ? 'Prepared' : o.status,
+                        };
+                    });
+
+                    return updatedOrders;
                 });
+            }
+        );
 
-                return updatedOrders;
-            });
-        });
-
-        socket.on('itemPickedUp', ({ orderId, itemId, stuId }) => {
+        socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, ({ orderId, itemId, stuId }) => {
             if (stuId !== studentId) return;
 
             setStudentOrders((prev) => {
@@ -175,10 +179,10 @@ export default function StudentOrdersPage() {
         });
 
         return () => {
-            socket.off('orderRejected');
-            socket.off('orderPickedUp');
-            socket.off('itemPrepared');
-            socket.off('itemPickedUp');
+            socket.off(SOCKET_EVENTS.ORDER_REJECTED);
+            socket.off(SOCKET_EVENTS.ORDER_PICKEDUP);
+            socket.off(SOCKET_EVENTS.ITEM_PREPARED);
+            socket.off(SOCKET_EVENTS.ITEM_PICKEDUP);
         };
     }, [socket]);
 

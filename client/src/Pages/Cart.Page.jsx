@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { PER_ITEM_PACKAGING_CHARGES, TAX } from '../Constants/constants';
+import {
+    PER_ITEM_PACKAGING_CHARGES,
+    SOCKET_EVENTS,
+    TAX,
+} from '../Constants/constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
@@ -96,7 +100,7 @@ export default function CartPage() {
             });
             if (res && !res.message) {
                 localStorage.removeItem('cartItems');
-                socket.emit('newOrder', res);
+                socket.emit(SOCKET_EVENTS.NEW_ORDER, res);
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
                 setCartItems([]);
@@ -257,7 +261,9 @@ export default function CartPage() {
         </div>
     ) : cartItems.length > 0 ? (
         <div className="w-full py-6 px-4 sm:px-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-8">Your Cart</h1>
+            <h1 className="text-2xl font-semibold text-gray-900 mb-8">
+                Your Cart
+            </h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Product List */}
                 <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">

@@ -4,7 +4,7 @@ import { orderService } from '../../Services';
 import { useSocketContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { Button } from '../../Components';
-import { LOGO } from '../../Constants/constants';
+import { LOGO, SOCKET_EVENTS } from '../../Constants/constants';
 
 export default function KitchenPage() {
     const navigate = useNavigate();
@@ -124,7 +124,10 @@ export default function KitchenPage() {
                                 res.message ===
                                     'order status updated successfully'
                             ) {
-                                socket.emit('orderPrepared', res.order);
+                                socket.emit(
+                                    SOCKET_EVENTS.ORDER_PREPARED,
+                                    res.order
+                                );
                             }
                         } catch (error) {
                             console.error(
@@ -139,14 +142,14 @@ export default function KitchenPage() {
             });
         }
 
-        socket.on('newOrder', newOrder);
-        socket.on('orderRejected', orderRejected);
-        socket.on('itemPrepared', itemPrepared);
+        socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
+        socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+        socket.on(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
 
         return () => {
-            socket.off('newOrder', newOrder);
-            socket.off('orderRejected', orderRejected);
-            socket.off('itemPrepared', itemPrepared);
+            socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
+            socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+            socket.off(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
         };
     }, [socket]);
 
@@ -175,10 +178,13 @@ export default function KitchenPage() {
                                 <Button
                                     className="px-2 rounded-sm h-[23px] text-2xl pb-[5px] flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2]"
                                     onClick={() =>
-                                        socket.emit('itemPrepared', {
-                                            order: o,
-                                            itemId: i.id,
-                                        })
+                                        socket.emit(
+                                            SOCKET_EVENTS.ITEM_PREPARED,
+                                            {
+                                                order: o,
+                                                itemId: i.id,
+                                            }
+                                        )
                                     }
                                     btnText="-"
                                 />

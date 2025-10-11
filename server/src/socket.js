@@ -2,149 +2,23 @@ import { app } from './app.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/index.js';
-import {
-    deleteSocketId,
-    addSocketId,
-    addPreparedItem,
-    sendOrderPickedUpSMS,
-    sendOrderPlacedSMS,
-    sendOrderPreparedSMS,
-    sendOrderRejectedSMS,
-    addPickedUpItem,
-} from './Utils/index.js';
+import { registerOrderEvents } from './Socket/order.events.js';
+import { registerItemEvents } from './Socket/item.events.js';
+import { joinRoom, leaveRoom } from './Socket/room.events.js';
 
 export const http = createServer(app);
 export const io = new Server(http, { cors: CORS_OPTIONS });
 
 io.on('connection', async (socket) => {
-    try {
-        const { userId, canteenId, role } = socket.handshake.auth;
-        console.log('[USER CONNECTED] ', socket.id);
+    const { userId, canteenId, role } = socket.handshake.auth;
+    console.log(`[USER CONNECTED] ${socket.id}`);
+    await joinRoom(socket, { userId, canteenId, role });
 
-        // Event Listeners
+    registerItemEvents(io, socket);
+    registerOrderEvents(io, socket);
 
-        socket.on('newOrder', async (order) => {
-            order.items.forEach((i) => {
-                i.id = i._id;
-            });
-            await Promise.all([
-                io
-                    .to(`contractor_${order.canteenId}`)
-                    .to(`staff_${order.canteenId}`)
-                    .emit('newOrder', order),
-                sendOrderPlacedSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
-            ]);
-        });
-
-        socket.on('itemPrepared', async ({ itemId, order }) => {
-            await addPreparedItem({ itemId, orderId: order._id });
-            io.to(`contractor_${order.canteenId}`)
-                .to(`staff_${order.canteenId}`)
-                .to(`student_${order.studentId}`)
-                .emit('itemPrepared', {
-                    itemId,
-                    orderId: order._id,
-                    stuId: order.studentId,
-                });
-        });
-
-        socket.on('itemPickedUp', async ({ itemId, order }) => {
-            await addPickedUpItem({ itemId, orderId: order._id });
-            io.to(`contractor_${order.canteenId}`)
-                .to(`student_${order.studentId}`)
-                .emit('itemPickedUp', {
-                    itemId,
-                    orderId: order._id,
-                    stuId: order.studentId,
-                });
-        });
-
-        socket.on('orderRejected', async (order) => {
-            await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .to(`contractor_${order.canteenId}`)
-                    .to(`staff_${order.canteenId}`)
-                    .emit('orderRejected', order),
-                sendOrderRejectedSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
-            ]);
-        });
-
-        socket.on('orderPrepared', async (order) => {
-            await Promise.all([
-                io
-                    .to(`contractor_${order.canteenId}`)
-                    .emit('orderPrepared', order),
-                sendOrderPreparedSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
-            ]);
-        });
-
-        socket.on('orderPickedUp', async (order) => {
-            await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .to(`contractor_${order.canteenId}`)
-                    .emit('orderPickedUp', order),
-                sendOrderPickedUpSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
-            ]);
-        });
-
-        socket.on('disconnect', async () => {
-            console.log('[USER DISCONNECTED] ', socket.id);
-
-            // delete the socket id from redis
-            let room;
-            switch (role) {
-                case 'student':
-                    room = `student_${userId}`;
-                    break;
-                case 'contractor':
-                    room = `contractor_${canteenId}`;
-                    break;
-                default:
-                    room = `staff_${canteenId}`;
-                    break;
-            }
-            await deleteSocketId(room, socket.id);
-            await socket.leave(room);
-            console.log(
-                `[REMOVED FROM REDIS] ${role === 'student' ? userId : canteenId}`
-            );
-        });
-
-        // store its socket id in redis
-        let room;
-        switch (role) {
-            case 'student':
-                room = `student_${userId}`;
-                break;
-            case 'contractor':
-                room = `contractor_${canteenId}`;
-                break;
-            default:
-                room = `staff_${canteenId}`;
-                break;
-        }
-
-        await addSocketId(room, socket.id);
-        await socket.join(room);
-        console.log(
-            `[ADDED TO REDIS] ${role === 'student' ? userId : canteenId}`
-        );
-    } catch (err) {
-        console.error('[SOCKET ERROR] ', err);
-        // process.exit(1);
-    }
+    socket.on('disconnect', async () => {
+        await leaveRoom(socket, { userId, canteenId, role });
+        console.log(`[USER DISCONNECTED] ${socket.id}`);
+    });
 });

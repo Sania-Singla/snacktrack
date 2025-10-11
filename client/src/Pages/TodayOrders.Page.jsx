@@ -8,6 +8,7 @@ import {
     playSound,
 } from '../Utils';
 import { useSocketContext, useUserContext } from '../Contexts';
+import { SOCKET_EVENTS } from '../Constants/constants';
 import toast from 'react-hot-toast';
 import { orderService } from '../Services';
 
@@ -252,7 +253,10 @@ export default function TodayOrdersPage() {
                                     res.message ===
                                         'order status updated successfully'
                                 ) {
-                                    socket.emit('orderPickedUp', originalOrder);
+                                    socket.emit(
+                                        SOCKET_EVENTS.ORDER_PICKEDUP,
+                                        originalOrder
+                                    );
                                 }
                             } catch (error) {
                                 console.error(
@@ -268,20 +272,20 @@ export default function TodayOrdersPage() {
             }
         }
 
-        socket.on('newOrder', newOrder);
-        socket.on('orderPrepared', orderPrepared);
-        socket.on('orderPickedUp', orderPickedUp);
-        socket.on('orderRejected', orderRejected);
-        socket.on('itemPrepared', itemPrepared);
-        socket.on('itemPickedUp', itemPickedUp);
+        socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
+        socket.on(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
+        socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
+        socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+        socket.on(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
+        socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
 
         return () => {
-            socket.off('newOrder', newOrder);
-            socket.off('orderPrepared', orderPrepared);
-            socket.off('orderPickedUp', orderPickedUp);
-            socket.off('orderRejected', orderRejected);
-            socket.off('itemPrepared', itemPrepared);
-            socket.off('itemPickedUp', itemPickedUp);
+            socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
+            socket.off(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
+            socket.off(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
+            socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+            socket.off(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
+            socket.off(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
         };
     }, [socket]);
 

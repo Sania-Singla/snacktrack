@@ -14,6 +14,7 @@ import {
     FORBIDDEN,
 } from './errorCodes.js';
 import { HOSTELS } from './hostels.js';
+import { SOCKET_EVENTS } from './events.js';
 
 export {
     MAX_FILE_SIZE,
@@ -29,4 +30,5 @@ export {
     SERVER_ERROR,
     FORBIDDEN,
     HOSTELS,
+    SOCKET_EVENTS,
 };

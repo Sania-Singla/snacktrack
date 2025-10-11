@@ -2,15 +2,32 @@ import { ErrorHandler } from './errorHandler.js';
 
 /**
  * try catch wrapper
- * @param {string} task - description of the operation to perform
- * @param {function} passedFunction - actual function to execute
+ * @param {string} aim - description of the operation to perform
+ * @param {function} fn - actual function to execute
  * @returns function wrapped in try catch
  */
-export const tryCatch = (task, passedFunction) => async (req, res, next) => {
-    try {
-        await passedFunction(req, res, next);
-    } catch (err) {
-        console.log(`error in operation: ${task}`, err);
-        next(new ErrorHandler(err.message));
-    }
-};
+export function tryCatch(aim, fn) {
+    return async function (...args) {
+        try {
+            await fn(...args);
+        } catch (err) {
+            console.error(`[ERROR] in ${aim}: `, err);
+            next(new ErrorHandler(err.message));
+        }
+    };
+}
+
+/**
+ * try catch wrapper for socket events
+ * @param {function} fn - actual function to execute
+ * @returns function wrapped in try catch
+ */
+export function safeHandler(fn) {
+    return async function (...args) {
+        try {
+            await fn(...args);
+        } catch (err) {
+            console.error('[SOCKET ERROR] ', err);
+        }
+    };
+}

@@ -1,6 +1,6 @@
 import verifyExpression from './regex.js';
 import { ErrorHandler } from './errorHandler.js';
-import { tryCatch } from './tryCatch.js';
+import { tryCatch, safeHandler } from './tryCatch.js';
 import { verifyEmail, sendVerificationEmail } from './verificationMail.js';
 import {
     addSocketId,
@@ -21,6 +21,7 @@ export {
     verifyExpression,
     ErrorHandler,
     tryCatch,
+    safeHandler,
     verifyEmail,
     sendVerificationEmail,
     addSocketId,
