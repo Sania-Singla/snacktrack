@@ -105,7 +105,7 @@ export default function PendingOrders({ pendingOrders, setPendingOrders }) {
                 </div>
             ) : (
                 orderElements.length === 0 && (
-                    <div className="italic text-gray-600">No orders found</div>
+                    <div className="italic text-gray-600 text-center">No orders found</div>
                 )
             )}
         </div>

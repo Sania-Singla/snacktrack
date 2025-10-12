@@ -105,7 +105,7 @@ export default function StudentOrdersPage() {
             }
         });
 
-        socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, (order) => {
+        socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, (order) => {
             if (order.studentId === studentId) {
                 setStudentOrders((prev) =>
                     prev.map((o) =>

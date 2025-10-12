@@ -98,7 +98,7 @@ export default function Sidebar() {
             x: '-100vw',
             transition: {
                 type: 'tween',
-                duration: 1,
+                duration: 0.2,
             },
         },
     };
@@ -139,7 +139,6 @@ export default function Sidebar() {
                     >
                         <div className="w-full bg-gray-50 drop-shadow-sm flex flex-col items-start justify-start h-full">
                             <div className="h-[60px] px-5 gap-5 w-full flex items-center justify-between">
-                                {/* hamburgur menu btn */}
                                 <Button
                                     btnText={
                                         <div className="size-5 fill-[#434343] hover:fill-[#4977ec]">
@@ -152,24 +151,7 @@ export default function Sidebar() {
                                     title="Close Sidebar"
                                 />
 
-                                <div className="flex gap-4 items-center">
-                                    <div
-                                        className={`block ${user.role === 'student' ? 'sm:hidden' : 'md:hidden'}`}
-                                    >
-                                        <Logout />
-                                    </div>
-
-                                    <div
-                                        onClick={() => navigate('/settings')}
-                                        className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
-                                    >
-                                        <img
-                                            src={user.avatar}
-                                            alt="user avatar"
-                                            className="size-full object-cover"
-                                        />
-                                    </div>
-                                </div>
+                                <Logout />
                             </div>
 
                             <hr className="w-full border-gray-200" />

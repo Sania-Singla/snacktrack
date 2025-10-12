@@ -293,12 +293,12 @@ export default function TodayOrdersPage() {
         <div className="w-full sm:p-4">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-                    <div className="px-3 py-[3px] text-[15px] font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                    <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+                    <div className="px-3 mt-1 py-[2px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                         Today
                     </div>
                 </div>
-                <div className="flex items-center justify-center gap-4">
+                <div className="flex items-center justify-center gap-3">
                     <CalendarFilter />
                     <div className="relative">
                         <Button
@@ -306,7 +306,7 @@ export default function TodayOrdersPage() {
                             title={
                                 audioEnabled ? 'Disable Audio' : 'Enable Audio'
                             }
-                            className={`bg-[#ffffff] flex items-center justify-center size-[37px] text-[17px] group rounded-full drop-shadow-sm ${
+                            className={`bg-[#ffffff] flex items-center justify-center size-8 group rounded-full drop-shadow-sm ${
                                 !audioEnabled ? 'opacity-70' : ''
                             }`}
                             onClick={() => {
@@ -318,7 +318,7 @@ export default function TodayOrdersPage() {
                         />
                         {!audioEnabled && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                                <div className="w-7 h-[2px] bg-red-500 rotate-45 transform origin-center" />
+                                <div className="w-6.5 h-[2px] bg-red-500 rotate-45 transform origin-center" />
                             </div>
                         )}
                     </div>
@@ -336,11 +336,9 @@ export default function TodayOrdersPage() {
                             borderColor:
                                 statusFilter === 'Pending' ? 'blue' : '',
                         }}
-                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
+                        className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
                     >
-                        <h3 className="text-lg font-medium text-gray-800">
-                            Pending
-                        </h3>
+                        <h3 className="font-medium text-gray-800">Pending</h3>
                         <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
                             <span className="text-blue-600 font-bold">
                                 {stats.Pending}
@@ -355,11 +353,9 @@ export default function TodayOrdersPage() {
                             borderColor:
                                 statusFilter === 'Prepared' ? '#9810fa' : '',
                         }}
-                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
+                        className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
                     >
-                        <h3 className="text-lg font-medium text-gray-800">
-                            Prepared
-                        </h3>
+                        <h3 className="font-medium text-gray-800">Prepared</h3>
                         <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
                             <span className="text-purple-600 font-bold">
                                 {stats.Prepared}
@@ -376,11 +372,9 @@ export default function TodayOrdersPage() {
                                     ? 'oklch(62.7% 0.194 149.214)'
                                     : '',
                         }}
-                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
+                        className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
                     >
-                        <h3 className="text-lg font-medium text-gray-800">
-                            Completed
-                        </h3>
+                        <h3 className="font-medium text-gray-800">Completed</h3>
                         <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
                             <span className="text-green-600 font-bold">
                                 {stats.PickedUp}
@@ -395,11 +389,9 @@ export default function TodayOrdersPage() {
                             borderColor:
                                 statusFilter === 'Rejected' ? 'red' : '',
                         }}
-                        className="bg-white p-4 flex justify-between cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
+                        className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
                     >
-                        <h3 className="text-lg font-medium text-gray-800">
-                            Rejected
-                        </h3>
+                        <h3 className="font-medium text-gray-800">Rejected</h3>
                         <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">
                             <span className="text-red-600 font-bold">
                                 {stats.Rejected}

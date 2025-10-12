@@ -44,11 +44,11 @@ export default function OrderDropdown({
                 <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full font-medium flex items-center gap-2 cursor-pointer justify-between bg-[#e0e0e010] border-[0.01rem] border-gray-500 hover:border-gray-400 px-2 py-1 rounded-md text-[14px] text-gray-700 leading-tight focus:outline-none focus:ring-1 focus:ring-[#4977ec] focus:border-[#4977ec]"
+                    className="w-full font-medium flex items-center gap-2 cursor-pointer justify-between bg-[#e0e0e010] border-[0.01rem] border-gray-500 hover:border-gray-400 px-2 py-1 rounded-lg text-[14px] text-gray-700 leading-tight focus:outline-none focus:ring-1 focus:ring-[#4977ec] focus:border-[#4977ec]"
                 >
                     {options.find((opt) => opt.value === selectedValue)?.label}
                     <div
-                        className={`size-[10px] fill-gray-800 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`size-2.5 fill-gray-800 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
                     >
                         {icons.arrowDown}
                     </div>
@@ -56,7 +56,7 @@ export default function OrderDropdown({
 
                 {/* Dropdown Options */}
                 {isDropdownOpen && (
-                    <div className="text-[14px] text-nowrap absolute z-10 mt-2 w-full cursor-pointer bg-white border border-gray-300 rounded-md shadow-sm overflow-hidden max-h-[200px] overflow-y-auto">
+                    <div className="text-nowrap absolute z-10 mt-2 w-full cursor-pointer bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden max-h-[200px] overflow-y-auto">
                         {options.map(
                             (option) =>
                                 option.value !== defaultOption && (

@@ -40,7 +40,7 @@ export default function Dropdown({ options, defaultOption = '', setValue }) {
                 <button
                     type="button"
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full flex items-center cursor-pointer justify-between bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 text-lg rounded-lg shadow-sm text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200"
+                    className="w-full flex items-center cursor-pointer justify-between bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg shadow-sm text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200"
                 >
                     <div className="flex items-center gap-[10px]">
                         {options.find((opt) => opt.value === selectedValue)
@@ -61,7 +61,7 @@ export default function Dropdown({ options, defaultOption = '', setValue }) {
                         </span>
                     </div>
                     <div
-                        className={`size-[15px] fill-gray-800 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`size-2.5 fill-gray-800 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
                     >
                         {icons.arrowDown}
                     </div>

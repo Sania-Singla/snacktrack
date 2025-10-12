@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
-import { LOGO_SVG } from '../../Constants/constants';
+import { LOGO } from '../../Constants/constants';
 
 export default function AdminPage() {
     const [canteens, setCanteens] = useState([]);
@@ -125,7 +125,7 @@ export default function AdminPage() {
                             Resources efficiently.
                         </p>
                     </div>
-                    <img src={LOGO_SVG} alt="logo svg" className="size-20" />
+                    <img src={LOGO} alt="logo svg" className="size-20" />
                 </section>
 
                 <div className="flex justify-center w-full mb-8">

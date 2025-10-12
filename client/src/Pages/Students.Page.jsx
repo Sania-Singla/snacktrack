@@ -112,16 +112,14 @@ export default function StudentsPage() {
             {studentElements.length > 0 && (
                 <div className="w-full">
                     <div className=" w-full flex justify-between gap-4 mb-8">
-                        <div className="bg-white px-3 py-2 rounded-lg shadow-sm">
-                            <div className="flex items-center justify-between gap-2">
-                                <h3 className="text-sm font-medium text-gray-800">
+                        <div className="bg-white px-3 py-2 rounded-md shadow-sm">
+                            <div className="flex items-center justify-between gap-4">
+                                <h3 className="font-medium text-gray-800">
                                     Total Students
                                 </h3>
-                                <div className="size-6 rounded-full bg-blue-50 text-sm flex items-center justify-center">
-                                    <span className="text-blue-600 font-bold">
-                                        {studentsInfo?.totalCount || 0}
-                                    </span>
-                                </div>
+                                <span className="text-blue-600 font-medium">
+                                    {studentsInfo?.totalCount || 0}
+                                </span>
                             </div>
                         </div>
 
@@ -130,13 +128,13 @@ export default function StudentsPage() {
                             onClick={removeAllStudents}
                             btnText={
                                 <div className="flex gap-2 items-center justify-center px-1">
-                                    <div className="size-[16px] fill-white group-hover:fill-red-700">
+                                    <div className="size-3.5 fill-white group-hover:fill-red-700">
                                         {icons.delete}
                                     </div>
-                                    <p>Remove All Students</p>
+                                    <p>Delete All</p>
                                 </div>
                             }
-                            className="bg-red-600  shadow-sm hover:bg-red-700 text-white p-2 h-fit rounded-lg"
+                            className="bg-red-600 text-sm shadow-sm hover:bg-red-700 text-white p-1.5 h-fit rounded-md"
                         />
                     </div>
 

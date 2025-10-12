@@ -89,6 +89,7 @@ export default function ContractorOrderCard({ order, reference }) {
                             </div>
                         </div>
                     </div>
+
                     {order.status === 'Pending' ||
                     order.status === 'Prepared' ? (
                         <div

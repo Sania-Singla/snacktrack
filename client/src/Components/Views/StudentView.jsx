@@ -58,8 +58,8 @@ export default function StudentView({ student, reference }) {
                     <div className="flex h-fit gap-3">
                         <Button
                             btnText={
-                                <div className="size-[15px] group-hover:fill-[#4977ec]">
-                                    {icons.edit}
+                                <div className="size-4 fill-none stroke-black group-hover:stroke-[#4977ec]">
+                                    {icons.editUnfilled}
                                 </div>
                             }
                             className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
@@ -68,7 +68,7 @@ export default function StudentView({ student, reference }) {
                         <div>
                             <Button
                                 btnText={
-                                    <div className="size-[15px] group-hover:fill-red-700">
+                                    <div className="size-4 group-hover:fill-red-700">
                                         {icons.delete}
                                     </div>
                                 }
@@ -93,10 +93,10 @@ export default function StudentView({ student, reference }) {
                                 <div className="flex gap-2 items-center">
                                     Bills
                                     <div
-                                        className={`size-[10px] transition-transform fill-white ${
+                                        className={`size-2.5 transition-transform fill-white ${
                                             expanded
-                                                ? 'rotate-180 duration-400'
-                                                : 'rotate-0 duration-400'
+                                                ? 'rotate-180 duration-200'
+                                                : 'rotate-0 duration-500'
                                         }`}
                                         style={{ transformOrigin: 'center' }}
                                     >
@@ -116,7 +116,6 @@ export default function StudentView({ student, reference }) {
                         initial={{ height: 0 }}
                         animate={{ height: '100%' }}
                         exit={{ height: 0 }}
-                        transition={{ duration: 0.2 }}
                         className="p-1 pt-4 space-y-4 border-t w-full border-gray-300"
                     >
                         {bills.length > 0 ? (

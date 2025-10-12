@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Logout, Searchbar } from '..';
+import { Button, Searchbar } from '..';
 import {
     useUserContext,
     useSideBarContext,
@@ -42,13 +42,13 @@ export default function Header() {
                 {/* logo */}
                 <Link
                     to={'/'}
-                    className="flex items-center justify-center gap-3 text-nowrap font-medium text-lg"
+                    className="flex items-center justify-center gap-2 text-nowrap font-medium text-lg"
                 >
-                    <div className="overflow-hidden rounded-full size-8 shadow-sm">
+                    <div className="size-8">
                         <img
                             src={LOGO}
                             alt="Snack Track Logo"
-                            className="object-cover size-full hover:brightness-95"
+                            className="object-cover size-full"
                         />
                     </div>
                     <p className="hover:text-[#4977ec]">SnackTrack</p>
@@ -86,22 +86,28 @@ export default function Header() {
                         <Button
                             onClick={() => navigate('/register-student')}
                             btnText={
-                                <div className="flex items-center justify-center gap-2">
-                                    <div className="size-4 fill-white">
-                                        {icons.memberAdd}
+                                <div className="flex items-center justify-center gap-1.5">
+                                    <div className="size-3.5 fill-white">
+                                        {icons.plus}
                                     </div>
                                     <span>Student</span>
                                 </div>
                             }
                             title="Add Student"
-                            className="text-white rounded-md w-fit text-nowrap font-normal px-3 h-8 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md w-fit text-nowrap font-normal px-2.5 h-8 bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     </div>
                 )}
+
                 <div
-                    className={`hidden ${user.role === 'student' ? 'sm:block' : 'md:block'}`}
+                    onClick={() => navigate('/settings')}
+                    className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
                 >
-                    <Logout />
+                    <img
+                        src={user.avatar}
+                        alt="user avatar"
+                        className="size-full object-cover"
+                    />
                 </div>
             </div>
         </header>
