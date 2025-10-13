@@ -177,8 +177,8 @@ export default function UpdatePassword() {
                 <div className="w-full py-4">
                     <h3 className="text-2xl font-semibold">Update Password</h3>
                     <p className="mt-4 text-gray-600">
-                        Update your password to secure your account. Changes are
-                        final once saved and cannot be undone.
+                        Update your password here. Please note that changes
+                        cannot be undone.
                     </p>
                     <div className="mt-4">
                         <Button

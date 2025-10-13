@@ -131,7 +131,7 @@ export default function UpdateAccountDetails() {
             <div className="rounded-xl drop-shadow-md flex flex-col sm:flex-row bg-white py-6 px-8 sm:gap-14">
                 <div className="w-full py-4">
                     <h3 className="text-2xl font-semibold">
-                        Update Personal Information
+                        Update Personal Details
                     </h3>
                     <p className="mt-4 text-gray-600">
                         Update your personal details here. Please note that

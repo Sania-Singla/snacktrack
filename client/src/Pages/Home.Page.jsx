@@ -159,7 +159,7 @@ export default function HomePage() {
                             </div>
                         }
                         title={filter === 'snacks' ? 'Add Snack' : 'Add Item'}
-                        className="text-white rounded-md px-2 h-8 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
+                        className="text-white rounded-md px-2 h-7.5 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
                     />
                 )}
                 <div className="flex items-center gap-4 w-full place-content-end">

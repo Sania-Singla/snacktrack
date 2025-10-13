@@ -113,10 +113,10 @@ export default function BillsPage() {
             <div className="flex flex-col gap-6 sm:gap-4 sm:flex-row sm:items-center justify-between w-full mb-6">
                 <div className="flex items-center justify-between gap-4 w-full">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-gray-900">
+                        <h1 className="text-2xl font-semibold text-gray-900">
                             Bills
                         </h1>
-                        <div className="px-3 py-[3px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                        <div className="px-3 py-[3px] text-sm font-semibold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                             {new Date().getFullYear()}
                         </div>
                     </div>
@@ -145,7 +145,7 @@ export default function BillsPage() {
 
                 <Button
                     onClick={generateIntermediateBill}
-                    className="text-white rounded-lg py-2 w-fit font-medium text-nowrap px-4 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                    className="text-white rounded-lg py-2 w-fit text-nowrap px-4 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
                     btnText="Generate Bill"
                 />
             </div>

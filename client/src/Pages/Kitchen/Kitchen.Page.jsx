@@ -231,17 +231,18 @@ export default function KitchenPage() {
             <section className="w-full bg-white shadow-sm rounded-xl p-6 mb-8 h-fit">
                 <div className="flex justify-between gap-6 items-center">
                     <div className="flex items-center gap-3 mb-4">
-                        <Link
-                            to={'/'}
-                            className="overflow-hidden rounded-full size-[35px] border-gray-200 border shadow-sm"
-                        >
-                            <img
-                                src={LOGO}
-                                alt="Snack Track Logo"
-                                className="object-cover size-full hover:brightness-95"
-                            />
-                        </Link>
-                        <h2 className="text-2xl font-semibold text-gray-800">
+                        <div>
+                            <Link to={'/'}>
+                                <div className="overflow-hidden rounded-full size-12 border-gray-200 border shadow-sm">
+                                    <img
+                                        src={LOGO}
+                                        alt="Snack Track Logo"
+                                        className="object-cover size-full hover:brightness-95"
+                                    />
+                                </div>
+                            </Link>
+                        </div>
+                        <h2 className="text-2xl font-semibold text-gray-800 leading-7">
                             Kitchen Summary
                         </h2>
                     </div>

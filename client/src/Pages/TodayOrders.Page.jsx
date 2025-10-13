@@ -293,8 +293,8 @@ export default function TodayOrdersPage() {
         <div className="w-full sm:p-4">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-                    <div className="px-3 mt-1 py-[2px] text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                    <h1 className="text-2xl font-semibold text-gray-900">Orders</h1>
+                    <div className="px-3 mt-1 py-[2px] text-sm font-semibold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                         Today
                     </div>
                 </div>

@@ -159,8 +159,8 @@ export default function UpdatePassword() {
                         Update Kitchen Key
                     </h3>
                     <p className="mt-4 text-gray-600">
-                        Update your kitchen key to secure your kitchen controls.
-                        Changes are final once saved and cannot be undone.
+                        Update your kitchen key here. Please note that changes
+                        cannot be undone.
                     </p>
                 </div>
                 <form onSubmit={handleSubmit} className="w-full max-w-[600px]">

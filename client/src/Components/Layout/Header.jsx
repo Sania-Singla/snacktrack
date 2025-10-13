@@ -5,7 +5,7 @@ import {
     useSideBarContext,
     useStudentContext,
 } from '../../Contexts';
-import { LOGO } from '../../Constants/constants';
+import { LOGO_SVG } from '../../Constants/constants';
 import { icons } from '../../Assets/icons';
 
 export default function Header() {
@@ -46,7 +46,7 @@ export default function Header() {
                 >
                     <div className="size-8">
                         <img
-                            src={LOGO}
+                            src={LOGO_SVG}
                             alt="Snack Track Logo"
                             className="object-cover size-full"
                         />
@@ -61,7 +61,7 @@ export default function Header() {
                 <Searchbar />
             </div>
 
-            <div className="flex gap-4 items-center">
+            <div className="flex gap-3 items-center">
                 {user.role === 'student' ? (
                     <div className="relative">
                         <Button
@@ -87,14 +87,14 @@ export default function Header() {
                             onClick={() => navigate('/register-student')}
                             btnText={
                                 <div className="flex items-center justify-center gap-1.5">
-                                    <div className="size-3.5 fill-white">
+                                    <div className="size-3 fill-white">
                                         {icons.plus}
                                     </div>
                                     <span>Student</span>
                                 </div>
                             }
                             title="Add Student"
-                            className="text-white rounded-md w-fit text-nowrap font-normal px-2.5 h-8 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md w-fit text-nowrap font-normal px-2 h-7.5 bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     </div>
                 )}

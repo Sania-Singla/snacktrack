@@ -128,7 +128,7 @@ export default function StudentsPage() {
                             onClick={removeAllStudents}
                             btnText={
                                 <div className="flex gap-2 items-center justify-center px-1">
-                                    <div className="size-3.5 fill-white group-hover:fill-red-700">
+                                    <div className="size-3 fill-white group-hover:fill-red-700">
                                         {icons.delete}
                                     </div>
                                     <p>Delete All</p>

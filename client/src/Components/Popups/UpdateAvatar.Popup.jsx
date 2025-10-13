@@ -32,7 +32,7 @@ export default function UpdateAvatarPopup() {
             if (!fileRestrictions(file)) {
                 setAvatarPreview(USER_PLACEHOLDER_IMAGE);
                 setError(
-                    `only PNG, JPG/JPEG files are allowed and File size should not exceed ${MAX_FILE_SIZE} MB`
+                    `only PNG, JPG/JPEG files are allowed with size < ${MAX_FILE_SIZE} MB`
                 );
             } else {
                 setAvatarPreview(URL.createObjectURL(file));
@@ -53,7 +53,7 @@ export default function UpdateAvatarPopup() {
     async function handleSubmit(e) {
         e.preventDefault();
         if (handleDisable()) {
-            toast.error('Please fill all fields correctly');
+            toast.error('Please choose an image');
             return;
         }
         setLoading(true);

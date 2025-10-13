@@ -88,7 +88,7 @@ export default function Searchbar() {
     };
 
     return (
-        <div className="w-full group shadow-sm rounded-full relative">
+        <div className="w-full group shadow-sm rounded-lg relative overflow-hidden">
             <input
                 type="text"
                 placeholder={
@@ -98,7 +98,7 @@ export default function Searchbar() {
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                className="w-full bg-white border-transparent border-[0.1rem] indent-8 rounded-full px-[5px] py-1 text-black font-normal placeholder:font-light placeholder:text-gray-500 outline-none focus:border-[#4977ec] transition-all duration-100"
+                className="w-full bg-white border-transparent border-[0.1rem] indent-8 px-[5px] py-1 text-black font-normal placeholder:font-light placeholder:text-gray-500 outline-none focus:border-[#4977ec] transition-all duration-100"
             />
             <div className="size-4 fill-gray-400 group-focus-within:fill-[#4977ec] absolute top-[50%] translate-y-[-50%] left-3">
                 {icons.search}
