@@ -230,10 +230,10 @@ export default function KitchenPage() {
         <div className="min-h-screen bg-gray-50 p-4 md:p-6">
             <section className="w-full bg-white shadow-sm rounded-xl p-6 mb-8 h-fit">
                 <div className="flex justify-between gap-6 items-center">
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex w-full items-center gap-3 mb-4">
                         <div>
                             <Link to={'/'}>
-                                <div className="overflow-hidden rounded-full size-12 border-gray-200 border shadow-sm">
+                                <div className="overflow-hidden rounded-full size-10 border-gray-200 border shadow-sm">
                                     <img
                                         src={LOGO}
                                         alt="Snack Track Logo"
@@ -242,11 +242,11 @@ export default function KitchenPage() {
                                 </div>
                             </Link>
                         </div>
-                        <h2 className="text-2xl font-semibold text-gray-800 leading-7">
+                        <h2 className="text-xl font-semibold text-gray-800 leading-6">
                             Kitchen Summary
                         </h2>
                     </div>
-                    <p className="text-sm md:text-base font-medium w-fit text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg">
+                    <p className="text-sm md:text-base font-medium w-fit text-center text-gray-700 bg-gray-50 px-3 py-1.5 rounded-lg">
                         <span className="font-semibold text-blue-600">
                             {user.hostelType}
                             {user.hostelNumber}
