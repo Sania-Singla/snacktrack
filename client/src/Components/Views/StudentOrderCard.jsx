@@ -26,19 +26,29 @@ export default function StudentOrderCard({ order, reference }) {
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                        <span
-                            className={`px-2 pt-[2px] pb-[3px] text-xs font-bold rounded-full ${
-                                status === 'Pending'
-                                    ? 'bg-yellow-50 text-yellow-700'
-                                    : status === 'Rejected'
-                                      ? 'bg-red-50 text-red-700'
-                                      : status === 'Prepared'
-                                        ? 'bg-blue-50 text-blue-700'
-                                        : 'bg-green-50 text-green-700'
-                            }`}
-                        >
-                            {status}
-                        </span>
+                        {order.status === 'Pending' && (
+                            <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700">
+                                Pending
+                            </div>
+                        )}
+
+                        {order.status === 'Prepared' && (
+                            <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-purple-50 text-purple-700">
+                                Prepared
+                            </div>
+                        )}
+
+                        {order.status === 'PickedUp' && (
+                            <div className="fill-green-600 size-4 m-1">
+                                {icons.checkWithoutCircle}
+                            </div>
+                        )}
+
+                        {order.status === 'Rejected' && (
+                            <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-red-50 text-red-700">
+                                Rejected
+                            </div>
+                        )}
 
                         <div className="flex items-center gap-3">
                             <span className="text-[17px] font-semibold text-gray-900">

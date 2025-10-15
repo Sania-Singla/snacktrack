@@ -5,7 +5,7 @@ import {
     connectMongoDB,
     connectRedis,
     generateTransporter,
-    // connectTwilio,
+    connectTwilio,
 } from './Config/index.js';
 
 const PORT = process.env.PORT || 4000;
@@ -17,7 +17,7 @@ try {
         connectMongoDB(),
         connectRedis(),
         generateTransporter(),
-        // connectTwilio(),
+        connectTwilio(),
     ]);
 
     startBillingCronJob();

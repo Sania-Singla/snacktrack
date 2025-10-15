@@ -10,6 +10,8 @@ import { Button, InputField } from '..';
 import { verifyExpression, getRollNo, checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
+import 'react-phone-input-2/lib/style.css';
+import PhoneInput from 'react-phone-input-2';
 
 export default function EditStudentPopup() {
     const { setShowPopup, popupInfo } = usePopupContext();
@@ -91,6 +93,14 @@ export default function EditStudentPopup() {
         }
     }
 
+    function handlePhoneChange(value, country, e, formattedValue) {
+        const name = e.target.name || 'phoneNumber'; // because when flag changes the name = undefiend
+        setInputs((prev) => ({ ...prev, [name]: formattedValue }));
+        if (value) verifyExpression(name, formattedValue, setError);
+        else setError((prev) => ({ ...prev, [name]: '' }));
+        onMouseOver();
+    }
+
     const inputFields = [
         {
             type: 'text',
@@ -113,13 +123,13 @@ export default function EditStudentPopup() {
             placeholder: 'Enter new email',
             required: true,
         },
-        {
-            type: 'text',
-            name: 'phoneNumber',
-            label: 'PhoneNumber',
-            placeholder: 'Enter new Phone Number',
-            required: true,
-        },
+        // {
+        //     type: 'text',
+        //     name: 'phoneNumber',
+        //     label: 'PhoneNumber',
+        //     placeholder: 'Enter new Phone Number',
+        //     required: true,
+        // },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -169,6 +179,36 @@ export default function EditStudentPopup() {
                     className="flex flex-col items-start justify-center gap-2 w-full"
                 >
                     {inputElements}
+
+                    {/* phone number field */}
+                    <div className="w-full shadow-md shadow-[#f8f0eb]">
+                        <div className="bg-white z-[10] text-[15px] ml-2 px-1 w-fit relative top-3 font-medium">
+                            <label htmlFor="phoneNumber">
+                                <span className="text-red-500">* </span>
+                                Phone Number
+                            </label>
+                        </div>
+                        <div className="w-full">
+                            <PhoneInput
+                                countryCodeEditable={false}
+                                country={'in'}
+                                value={inputs.phoneNumber}
+                                onChange={handlePhoneChange}
+                                inputProps={{
+                                    name: 'phoneNumber',
+                                    required: true,
+                                    id: 'phoneNumber',
+                                }}
+                                inputClass="!w-full !h-[42px] !indent-2 !rounded-md !shadow-sm !border-[0.01rem] !border-[#858585] !outline-[#f68533] !bg-transparent"
+                                buttonClass="!h-[42px] !w-[45px] !bg-white !hover:bg-white !z-[1] !rounded-r-none !rounded-md !border-[0.01rem] !border-[#858585] !outline-[#f68533]"
+                            />
+                        </div>
+                        {error.phoneNumber && (
+                            <div className="text-red-500 text-xs font-medium">
+                                {error.phoneNumber}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="w-full">
                         <Button
