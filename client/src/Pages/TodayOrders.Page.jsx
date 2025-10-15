@@ -83,24 +83,34 @@ export default function TodayOrdersPage() {
 
         async function newOrder(order) {
             if (user.role === 'contractor') {
+                // setStats((prev) => ({
+                //     ...prev,
+                //     Total: prev.Total + 1,
+                //     [order.status]: prev[order.status] + 1,
+                // }));
+
+                // const hasSnacks = order.items.some(
+                //     (item) => item.type === 'Snack'
+                // );
+
+                // if (hasSnacks && statusFilterRef.current === 'Pending') {
+                //     setPendingOrders((prev) => [...prev, order]);
+                // } else if (
+                //     !hasSnacks &&
+                //     statusFilterRef.current === 'Prepared'
+                // ) {
+                //     setOrders((prev) => [...prev, order]);
+                // }
+
+                // await playSound();
+
+                setPendingOrders((prev) => [...prev, order]);
+
                 setStats((prev) => ({
                     ...prev,
                     Total: prev.Total + 1,
-                    [order.status]: prev[order.status] + 1,
+                    Pending: prev.Pending + 1,
                 }));
-
-                const hasSnacks = order.items.some(
-                    (item) => item.type === 'Snack'
-                );
-
-                if (hasSnacks && statusFilterRef.current === 'Pending') {
-                    setPendingOrders((prev) => [...prev, order]);
-                } else if (
-                    !hasSnacks &&
-                    statusFilterRef.current === 'Prepared'
-                ) {
-                    setOrders((prev) => [...prev, order]);
-                }
 
                 await playSound();
             }
@@ -108,34 +118,53 @@ export default function TodayOrdersPage() {
 
         function orderPrepared(order) {
             if (user.role === 'contractor') {
-                setStats((prev) => ({
-                    ...prev,
-                    Pending: prev.Pending - 1,
-                    Prepared: prev.Prepared + 1,
-                }));
+                // setStats((prev) => ({
+                //     ...prev,
+                //     Pending: prev.Pending - 1,
+                //     Prepared: prev.Prepared + 1,
+                // }));
 
-                if (statusFilterRef.current === 'Pending') {
-                    setPendingOrders((prev) =>
-                        prev.filter((o) => o._id !== order._id)
-                    );
-                } else if (statusFilterRef.current === 'Prepared') {
-                    setOrders((prev) => [...prev, order]);
-                }
+                // if (statusFilterRef.current === 'Pending') {
+                //     setPendingOrders((prev) =>
+                //         prev.filter((o) => o._id !== order._id)
+                //     );
+                // } else if (statusFilterRef.current === 'Prepared') {
+                //     setOrders((prev) => [...prev, order]);
+                // }
+
+                setPendingOrders((prev) =>
+                    prev.map((o) =>
+                        o._id === order._id ? { ...o, status: 'Prepared' } : o
+                    )
+                );
             }
         }
 
         function orderPickedUp(order) {
             if (user.role === 'contractor') {
+                // setStats((prev) => ({
+                //     ...prev,
+                //     Prepared: prev.Prepared - 1,
+                //     PickedUp: prev.PickedUp + 1,
+                // }));
+                // if (statusFilterRef.current === 'Prepared') {
+                //     setOrders((prev) =>
+                //         prev.filter((o) => o._id !== order._id)
+                //     );
+                // } else if (statusFilterRef.current === 'PickedUp') {
+                //     setOrders((prev) => [...prev, order]);
+                // }
                 setStats((prev) => ({
                     ...prev,
-                    Prepared: prev.Prepared - 1,
+                    Pending: prev.Pending - 1,
                     PickedUp: prev.PickedUp + 1,
                 }));
-                if (statusFilterRef.current === 'Prepared') {
-                    setOrders((prev) =>
-                        prev.filter((o) => o._id !== order._id)
-                    );
-                } else if (statusFilterRef.current === 'PickedUp') {
+
+                setPendingOrders((prev) =>
+                    prev.filter((o) => o._id !== order._id)
+                );
+
+                if (statusFilterRef.current === 'PickedUp') {
                     setOrders((prev) => [...prev, order]);
                 }
             }
@@ -143,30 +172,44 @@ export default function TodayOrdersPage() {
 
         function orderRejected(order) {
             if (user.role === 'contractor') {
-                if (order.status === 'Prepared') {
-                    setStats((prev) => ({
-                        ...prev,
-                        Prepared: prev.Prepared - 1,
-                        Rejected: prev.Rejected + 1,
-                    }));
-                } else {
-                    setStats((prev) => ({
-                        ...prev,
-                        Pending: prev.Pending - 1,
-                        Rejected: prev.Rejected + 1,
-                    }));
-                }
+                // if (order.status === 'Prepared') {
+                //     setStats((prev) => ({
+                //         ...prev,
+                //         Prepared: prev.Prepared - 1,
+                //         Rejected: prev.Rejected + 1,
+                //     }));
+                // } else {
+                //     setStats((prev) => ({
+                //         ...prev,
+                //         Pending: prev.Pending - 1,
+                //         Rejected: prev.Rejected + 1,
+                //     }));
+                // }
 
-                if (statusFilterRef.current === 'Prepared') {
-                    setOrders((prev) =>
-                        prev.filter((o) => o._id !== order._id)
-                    );
-                } else if (statusFilterRef.current === 'Rejected') {
+                // if (statusFilterRef.current === 'Prepared') {
+                //     setOrders((prev) =>
+                //         prev.filter((o) => o._id !== order._id)
+                //     );
+                // } else if (statusFilterRef.current === 'Rejected') {
+                //     setOrders((prev) => [...prev, order]);
+                // } else if (statusFilterRef.current === 'Pending') {
+                //     setPendingOrders((prev) =>
+                //         prev.filter((o) => o._id !== order._id)
+                //     );
+                // }
+
+                setStats((prev) => ({
+                    ...prev,
+                    Pending: prev.Pending - 1,
+                    Rejected: prev.Rejected + 1,
+                }));
+
+                setPendingOrders((prev) =>
+                    prev.filter((o) => o._id !== order._id)
+                );
+
+                if (statusFilterRef.current === 'Rejected') {
                     setOrders((prev) => [...prev, order]);
-                } else if (statusFilterRef.current === 'Pending') {
-                    setPendingOrders((prev) =>
-                        prev.filter((o) => o._id !== order._id)
-                    );
                 }
             }
         }
@@ -192,9 +235,90 @@ export default function TodayOrdersPage() {
         }
 
         function itemPickedUp({ orderId, itemId }) {
-            if (statusFilterRef.current === 'Pending') {
-                setPendingOrders((prev) =>
-                    prev.map((o) =>
+            // if (statusFilterRef.current === 'Pending') {
+            //     setPendingOrders((prev) =>
+            //         prev.map((o) =>
+            //             o._id === orderId
+            //                 ? {
+            //                       ...o,
+            //                       items: o.items.map((i) =>
+            //                           i.id === itemId
+            //                               ? {
+            //                                     ...i,
+            //                                     pickedUpCount: i.preparedCount,
+            //                                 }
+            //                               : i
+            //                       ),
+            //                   }
+            //                 : o
+            //         )
+            //     );
+            // } else if (statusFilterRef.current === 'Prepared') {
+            //     setOrders((prev) => {
+            //         const originalOrder = prev.find((o) => o._id === orderId);
+            //         if (!originalOrder) return prev;
+
+            //         const updatedOrders = prev
+            //             .map((o) =>
+            //                 o._id === orderId
+            //                     ? {
+            //                           ...o,
+            //                           items: o.items.map((i) =>
+            //                               i.id === itemId
+            //                                   ? {
+            //                                         ...i,
+            //                                         pickedUpCount:
+            //                                             i.preparedCount,
+            //                                     }
+            //                                   : i
+            //                           ),
+            //                       }
+            //                     : o
+            //             )
+            //             .filter((o) =>
+            //                 o.items.some((i) => i.pickedUpCount < i.quantity)
+            //             );
+
+            //         const orderWasRemoved = !updatedOrders.some(
+            //             (o) => o._id === orderId
+            //         );
+
+            //         if (orderWasRemoved) {
+            //             (async () => {
+            //                 try {
+            //                     const res =
+            //                         await orderService.updateOrderStatus({
+            //                             orderId,
+            //                             status: 'PickedUp',
+            //                         });
+            //                     if (
+            //                         res &&
+            //                         res.message ===
+            //                             'order status updated successfully'
+            //                     ) {
+            //                         socket.emit(
+            //                             SOCKET_EVENTS.ORDER_PICKEDUP,
+            //                             originalOrder
+            //                         );
+            //                     }
+            //                 } catch (error) {
+            //                     console.error(
+            //                         'Failed to update order status:',
+            //                         error
+            //                     );
+            //                 }
+            //             })();
+            //         }
+
+            //         return updatedOrders;
+            //     });
+            // }
+
+            setPendingOrders((prev) => {
+                const originalOrder = prev.find((o) => o._id === orderId);
+
+                const updatedOrders = prev
+                    .map((o) =>
                         o._id === orderId
                             ? {
                                   ...o,
@@ -209,67 +333,39 @@ export default function TodayOrdersPage() {
                               }
                             : o
                     )
-                );
-            } else if (statusFilterRef.current === 'Prepared') {
-                setOrders((prev) => {
-                    const originalOrder = prev.find((o) => o._id === orderId);
-                    if (!originalOrder) return prev;
-
-                    const updatedOrders = prev
-                        .map((o) =>
-                            o._id === orderId
-                                ? {
-                                      ...o,
-                                      items: o.items.map((i) =>
-                                          i.id === itemId
-                                              ? {
-                                                    ...i,
-                                                    pickedUpCount:
-                                                        i.preparedCount,
-                                                }
-                                              : i
-                                      ),
-                                  }
-                                : o
-                        )
-                        .filter((o) =>
-                            o.items.some((i) => i.pickedUpCount < i.quantity)
-                        );
-
-                    const orderWasRemoved = !updatedOrders.some(
-                        (o) => o._id === orderId
+                    .filter((o) =>
+                        o.items.some((i) => i.pickedUpCount < i.quantity)
                     );
 
-                    if (orderWasRemoved) {
-                        (async () => {
-                            try {
-                                const res =
-                                    await orderService.updateOrderStatus({
-                                        orderId,
-                                        status: 'PickedUp',
-                                    });
-                                if (
-                                    res &&
-                                    res.message ===
-                                        'order status updated successfully'
-                                ) {
-                                    socket.emit(
-                                        SOCKET_EVENTS.ORDER_PICKEDUP,
-                                        originalOrder
-                                    );
-                                }
-                            } catch (error) {
-                                console.error(
-                                    'Failed to update order status:',
-                                    error
+                const orderWasRemoved = !updatedOrders.some(
+                    (o) => o._id === orderId
+                );
+
+                if (orderWasRemoved) {
+                    (async () => {
+                        try {
+                            const res = await orderService.updateOrderStatus({
+                                orderId,
+                                status: 'PickedUp',
+                            });
+                            if (
+                                res &&
+                                res.message ===
+                                    'order status updated successfully'
+                            ) {
+                                socket.emit(
+                                    SOCKET_EVENTS.ORDER_PICKEDUP,
+                                    originalOrder
                                 );
                             }
-                        })();
-                    }
+                        } catch (error) {
+                            navigate('/server-error');
+                        }
+                    })();
+                }
 
-                    return updatedOrders;
-                });
-            }
+                return updatedOrders;
+            });
         }
 
         socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
@@ -293,7 +389,9 @@ export default function TodayOrdersPage() {
         <div className="w-full sm:p-4">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-semibold text-gray-900">Orders</h1>
+                    <h1 className="text-2xl font-semibold text-gray-900">
+                        Orders
+                    </h1>
                     <div className="px-3 mt-1 py-[2px] text-sm font-semibold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                         Today
                     </div>
@@ -328,7 +426,7 @@ export default function TodayOrdersPage() {
             {loading ? (
                 <div className="my-8">loading...</div>
             ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     {/* Pending Orders */}
                     <div
                         onClick={() => handleStatusClick('Pending')}
@@ -347,7 +445,7 @@ export default function TodayOrdersPage() {
                     </div>
 
                     {/* Prepared Orders */}
-                    <div
+                    {/* <div
                         onClick={() => handleStatusClick('Prepared')}
                         style={{
                             borderColor:
@@ -361,7 +459,7 @@ export default function TodayOrdersPage() {
                                 {stats.Prepared}
                             </span>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Picked Up Orders */}
                     <div

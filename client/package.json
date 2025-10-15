@@ -12,6 +12,7 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@headlessui/react": "^2.2.9",
         "@tailwindcss/vite": "^4.0.12",
         "date-fns": "^4.1.0",
         "framer-motion": "^12.6.3",

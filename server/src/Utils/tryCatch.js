@@ -7,9 +7,9 @@ import { ErrorHandler } from './errorHandler.js';
  * @returns function wrapped in try catch
  */
 export function tryCatch(aim, fn) {
-    return async function (...args) {
+    return async function (req, res, next) {
         try {
-            await fn(...args);
+            await fn(req, res, next);
         } catch (err) {
             console.error(`[ERROR] in ${aim}: `, err);
             next(new ErrorHandler(err.message));

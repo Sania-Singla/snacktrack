@@ -15,13 +15,8 @@ export default function AdminPage() {
     useEffect(() => {
         (async function () {
             try {
-                console.log(1);
-
                 const res = await adminService.getContractors();
-                console.log(res);
-                if (res) {
-                    setCanteens(res);
-                }
+                if (res) setCanteens(res);
                 setLoading(false);
             } catch (err) {
                 navigate('/server-error');

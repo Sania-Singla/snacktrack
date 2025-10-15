@@ -156,7 +156,7 @@ export default function Sidebar() {
 
                             <hr className="w-full border-gray-200" />
 
-                            <div className="text-[17px] px-2 py-3 h-[calc(100%-60px)] text-black overflow-y-scroll w-full flex flex-col gap-1 mb-1 items-start justify-start">
+                            <div className="text-[17px] px-2 py-3 h-[calc(100%-60px)] text-black overflow-y-auto w-full flex flex-col gap-1 mb-1 items-start justify-start">
                                 {itemElements}
                             </div>
                         </div>

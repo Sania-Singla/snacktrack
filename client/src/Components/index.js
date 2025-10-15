@@ -40,7 +40,6 @@ import NewContractorPopup from './Popups/NewContractor.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
 import OrderUnavailablePopup from './Popups/OrderUnavailable.Popup';
 import EmptyCart from './Views/EmptyCart';
-import OrderDropdown from './General/OrderDropdown';
 import BillCard from './Views/BillCard';
 import StudentBillCard from './Views/StudentBillCard';
 
@@ -57,7 +56,6 @@ export {
     Button,
     Searchbar,
     InputField,
-    OrderDropdown,
     ContributorCard,
     UpdateAccountDetails,
     UpdateKitchenKey,

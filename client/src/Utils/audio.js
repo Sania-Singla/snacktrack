@@ -44,7 +44,7 @@ async function playSound() {
         audio.currentTime = 0;
         await audio.play();
     } catch (err) {
-        console.log('Audio play failed:', err);
+        // console.log('Audio play failed:', err);
         disableAudio();
     }
 }

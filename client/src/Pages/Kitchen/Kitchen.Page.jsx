@@ -130,10 +130,7 @@ export default function KitchenPage() {
                                 );
                             }
                         } catch (error) {
-                            console.error(
-                                'Failed to update order status:',
-                                error
-                            );
+                            navigate('/server-error');
                         }
                     })();
                 }

@@ -22,17 +22,17 @@ const SocketContextProvider = ({ children }) => {
         });
 
         socketInstance.on('connect', () => {
-            console.log('socket connected. SocketId: ', socketInstance.id);
+            // console.log('socket connected. SocketId: ', socketInstance.id);
             setSocket(socketInstance);
         });
 
         socketInstance.on('connect_error', (err) => {
-            console.error('Socket connection error:', err);
+            // console.error('Socket connection error:', err);
             setSocket(null);
         });
 
         socketInstance.on('error', (err) => {
-            console.error('Socket error:', err);
+            // console.error('Socket error:', err);
             setSocket(null);
         });
 
@@ -41,7 +41,7 @@ const SocketContextProvider = ({ children }) => {
 
     function disconnectSocket() {
         if (socket) {
-            console.log('socket disconnecting...');
+            // console.log('socket disconnected');
             socket.disconnect();
             setSocket(null);
         }

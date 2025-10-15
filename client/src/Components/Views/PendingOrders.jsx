@@ -31,7 +31,7 @@ export default function PendingOrders({ pendingOrders, setPendingOrders }) {
         try {
             setLoading(true);
             const res = await orderService.getCanteenOrders({
-                status: 'Pending',
+                status: 'Pending', // both pending and prepared actually
                 canteenId: user.canteenId,
                 date: dateFilter || undefined,
                 page: pageNum,
@@ -105,7 +105,9 @@ export default function PendingOrders({ pendingOrders, setPendingOrders }) {
                 </div>
             ) : (
                 orderElements.length === 0 && (
-                    <div className="italic text-gray-600 text-center">No orders found</div>
+                    <div className="italic text-gray-600 text-center">
+                        No orders found
+                    </div>
                 )
             )}
         </div>

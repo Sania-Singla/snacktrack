@@ -24,15 +24,15 @@ export async function fetchWrapper({
         const res = await fetch(BASE_BACKEND_URL + endPoint, options);
 
         const data = await res.json();
-        console.log(data);
+        // console.log(data);
 
         if (res.status === SERVER_ERROR) throw new Error(data.message);
         else return data;
     } catch (err) {
         if (err.name === 'AbortError') {
-            console.log(`${aim} request aborted.`);
+            // console.log(`${aim} request aborted.`);
         } else {
-            console.error(`error in ${aim} service`, err.message);
+            // console.error(`error in ${aim} service`, err.message);
             throw err;
         }
     }

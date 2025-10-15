@@ -34,7 +34,6 @@ export default function SnackView({ snack, reference }) {
                 );
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            console.log(err);
             navigate('/server-error');
         }
     }

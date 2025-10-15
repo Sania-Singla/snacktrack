@@ -71,7 +71,6 @@ export default function EmailVerificationPopup() {
                 inputRefs.current[0].focus();
             }
         } catch (err) {
-            console.log(err);
             toast.error('Failed to resend code. Please try again.');
         } finally {
             setResendingMail(false);

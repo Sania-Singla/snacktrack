@@ -1,7 +1,7 @@
 import { icons } from '../../Assets/icons';
-import { Button, OrderDropdown } from '..';
+import { Button } from '..';
 import { getRollNo, formatTime, checkTokenExpired } from '../../Utils';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
@@ -15,27 +15,14 @@ export default function ContractorOrderCard({ order, reference }) {
         order;
     const { socket } = useSocketContext();
     const { setUser } = useUserContext();
-    const [statusOptions, setStatusOptions] = useState([]);
-
-    useEffect(() => {
-        if (order.status === 'Pending') {
-            setStatusOptions([
-                { value: '', label: 'Pending' },
-                { value: 'Rejected', label: 'Rejected' },
-            ]);
-        } else {
-            setStatusOptions([
-                { value: '', label: 'Prepared' },
-                { value: 'PickedUp', label: 'Picked Up' },
-                { value: 'Rejected', label: 'Rejected' },
-            ]);
-        }
-    }, [order]);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
     async function handleStatusChange(status) {
         try {
+            if (!status) return;
+            setLoading(true);
             const res = await orderService.updateOrderStatus({
                 orderId: _id,
                 status,
@@ -50,6 +37,7 @@ export default function ContractorOrderCard({ order, reference }) {
                     'You cannot change the status of this order anymore.'
                 );
             } else checkTokenExpired(res, setUser);
+            setLoading(false);
         } catch (err) {
             navigate('/server-error');
         }
@@ -79,7 +67,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                 <span className="font-medium text-sm text-gray-800 truncate">
                                     {studentInfo.fullName}
                                 </span>
-                                <span className="text-xs text-gray-600">•</span>
+                                <span className="text-xs text-gray-500">•</span>
                                 <span className="text-xs text-gray-600">
                                     Roll No: {getRollNo(studentInfo.userName)}
                                 </span>
@@ -90,26 +78,26 @@ export default function ContractorOrderCard({ order, reference }) {
                         </div>
                     </div>
 
-                    {order.status === 'Pending' ||
-                    order.status === 'Prepared' ? (
-                        <div
-                            className="w-fit"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <OrderDropdown
-                                options={statusOptions}
-                                onChange={handleStatusChange}
-                            />
+                    {order.status === 'Prepared' && (
+                        <Button
+                            btnText="Taken"
+                            className="rounded-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] text-sm font-medium text-center px-2 py-0.5"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange('PickedUp');
+                            }}
+                        />
+                    )}
+
+                    {order.status === 'PickedUp' && (
+                        <div className="fill-green-600 size-4 m-1">
+                            {icons.checkWithoutCircle}
                         </div>
-                    ) : (
-                        <span
-                            className={`px-2 pt-[2px] pb-[3px] text-xs font-bold rounded-full ${
-                                order.status === 'Rejected'
-                                    ? 'bg-red-50 text-red-700'
-                                    : 'bg-green-50 text-green-700'
-                            }`}
-                        >
-                            {order.status}
+                    )}
+
+                    {order.status === 'Rejected' && (
+                        <span className="px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-red-50 text-red-700">
+                            Rejected
                         </span>
                     )}
                 </div>
@@ -165,7 +153,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                 : 'border-[0.01rem] border-transparent'
                                         }`}
                                     >
-                                        {/* ✅ Complete: Show green tick */}
+                                        {/* ✅ Taken: Show green tick */}
                                         {(order.status === 'Pending' ||
                                             order.status === 'Prepared') &&
                                             item.pickedUpCount ===
@@ -200,8 +188,11 @@ export default function ContractorOrderCard({ order, reference }) {
                                                                 Pack
                                                             </span>
                                                         )}
-                                                        {order.status ===
-                                                            'Pending' &&
+
+                                                        {(order.status ===
+                                                            'Pending' ||
+                                                            order.status ===
+                                                                'Prepared') &&
                                                             item.preparedCount >
                                                                 0 &&
                                                             item.pickedUpCount <
@@ -209,12 +200,13 @@ export default function ContractorOrderCard({ order, reference }) {
                                                                 <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
                                                                     {item.preparedCount ===
                                                                     item.quantity
-                                                                        ? 'Prepared'
-                                                                        : `Prepared - ${
+                                                                        ? 'Ready'
+                                                                        : `Ready - ${
                                                                               item.preparedCount
                                                                           }`}
                                                                 </span>
                                                             )}
+
                                                         {(order.status ===
                                                             'Pending' ||
                                                             order.status ===
@@ -249,7 +241,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                                         'Prepared') &&
                                                     item.preparedCount > 0 &&
                                                     item.pickedUpCount <
-                                                        item.quantity && (
+                                                        item.preparedCount && (
                                                         <Button
                                                             btnText="Taken"
                                                             className="rounded-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] text-[12px] font-medium text-center px-2 py-[2px]"
@@ -280,7 +272,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                 ))}
                             </div>
 
-                            <div className="p-4 border-t border-gray-100">
+                            <div className="p-3.5 border-t border-gray-100">
                                 <div className="flex justify-between text-sm text-gray-600">
                                     <span>Subtotal</span>
                                     <span>₹{amount.toFixed(2)}</span>
@@ -294,6 +286,21 @@ export default function ContractorOrderCard({ order, reference }) {
                                     <span>₹{amount.toFixed(2)}</span>
                                 </div>
                             </div>
+
+                            {order.status === 'Pending' && (
+                                <div className="w-full flex items-center justify-center border-t border-gray-100">
+                                    <Button
+                                        btnText={
+                                            loading ? <div></div> : 'Reject'
+                                        }
+                                        disabled={loading}
+                                        className="m-3 w-fit text-white bg-red-600 hover:bg-red-700 disabled:bg-red-300 rounded-md text-sm font-medium text-center px-3 py-1.5"
+                                        onClick={() =>
+                                            handleStatusChange('Rejected')
+                                        }
+                                    />
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 )}

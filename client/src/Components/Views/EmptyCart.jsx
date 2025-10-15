@@ -99,7 +99,7 @@ export default function EmptyCart() {
                 </motion.p>
 
                 <Button
-                    btnText="Continue Shopping"
+                    btnText="Order Something"
                     onClick={() => navigate('/')}
                     className="text-white rounded-md py-2 h-9 text-sm font-medium flex items-center justify-center w-fit px-6 bg-[#4977ec] hover:bg-[#3b62c2]"
                 />

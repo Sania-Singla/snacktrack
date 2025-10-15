@@ -412,7 +412,10 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 $match: {
                     canteenId: new Types.ObjectId(canteenId),
                     createdAt: { $gte: startOfDay, $lt: endOfDay },
-                    status,
+                    status:
+                        status === 'Pending'
+                            ? { $in: ['Pending', 'Prepared'] }
+                            : status,
                 },
             },
             { $unwind: '$items' },
@@ -622,6 +625,8 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
         result.Total += stat.count;
         result[stat.status] = stat.count;
     });
+
+    result.Pending = result.Pending + result.Prepared;
 
     return res.status(OK).json(result);
 });

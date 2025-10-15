@@ -1,97 +1,59 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { icons } from '../../Assets/icons';
+import {
+    Listbox,
+    ListboxButton,
+    ListboxOption,
+    ListboxOptions,
+} from '@headlessui/react';
 
-export default function Dropdown({ options, defaultOption = '', setValue }) {
-    const [selectedValue, setSelectedValue] = useState(defaultOption);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const dropdownRef = useRef(null);
+export default function Dropdown({ options, setValue }) {
+    const [selectedValue, setSelectedValue] = useState(options[0].value);
+    const [isOpen, setIsOpen] = useState(false);
 
-    const handleOptionClick = (value) => {
+    const handleClick = (value) => {
         setValue(value);
         setSelectedValue(value);
-        setIsDropdownOpen(false);
+        setIsOpen(false);
     };
 
-    useEffect(() => {
-        const handleClickOutside = (e) => {
-            if (
-                dropdownRef.current &&
-                !dropdownRef.current.contains(e.target)
-            ) {
-                setIsDropdownOpen(false);
-            }
-        };
-
-        if (isDropdownOpen) {
-            window.addEventListener('mousedown', handleClickOutside);
-            window.addEventListener('touchstart', handleClickOutside);
-        }
-
-        return () => {
-            window.removeEventListener('mousedown', handleClickOutside);
-            window.removeEventListener('touchstart', handleClickOutside);
-        };
-    }, [isDropdownOpen]);
-
     return (
-        <div className="w-full mb-0">
-            <div className="relative inline-block w-full" ref={dropdownRef}>
-                {/* Dropdown Button */}
-                <button
-                    type="button"
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="w-full flex items-center cursor-pointer justify-between bg-white border border-gray-300 hover:border-gray-400 px-4 py-2 rounded-lg shadow-sm text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-[#4977ec] focus:border-[#4977ec] transition-all duration-200"
+        <div className="w-full mb-0 relative">
+            <Listbox value={selectedValue} onChange={handleClick}>
+                <ListboxButton
+                    onClick={() => setIsOpen((prev) => !prev)}
+                    className="border border-gray-300 p-2 overflow-auto w-full flex justify-between items-center rounded-md"
                 >
-                    <div className="flex items-center gap-[10px]">
-                        {options.find((opt) => opt.value === selectedValue)
-                            ?.icon && (
-                            <div className="size-[16px] fill-gray-900">
-                                {
-                                    options.find((opt) => opt.value === filter)
-                                        ?.icon
-                                }
-                            </div>
-                        )}
-                        <span>
-                            {
-                                options.find(
-                                    (opt) => opt.value === selectedValue
-                                )?.label
-                            }
-                        </span>
-                    </div>
+                    <span className="w-fit">
+                        {options.find((o) => o.value === selectedValue)?.label}
+                    </span>
                     <div
-                        className={`size-2.5 fill-gray-800 transition-all duration-300 ${isDropdownOpen ? 'rotate-180' : 'rotate-0'}`}
+                        className={`size-2.5 fill-gray-800 transition-all duration-100 ${isOpen ? 'rotate-180' : 'rotate-0'}`}
                     >
                         {icons.arrowDown}
                     </div>
-                </button>
+                </ListboxButton>
 
-                {/* Dropdown Options */}
-                {isDropdownOpen && (
-                    <div className="absolute z-[100] mt-2 w-full bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden max-h-[200px] overflow-y-auto">
-                        {options.map(
-                            (option) =>
-                                option.value !== selectedValue && (
-                                    <div
-                                        key={option.label}
-                                        onClick={() =>
-                                            handleOptionClick(option.value)
-                                        }
-                                        className="flex items-center gap-[10px] px-4 py-2 cursor-pointer hover:bg-gray-100 transition-colors duration-200"
-                                    >
-                                        {option.icon && (
-                                            <div className="size-[16px] fill-gray-900">
-                                                {option.icon}
-                                            </div>
-                                        )}
-                                        <span>{option.label}</span>
-                                    </div>
-                                )
-                        )}
-                    </div>
-                )}
-            </div>
+                <ListboxOptions className="focus:outline-none absolute z-[100] w-full mt-1 border border-gray-400 rounded-md bg-white shadow-sm max-h-[300px] overflow-y-auto">
+                    {options.map((opt) => (
+                        <ListboxOption
+                            key={opt.label}
+                            value={opt.value}
+                            className={({ focus }) =>
+                                `px-3 py-2 cursor-pointer text-gray-800 transition-colors duration-200 ${
+                                    focus ? 'bg-gray-100' : ''
+                                }`
+                            }
+                        >
+                            {({ selected }) => (
+                                <span className={selected ? 'font-medium' : ''}>
+                                    {opt.label}
+                                </span>
+                            )}
+                        </ListboxOption>
+                    ))}
+                </ListboxOptions>
+            </Listbox>
         </div>
     );
 }

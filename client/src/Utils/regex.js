@@ -89,7 +89,7 @@ export function verifyExpression(name, value, setError) {
             }
 
             default: {
-                console.log("Doesn't have a defined regex.");
+                // console.log("Doesn't have a defined regex.");
                 return;
             }
         }
