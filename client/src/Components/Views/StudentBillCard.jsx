@@ -3,16 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useUserContext } from '../../Contexts';
 import Button from '../General/Button';
 
-export default function StudentBillCard({ bill, studentInfo,  }) {
+export default function StudentBillCard({ bill, studentInfo }) {
     const { _id, month, year, amount } = bill;
     const { user } = useUserContext();
     const { studentId } = useParams();
     const navigate = useNavigate();
 
     return (
-        <div
-            className="rounded-xl shadow-sm transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between"
-        >
+        <div className="rounded-lg shadow-sm transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between">
             <div className="flex items-center gap-3">
                 {/* Month/year badge */}
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-12 rounded-lg flex items-center justify-center border border-blue-400">

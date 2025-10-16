@@ -10,7 +10,7 @@ export default function StudentOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-xl shadow-sm overflow-hidden transition-all hover:shadow-md h-fit"
+            className="bg-white rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md h-fit"
         >
             <div
                 className="p-4 cursor-pointer"
@@ -39,7 +39,7 @@ export default function StudentOrderCard({ order, reference }) {
                         )}
 
                         {order.status === 'PickedUp' && (
-                            <div className="fill-green-600 size-4 m-1">
+                            <div className="fill-green-600 size-4 mr-2">
                                 {icons.checkWithoutCircle}
                             </div>
                         )}
@@ -99,7 +99,7 @@ export default function StudentOrderCard({ order, reference }) {
 
                                 <div className="flex justify-between items-center">
                                     <div className="flex items-center gap-3">
-                                        <div className="size-10 bg-gray-50 rounded-lg border-[0.01rem] border-gray-400 overflow-hidden flex items-center justify-center">
+                                        <div className="size-10 bg-gray-50 rounded-lg border-1 border-gray-300 overflow-hidden flex items-center justify-center">
                                             {item.type === 'Snack' ? (
                                                 <img
                                                     src={item.image}

@@ -59,8 +59,7 @@ export default function Searchbar() {
                 currentIndex = (currentIndex + 1) % snackNames.length;
             }
 
-            const delay = isDeleting ? 100 : 150;
-            typingIntervalRef.current = setTimeout(type, delay);
+            typingIntervalRef.current = setTimeout(type, 200);
         })();
     };
 

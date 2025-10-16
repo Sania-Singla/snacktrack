@@ -13,7 +13,7 @@ async function generateBills() {
         const studentsWithOrders = await Order.aggregate([
             {
                 $match: {
-                    status: 'PickedUp',
+                    status: 'Prepared',
                     createdAt: {
                         $gte: lastMonth.clone().startOf('month').utc().toDate(),
                         $lte: lastMonth.clone().endOf('month').utc().toDate(),

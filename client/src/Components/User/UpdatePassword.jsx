@@ -160,7 +160,9 @@ export default function UpdatePassword() {
                     }
                 />
                 {!error.newPassword && field.name === 'newPassword' && (
-                    <p className="text-xs">Password must be 8-12 characters.</p>
+                    <p className="text-xs text-gray-700">
+                        Password must be 8-12 characters.
+                    </p>
                 )}
                 {error[field.name] && (
                     <p className="text-red-500 font-medium text-xs">
@@ -173,14 +175,14 @@ export default function UpdatePassword() {
 
     return (
         <div className="w-full p-2">
-            <div className="rounded-xl drop-shadow-md flex flex-col sm:flex-row bg-white px-8 py-6 sm:gap-14">
-                <div className="w-full py-4">
+            <div className="rounded-lg drop-shadow-sm flex flex-col sm:flex-row bg-white py-7 px-6 sm:gap-14">
+                <div className="w-full">
                     <h3 className="text-2xl font-semibold">Update Password</h3>
                     <p className="mt-4 text-gray-600">
                         Update your password here. Please note that changes
                         cannot be undone.
                     </p>
-                    <div className="mt-4">
+                    <div className="my-4">
                         <Button
                             btnText={
                                 resetting ? (
@@ -190,7 +192,7 @@ export default function UpdatePassword() {
                                         </div>
                                     </div>
                                 ) : (
-                                    'Reset Password'
+                                    'Reset'
                                 )
                             }
                             onClick={resetPassword}

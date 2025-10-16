@@ -26,7 +26,7 @@ export default function SettingsPage() {
                     key={option.name}
                     to={option.path}
                     className={({ isActive }) =>
-                        `${isActive ? 'border-b-[#4977ec] bg-[#4977ec] text-white' : 'border-b-black bg-white text-black'} text-ellipsis drop-shadow-sm hover:backdrop-brightness-90 rounded-t-md p-2 border-b-[0.1rem] w-full text-center md:text-lg font-medium`
+                        `${isActive ? 'bg-[#4977ec] text-white' : 'bg-white text-black'} text-ellipsis shadow-sm hover:backdrop-brightness-90 rounded-md p-2 w-full text-center`
                     }
                 >
                     <div>{option.name}</div>
@@ -35,46 +35,44 @@ export default function SettingsPage() {
     );
 
     return (
-        <div className="w-full h-full overflow-scroll py-4 space-y-8">
-            <div className="w-full px-2 md:px-4">
+        <div className="w-full h-full overflow-scroll py-3 px-1 sm:px-3">
+            <div className="flex gap-4 items-center justify-start mb-7">
                 {/* avatar */}
-                <div className="flex gap-4 items-center justify-start">
-                    <div className="relative">
-                        <div className="rounded-full overflow-hidden size-24 border">
-                            <img
-                                alt="user avatar"
-                                src={user.avatar}
-                                className="size-full object-cover drop-shadow-md"
-                            />
-                        </div>
-
-                        <div>
-                            <Button
-                                btnText={
-                                    <div className="size-[25px] fill-[#202020]">
-                                        {icons.upload}
-                                    </div>
-                                }
-                                onClick={() => {
-                                    setShowPopup(true);
-                                    setPopupInfo({ type: 'updateAvatar' });
-                                }}
-                                className="drop-shadow-md hover:brightness-95 absolute top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] rounded-md p-1 bg-[#f9f9f9] border-[0.01rem] border-[#4977ec]"
-                            />
-                        </div>
+                <div className="relative">
+                    <div className="rounded-full overflow-hidden size-24 border">
+                        <img
+                            alt="user avatar"
+                            src={user.avatar}
+                            className="size-full object-cover drop-shadow-md"
+                        />
                     </div>
 
-                    {/* info*/}
-                    <div className="space-y-1">
-                        <p className="text-xl font-semibold">{user.fullName}</p>
-                        <p>
-                            @{user.hostelType}
-                            {user.hostelNumber} - {user.hostelName}
-                        </p>
-                        {user.role === 'student' && (
-                            <p>Roll No: {getRollNo(user.userName)}</p>
-                        )}
+                    <div>
+                        <Button
+                            btnText={
+                                <div className="size-[25px] fill-[#202020]">
+                                    {icons.upload}
+                                </div>
+                            }
+                            onClick={() => {
+                                setShowPopup(true);
+                                setPopupInfo({ type: 'updateAvatar' });
+                            }}
+                            className="drop-shadow-sm hover:brightness-95 absolute top-[50%] translate-y-[-50%] left-[50%] translate-x-[-50%] rounded-md p-1 bg-[#f9f9f9] border-[0.01rem] border-[#4977ec]"
+                        />
                     </div>
+                </div>
+
+                {/* info*/}
+                <div className="space-y-1">
+                    <p className="text-xl font-semibold">{user.fullName}</p>
+                    <p>
+                        @{user.hostelType}
+                        {user.hostelNumber} - {user.hostelName}
+                    </p>
+                    {user.role === 'student' && (
+                        <p>Roll No: {getRollNo(user.userName)}</p>
+                    )}
                 </div>
             </div>
 
@@ -82,7 +80,7 @@ export default function SettingsPage() {
                 {tabElements}
             </div>
 
-            <div className="border-t py-4 border-gray-400 md:px-4">
+            <div className="border-t-1 py-4 border-gray-300 md:px-4 mt-6">
                 <Outlet />
             </div>
         </div>

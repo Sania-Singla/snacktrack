@@ -166,7 +166,7 @@ const generateIntermediateBill = tryCatch(
                             .endOf('month')
                             .toDate(),
                     },
-                    status: 'PickedUp',
+                    status: 'Prepared',
                 },
             },
             {

@@ -128,8 +128,8 @@ export default function UpdateAccountDetails() {
 
     return (
         <div className="w-full p-2">
-            <div className="rounded-xl drop-shadow-md flex flex-col sm:flex-row bg-white py-6 px-8 sm:gap-14">
-                <div className="w-full py-4">
+            <div className="rounded-lg drop-shadow-sm flex flex-col sm:flex-row bg-white py-7 px-6 sm:gap-14">
+                <div className="w-full">
                     <h3 className="text-2xl font-semibold">
                         Update Personal Details
                     </h3>

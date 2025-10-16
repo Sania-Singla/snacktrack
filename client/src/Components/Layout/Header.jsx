@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Searchbar } from '..';
+import { Button, Logout, Searchbar } from '..';
 import {
     useUserContext,
     useSideBarContext,
@@ -26,7 +26,7 @@ export default function Header() {
     const isStaticPage = staticPages.some((page) => pathname.startsWith(page));
 
     return (
-        <header className="border-b border-b-gray-200 fixed top-0 z-[10] w-full bg-gray-50 text-black h-[60px] px-5 font-medium flex items-center justify-between gap-4">
+        <header className="border-b border-b-gray-200 fixed top-0 z-[10] w-full bg-gray-50 text-black h-[60px] sm:px-5 px-3 font-medium flex items-center justify-between gap-4">
             <div className="flex items-center justify-center gap-4">
                 {/* hamburgur menu btn */}
                 <Button
@@ -61,7 +61,7 @@ export default function Header() {
                 <Searchbar />
             </div>
 
-            <div className="flex gap-3 items-center">
+            <div className="flex gap-3.5 items-center">
                 {user.role === 'student' ? (
                     <div className="relative">
                         <Button
@@ -72,7 +72,7 @@ export default function Header() {
                             }
                             title="View Cart"
                             onClick={() => navigate('/cart')}
-                            className="bg-[#ffffff] p-2 group rounded-full drop-shadow-sm w-fit"
+                            className="bg-[#ffffff] p-2 group rounded-full shadow-sm w-fit"
                         />
                         {/* total quantity count */}
                         {totalQuantity > 0 && (
@@ -109,6 +109,8 @@ export default function Header() {
                         className="size-full object-cover"
                     />
                 </div>
+
+                <Logout />
             </div>
         </header>
     );

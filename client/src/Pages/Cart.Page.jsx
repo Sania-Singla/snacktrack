@@ -154,7 +154,7 @@ export default function CartPage() {
                 <div className="w-full flex items-center gap-4 justify-between">
                     <div className="flex items-center gap-4">
                         {/* image */}
-                        <div className="size-[40px] bg-gray-50 overflow-hidden border-[0.01rem] border-gray-400 rounded-lg flex items-center justify-center">
+                        <div className="size-[40px] bg-gray-50 overflow-hidden border-1 border-gray-300 rounded-lg flex items-center justify-center">
                             {type === 'Snack' ? (
                                 <img
                                     src={image}
@@ -260,13 +260,13 @@ export default function CartPage() {
             </div>
         </div>
     ) : cartItems.length > 0 ? (
-        <div className="w-full py-6 px-4 sm:px-6">
+        <div className="w-full py-2 px-2 sm:px-6">
             <h1 className="text-2xl font-semibold text-gray-900 mb-8">
                 Your Cart
             </h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Product List */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-sm">
+                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm">
                     <h2 className="text-xl font-semibold text-gray-900 px-6 pt-6 pb-4">
                         Cart Items
                     </h2>
@@ -274,7 +274,7 @@ export default function CartPage() {
                 </div>
 
                 {/* Order Summary */}
-                <div className="bg-white rounded-xl shadow-sm p-6">
+                <div className="bg-white rounded-lg shadow-sm p-5">
                     <h2 className="text-xl font-semibold text-gray-900 mb-6">
                         Order Summary
                     </h2>
@@ -306,24 +306,26 @@ export default function CartPage() {
                             </div>
                         </div>
                     </div>
-                    <Button
-                        onClick={placeOrder}
-                        className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full bg-[#4977ec] hover:bg-[#3b62c2]"
-                        btnText={
-                            ordering ? (
-                                <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                    {icons.loading}
-                                </div>
-                            ) : (
-                                'Place Order'
-                            )
-                        }
-                    />
-                    <Button
-                        className="text-black rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full bg-gray-100 border-[0.01rem] border-transparent hover:border-black hover:bg-gray-200"
-                        btnText="Continue Shopping"
-                        onClick={() => navigate('/')}
-                    />
+                    <div className="flex items-center justify-center w-full gap-4 mt-4">
+                        <Button
+                            onClick={placeOrder}
+                            className="text-white rounded-md py-2 h-[40px] flex items-center justify-center w-full bg-[#4977ec] hover:bg-[#3b62c2]"
+                            btnText={
+                                ordering ? (
+                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                        {icons.loading}
+                                    </div>
+                                ) : (
+                                    'Place Order'
+                                )
+                            }
+                        />
+                        <Button
+                            className="text-black rounded-md py-2 h-[40px] flex items-center justify-center w-full bg-gray-100 border-1 border-gray-300 hover:bg-gray-200"
+                            btnText="Add More"
+                            onClick={() => navigate('/')}
+                        />
+                    </div>
                 </div>
             </div>
         </div>

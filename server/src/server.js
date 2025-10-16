@@ -7,6 +7,12 @@ import {
     generateTransporter,
     connectTwilio,
 } from './Config/index.js';
+import { Order } from './Models/order.Model.js';
+import { PackagedFood } from './Models/packagedFood.Model.js';
+import { Snack } from './Models/snack.Model.js';
+import { Student } from './Models/student.Model.js';
+import { Bill } from './Models/bill.Model.js';
+import { Contractor } from './Models/contractor.Model.js';
 
 const PORT = process.env.PORT || 4000;
 

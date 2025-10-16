@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { icons } from '../../Assets/icons';
-import { CONTRIBUTORS, LOGO, PU, UIET } from '../../Constants/constants';
+import { CONTRIBUTORS, LOGO, LOGO_SVG, PU, UIET } from '../../Constants/constants';
 
 export default function Footer() {
     const socialElements = Object.entries(CONTRIBUTORS[0].socials).map(
@@ -26,9 +26,9 @@ export default function Footer() {
                 <div className="flex flex-col items-center sm:items-start gap-3">
                     <div className="flex items-center gap-2">
                         <img
-                            src={LOGO}
+                            src={LOGO_SVG}
                             alt="Snack Track Logo"
-                            className="size-10 rounded-full object-cover shadow-sm"
+                            className="size-10 object-cover"
                         />
                         <h2 className="text-base font-semibold text-gray-800">
                             Snack Track
@@ -37,7 +37,7 @@ export default function Footer() {
                     <p className="text-xs text-gray-600 text-center md:text-left">
                         Your campus food companion.
                     </p>
-                    <div className="flex gap-3 pt-1">{socialElements}</div>
+                    {/* <div className="flex gap-3 pt-1">{socialElements}</div> */}
                 </div>
 
                 {/* Right: University Info */}

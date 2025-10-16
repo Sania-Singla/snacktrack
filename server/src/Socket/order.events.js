@@ -18,10 +18,10 @@ export function registerOrderEvents(io, socket) {
                     .to(`contractor_${order.canteenId}`)
                     .to(`staff_${order.canteenId}`)
                     .emit(SOCKET_EVENTS.NEW_ORDER, order),
-                sendOrderPlacedSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
+                // sendOrderPlacedSMS({
+                //     to: order.studentInfo.phoneNumber,
+                //     orderId: order._id,
+                // }),
             ]);
         })
     );
@@ -69,10 +69,10 @@ export function registerOrderEvents(io, socket) {
                     .to(`student_${order.studentId}`)
                     .to(`contractor_${order.canteenId}`)
                     .emit(SOCKET_EVENTS.ORDER_PICKEDUP, order),
-                sendOrderPickedUpSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
+                // sendOrderPickedUpSMS({
+                //     to: order.studentInfo.phoneNumber,
+                //     orderId: order._id,
+                // }),
             ]);
         })
     );

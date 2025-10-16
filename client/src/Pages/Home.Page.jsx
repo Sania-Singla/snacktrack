@@ -144,7 +144,7 @@ export default function HomePage() {
 
     return (
         <>
-            <div className="mb-4 w-full flex justify-between">
+            <div className="mb-6 w-full flex justify-between">
                 {user.role === 'contractor' && (
                     <Button
                         onClick={filter === 'snacks' ? addSnack : addItem}
@@ -162,10 +162,11 @@ export default function HomePage() {
                         className="text-white rounded-md px-2 h-7.5 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
                     />
                 )}
+
                 <div className="flex items-center gap-4 w-full place-content-end">
                     <Button
                         onClick={() => handleOptionClick('snacks')}
-                        className="hover:bg-[#4977ec]  hover:text-white active:bg-[#4977ec] active:text-white group transition-all duration-100 bg-white shadow-sm rounded-md px-2 py-[5px]"
+                        className="hover:bg-[#4977ec] hover:text-white active:bg-[#4977ec] active:text-white group transition-all duration-100 bg-white shadow-sm rounded-md px-2 py-[5px]"
                         btnText={
                             <div className="flex items-center justify-center gap-2">
                                 <div className="size-4 fill-gray-700 group-hover:fill-white">
@@ -193,7 +194,7 @@ export default function HomePage() {
             <div className="pb-8">
                 {itemElements.length > 0 && (
                     <div
-                        className={`grid gap-5 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4`}
+                        className={`grid gap-5 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5`}
                     >
                         {itemElements}
                     </div>

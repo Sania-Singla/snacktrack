@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react';
 import { checkTokenExpired } from '../../Utils';
 
 export default function SnackView({ snack, reference }) {
-    const { _id, image, name, isAvailable } = snack;
+    const { _id, image, name, isAvailable, price } = snack;
     const [quantityInCart, setQuantityInCart] = useState(snack.quantity);
     const { user, setUser } = useUserContext();
     const { setItems } = useSnackContext();
@@ -85,10 +85,10 @@ export default function SnackView({ snack, reference }) {
     return (
         <div
             ref={reference}
-            className={`${!isAvailable ? 'brightness-95 opacity-50' : 'shadow-sm hover:shadow-md'} p-4 relative bg-white transition-all rounded-2xl overflow-hidden cursor-pointer`}
+            className={`${!isAvailable ? 'brightness-95 opacity-50' : 'hover:shadow-md'} flex flex-col shadow-sm relative h-full bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
         >
             {/* Image */}
-            <div className="aspect-[5/3] w-full rounded-xl overflow-hidden shadow-sm">
+            <div className="aspect-[5/3] w-full overflow-hidden shadow-sm">
                 <img
                     alt="snack image"
                     src={image}
@@ -97,44 +97,16 @@ export default function SnackView({ snack, reference }) {
             </div>
 
             {/* Content */}
-            <div className="flex flex-col w-full mt-4">
-                <div className="flex justify-between gap-4 items-center">
-                    <p className="text-lg font-semibold text-gray-900 truncate">
-                        {name}
-                    </p>
-
-                    {user.role === 'contractor' && (
-                        <div className="flex gap-3 justify-end">
-                            <Button
-                                btnText={
-                                    <div className="size-4 group-hover:stroke-[#4977ec] stroke-black fill-none">
-                                        {icons.editUnfilled}
-                                    </div>
-                                }
-                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
-                                onClick={editSnack}
-                            />
-                            <div>
-                                <Button
-                                    btnText={
-                                        <div className="size-4 group-hover:fill-red-700">
-                                            {icons.delete}
-                                        </div>
-                                    }
-                                    className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
-                                    onClick={removeSnack}
-                                />
-                            </div>
-                        </div>
-                    )}
+            <div className="flex flex-col justify-between gap-4.5 flex-1 py-2.5 px-3.5">
+                <div className="flex justify-between sm:text-lg items-center">
+                    <p className="font-medium text-gray-900 w-[70%]">{name}</p>
+                    <p>Rs. {price}</p>
                 </div>
 
-                {/* Add to Cart Button or Toggle Switch */}
-                <div className="w-full flex items-center justify-end mt-5">
-                    {user.role === 'student' ? (
-                        isAvailable &&
-                        (quantityInCart > 0 ? (
-                            <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                {user.role === 'student' && isAvailable && (
+                    <div className="w-full flex items-center justify-center">
+                        {quantityInCart > 0 ? (
+                            <div className="flex items-center border w-fit border-gray-300 rounded-lg overflow-hidden">
                                 <Button
                                     className="px-3 py-1 text-gray-500 hover:bg-gray-100"
                                     onClick={() =>
@@ -159,34 +131,59 @@ export default function SnackView({ snack, reference }) {
                             <Button
                                 btnText={
                                     <div className="py-1">
-                                        <div className="size-4 fill-white">
+                                        <div className="size-3.5 fill-white">
                                             {icons.plus}
                                         </div>
                                     </div>
                                 }
                                 onClick={addToCart}
-                                className="rounded-md px-3 py-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
+                                className="rounded-full size-8 flex items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
                             />
-                        ))
-                    ) : (
-                        <div className="flex items-center w-full">
-                            <label
-                                htmlFor={_id}
-                                className="relative inline-flex items-center cursor-pointer"
-                            >
-                                <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={isAvailable}
-                                    id={_id}
-                                    onChange={toggleAvailability}
+                        )}
+                    </div>
+                )}
+
+                {user.role === 'contractor' && (
+                    <div className="flex items-center justify-between w-full">
+                        <label
+                            htmlFor={_id}
+                            className="relative inline-flex items-center cursor-pointer"
+                        >
+                            <input
+                                type="checkbox"
+                                className="sr-only peer"
+                                checked={isAvailable}
+                                id={_id}
+                                onChange={toggleAvailability}
+                            />
+                            <div className="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-[#4977ec] transition-colors duration-200" />
+                            <div className="absolute left-[3px] size-3.5 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-4" />
+                        </label>
+
+                        <div className="flex gap-2.5 justify-end">
+                            <Button
+                                btnText={
+                                    <div className="size-4 group-hover:stroke-[#4977ec] stroke-black fill-none">
+                                        {icons.editUnfilled}
+                                    </div>
+                                }
+                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                onClick={editSnack}
+                            />
+                            <div>
+                                <Button
+                                    btnText={
+                                        <div className="size-4 group-hover:fill-red-700">
+                                            {icons.delete}
+                                        </div>
+                                    }
+                                    className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                    onClick={removeSnack}
                                 />
-                                <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-[#4977ec] transition-colors duration-200" />
-                                <div className="absolute left-1 top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 peer-checked:translate-x-5" />
-                            </label>
+                            </div>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
         </div>
     );
