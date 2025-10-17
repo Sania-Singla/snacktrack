@@ -67,7 +67,7 @@ export default function Footer() {
             </div>
 
             {/* Bottom Bar */}
-            <div className="border-t border-gray-200 mt-6 pt-4 text-center text-xs text-gray-500">
+            <div className="border-t border-gray-200 mt-6 py-4 text-center text-xs text-gray-500">
                 <p>
                     &copy; {new Date().getFullYear()} SnackTrack. Made with ❤️
                     for Panjab University.

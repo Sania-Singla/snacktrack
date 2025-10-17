@@ -34,11 +34,11 @@ export default function SettingsPage() {
             <div className="flex gap-4 items-center justify-start mb-7">
                 {/* avatar */}
                 <div className="relative">
-                    <div className="rounded-full overflow-hidden size-24 border">
+                    <div className="rounded-full drop-shadow-sm size-24">
                         <img
                             alt="user avatar"
                             src={user.avatar}
-                            className="size-full object-cover drop-shadow-md"
+                            className="h-24 w-24 object-cover rounded-full border-1 border-gray-400"
                         />
                     </div>
 
