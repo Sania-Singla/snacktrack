@@ -6,9 +6,7 @@ export default function AccessTo({ roles = [] }) {
     const location = useLocation();
 
     if (!user || (roles.length && !roles.includes(user.role))) {
-        if (location.pathname.includes('kitchen'))
-            return <Navigate to="/kitchen/verify-key" replace />;
-        else if (location.pathname.includes('admin'))
+        if (location.pathname.includes('admin'))
             return <Navigate to="/admin/verify-key" replace />;
         else return <Navigate to={'/new-user'} replace />;
     }

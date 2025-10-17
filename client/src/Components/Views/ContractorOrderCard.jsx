@@ -145,19 +145,18 @@ export default function ContractorOrderCard({ order, reference }) {
                                 {items.map((item) => (
                                     <div
                                         key={item.id}
-                                        className={`relative p-3 ${
+                                        className={`relative p-3 border-b-1 border-b-gray-100 ${
                                             (order.status === 'Pending' ||
                                                 order.status === 'Prepared') &&
-                                            item.pickedUpCount === item.quantity
+                                            item.pickedUp
                                                 ? 'opacity-60'
-                                                : 'border-[0.01rem] border-transparent'
+                                                : ''
                                         }`}
                                     >
                                         {/* ✅ Taken: Show green tick */}
                                         {(order.status === 'Pending' ||
                                             order.status === 'Prepared') &&
-                                            item.pickedUpCount ===
-                                                item.quantity && (
+                                            item.pickedUp && (
                                                 <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
                                                     <div className="fill-green-600 size-8 p-1">
                                                         {icons.check}
@@ -188,40 +187,6 @@ export default function ContractorOrderCard({ order, reference }) {
                                                                 Pack
                                                             </span>
                                                         )}
-
-                                                        {(order.status ===
-                                                            'Pending' ||
-                                                            order.status ===
-                                                                'Prepared') &&
-                                                            item.preparedCount >
-                                                                0 &&
-                                                            item.pickedUpCount <
-                                                                item.quantity && (
-                                                                <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
-                                                                    {item.preparedCount ===
-                                                                    item.quantity
-                                                                        ? 'Ready'
-                                                                        : `Ready - ${
-                                                                              item.preparedCount
-                                                                          }`}
-                                                                </span>
-                                                            )}
-
-                                                        {(order.status ===
-                                                            'Pending' ||
-                                                            order.status ===
-                                                                'Prepared') &&
-                                                            item.pickedUpCount >
-                                                                0 &&
-                                                            item.pickedUpCount <
-                                                                item.quantity && (
-                                                                <span className="flex items-center gap-1 text-[10px] bg-blue-50 rounded-full font-medium border-[0.01rem] border-blue-300 w-fit px-2 text-blue-600">
-                                                                    Taken -{' '}
-                                                                    {
-                                                                        item.pickedUpCount
-                                                                    }
-                                                                </span>
-                                                            )}
                                                     </h3>
                                                     <p className="text-gray-600 text-xs">
                                                         Qty: {item.quantity}
@@ -236,27 +201,40 @@ export default function ContractorOrderCard({ order, reference }) {
                                                         item.quantity
                                                     ).toFixed(2)}
                                                 </div>
-                                                {(order.status === 'Pending' ||
-                                                    order.status ===
-                                                        'Prepared') &&
-                                                    item.preparedCount > 0 &&
-                                                    item.pickedUpCount <
-                                                        item.preparedCount && (
+
+                                                {order.status === 'Pending' &&
+                                                    (item.prepared ? (
+                                                        !item.pickedUp && (
+                                                            <Button
+                                                                btnText="Taken"
+                                                                className="rounded-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] text-[12px] font-medium text-center w-12 h-5.5"
+                                                                onClick={() =>
+                                                                    socket.emit(
+                                                                        SOCKET_EVENTS.ITEM_PICKEDUP,
+                                                                        {
+                                                                            itemId: item.id,
+                                                                            order,
+                                                                            stuId: studentInfo._id,
+                                                                        }
+                                                                    )
+                                                                }
+                                                            />
+                                                        )
+                                                    ) : (
                                                         <Button
-                                                            btnText="Taken"
-                                                            className="rounded-[5px] text-white bg-[#4977ec] hover:bg-[#3b62c2] text-[12px] font-medium text-center px-2 py-[2px]"
+                                                            btnText="Ready"
+                                                            className="rounded-[5px] text-white bg-green-600 hover:bg-green-700 text-[12px] font-medium text-center w-12 h-5.5"
                                                             onClick={() =>
                                                                 socket.emit(
-                                                                    SOCKET_EVENTS.ITEM_PICKEDUP,
+                                                                    SOCKET_EVENTS.ITEM_PREPARED,
                                                                     {
-                                                                        itemId: item.id,
                                                                         order,
-                                                                        stuId: studentInfo._id,
+                                                                        itemId: item.id,
                                                                     }
                                                                 )
                                                             }
                                                         />
-                                                    )}
+                                                    ))}
                                             </div>
                                         </div>
 
@@ -272,7 +250,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                 ))}
                             </div>
 
-                            <div className="p-3.5 border-t border-gray-100">
+                            <div className="p-3.5">
                                 <div className="flex justify-between text-sm text-gray-600">
                                     <span>Subtotal</span>
                                     <span>₹{amount.toFixed(2)}</span>
@@ -291,10 +269,16 @@ export default function ContractorOrderCard({ order, reference }) {
                                 <div className="w-full flex items-center justify-center border-t border-gray-100">
                                     <Button
                                         btnText={
-                                            loading ? <div></div> : 'Reject'
+                                            loading ? (
+                                                <div className="size-4 fill-red-800 dark:text-[#e95555]">
+                                                    {icons.loading}
+                                                </div>
+                                            ) : (
+                                                'Reject'
+                                            )
                                         }
                                         disabled={loading}
-                                        className="m-3 w-fit text-white bg-red-600 hover:bg-red-700 disabled:bg-red-300 rounded-md text-sm font-medium text-center px-3 py-1.5"
+                                        className="m-3 w-15 h-7.5 text-white flex items-center justify-center bg-red-600 hover:bg-red-700 disabled:bg-red-300 rounded-md text-sm font-medium"
                                         onClick={() =>
                                             handleStatusChange('Rejected')
                                         }

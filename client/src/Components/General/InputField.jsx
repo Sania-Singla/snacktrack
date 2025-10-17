@@ -18,10 +18,8 @@ export default function InputField({
         'oldPassword',
         'newPassword',
         'confirmPassword',
-        'newKey',
-        'confirmKey',
-        'kitchenKey',
     ];
+
     return (
         <div key={name} className={`w-full ${className}`}>
             <div className="bg-white z-[1] ml-2 px-1 w-fit relative top-2.5 text-[15px] font-medium">

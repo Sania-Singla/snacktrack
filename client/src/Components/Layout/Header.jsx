@@ -42,9 +42,9 @@ export default function Header() {
                 {/* logo */}
                 <Link
                     to={'/'}
-                    className="flex items-center justify-center gap-2 text-nowrap font-medium text-lg"
+                    className="flex items-center justify-center gap-1 text-nowrap font-medium text-lg"
                 >
-                    <div className="size-8">
+                    <div className="size-10">
                         <img
                             src={LOGO_SVG}
                             alt="Snack Track Logo"
@@ -110,7 +110,7 @@ export default function Header() {
                     />
                 </div>
 
-                <Logout />
+                {user.role === 'student' && <Logout />}
             </div>
         </header>
     );

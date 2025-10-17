@@ -16,7 +16,6 @@ export function registerOrderEvents(io, socket) {
             await Promise.all([
                 io
                     .to(`contractor_${order.canteenId}`)
-                    .to(`staff_${order.canteenId}`)
                     .emit(SOCKET_EVENTS.NEW_ORDER, order),
                 // sendOrderPlacedSMS({
                 //     to: order.studentInfo.phoneNumber,
@@ -34,7 +33,6 @@ export function registerOrderEvents(io, socket) {
                 io
                     .to(`student_${order.studentId}`)
                     .to(`contractor_${order.canteenId}`)
-                    .to(`staff_${order.canteenId}`)
                     .emit(SOCKET_EVENTS.ORDER_REJECTED, order),
                 sendOrderRejectedSMS({
                     to: order.studentInfo.phoneNumber,

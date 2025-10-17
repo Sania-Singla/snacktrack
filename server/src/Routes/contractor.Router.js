@@ -15,13 +15,10 @@ import {
     addItem,
     deleteItem,
     updateItem,
-    updateKitchenKey,
     toggleItemAvailability,
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.use(verifyJwt);
-
-contractorRouter.route('/kitchen-key').patch(updateKitchenKey);
 
 // student management
 

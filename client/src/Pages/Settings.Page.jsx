@@ -11,11 +11,6 @@ export default function SettingsPage() {
     const tabOptions = [
         { name: 'Personal Information', path: '', show: true },
         { name: 'Update Password', path: 'password', show: true },
-        {
-            name: 'Update Kitchen Key',
-            path: 'kitchen-key',
-            show: user.role === 'contractor',
-        },
     ];
 
     const tabElements = tabOptions.map(

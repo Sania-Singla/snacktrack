@@ -11,8 +11,6 @@ import TodayOrdersPage from './TodayOrders.Page';
 import StudentOrdersPage from './StudentOrders.Page';
 import CartPage from './Cart.Page';
 import StudentBillsPage from './StudentBills.Page';
-import KitchenPage from './Kitchen/Kitchen.Page';
-import VerifyKitchenKeyPage from './Kitchen/VerifyKitchenKey.Page';
 import AdminPage from './Admin/Admin.Page';
 import VerifyAdminKeyPage from './Admin/VerifyAdminKey.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
@@ -33,8 +31,6 @@ export {
     TodayOrdersPage,
     StudentOrdersPage,
     CartPage,
-    KitchenPage,
-    VerifyKitchenKeyPage,
     BillsPage,
     AdminPage,
     VerifyAdminKeyPage,

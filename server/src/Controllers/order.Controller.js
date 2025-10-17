@@ -67,19 +67,15 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         packagedItems.map((item) => {
             redisClient.sAdd(
                 `order_${order._id}`,
-                JSON.stringify({
-                    itemId: item._id,
-                    prepared: item.quantity,
-                    pickedUp: 0,
-                })
+                JSON.stringify({ itemId: item._id, pickedUp: false })
             );
         }),
     ]);
 
     const items = cartItems.map((item) => ({
         ...item,
-        preparedCount: item.type === 'Snack' ? 0 : item.quantity,
-        pickedUpCount: 0,
+        prepared: item.type === 'Snack' ? false : true,
+        pickedUp: false,
     }));
 
     const data = {
@@ -203,23 +199,28 @@ const updateOrderStatus = tryCatch(
         if (status === 'PickedUp') {
             completeOrder.items = completeOrder.items.map((i) => ({
                 ...i,
-                pickedUpCount: i.quantity,
-                preparedCount: i.quantity,
+                pickedUp: true,
+                prepared: true,
             }));
+
             await redisClient.del(`order_${order._id}`);
         } else if (status === 'Prepared') {
             const preparedItems = await redisClient.sMembers(
                 `order_${order._id}`
             );
+
             completeOrder.items = completeOrder.items.map((item) => {
-                const preparedItem = preparedItems
-                    .map((i) => JSON.parse(i))
-                    .find((i) => item.id.equals(i.itemId));
+                const preparedItem = preparedItems.find((i) => {
+                    const parsedItem = JSON.parse(i);
+                    return item.id.equals(parsedItem.itemId);
+                });
 
                 return {
                     ...item,
-                    preparedCount: item.quantity,
-                    pickedUpCount: preparedItem?.pickedUp || 0,
+                    prepared: true,
+                    pickedUp: preparedItem
+                        ? JSON.parse(preparedItem).pickedUp
+                        : false,
                 };
             });
         }
@@ -364,16 +365,19 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                 );
 
                 const updatedItems = order.items.map((item) => {
-                    const preparedItem = preparedItems
-                        .map((i) => JSON.parse(i))
-                        .find((i) => item.id.equals(i.itemId));
+                    const preparedItem = preparedItems.find((i) => {
+                        const parsedItem = JSON.parse(i);
+                        return item.id.equals(parsedItem.itemId);
+                    });
 
                     if (
                         order.status === 'Pending' ||
                         order.status === 'Prepared'
                     ) {
-                        item.preparedCount = preparedItem?.prepared || 0;
-                        item.pickedUpCount = preparedItem?.pickedUp || 0;
+                        item.prepared = preparedItem ? true : false;
+                        item.pickedUp = preparedItem
+                            ? JSON.parse(preparedItem).pickedUp
+                            : false;
                     }
                     return item;
                 });
@@ -550,17 +554,21 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 );
 
                 const updatedItems = order.items.map((item) => {
-                    const preparedItem = preparedItems
-                        .map((i) => JSON.parse(i))
-                        .find((i) => item.id.equals(i.itemId));
+                    let preparedItem = preparedItems.find((i) => {
+                        const parsedItem = JSON.parse(i);
+                        return item.id.equals(parsedItem.itemId);
+                    });
 
                     if (
                         order.status === 'Pending' ||
                         order.status === 'Prepared'
                     ) {
-                        item.preparedCount = preparedItem?.prepared || 0;
-                        item.pickedUpCount = preparedItem?.pickedUp || 0;
+                        item.prepared = preparedItem ? true : false;
+                        item.pickedUp = preparedItem
+                            ? JSON.parse(preparedItem).pickedUp
+                            : false;
                     }
+
                     return item;
                 });
 
@@ -631,102 +639,11 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
     return res.status(OK).json(result);
 });
 
-const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
-    const { canteenId } = req.user;
-
-    const istNow = moment.tz('Asia/Kolkata');
-    const startOfDay = istNow.clone().startOf('day').utc().toDate();
-    const endOfDay = istNow.clone().endOf('day').utc().toDate();
-
-    const result = await Order.aggregatePaginate(
-        [
-            {
-                $match: {
-                    canteenId: new Types.ObjectId(canteenId),
-                    createdAt: { $gte: startOfDay, $lt: endOfDay },
-                    status: 'Pending',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'students',
-                    localField: 'studentId',
-                    foreignField: '_id',
-                    as: 'studentInfo',
-                    pipeline: [
-                        {
-                            $project: {
-                                fullName: 1,
-                                phoneNumber: 1,
-                                avatar: 1,
-                                userName: 1,
-                            },
-                        },
-                    ],
-                },
-            },
-            { $unwind: '$items' },
-            { $unwind: '$studentInfo' },
-            { $match: { 'items.type': 'Snack' } },
-            {
-                $lookup: {
-                    from: 'snacks',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    as: 'snack',
-                    pipeline: [{ $project: { name: 1 } }],
-                },
-            },
-            { $addFields: { 'items.name': { $first: '$snack.name' } } },
-            {
-                $group: {
-                    _id: '$_id',
-                    status: { $first: '$status' },
-                    canteenId: { $first: '$canteenId' },
-                    studentId: { $first: '$studentId' },
-                    items: { $push: '$items' },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
-                    studentInfo: { $first: '$studentInfo' },
-                },
-            },
-            { $project: { snack: 0 } },
-        ],
-        { sort: { createdAt: 1 } }
-    );
-
-    if (result.docs.length) {
-        result.docs = await Promise.all(
-            result.docs.map(async (order) => {
-                const preparedItems = await redisClient.sMembers(
-                    `order_${order._id}`
-                );
-
-                const updatedItems = order.items.map((item) => {
-                    const preparedItem = preparedItems
-                        .map((i) => JSON.parse(i))
-                        .find((i) => item.id.equals(i.itemId));
-
-                    return {
-                        ...item,
-                        preparedCount: preparedItem?.prepared || 0,
-                    };
-                });
-
-                return { ...order, items: updatedItems };
-            })
-        );
-    }
-
-    return res.status(OK).json({ orders: result.docs });
-});
-
 export {
     placeOrder,
     getOrderStats,
     getStudentOrders,
     updateOrderStatus,
     getCanteenOrders,
-    getKitchenOrders,
     checkAvailability,
 };

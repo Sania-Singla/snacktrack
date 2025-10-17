@@ -21,20 +21,13 @@ import {
     StudentOrdersPage,
     CartPage,
     StudentBillsPage,
-    KitchenPage,
     AdminPage,
     RegisterCanteenPage,
-    VerifyKitchenKeyPage,
     VerifyAdminKeyPage,
     DemoCredentialsPage,
 } from './Pages';
 
-import {
-    UpdateAccountDetails,
-    UpdatePassword,
-    UpdateKitchenKey,
-    Layout,
-} from './Components';
+import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -52,10 +45,6 @@ export const router = createBrowserRouter(
                     <Route path="settings" element={<SettingsPage />}>
                         <Route path="" element={<UpdateAccountDetails />} />
                         <Route path="password" element={<UpdatePassword />} />
-                        <Route
-                            path="kitchen-key"
-                            element={<UpdateKitchenKey />}
-                        />
                     </Route>
                     <Route
                         path="orders/:studentId"
@@ -92,19 +81,6 @@ export const router = createBrowserRouter(
             </Route>
 
             <Route element={<Layout renderTemplate={false} />}>
-                <Route path="kitchen">
-                    <Route
-                        path="verify-key"
-                        element={<VerifyKitchenKeyPage />}
-                    />
-
-                    <Route
-                        element={<AccessTo roles={['staff', 'contractor']} />}
-                    >
-                        <Route path="" element={<KitchenPage />} />
-                    </Route>
-                </Route>
-
                 <Route path="admin">
                     <Route path="verify-key" element={<VerifyAdminKeyPage />} />
 

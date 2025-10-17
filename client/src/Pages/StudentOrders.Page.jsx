@@ -125,16 +125,11 @@ export default function StudentOrdersPage() {
                         if (o._id !== orderId) return o;
 
                         const updatedItems = o.items.map((i) =>
-                            i.id === itemId
-                                ? {
-                                      ...i,
-                                      preparedCount: i.preparedCount + 1,
-                                  }
-                                : i
+                            i.id === itemId ? { ...i, prepared: true } : i
                         );
 
                         const allPrepared = updatedItems.every(
-                            (i) => i.preparedCount === i.quantity
+                            (i) => i.prepared
                         );
                         return {
                             ...o,
@@ -156,17 +151,10 @@ export default function StudentOrdersPage() {
                     if (o._id !== orderId) return o;
 
                     const updatedItems = o.items.map((i) =>
-                        i.id === itemId
-                            ? {
-                                  ...i,
-                                  pickedUpCount: i.preparedCount,
-                              }
-                            : i
+                        i.id === itemId ? { ...i, pickedUp: true } : i
                     );
 
-                    const allPickedUp = updatedItems.every(
-                        (i) => i.pickedUpCount === i.quantity
-                    );
+                    const allPickedUp = updatedItems.every((i) => i.pickedUp);
                     return {
                         ...o,
                         items: updatedItems,

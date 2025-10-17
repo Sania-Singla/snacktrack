@@ -84,11 +84,11 @@ export default function PackagedItemView({ item, reference }) {
     return (
         <div
             ref={reference}
-            className={`${!isAvailable ? 'brightness-95 opacity-50' : 'hover:shadow-md'} shadow-sm relative bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
+            className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} shadow-sm relative bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
         >
             {/* Content */}
             <div className="flex flex-col justify-between gap-4.5 h-full w-full py-2.5 px-3.5">
-                <div className="flex justify-between sm:text-lg items-center">
+                <div className="flex justify-between md:text-lg items-center">
                     <p className="font-medium text-gray-900 w-[70%]">{name}</p>
                     <p>Rs. {price}</p>
                 </div>

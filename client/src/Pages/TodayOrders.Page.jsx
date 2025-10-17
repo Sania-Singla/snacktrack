@@ -83,27 +83,6 @@ export default function TodayOrdersPage() {
 
         async function newOrder(order) {
             if (user.role === 'contractor') {
-                // setStats((prev) => ({
-                //     ...prev,
-                //     Total: prev.Total + 1,
-                //     [order.status]: prev[order.status] + 1,
-                // }));
-
-                // const hasSnacks = order.items.some(
-                //     (item) => item.type === 'Snack'
-                // );
-
-                // if (hasSnacks && statusFilterRef.current === 'Pending') {
-                //     setPendingOrders((prev) => [...prev, order]);
-                // } else if (
-                //     !hasSnacks &&
-                //     statusFilterRef.current === 'Prepared'
-                // ) {
-                //     setOrders((prev) => [...prev, order]);
-                // }
-
-                // await playSound();
-
                 setPendingOrders((prev) => [...prev, order]);
 
                 setStats((prev) => ({
@@ -118,20 +97,6 @@ export default function TodayOrdersPage() {
 
         function orderPrepared(order) {
             if (user.role === 'contractor') {
-                // setStats((prev) => ({
-                //     ...prev,
-                //     Pending: prev.Pending - 1,
-                //     Prepared: prev.Prepared + 1,
-                // }));
-
-                // if (statusFilterRef.current === 'Pending') {
-                //     setPendingOrders((prev) =>
-                //         prev.filter((o) => o._id !== order._id)
-                //     );
-                // } else if (statusFilterRef.current === 'Prepared') {
-                //     setOrders((prev) => [...prev, order]);
-                // }
-
                 setPendingOrders((prev) =>
                     prev.map((o) =>
                         o._id === order._id ? { ...o, status: 'Prepared' } : o
@@ -142,18 +107,6 @@ export default function TodayOrdersPage() {
 
         function orderPickedUp(order) {
             if (user.role === 'contractor') {
-                // setStats((prev) => ({
-                //     ...prev,
-                //     Prepared: prev.Prepared - 1,
-                //     PickedUp: prev.PickedUp + 1,
-                // }));
-                // if (statusFilterRef.current === 'Prepared') {
-                //     setOrders((prev) =>
-                //         prev.filter((o) => o._id !== order._id)
-                //     );
-                // } else if (statusFilterRef.current === 'PickedUp') {
-                //     setOrders((prev) => [...prev, order]);
-                // }
                 setStats((prev) => ({
                     ...prev,
                     Pending: prev.Pending - 1,
@@ -172,32 +125,6 @@ export default function TodayOrdersPage() {
 
         function orderRejected(order) {
             if (user.role === 'contractor') {
-                // if (order.status === 'Prepared') {
-                //     setStats((prev) => ({
-                //         ...prev,
-                //         Prepared: prev.Prepared - 1,
-                //         Rejected: prev.Rejected + 1,
-                //     }));
-                // } else {
-                //     setStats((prev) => ({
-                //         ...prev,
-                //         Pending: prev.Pending - 1,
-                //         Rejected: prev.Rejected + 1,
-                //     }));
-                // }
-
-                // if (statusFilterRef.current === 'Prepared') {
-                //     setOrders((prev) =>
-                //         prev.filter((o) => o._id !== order._id)
-                //     );
-                // } else if (statusFilterRef.current === 'Rejected') {
-                //     setOrders((prev) => [...prev, order]);
-                // } else if (statusFilterRef.current === 'Pending') {
-                //     setPendingOrders((prev) =>
-                //         prev.filter((o) => o._id !== order._id)
-                //     );
-                // }
-
                 setStats((prev) => ({
                     ...prev,
                     Pending: prev.Pending - 1,
@@ -221,12 +148,7 @@ export default function TodayOrdersPage() {
                         ? {
                               ...o,
                               items: o.items.map((i) =>
-                                  i.id === itemId
-                                      ? {
-                                            ...i,
-                                            preparedCount: i.preparedCount + 1,
-                                        }
-                                      : i
+                                  i.id === itemId ? { ...i, prepared: true } : i
                               ),
                           }
                         : o
@@ -235,85 +157,6 @@ export default function TodayOrdersPage() {
         }
 
         function itemPickedUp({ orderId, itemId }) {
-            // if (statusFilterRef.current === 'Pending') {
-            //     setPendingOrders((prev) =>
-            //         prev.map((o) =>
-            //             o._id === orderId
-            //                 ? {
-            //                       ...o,
-            //                       items: o.items.map((i) =>
-            //                           i.id === itemId
-            //                               ? {
-            //                                     ...i,
-            //                                     pickedUpCount: i.preparedCount,
-            //                                 }
-            //                               : i
-            //                       ),
-            //                   }
-            //                 : o
-            //         )
-            //     );
-            // } else if (statusFilterRef.current === 'Prepared') {
-            //     setOrders((prev) => {
-            //         const originalOrder = prev.find((o) => o._id === orderId);
-            //         if (!originalOrder) return prev;
-
-            //         const updatedOrders = prev
-            //             .map((o) =>
-            //                 o._id === orderId
-            //                     ? {
-            //                           ...o,
-            //                           items: o.items.map((i) =>
-            //                               i.id === itemId
-            //                                   ? {
-            //                                         ...i,
-            //                                         pickedUpCount:
-            //                                             i.preparedCount,
-            //                                     }
-            //                                   : i
-            //                           ),
-            //                       }
-            //                     : o
-            //             )
-            //             .filter((o) =>
-            //                 o.items.some((i) => i.pickedUpCount < i.quantity)
-            //             );
-
-            //         const orderWasRemoved = !updatedOrders.some(
-            //             (o) => o._id === orderId
-            //         );
-
-            //         if (orderWasRemoved) {
-            //             (async () => {
-            //                 try {
-            //                     const res =
-            //                         await orderService.updateOrderStatus({
-            //                             orderId,
-            //                             status: 'PickedUp',
-            //                         });
-            //                     if (
-            //                         res &&
-            //                         res.message ===
-            //                             'order status updated successfully'
-            //                     ) {
-            //                         socket.emit(
-            //                             SOCKET_EVENTS.ORDER_PICKEDUP,
-            //                             originalOrder
-            //                         );
-            //                     }
-            //                 } catch (error) {
-            //                     console.error(
-            //                         'Failed to update order status:',
-            //                         error
-            //                     );
-            //                 }
-            //             })();
-            //         }
-
-            //         return updatedOrders;
-            //     });
-            // }
-
             setPendingOrders((prev) => {
                 const originalOrder = prev.find((o) => o._id === orderId);
 
@@ -324,18 +167,13 @@ export default function TodayOrdersPage() {
                                   ...o,
                                   items: o.items.map((i) =>
                                       i.id === itemId
-                                          ? {
-                                                ...i,
-                                                pickedUpCount: i.preparedCount,
-                                            }
+                                          ? { ...i, pickedUp: true }
                                           : i
                                   ),
                               }
                             : o
                     )
-                    .filter((o) =>
-                        o.items.some((i) => i.pickedUpCount < i.quantity)
-                    );
+                    .filter((o) => o.items.some((i) => !i.pickedUp));
 
                 const orderWasRemoved = !updatedOrders.some(
                     (o) => o._id === orderId

@@ -17,9 +17,8 @@ import {
     sendMail,
 } from '../Utils/index.js';
 import { Canteen, Contractor } from '../Models/index.js';
-import { customAlphabet, nanoid } from 'nanoid';
+import { nanoid } from 'nanoid';
 import { Types } from 'mongoose';
-import bcrypt from 'bcryptjs';
 import { generateAccessToken } from '../Helpers/tokens.js';
 
 const verifyAdminKey = tryCatch('verify admin key', async (req, res, next) => {
@@ -97,17 +96,11 @@ const registerCanteen = tryCatch(
             );
         }
 
-        const randomkitchenKey = customAlphabet(
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-            8
-        )();
-
         // Now register the contractor & canteen
         const canteen = await Canteen.create({
             hostelName: hostel.hostelName.trim(),
             hostelNumber: hostel.hostelNumber,
             hostelType: hostel.hostelType.trim(),
-            kitchenKey: randomkitchenKey,
         });
 
         const randomPassword = nanoid(8); // unique temporary random password
@@ -126,7 +119,7 @@ const registerCanteen = tryCatch(
         canteen.contractorId = contractor._id;
         await canteen.save();
 
-        // send this password & kitchenKey on contractor's email
+        // send this password on contractor's email
         await sendMail({
             receiverName: fullName,
             receiverMail: email,
@@ -136,7 +129,6 @@ const registerCanteen = tryCatch(
                 Welcome to SnackTrack! <br>
                 You are now the manager of the canteen of Hostel: ${hostel.hostelType}${hostel.hostelNumber}-${hostel.hostelName}. <br>
                 Your Temporary password is <b>${randomPassword}</b> <br>
-                Your Temporary Kitchen Key is <b>${randomkitchenKey}</b> <br>
                 <i>*These values can be updated anytime after logging in from settings.*</i> <br>
             `,
         });
@@ -180,7 +172,7 @@ const updateContractor = tryCatch(
     'update contractor',
     async (req, res, next) => {
         const { contractorId } = req.params;
-        const { fullName, phoneNumber, email, kitchenKey } = req.body;
+        const { fullName, phoneNumber, email } = req.body;
 
         if (!fullName || !phoneNumber || !email) {
             return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
@@ -219,39 +211,18 @@ const updateContractor = tryCatch(
                 new ErrorHandler('contractor already exists', BAD_REQUEST)
             );
         }
-        let newKitchenKey = null,
-            isKitchenKeySame = false,
-            canteen = null;
-        if (kitchenKey) {
-            const oldKitchenKey = contractor.canteen.kitchenKey;
-            newKitchenKey = `${contractor.canteenId}-${kitchenKey.trim()}`;
-            isKitchenKeySame = bcrypt.compareSync(newKitchenKey, oldKitchenKey);
-            if (!isKitchenKeySame) {
-                canteen = await Canteen.findById(contractor.canteenId);
-                canteen.kitchenKey = newKitchenKey;
-                await canteen.save();
-            }
-        }
 
-        const [updatedContractor] = await Promise.all([
-            Contractor.findByIdAndUpdate(
-                contractorId,
-                {
-                    $set: {
-                        fullName,
-                        phoneNumber,
-                        email,
-                    },
+        const [updatedContractor] = await Contractor.findByIdAndUpdate(
+            contractorId,
+            {
+                $set: {
+                    fullName,
+                    phoneNumber,
+                    email,
                 },
-                { new: true }
-            ),
-            sendMail({
-                receiverName: fullName,
-                receiverMail: email,
-                subject: 'Welcome to SnackTrack',
-                html: `Hello ${fullName}, <br> Your Canteen's Kitchen key has been reset. The new Kitchen Key is <b>${kitchenKey.trim()}</b> <br> You can update it anytime from settings.`,
-            }),
-        ]);
+            },
+            { new: true }
+        );
         return res.status(OK).json(updatedContractor);
     }
 );
@@ -298,14 +269,8 @@ const changeContractor = tryCatch(
         );
         const canteen = await Canteen.findById(contractor.canteenId);
 
-        const randomkitchenKey = customAlphabet(
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-            8
-        )();
         const randomPassword = nanoid(8);
-
         contractor.password = randomPassword;
-        canteen.kitchenKey = randomkitchenKey;
 
         await Promise.all([contractor.save(), canteen.save()]);
 
@@ -319,8 +284,7 @@ const changeContractor = tryCatch(
                 The manager of the Canteen of the Hostel: ${canteen.hostelType}${canteen.hostelNumber}-${canteen.hostelName} has been Changed Recently.
                 You are now the manager of this Canteen. <br>
                 Your Temporary password is <b>${randomPassword}</b> <br>
-                Your Temporary Kitchen Key is <b>${randomkitchenKey}</b> <br>
-                <i>*These values can be updated anytime after logging in from settings.*</i> <br>
+                <i>*You can update your password anytime after logging in from settings.*</i> <br>
             `,
         });
 
@@ -329,7 +293,6 @@ const changeContractor = tryCatch(
 );
 
 const getContractors = tryCatch('get contractors', async (req, res) => {
-    console.log(1);
     const canteens = await Canteen.aggregate([
         {
             $lookup: {
@@ -352,7 +315,7 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
         { $unwind: '$contractor' },
         { $project: { snacks: 0, packagedItems: 0 } },
     ]);
-console.log(canteens)
+
     return res.status(OK).json(canteens);
 });
 

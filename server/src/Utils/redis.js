@@ -11,21 +11,8 @@ async function deleteSocketId(room, socketId) {
 }
 
 async function addPreparedItem({ itemId, orderId }) {
-    const existing = await redisClient.sMembers(`order_${orderId}`);
-    const existingItem = existing.find((item) => {
-        const parsedItem = JSON.parse(item);
-        return parsedItem.itemId === itemId;
-    });
-
-    if (existingItem) {
-        const parsedItem = JSON.parse(existingItem);
-        parsedItem.prepared++;
-        await redisClient.sRem(`order_${orderId}`, existingItem);
-        await redisClient.sAdd(`order_${orderId}`, JSON.stringify(parsedItem));
-    } else {
-        const newItem = { itemId, prepared: 1, pickedUp: 0 };
-        await redisClient.sAdd(`order_${orderId}`, JSON.stringify(newItem));
-    }
+    const newItem = { itemId, pickedUp: false };
+    await redisClient.sAdd(`order_${orderId}`, JSON.stringify(newItem));
 }
 
 async function addPickedUpItem({ itemId, orderId }) {
@@ -37,7 +24,7 @@ async function addPickedUpItem({ itemId, orderId }) {
 
     if (existingItem) {
         const parsedItem = JSON.parse(existingItem);
-        parsedItem.pickedUp = parsedItem.prepared; // No Partial Pickups
+        parsedItem.pickedUp = true; // No Partial Pickups
         await redisClient.sRem(`order_${orderId}`, existingItem);
         await redisClient.sAdd(`order_${orderId}`, JSON.stringify(parsedItem));
     }

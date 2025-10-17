@@ -86,9 +86,7 @@ export default function NewContractorPopup() {
 
     function handleDisable() {
         return (
-            Object.entries(inputs).some(
-                ([key, value]) => !value && key !== 'kitchenKey'
-            ) ||
+            Object.entries(inputs).some(([key, value]) => !value) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             ) ||
@@ -201,7 +199,9 @@ export default function NewContractorPopup() {
                 onClick={() => setShowPopup(false)}
                 className="absolute top-3 right-3"
             />
-            <p className="text-center text-2xl font-semibold">Change Contractor</p>
+            <p className="text-center text-2xl font-semibold">
+                Change Contractor
+            </p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (
                     <div className="text-red-500 w-full text-center">

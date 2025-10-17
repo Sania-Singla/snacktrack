@@ -26,12 +26,6 @@ export default function DemoCredentialsPage() {
             description: 'Full administrative access to the system',
             dashboardPath: '/admin',
         },
-        kitchen: {
-            hostel: 'WWH1 - Sushila Nayyar Hall',
-            key: '12345678',
-            description: 'Kitchen staff access for meal preparation',
-            dashboardPath: '/kitchen',
-        },
     };
 
     const copyToClipboard = (text) => {
@@ -110,22 +104,6 @@ export default function DemoCredentialsPage() {
         </svg>
     );
 
-    const KitchenIcon = () => (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-        >
-            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-            <path
-                fillRule="evenodd"
-                d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-                clipRule="evenodd"
-            />
-        </svg>
-    );
-
     const currentCredential = credentials[activeRole];
 
     return (
@@ -140,7 +118,7 @@ export default function DemoCredentialsPage() {
                 </p>
 
                 {/* Role Selection */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
                     <RoleCard
                         role="contractor"
                         title="Contractor"
@@ -152,11 +130,6 @@ export default function DemoCredentialsPage() {
                         icon={<StudentIcon />}
                     />
                     <RoleCard role="admin" title="Admin" icon={<AdminIcon />} />
-                    <RoleCard
-                        role="kitchen"
-                        title="Kitchen Staff"
-                        icon={<KitchenIcon />}
-                    />
                 </div>
 
                 {/* Credentials Display */}
@@ -273,17 +246,15 @@ export default function DemoCredentialsPage() {
                 </div>
 
                 {/* Quick Access Buttons */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-2 gap-4">
                     <Button
                         onClick={() =>
                             activeRole === 'admin'
                                 ? navigate('/admin')
-                                : activeRole === 'kitchen'
-                                  ? navigate('/kitchen')
-                                  : navigate('/login')
+                                : navigate('/login')
                         }
                         className="bg-[#3a67d8] text-white py-2 rounded-md font-semibold hover:bg-[#2c4fa8]"
-                        btnText={`Go to ${activeRole === 'admin' || activeRole === 'kitchen' ? activeRole.charAt(0).toUpperCase() + activeRole.slice(1) + ' Dashboard' : 'Login'}`}
+                        btnText={`Go to ${activeRole === 'admin' ? activeRole.charAt(0).toUpperCase() + activeRole.slice(1) + ' Dashboard' : 'Login'}`}
                     />
                     <Button
                         onClick={() => navigate('/')}

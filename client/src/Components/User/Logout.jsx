@@ -18,6 +18,7 @@ export default function Logout() {
             if (res && res.message === 'user loggedout successfully') {
                 setUser(null);
                 toast.success('Logged out Successfully 🙂');
+                localStorage.removeItem('cartItems');
             } else checkTokenExpired(res, setUser);
         } catch (err) {
             navigate('/server-error');

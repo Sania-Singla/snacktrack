@@ -57,27 +57,6 @@ class OrderService {
         });
     }
 
-    // only today's
-    async getKitchenOrders(signal) {
-        return await fetchWrapper({
-            endPoint: `/orders/kitchen`,
-            method: 'GET',
-            signal,
-            credentials: 'include',
-            aim: 'getKitchenOrders',
-        });
-    }
-
-    async verifyKitchenKey({ key, canteenId }) {
-        return await fetchWrapper({
-            endPoint: `/orders/kitchen/verify-key/${canteenId}`,
-            body: { key },
-            method: 'POST',
-            credentials: 'include',
-            aim: 'verifyKitchenKey',
-        });
-    }
-
     async checkAvailability(cartItems) {
         return await fetchWrapper({
             endPoint: `/orders/availability`,

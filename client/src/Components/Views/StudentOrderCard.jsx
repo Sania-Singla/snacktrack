@@ -81,15 +81,15 @@ export default function StudentOrderCard({ order, reference }) {
                                 className={`relative p-3 ${
                                     (order.status === 'Pending' ||
                                         order.status === 'Prepared') &&
-                                    item.pickedUpCount === item.quantity
-                                        ? 'opacity-60'
-                                        : 'border-[0.01rem] border-transparent'
+                                    item.pickedUp
+                                        ? 'opacity-60 border-none'
+                                        : 'border-b-1 border-b-gray-100'
                                 }`}
                             >
                                 {/* ✅ Complete: Show green tick */}
                                 {(order.status === 'Pending' ||
                                     order.status === 'Prepared') &&
-                                    item.pickedUpCount === item.quantity && (
+                                    item.pickedUp && (
                                         <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
                                             <div className="fill-green-600 size-8 p-1">
                                                 {icons.check}
@@ -120,42 +120,28 @@ export default function StudentOrderCard({ order, reference }) {
                                                         Pack
                                                     </span>
                                                 )}
-                                                {order.status === 'Pending' &&
-                                                    item.preparedCount > 0 &&
-                                                    item.pickedUpCount <
-                                                        item.quantity && (
-                                                        <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
-                                                            {item.preparedCount ===
-                                                            item.quantity
-                                                                ? 'Prepared'
-                                                                : `Prepared - ${
-                                                                      item.preparedCount
-                                                                  }`}
-                                                        </span>
-                                                    )}
-                                                {(order.status === 'Pending' ||
-                                                    order.status ===
-                                                        'Prepared') &&
-                                                    item.pickedUpCount > 0 &&
-                                                    item.pickedUpCount <
-                                                        item.quantity && (
-                                                        <span className="flex items-center gap-1 text-[10px] bg-blue-50 rounded-full font-medium border-[0.01rem] border-blue-300 w-fit px-2 text-blue-600">
-                                                            Taken -{' '}
-                                                            {item.pickedUpCount}
-                                                        </span>
-                                                    )}
                                             </h3>
                                             <p className="text-gray-600 text-xs">
                                                 Qty: {item.quantity}
                                             </p>
                                         </div>
                                     </div>
-                                    <span className="text-sm font-semibold text-gray-900">
-                                        ₹
-                                        {(item.price * item.quantity).toFixed(
-                                            2
-                                        )}
-                                    </span>
+                                    <div className="flex flex-col items-end justify-between gap-[5px]">
+                                        <div className="text-sm font-semibold text-gray-900">
+                                            ₹
+                                            {(
+                                                item.price * item.quantity
+                                            ).toFixed(2)}
+                                        </div>
+
+                                        {order.status === 'Pending' &&
+                                            item.prepared &&
+                                            !item.pickedUp && (
+                                                <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
+                                                    Ready
+                                                </span>
+                                            )}
+                                    </div>
                                 </div>
 
                                 {item.specialInstructions && (

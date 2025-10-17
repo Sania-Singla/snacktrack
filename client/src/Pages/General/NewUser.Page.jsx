@@ -86,11 +86,6 @@ export default function NewUserPage() {
                         btnText="Admin"
                         className="bg-gray-700 text-white py-2 rounded-md hover:bg-gray-800 flex-1"
                     />
-                    <Button
-                        onClick={() => navigate('/kitchen')}
-                        btnText="Kitchen"
-                        className="bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 flex-1"
-                    />
                 </div>
             </div>
         </div>

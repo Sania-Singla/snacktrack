@@ -12,7 +12,6 @@ export function registerItemEvents(io, socket) {
         safeHandler(async ({ itemId, order }) => {
             await addPreparedItem({ itemId, orderId: order._id });
             io.to(`contractor_${order.canteenId}`)
-                .to(`staff_${order.canteenId}`)
                 .to(`student_${order.studentId}`)
                 .emit(SOCKET_EVENTS.ITEM_PREPARED, {
                     itemId,

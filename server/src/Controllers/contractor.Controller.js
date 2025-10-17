@@ -25,27 +25,6 @@ import {
 import { Types } from 'mongoose';
 import fs from 'fs';
 
-const updateKitchenKey = tryCatch(
-    'update kitchen key',
-    async (req, res, next) => {
-        const { password, newKey } = req.body;
-
-        const isPassValid = bcrypt.compareSync(password, req.user.password);
-        if (!isPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
-        }
-
-        // hash new key
-        const hashedNewKey = bcrypt.hashSync(newKey, 10);
-
-        await Canteen.findByIdAndUpdate(req.user.canteenId, {
-            $set: { kitchenKey: hashedNewKey },
-        });
-
-        return res.status(OK).json({ message: 'key updated successfully' });
-    }
-);
-
 // student management
 
 const getStudents = tryCatch('get students', async (req, res) => {
@@ -525,7 +504,6 @@ const toggleItemAvailability = tryCatch(
 export {
     getStudents,
     registerStudent,
-    updateKitchenKey,
     removeAllStudents,
     removeStudent,
     updateStudent,

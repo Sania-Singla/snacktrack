@@ -1,8 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { BAD_REQUEST, FORBIDDEN, COOKIE_OPTIONS } from '../Constants/index.js';
 import { extractTokens, generateAccessToken } from '../Helpers/index.js';
-import { Student, Contractor, Canteen } from '../Models/index.js';
-import bcrypt from 'bcryptjs';
+import { Student, Contractor } from '../Models/index.js';
 
 /**
  * @param {String} token - token to verify
@@ -28,18 +27,6 @@ async function verifyToken(token, secret) {
             ).lean();
             if (!contractor) throw new Error('user not found');
             user = { ...user, ...contractor };
-            break;
-        case 'staff':
-            const canteen = await Canteen.findById(
-                decodedToken.canteenId
-            ).lean();
-            if (
-                !canteen ||
-                !bcrypt.compareSync(decodedToken.key, canteen.kitchenKey)
-            ) {
-                throw new Error(`invalid key`);
-            }
-            user = { ...user, canteenId: decodedToken.canteenId };
             break;
         case 'admin':
             if (decodedToken.key !== process.env.ADMIN_KEY) {

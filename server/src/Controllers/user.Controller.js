@@ -15,7 +15,6 @@ import {
     generateTokens,
     uploadOnCloudinary,
     deleteFromCloudinary,
-    generateAccessToken,
 } from '../Helpers/index.js';
 import { Canteen, Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcryptjs';
@@ -91,54 +90,6 @@ const logout = tryCatch('logout user', async (req, res, next) => {
         .clearCookie('refreshToken', COOKIE_OPTIONS)
         .json({ message: 'user loggedout successfully' });
 });
-
-const verifyKitchenKey = tryCatch(
-    'verify kitchen key',
-    async (req, res, next) => {
-        const { key } = req.body;
-        const { canteenId } = req.params;
-
-        if (!canteenId) {
-            return next(new ErrorHandler('missing canteenId', BAD_REQUEST));
-        }
-
-        if (!key) {
-            return next(new ErrorHandler('missing key', BAD_REQUEST));
-        }
-
-        const canteen = await Canteen.findById(canteenId);
-
-        const isValid = bcrypt.compareSync(key, canteen.kitchenKey);
-        if (!isValid) {
-            return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
-        }
-
-        const token = await generateAccessToken({
-            key,
-            canteenId,
-            role: 'staff',
-        });
-
-        const { hostelName, hostelNumber, hostelType } = canteen;
-
-        return res
-            .status(OK)
-            .cookie('accessToken', token, {
-                ...COOKIE_OPTIONS,
-                maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
-            })
-            .clearCookie('refreshToken', COOKIE_OPTIONS)
-            .json({
-                user: {
-                    canteenId,
-                    role: 'staff',
-                    hostelType,
-                    hostelNumber,
-                    hostelName,
-                },
-            });
-    }
-);
 
 const getCurrentUser = tryCatch('get current user', async (req, res, next) => {
     let { password, refreshToken, ...user } = req.user;
@@ -298,5 +249,4 @@ export {
     updateAccountDetails,
     getCanteens,
     resetPassword,
-    verifyKitchenKey,
 };

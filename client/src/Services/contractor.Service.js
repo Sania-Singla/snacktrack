@@ -2,16 +2,6 @@ import { LIMIT } from '../Constants/constants';
 import { fetchWrapper } from '../Utils';
 
 class ContractorService {
-    async updateKitchenKey({ password, newKey }) {
-        return await fetchWrapper({
-            endPoint: `/contractors/kitchen-key`,
-            method: 'PATCH',
-            aim: 'updateKitchenKey',
-            credentials: 'include',
-            body: { password, newKey },
-        });
-    }
-
     // student management tasks
 
     async getStudents({ signal, search, page = 1, limit = LIMIT }) {

@@ -2,13 +2,13 @@ import { twilioClient } from '../server.js';
 
 export async function sendSMS({ to, message }) {
     try {
-        const msg = await twilioClient.messages.create({
-            from: process.env.TWILIO_PHONE_NUMBER,
-            to,
-            body: message,
-        });
+        // const msg = await twilioClient.messages.create({
+        //     from: process.env.TWILIO_PHONE_NUMBER,
+        //     to,
+        //     body: message,
+        // });
 
-        return msg.sid;
+        // return msg.sid;
     } catch (err) {
         console.error('[Error sending sms]: ', err);
     }

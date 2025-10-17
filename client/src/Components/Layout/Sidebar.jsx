@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useSideBarContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
-import { Button } from '..';
+import { Button, Logout } from '..';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useRef } from 'react';
 
@@ -33,12 +33,6 @@ export default function Sidebar() {
             path: '/all-bills',
             name: 'Bills',
             icon: icons.rupee,
-            show: user.role === 'contractor',
-        },
-        {
-            path: '/kitchen',
-            name: 'Kitchen',
-            icon: icons.store,
             show: user.role === 'contractor',
         },
         {
@@ -151,16 +145,20 @@ export default function Sidebar() {
                                     title="Close Sidebar"
                                 />
 
-                                <div
-                                    onClick={() => navigate('/settings')}
-                                    className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
-                                >
-                                    <img
-                                        src={user.avatar}
-                                        alt="user avatar"
-                                        className="size-full object-cover"
-                                    />
-                                </div>
+                                {user.role === 'student' ? (
+                                    <div
+                                        onClick={() => navigate('/settings')}
+                                        className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
+                                    >
+                                        <img
+                                            src={user.avatar}
+                                            alt="user avatar"
+                                            className="size-full object-cover"
+                                        />
+                                    </div>
+                                ) : (
+                                    <Logout />
+                                )}
                             </div>
 
                             <hr className="w-full border-gray-200" />

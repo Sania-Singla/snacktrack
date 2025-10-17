@@ -85,7 +85,7 @@ export default function SnackView({ snack, reference }) {
     return (
         <div
             ref={reference}
-            className={`${!isAvailable ? 'brightness-95 opacity-50' : 'hover:shadow-md'} flex flex-col shadow-sm relative h-full bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
+            className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} flex flex-col shadow-sm relative h-full bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
         >
             {/* Image */}
             <div className="aspect-[5/3] w-full overflow-hidden shadow-sm">
@@ -98,7 +98,7 @@ export default function SnackView({ snack, reference }) {
 
             {/* Content */}
             <div className="flex flex-col justify-between gap-4.5 flex-1 py-2.5 px-3.5">
-                <div className="flex justify-between sm:text-lg items-center">
+                <div className="flex justify-between md:text-lg items-center">
                     <p className="font-medium text-gray-900 w-[70%]">{name}</p>
                     <p>Rs. {price}</p>
                 </div>

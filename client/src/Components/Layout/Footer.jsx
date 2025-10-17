@@ -1,6 +1,12 @@
 import { Link } from 'react-router-dom';
 import { icons } from '../../Assets/icons';
-import { CONTRIBUTORS, LOGO, LOGO_SVG, PU, UIET } from '../../Constants/constants';
+import {
+    CONTRIBUTORS,
+    LOGO,
+    LOGO_SVG,
+    PU,
+    UIET,
+} from '../../Constants/constants';
 
 export default function Footer() {
     const socialElements = Object.entries(CONTRIBUTORS[0].socials).map(
@@ -24,7 +30,7 @@ export default function Footer() {
             <div className="w-[90%] max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
                 {/* Left: Branding and Socials */}
                 <div className="flex flex-col items-center sm:items-start gap-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                         <img
                             src={LOGO_SVG}
                             alt="Snack Track Logo"

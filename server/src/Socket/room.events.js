@@ -6,11 +6,8 @@ export async function joinRoom(socket, { userId, canteenId, role }) {
         case 'student':
             room = `student_${userId}`;
             break;
-        case 'contractor':
-            room = `contractor_${canteenId}`;
-            break;
         default:
-            room = `staff_${canteenId}`;
+            room = `contractor_${canteenId}`;
             break;
     }
 
@@ -27,11 +24,8 @@ export async function leaveRoom(socket, { userId, canteenId, role }) {
         case 'student':
             room = `student_${userId}`;
             break;
-        case 'contractor':
-            room = `contractor_${canteenId}`;
-            break;
         default:
-            room = `staff_${canteenId}`;
+            room = `contractor_${canteenId}`;
             break;
     }
 

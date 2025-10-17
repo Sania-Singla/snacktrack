@@ -13,14 +13,12 @@ export default function EditContractorPopup() {
     const [error, setError] = useState({});
     const { setPopupInfo, setShowPopup, popupInfo } = usePopupContext();
     const [disabled, setDisabled] = useState(true);
-    const [showkitchenKey, setShowKitchenKey] = useState(false);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const [inputs, setInputs] = useState({
         fullName: popupInfo.contractor?.fullName,
         phoneNumber: popupInfo.contractor?.phoneNumber,
         email: popupInfo.contractor?.email,
-        kitchenKey: popupInfo.contractor?.kitchenKey || '',
     });
     const [isVerified, setIsVerified] = useState(true);
     const [sendingMail, setSendingMail] = useState(false);
@@ -87,9 +85,7 @@ export default function EditContractorPopup() {
 
     function handleDisable() {
         return (
-            Object.entries(inputs).some(
-                ([key, value]) => !value && key !== 'kitchenKey'
-            ) ||
+            Object.entries(inputs).some(([key, value]) => !value) ||
             Object.entries(error).some(
                 ([key, value]) => value && key !== 'root'
             ) ||
@@ -145,13 +141,6 @@ export default function EditContractorPopup() {
             placeholder: 'Enter your Email',
             required: true,
         },
-        {
-            type: showkitchenKey ? 'text' : 'password',
-            name: 'kitchenKey',
-            label: 'Kitchen Key',
-            placeholder: 'Enter new Kitchen Key',
-            required: false,
-        },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -161,8 +150,6 @@ export default function EditContractorPopup() {
                     field={field}
                     handleChange={handleChange}
                     inputs={inputs}
-                    showPassword={showkitchenKey}
-                    setShowPassword={setShowKitchenKey}
                     inputStyling={field.name === 'email' ? 'pr-18' : ''}
                 />
                 {field.name === 'email' && (
@@ -216,7 +203,9 @@ export default function EditContractorPopup() {
                 className="absolute top-3 right-3"
             />
 
-            <p className="text-center text-2xl font-semibold">Edit Contractor</p>
+            <p className="text-center text-2xl font-semibold">
+                Edit Contractor
+            </p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (
                     <div className="text-red-500 w-full text-center">
