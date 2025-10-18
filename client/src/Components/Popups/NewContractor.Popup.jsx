@@ -260,7 +260,7 @@ export default function NewContractorPopup() {
                             className="ml-2 text-md text-red-600 font-semibold"
                             htmlFor="confirmation"
                         >
-                            This will permanently clear out the information
+                            I understand that, this will permanently clear out the information
                             about the old contractor.
                         </label>
                         <Button

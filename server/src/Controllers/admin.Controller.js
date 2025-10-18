@@ -16,9 +16,10 @@ import {
     sendMail,
 } from '../Utils/index.js';
 import { Canteen, Contractor } from '../Models/index.js';
-import { nanoid } from 'nanoid';
+import { nanoid, random } from 'nanoid';
 import { Types } from 'mongoose';
 import { generateAccessToken } from '../Helpers/tokens.js';
+import bcrypt from 'bcryptjs';
 
 const verifyAdminKey = tryCatch('verify admin key', async (req, res, next) => {
     const { key } = req.body;
@@ -176,41 +177,26 @@ const updateContractor = tryCatch(
             return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
         }
 
-        const [contractor] = await Contractor.aggregate([
-            {
-                $match: {
-                    _id: new Types.ObjectId(contractorId),
-                },
-            },
-            {
-                $lookup: {
-                    from: 'canteens',
-                    localField: 'canteenId',
-                    foreignField: '_id',
-                    as: 'canteen',
-                },
-            },
-            {
-                $unwind: '$canteen',
-            },
-        ]);
+        const isValid = ['fullName', 'email', 'phoneNumber'].every((key) =>
+            verifyExpression(key, req.body[key]?.trim())
+        );
 
-        let alreadyExists = null;
-
-        if (contractor.phoneNumber !== phoneNumber) {
-            alreadyExists = await Contractor.findOne({ phoneNumber });
-        } else if (contractor.email !== email.toLowerCase()) {
-            alreadyExists = await Contractor.findOne({
-                email: email.toLowerCase(),
-            });
+        if (!isValid) {
+            return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
+
+        const alreadyExists = await Contractor.findOne({
+            $or: [{ phoneNumber }, { email: email.toLowerCase() }],
+            _id: { $ne: contractorId },
+        });
+
         if (alreadyExists) {
             return next(
                 new ErrorHandler('contractor already exists', BAD_REQUEST)
             );
         }
 
-        const [updatedContractor] = await Contractor.findByIdAndUpdate(
+        const contractor = await Contractor.findByIdAndUpdate(
             contractorId,
             {
                 $set: {
@@ -221,7 +207,7 @@ const updateContractor = tryCatch(
             },
             { new: true }
         );
-        return res.status(OK).json(updatedContractor);
+        return res.status(OK).json(contractor);
     }
 );
 
@@ -243,15 +229,19 @@ const changeContractor = tryCatch(
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
 
-        let existingContractor = await Contractor.findOne({
+        let alreadyExists = await Contractor.findOne({
             $or: [{ phoneNumber }, { email: email.toLowerCase() }],
+            _id: { $ne: contractorId },
         });
 
-        if (existingContractor) {
+        if (alreadyExists) {
             return next(
                 new ErrorHandler('contractor already exists', BAD_REQUEST)
             );
         }
+
+        let randomPassword = nanoid(8);
+        randomPassword = await bcrypt.hash(randomPassword, 10);
 
         const contractor = await Contractor.findByIdAndUpdate(
             contractorId,
@@ -260,16 +250,12 @@ const changeContractor = tryCatch(
                     fullName,
                     phoneNumber,
                     email,
+                    password: randomPassword,
                 },
             },
             { new: true }
         );
         const canteen = await Canteen.findById(contractor.canteenId);
-
-        const randomPassword = nanoid(8);
-        contractor.password = randomPassword;
-
-        await Promise.all([contractor.save(), canteen.save()]);
 
         await sendMail({
             receiverName: fullName,
@@ -278,8 +264,7 @@ const changeContractor = tryCatch(
             html: `
                 Hello ${fullName}, <br>
                 Welcome to SnackTrack! <br>
-                The manager of the Canteen of the Hostel: ${canteen.hostelType}${canteen.hostelNumber}-${canteen.hostelName} has been Changed Recently.
-                You are now the manager of this Canteen. <br>
+                You are now the manager of the Canteen of Hostel: ${canteen.hostelType}${canteen.hostelNumber}-${canteen.hostelName}. <br>
                 Your Temporary password is <b>${randomPassword}</b> <br>
                 <i>*You can update your password anytime from settings.*</i> <br>
             `,
