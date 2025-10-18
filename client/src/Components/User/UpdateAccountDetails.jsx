@@ -76,7 +76,8 @@ export default function UpdateAccountDetails() {
                 setError((prev) => ({ ...prev, password: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+                       toast.error('Something went wrong. Please try again.');
+
         } finally {
             setDisabled(false);
             setLoading(false);

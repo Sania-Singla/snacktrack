@@ -30,20 +30,6 @@ class UserService {
         });
     }
 
-    async updateAvatar(avatar) {
-        const formData = new FormData();
-        formData.append('avatar', avatar);
-
-        return await fetchWrapper({
-            endPoint: `/users/avatar`,
-            method: 'PATCH',
-            credentials: 'include',
-            body: formData,
-            aim: 'updateAvatar',
-            type: 'formData',
-        });
-    }
-
     async updateAccountDetails({ phoneNumber, rollNo, email }) {
         return await fetchWrapper({
             endPoint: `/users/account`,

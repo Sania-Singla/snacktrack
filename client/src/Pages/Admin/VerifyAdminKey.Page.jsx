@@ -26,7 +26,7 @@ export default function VerifyAdminKeyPage() {
             } else toast.error('Please Enter a Valid Key');
             setVerifying(false);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         }
     };
 

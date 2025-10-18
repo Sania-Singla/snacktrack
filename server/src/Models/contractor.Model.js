@@ -12,11 +12,6 @@ const contractorSchema = new Schema(
             type: String,
             required: true,
         },
-        avatar: {
-            type: String,
-            default: '',
-            required: false,
-        },
         email: {
             type: String,
             unique: true,

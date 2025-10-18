@@ -3,21 +3,24 @@ import { Button } from '..';
 import { getRollNo, formatTime, checkTokenExpired } from '../../Utils';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
 import { orderService } from '../../Services';
 import { useSocketContext, useUserContext } from '../../Contexts';
 import toast from 'react-hot-toast';
-import { SOCKET_EVENTS } from '../../Constants/constants';
+import {
+    SNACK_PLACEHOLDER_IMAGE,
+    SOCKET_EVENTS,
+    USER_PLACEHOLDER_IMAGE,
+} from '../../Constants/constants';
 
 export default function ContractorOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
-    const { amount, _id, createdAt, items, studentInfo, packingCharges } =
-        order;
+    const { amount, _id, createdAt, items, studentInfo, extraCharges } = order;
     const { socket } = useSocketContext();
     const { setUser } = useUserContext();
     const [loading, setLoading] = useState(false);
-
-    const navigate = useNavigate();
+    const [extraChgs, setExtraChgs] = useState(order.extraCharges);
+    const [updatingOrder, setUpdatingOrder] = useState(false);
+    const [disabled, setDisabled] = useState(true);
 
     async function handleStatusChange(status) {
         try {
@@ -39,7 +42,29 @@ export default function ContractorOrderCard({ order, reference }) {
             } else checkTokenExpired(res, setUser);
             setLoading(false);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
+        }
+    }
+
+    async function handleExtraChargesUpdate() {
+        try {
+            setUpdatingOrder(true);
+            const res = await orderService.updateExtraCharges({
+                orderId: _id,
+                extraCharges: parseFloat(extraChgs) || 0,
+            });
+            if (res && res.message === 'extra charges updated successfully') {
+                toast.success('Extra charges updated successfully');
+                socket.emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
+                    orderId: _id,
+                    extraCharges: parseFloat(extraChgs) || 0,
+                    studentId: studentInfo._id,
+                });
+                setDisabled(true);
+            } else checkTokenExpired(res, setUser);
+            setUpdatingOrder(false);
+        } catch (err) {
+            toast.error('Something went wrong. Please try again.');
         }
     }
 
@@ -55,16 +80,17 @@ export default function ContractorOrderCard({ order, reference }) {
                 <div className="flex justify-between items-center mb-3 w-full">
                     {/* User Info Section */}
                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-full overflow-hidden shadow-sm">
+                        <div className="size-9 rounded-full overflow-hidden shadow-sm">
                             <img
-                                src={studentInfo.avatar}
-                                alt={`${studentInfo.fullName} image`}
+                                src={USER_PLACEHOLDER_IMAGE}
+                                alt="user placeholder image"
                                 className="size-full object-cover"
                             />
                         </div>
+
                         <div className="flex-1 space-y-[2px]">
                             <h3 className="flex items-center gap-1">
-                                <span className="font-medium text-sm text-gray-800 truncate">
+                                <span className="font-medium text-gray-800 truncate">
                                     {studentInfo.fullName}
                                 </span>
                                 <span className="text-xs text-gray-500">•</span>
@@ -77,6 +103,17 @@ export default function ContractorOrderCard({ order, reference }) {
                             </div>
                         </div>
                     </div>
+
+                    {order.status === 'Pending' && (
+                        <Button
+                            btnText="Ready"
+                            className="rounded-[5px] text-white bg-green-600 hover:bg-green-700  text-sm font-medium text-center px-2 py-0.5"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange('Prepared');
+                            }}
+                        />
+                    )}
 
                     {order.status === 'Prepared' && (
                         <Button
@@ -169,7 +206,10 @@ export default function ContractorOrderCard({ order, reference }) {
                                                 <div className="size-10 bg-gray-50 rounded-lg border-1 border-gray-300 overflow-hidden flex items-center justify-center">
                                                     {item.type === 'Snack' ? (
                                                         <img
-                                                            src={item.image}
+                                                            src={
+                                                                item.image ||
+                                                                SNACK_PLACEHOLDER_IMAGE
+                                                            }
                                                             alt={`${item.name} image`}
                                                             className="object-cover size-full"
                                                         />
@@ -180,13 +220,8 @@ export default function ContractorOrderCard({ order, reference }) {
                                                     )}
                                                 </div>
                                                 <div className="space-y-[2px] pb-[5px]">
-                                                    <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
+                                                    <h3 className="text-sm font-medium text-gray-800">
                                                         <span>{item.name}</span>
-                                                        {item.isPacked && (
-                                                            <span className="flex items-center gap-1 text-[10px] bg-yellow-50 rounded-full font-medium border-[0.01rem] border-yellow-300 w-fit px-2 text-yellow-600">
-                                                                Pack
-                                                            </span>
-                                                        )}
                                                     </h3>
                                                     <p className="text-gray-600 text-xs">
                                                         Qty: {item.quantity}
@@ -241,7 +276,7 @@ export default function ContractorOrderCard({ order, reference }) {
                                         {item.specialInstructions && (
                                             <p className="ml-13 pt-1 italic text-xs text-red-600">
                                                 <span className="font-medium">
-                                                    Note:{' '}
+                                                    Note -{' '}
                                                 </span>
                                                 {item.specialInstructions}
                                             </p>
@@ -256,8 +291,50 @@ export default function ContractorOrderCard({ order, reference }) {
                                     <span>₹{amount.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-sm text-gray-600 mt-1">
-                                    <span>Packing</span>
-                                    <span>₹{packingCharges.toFixed(2)}</span>
+                                    <span>Extra Charges</span>
+                                    {order.status !== 'Pending' ? (
+                                        <span>₹{extraCharges.toFixed(2)}</span>
+                                    ) : (
+                                        <div className="flex gap-1 items-center">
+                                            <input
+                                                onChange={(e) => {
+                                                    const value =
+                                                        e.target.value.trim();
+                                                    if (
+                                                        /^\d*\.?\d*$/.test(
+                                                            value
+                                                        )
+                                                    ) {
+                                                        setExtraChgs(value);
+                                                    }
+                                                    setDisabled(!value);
+                                                }}
+                                                value={extraChgs}
+                                                type="text"
+                                                name="extraCharges"
+                                                placeholder="₹ 0"
+                                                className="border-1 border-[#4977ec] rounded-md px-1.5 py-0.5 w-12 focus:outline-2 focus:outline-[#4977ec]"
+                                            />
+                                            <Button
+                                                btnText={
+                                                    loading ? (
+                                                        <div className="size-4 fill-[#4977ec] dark:text-[#a2bdff]">
+                                                            {icons.loading}
+                                                        </div>
+                                                    ) : (
+                                                        'Save'
+                                                    )
+                                                }
+                                                disabled={
+                                                    disabled || updatingOrder
+                                                }
+                                                className="w-11 h-6 text-white flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2] rounded-md text-xs font-medium"
+                                                onClick={
+                                                    handleExtraChargesUpdate
+                                                }
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex justify-between font-medium text-gray-900 mt-2">
                                     <span>Total</span>

@@ -3,7 +3,6 @@ import {
     BAD_REQUEST,
     NOT_FOUND,
     CREATED,
-    USER_PLACEHOLDER_IMAGE_URL,
     FORBIDDEN,
     HOSTELS,
     COOKIE_OPTIONS,
@@ -111,7 +110,6 @@ const registerCanteen = tryCatch(
             email,
             phoneNumber,
             password: randomPassword,
-            avatar: USER_PLACEHOLDER_IMAGE_URL,
             canteenId: canteen._id,
         });
 
@@ -129,7 +127,7 @@ const registerCanteen = tryCatch(
                 Welcome to SnackTrack! <br>
                 You are now the manager of the canteen of Hostel: ${hostel.hostelType}${hostel.hostelNumber}-${hostel.hostelName}. <br>
                 Your Temporary password is <b>${randomPassword}</b> <br>
-                <i>*These values can be updated anytime after logging in from settings.*</i> <br>
+                <i>*These values can be updated anytime from settings.*</i> <br>
             `,
         });
 
@@ -262,7 +260,6 @@ const changeContractor = tryCatch(
                     fullName,
                     phoneNumber,
                     email,
-                    avatar: USER_PLACEHOLDER_IMAGE_URL,
                 },
             },
             { new: true }
@@ -284,7 +281,7 @@ const changeContractor = tryCatch(
                 The manager of the Canteen of the Hostel: ${canteen.hostelType}${canteen.hostelNumber}-${canteen.hostelName} has been Changed Recently.
                 You are now the manager of this Canteen. <br>
                 Your Temporary password is <b>${randomPassword}</b> <br>
-                <i>*You can update your password anytime after logging in from settings.*</i> <br>
+                <i>*You can update your password anytime from settings.*</i> <br>
             `,
         });
 
@@ -306,7 +303,6 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
                             fullName: 1,
                             email: 1,
                             phoneNumber: 1,
-                            avatar: 1,
                         },
                     },
                 ],

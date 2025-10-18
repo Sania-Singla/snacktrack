@@ -48,6 +48,7 @@ export function registerOrderEvents(io, socket) {
         safeHandler(async (order) => {
             await Promise.all([
                 io
+                    .to(`student_${order.studentId}`)
                     .to(`contractor_${order.canteenId}`)
                     .emit(SOCKET_EVENTS.ORDER_PREPARED, order),
                 sendOrderPreparedSMS({
@@ -72,6 +73,21 @@ export function registerOrderEvents(io, socket) {
                 //     orderId: order._id,
                 // }),
             ]);
+        })
+    );
+
+    // 🔹 EXTRA CHARGES UPDATED
+
+    socket.on(
+        SOCKET_EVENTS.EXTRA_CHARGES_UPDATED,
+        safeHandler(async ({ orderId, extraCharges, studentId }) => {
+            io.to(`student_${studentId}`).emit(
+                SOCKET_EVENTS.EXTRA_CHARGES_UPDATED,
+                {
+                    orderId,
+                    extraCharges,
+                }
+            );
         })
     );
 }

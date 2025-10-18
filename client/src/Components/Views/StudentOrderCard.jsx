@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { icons } from '../../Assets/icons';
 import { formatTime } from '../../Utils';
+import { SNACK_PLACEHOLDER_IMAGE } from '../../Constants/constants';
 
 export default function StudentOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
-    const { amount, _id, createdAt, status, items, packingCharges } = order;
+    const { amount, _id, createdAt, status, items, extraCharges } = order;
 
     return (
         <div
@@ -26,25 +27,25 @@ export default function StudentOrderCard({ order, reference }) {
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                        {order.status === 'Pending' && (
+                        {status === 'Pending' && (
                             <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700">
                                 Pending
                             </div>
                         )}
 
-                        {order.status === 'Prepared' && (
+                        {status === 'Prepared' && (
                             <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-purple-50 text-purple-700">
                                 Prepared
                             </div>
                         )}
 
-                        {order.status === 'PickedUp' && (
+                        {status === 'PickedUp' && (
                             <div className="fill-green-600 size-4 mr-2">
                                 {icons.checkWithoutCircle}
                             </div>
                         )}
 
-                        {order.status === 'Rejected' && (
+                        {status === 'Rejected' && (
                             <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-red-50 text-red-700">
                                 Rejected
                             </div>
@@ -79,16 +80,16 @@ export default function StudentOrderCard({ order, reference }) {
                             <div
                                 key={item.id}
                                 className={`relative p-3 ${
-                                    (order.status === 'Pending' ||
-                                        order.status === 'Prepared') &&
+                                    (status === 'Pending' ||
+                                        status === 'Prepared') &&
                                     item.pickedUp
                                         ? 'opacity-60 border-none'
                                         : 'border-b-1 border-b-gray-100'
                                 }`}
                             >
                                 {/* ✅ Complete: Show green tick */}
-                                {(order.status === 'Pending' ||
-                                    order.status === 'Prepared') &&
+                                {(status === 'Pending' ||
+                                    status === 'Prepared') &&
                                     item.pickedUp && (
                                         <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
                                             <div className="fill-green-600 size-8 p-1">
@@ -102,7 +103,10 @@ export default function StudentOrderCard({ order, reference }) {
                                         <div className="size-10 bg-gray-50 rounded-lg border-1 border-gray-300 overflow-hidden flex items-center justify-center">
                                             {item.type === 'Snack' ? (
                                                 <img
-                                                    src={item.image}
+                                                    src={
+                                                        item.image ||
+                                                        SNACK_PLACEHOLDER_IMAGE
+                                                    }
                                                     alt={`${item.name} image`}
                                                     className="object-cover size-full"
                                                 />
@@ -113,13 +117,8 @@ export default function StudentOrderCard({ order, reference }) {
                                             )}
                                         </div>
                                         <div className="space-y-[2px] pb-[5px]">
-                                            <h3 className="text-sm font-medium text-gray-800 flex gap-2 items-center">
+                                            <h3 className="text-sm font-medium text-gray-800">
                                                 <span>{item.name}</span>
-                                                {item.isPacked && (
-                                                    <span className="flex items-center gap-1 text-[10px] bg-yellow-50 rounded-full font-medium border-[0.01rem] border-yellow-300 w-fit px-2 text-yellow-600">
-                                                        Pack
-                                                    </span>
-                                                )}
                                             </h3>
                                             <p className="text-gray-600 text-xs">
                                                 Qty: {item.quantity}
@@ -134,7 +133,7 @@ export default function StudentOrderCard({ order, reference }) {
                                             ).toFixed(2)}
                                         </div>
 
-                                        {order.status === 'Pending' &&
+                                        {status === 'Pending' &&
                                             item.prepared &&
                                             !item.pickedUp && (
                                                 <span className="flex items-center gap-1 text-[10px] bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
@@ -162,8 +161,8 @@ export default function StudentOrderCard({ order, reference }) {
                             <span>₹{amount.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-sm text-gray-600 mt-1">
-                            <span>Packing Charges</span>
-                            <span>₹{packingCharges.toFixed(2)}</span>
+                            <span>Extra Charges</span>
+                            <span>₹{extraCharges.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-medium text-gray-900 mt-2">
                             <span>Total</span>

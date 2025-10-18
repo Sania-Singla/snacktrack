@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { PendingOrders, Orders, Button, CalendarFilter } from '../Components';
 import {
     toggleAudio,
@@ -11,6 +11,7 @@ import { useSocketContext, useUserContext } from '../Contexts';
 import { SOCKET_EVENTS } from '../Constants/constants';
 import toast from 'react-hot-toast';
 import { orderService } from '../Services';
+import { icons } from '../Assets/icons';
 
 export default function TodayOrdersPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -26,7 +27,6 @@ export default function TodayOrdersPage() {
     });
     const { socket } = useSocketContext();
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
     const dateFilter = searchParams.get('date') || undefined;
     const [statusFilter, setStatusFilter] = useState(
         searchParams.get('status') || 'Pending'
@@ -64,7 +64,7 @@ export default function TodayOrdersPage() {
                 if (res && !res.message) setStats(res);
                 setLoading(false);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         })();
 
@@ -82,62 +82,50 @@ export default function TodayOrdersPage() {
         if (!socket) return;
 
         async function newOrder(order) {
-            if (user.role === 'contractor') {
-                setPendingOrders((prev) => [...prev, order]);
+            setPendingOrders((prev) => [...prev, order]);
 
-                setStats((prev) => ({
-                    ...prev,
-                    Total: prev.Total + 1,
-                    Pending: prev.Pending + 1,
-                }));
+            setStats((prev) => ({
+                ...prev,
+                Total: prev.Total + 1,
+                Pending: prev.Pending + 1,
+            }));
 
-                await playSound();
-            }
+            await playSound();
         }
 
         function orderPrepared(order) {
-            if (user.role === 'contractor') {
-                setPendingOrders((prev) =>
-                    prev.map((o) =>
-                        o._id === order._id ? { ...o, status: 'Prepared' } : o
-                    )
-                );
-            }
+            setPendingOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'Prepared' } : o
+                )
+            );
         }
 
         function orderPickedUp(order) {
-            if (user.role === 'contractor') {
-                setStats((prev) => ({
-                    ...prev,
-                    Pending: prev.Pending - 1,
-                    PickedUp: prev.PickedUp + 1,
-                }));
+            setStats((prev) => ({
+                ...prev,
+                Pending: prev.Pending - 1,
+                PickedUp: prev.PickedUp + 1,
+            }));
 
-                setPendingOrders((prev) =>
-                    prev.filter((o) => o._id !== order._id)
-                );
+            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
 
-                if (statusFilterRef.current === 'PickedUp') {
-                    setOrders((prev) => [...prev, order]);
-                }
+            if (statusFilterRef.current === 'PickedUp') {
+                setOrders((prev) => [...prev, order]);
             }
         }
 
         function orderRejected(order) {
-            if (user.role === 'contractor') {
-                setStats((prev) => ({
-                    ...prev,
-                    Pending: prev.Pending - 1,
-                    Rejected: prev.Rejected + 1,
-                }));
+            setStats((prev) => ({
+                ...prev,
+                Pending: prev.Pending - 1,
+                Rejected: prev.Rejected + 1,
+            }));
 
-                setPendingOrders((prev) =>
-                    prev.filter((o) => o._id !== order._id)
-                );
+            setPendingOrders((prev) => prev.filter((o) => o._id !== order._id));
 
-                if (statusFilterRef.current === 'Rejected') {
-                    setOrders((prev) => [...prev, order]);
-                }
+            if (statusFilterRef.current === 'Rejected') {
+                setOrders((prev) => [...prev, order]);
             }
         }
 
@@ -197,7 +185,9 @@ export default function TodayOrdersPage() {
                                 );
                             }
                         } catch (error) {
-                            navigate('/server-error');
+                            toast.error(
+                                'Something went wrong. Please try again.'
+                            );
                         }
                     })();
                 }
@@ -238,13 +228,15 @@ export default function TodayOrdersPage() {
                     <CalendarFilter />
                     <div className="relative">
                         <Button
-                            btnText="🔔"
+                            btnText={
+                                <div className="size-5 fill-gray-800">
+                                    {icons.bell}
+                                </div>
+                            }
                             title={
                                 audioEnabled ? 'Disable Audio' : 'Enable Audio'
                             }
-                            className={`bg-[#ffffff] flex items-center justify-center size-8 group rounded-full drop-shadow-sm ${
-                                !audioEnabled ? 'opacity-70' : ''
-                            }`}
+                            className="bg-[#ffffff] flex items-center justify-center size-8 group rounded-full drop-shadow-sm"
                             onClick={() => {
                                 toggleAudio();
                                 audioEnabled
@@ -275,29 +267,10 @@ export default function TodayOrdersPage() {
                         className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-blue-500 rounded-lg shadow-sm border border-gray-100"
                     >
                         <h3 className="font-medium text-gray-800">Pending</h3>
-                        <div className="size-7 rounded-full bg-blue-50 flex items-center justify-center">
-                            <span className="text-blue-600 font-bold">
-                                {stats.Pending}
-                            </span>
-                        </div>
+                        <span className="text-blue-600 font-bold">
+                            {stats.Pending}
+                        </span>
                     </div>
-
-                    {/* Prepared Orders */}
-                    {/* <div
-                        onClick={() => handleStatusClick('Prepared')}
-                        style={{
-                            borderColor:
-                                statusFilter === 'Prepared' ? '#9810fa' : '',
-                        }}
-                        className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-purple-500 rounded-lg shadow-sm border border-gray-100"
-                    >
-                        <h3 className="font-medium text-gray-800">Prepared</h3>
-                        <div className="size-7 rounded-full bg-purple-50 flex items-center justify-center">
-                            <span className="text-purple-600 font-bold">
-                                {stats.Prepared}
-                            </span>
-                        </div>
-                    </div> */}
 
                     {/* Picked Up Orders */}
                     <div
@@ -311,11 +284,9 @@ export default function TodayOrdersPage() {
                         className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-green-500 border rounded-lg shadow-sm border-gray-100"
                     >
                         <h3 className="font-medium text-gray-800">Completed</h3>
-                        <div className="size-7 rounded-full bg-green-50 flex items-center justify-center">
-                            <span className="text-green-600 font-bold">
-                                {stats.PickedUp}
-                            </span>
-                        </div>
+                        <span className="text-green-600 font-bold">
+                            {stats.PickedUp}
+                        </span>
                     </div>
 
                     {/* Rejected Orders */}
@@ -328,11 +299,9 @@ export default function TodayOrdersPage() {
                         className="bg-white p-3 md:p-4 flex justify-between cursor-pointer hover:border-red-500 rounded-lg shadow-sm border border-gray-100"
                     >
                         <h3 className="font-medium text-gray-800">Rejected</h3>
-                        <div className="size-7 rounded-full bg-red-50 flex items-center justify-center">
-                            <span className="text-red-600 font-bold">
-                                {stats.Rejected}
-                            </span>
-                        </div>
+                        <span className="text-red-600 font-bold">
+                            {stats.Rejected}
+                        </span>
                     </div>
                 </div>
             )}

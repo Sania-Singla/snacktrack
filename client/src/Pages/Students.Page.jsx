@@ -10,6 +10,7 @@ import {
 } from '../Contexts';
 import { Button, StudentView } from '../Components';
 import { icons } from '../Assets/icons';
+import toast from 'react-hot-toast';
 
 export default function StudentsPage() {
     const { students, setStudents, studentsInfo, setStudentsInfo } =
@@ -58,7 +59,7 @@ export default function StudentsPage() {
                 }
                 setLoading(false);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         },
         [debouncedSearch, setStudents, setStudentsInfo, setUser, navigate]
@@ -123,7 +124,7 @@ export default function StudentsPage() {
                             </div>
                         </div>
 
-                        <Button
+                        {/* <Button
                             title="Remove all Students"
                             onClick={removeAllStudents}
                             btnText={
@@ -135,7 +136,7 @@ export default function StudentsPage() {
                                 </div>
                             }
                             className="bg-red-600 text-sm shadow-sm hover:bg-red-700 text-white p-2 h-fit rounded-md"
-                        />
+                        /> */}
                     </div>
 
                     <div

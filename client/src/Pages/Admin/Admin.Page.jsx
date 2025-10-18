@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
-import { LOGO } from '../../Constants/constants';
+import { LOGO, USER_PLACEHOLDER_IMAGE } from '../../Constants/constants';
+import toast from 'react-hot-toast';
 
 export default function AdminPage() {
     const [canteens, setCanteens] = useState([]);
@@ -19,7 +20,7 @@ export default function AdminPage() {
                 if (res) setCanteens(res);
                 setLoading(false);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         })();
     }, []);
@@ -46,8 +47,8 @@ export default function AdminPage() {
                         <div>
                             <div className="size-14 rounded-full overflow-hidden">
                                 <img
-                                    src={canteen.contractor.avatar}
-                                    alt={canteen.contractor.fullName}
+                                    src={USER_PLACEHOLDER_IMAGE}
+                                    alt="user placeholder image"
                                     className="size-full object-cover"
                                 />
                             </div>

@@ -49,7 +49,6 @@ const getBills = tryCatch('get bills', async (req, res) => {
                                     userName: 1,
                                     email: 1,
                                     phoneNumber: 1,
-                                    avatar: 1,
                                 },
                             },
                             {

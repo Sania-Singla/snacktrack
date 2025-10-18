@@ -12,6 +12,7 @@ import {
 import { snackService } from '../Services';
 import { checkTokenExpired, paginate } from '../Utils';
 import { useCallback } from 'react';
+import toast from 'react-hot-toast';
 
 export default function HomePage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -71,7 +72,7 @@ export default function HomePage() {
                 }
                 setLoading(false);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         },
         [filter, debouncedSearch, setItems, setItemsInfo, setUser, navigate]
@@ -144,7 +145,7 @@ export default function HomePage() {
 
     return (
         <>
-            <div className="mb-6 w-full flex justify-between">
+            <div className="mb-6 w-full flex justify-between items-center">
                 {user.role === 'contractor' && (
                     <Button
                         onClick={filter === 'snacks' ? addSnack : addItem}
@@ -161,6 +162,12 @@ export default function HomePage() {
                         title={filter === 'snacks' ? 'Add Snack' : 'Add Item'}
                         className="text-white rounded-md px-2 h-7.5 text-nowrap bg-[#4977ec] hover:bg-[#3b62c2]"
                     />
+                )}
+
+                {user.role === 'student' && (
+                    <p className="hidden sm:block italic font-serif text-gray-500 text-nowrap">
+                        Hi {user.fullName} !! What's on your mind today?
+                    </p>
                 )}
 
                 <div className="flex items-center gap-4 w-full place-content-end">
@@ -194,7 +201,7 @@ export default function HomePage() {
             <div className="pb-8">
                 {itemElements.length > 0 && (
                     <div
-                        className={`grid gap-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-5`}
+                        className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
                     >
                         {itemElements}
                     </div>

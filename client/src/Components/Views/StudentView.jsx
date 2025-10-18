@@ -7,8 +7,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 
 export default function StudentView({ student, reference }) {
-    const { _id, avatar, fullName, userName, email, phoneNumber, bills } =
-        student;
+    const { _id, fullName, userName, email, phoneNumber, bills } = student;
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();

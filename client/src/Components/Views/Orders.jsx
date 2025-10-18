@@ -5,6 +5,7 @@ import { orderService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import { ContractorOrderCard } from '..';
 import { useSearchContext, useUserContext } from '../../Contexts';
+import toast from 'react-hot-toast';
 
 export default function Orders({ orders, setOrders }) {
     const [searchParams] = useSearchParams();
@@ -48,7 +49,7 @@ export default function Orders({ orders, setOrders }) {
                 setOrdersInfo(res.ordersInfo);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -104,7 +105,9 @@ export default function Orders({ orders, setOrders }) {
                 </div>
             ) : (
                 orderElements.length === 0 && (
-                    <div className="italic text-gray-600 text-center">No orders found</div>
+                    <div className="italic text-gray-600 text-center">
+                        No orders found
+                    </div>
                 )
             )}
         </div>

@@ -79,7 +79,8 @@ export default function UpdatePassword() {
                 } else checkTokenExpired(res, setUser);
             }
         } catch (err) {
-            navigate('/server-error');
+                       toast.error('Something went wrong. Please try again.');
+
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -97,7 +98,8 @@ export default function UpdatePassword() {
                 toast.success('New password sent to your email');
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+                     toast.error('Something went wrong. Please try again.');
+
         } finally {
             setResetting(false);
         }

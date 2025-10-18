@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import {
     useSideBarContext,
     useUserContext,
@@ -8,13 +8,13 @@ import {
 } from './Contexts';
 import { userService } from './Services';
 import { LOGO } from './Constants/constants';
+import toast from 'react-hot-toast';
 
 export default function App() {
     const [loading, setLoading] = useState(true);
     const { setUser, user } = useUserContext();
     const { setShowSideBar } = useSideBarContext();
     const { setShowPopup } = usePopupContext();
-    const navigate = useNavigate();
     const location = useLocation();
     const { socket } = useSocketContext();
 
@@ -25,7 +25,7 @@ export default function App() {
                 if (res && !res.message) setUser(res);
                 else setUser(null);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             } finally {
                 setLoading(false);
             }

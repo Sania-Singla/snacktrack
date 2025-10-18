@@ -11,6 +11,7 @@ const snackSchema = new Schema(
         image: {
             type: String,
             required: false,
+            default: '',
         },
         name: {
             type: String,

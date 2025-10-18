@@ -31,7 +31,7 @@ export default function Header() {
                 {/* hamburgur menu btn */}
                 <Button
                     btnText={
-                        <div className="size-5 fill-[#434343] hover:fill-[#4977ec]">
+                        <div className="size-5.5 fill-[#434343] hover:fill-[#4977ec]">
                             {icons.hamburgur}
                         </div>
                     }
@@ -101,16 +101,16 @@ export default function Header() {
 
                 <div
                     onClick={() => navigate('/settings')}
-                    className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
+                    className="size-8 bg-[#e96805] text-white rounded-full flex items-center justify-center cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
                 >
-                    <img
-                        src={user.avatar}
-                        alt="user avatar"
-                        className="size-full object-cover"
-                    />
+                    <div>{user.fullName.slice(0, 1).toUpperCase()}</div>
                 </div>
 
-                {user.role === 'student' && <Logout />}
+                {user.role === 'student' && (
+                    <div className="hidden md:block">
+                        <Logout />
+                    </div>
+                )}
             </div>
         </header>
     );

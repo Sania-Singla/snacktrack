@@ -5,6 +5,7 @@ import { BillCard, Button, Filter } from '../Components';
 import { checkTokenExpired, paginate } from '../Utils';
 import { icons } from '../Assets/icons';
 import { usePopupContext, useSearchContext, useUserContext } from '../Contexts';
+import toast from 'react-hot-toast';
 
 export default function BillsPage() {
     const [bills, setBills] = useState([]);
@@ -52,7 +53,7 @@ export default function BillsPage() {
 
                 setLoading(false);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         },
         [filter, setUser, debouncedSearch, navigate]

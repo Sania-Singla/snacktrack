@@ -14,13 +14,27 @@ class ContractorService {
         });
     }
 
-    async registerStudent({ fullName, rollNo, phoneNumber, email }) {
+    async registerStudent({
+        fullName,
+        rollNo,
+        phoneNumber,
+        email,
+        hostelType,
+        hostelNumber,
+    }) {
         return await fetchWrapper({
             endPoint: `/contractors/students`,
             method: 'POST',
             credentials: 'include',
             aim: 'registerStudent',
-            body: { fullName, rollNo, email, phoneNumber },
+            body: {
+                fullName,
+                rollNo,
+                email,
+                hostelType,
+                hostelNumber,
+                phoneNumber,
+            },
         });
     }
 
@@ -43,13 +57,23 @@ class ContractorService {
         });
     }
 
-    async updateStudent(studentId, { fullName, phoneNumber, rollNo, email }) {
+    async updateStudent(
+        studentId,
+        { fullName, phoneNumber, hostelType, hostelNumber, rollNo, email }
+    ) {
         return await fetchWrapper({
             endPoint: `/contractors/students/${studentId}`,
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateStudent',
-            body: { fullName, phoneNumber, rollNo, email },
+            body: {
+                fullName,
+                phoneNumber,
+                hostelType,
+                hostelNumber,
+                rollNo,
+                email,
+            },
         });
     }
 

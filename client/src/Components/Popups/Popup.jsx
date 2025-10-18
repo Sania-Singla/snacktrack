@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 import {
-    UpdateAvatarPopup,
     RemoveStudentPopup,
     EditStudentPopup,
     RemoveItemPopup,
@@ -88,12 +87,6 @@ export default function Popup() {
             return (
                 <Wrapper>
                     <EditItemPopup />
-                </Wrapper>
-            );
-        case 'updateAvatar':
-            return (
-                <Wrapper>
-                    <UpdateAvatarPopup />
                 </Wrapper>
             );
         case 'addSnack':

@@ -2,12 +2,12 @@ import { LIMIT } from '../Constants/constants';
 import { fetchWrapper } from '../Utils';
 
 class OrderService {
-    async placeOrder({ cartItems, amount, packingCharges }) {
+    async placeOrder({ cartItems, amount }) {
         return await fetchWrapper({
             endPoint: `/orders/place`,
             method: 'POST',
             credentials: 'include',
-            body: { cartItems, amount, packingCharges },
+            body: { cartItems, amount },
             aim: 'placeOrder',
         });
     }
@@ -18,6 +18,16 @@ class OrderService {
             method: 'PATCH',
             credentials: 'include',
             aim: 'updateOrderStatus',
+        });
+    }
+
+    async updateExtraCharges({ orderId, extraCharges }) {
+        return await fetchWrapper({
+            endPoint: `/orders/extra-charges/${orderId}`,
+            method: 'PATCH',
+            body: { extraCharges },
+            credentials: 'include',
+            aim: 'updateExtraCharges',
         });
     }
 

@@ -26,7 +26,7 @@ export default function EditStudentPopup() {
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
 
     async function handleChange(e) {
         const { value, name } = e.target;
@@ -62,7 +62,11 @@ export default function EditStudentPopup() {
         try {
             const res = await contractorService.updateStudent(
                 popupInfo.student._id,
-                inputs
+                {
+                    ...inputs,
+                    hostelType: user.hostelType,
+                    hostelNumber: user.hostelNumber,
+                }
             );
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
@@ -86,7 +90,8 @@ export default function EditStudentPopup() {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+                       toast.error('Something went wrong. Please try again.');
+
         } finally {
             setDisabled(false);
             setLoading(false);

@@ -23,7 +23,7 @@ const orderSchema = new Schema(
             type: Number,
             required: true,
         },
-        packingCharges: {
+        extraCharges: {
             type: Number,
             default: 0,
         },
@@ -47,10 +47,6 @@ const orderSchema = new Schema(
                 specialInstructions: {
                     type: String,
                     default: '',
-                },
-                isPacked: {
-                    type: Boolean,
-                    default: false,
                 },
                 price: {
                     type: Number,

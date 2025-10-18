@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import {  useSearchParams } from 'react-router-dom';
 import { checkTokenExpired, paginate } from '../../Utils';
 import { orderService } from '../../Services';
 import { ContractorOrderCard } from '..';
 import { useSearchContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
+import toast from 'react-hot-toast';
 
 export default function PendingOrders({ pendingOrders, setPendingOrders }) {
     const [searchParams] = useSearchParams();
     const [ordersInfo, setOrdersInfo] = useState({});
     const [loading, setLoading] = useState(true);
-    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const { user, setUser } = useUserContext();
     const { search } = useSearchContext();
@@ -48,7 +48,8 @@ export default function PendingOrders({ pendingOrders, setPendingOrders }) {
                 setOrdersInfo(res.ordersInfo);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+                      toast.error('Something went wrong. Please try again.');
+
         } finally {
             setLoading(false);
         }

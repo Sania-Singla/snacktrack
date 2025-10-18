@@ -5,7 +5,6 @@ import {
     useSnackContext,
     useUserContext,
 } from '../../Contexts';
-import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
 import { checkTokenExpired, verifyExpression } from '../../Utils';
 import toast from 'react-hot-toast';
@@ -18,7 +17,6 @@ export default function AddItemPopup() {
     const [disabled, setDisabled] = useState(true);
     const { setShowPopup } = usePopupContext();
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const { setUser } = useUserContext();
 
     async function handleChange(e) {
@@ -61,7 +59,7 @@ export default function AddItemPopup() {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);

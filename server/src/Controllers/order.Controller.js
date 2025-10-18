@@ -39,7 +39,7 @@ const checkAvailability = tryCatch('check availability', async (req, res) => {
 });
 
 const placeOrder = tryCatch('place order', async (req, res) => {
-    const { cartItems, amount, packingCharges } = req.body;
+    const { cartItems, amount } = req.body;
     const student = req.user;
 
     const updatedCartItems = cartItems.map((i) => ({
@@ -48,7 +48,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         price: i.price,
         quantity: i.quantity,
         specialInstructions: i.specialInstructions,
-        isPacked: i.isPacked,
     }));
 
     const packagedItems = cartItems.filter((i) => i.type === 'PackagedFood');
@@ -60,7 +59,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         amount,
         status: allPackaged ? 'Prepared' : 'Pending',
         items: updatedCartItems,
-        packingCharges,
     });
 
     await Promise.all([
@@ -84,7 +82,6 @@ const placeOrder = tryCatch('place order', async (req, res) => {
         studentInfo: {
             fullName: student.fullName,
             phoneNumber: student.phoneNumber,
-            avatar: student.avatar,
             userName: student.userName,
         },
     };
@@ -132,7 +129,6 @@ const updateOrderStatus = tryCatch(
                             $project: {
                                 fullName: 1,
                                 phoneNumber: 1,
-                                avatar: 1,
                                 userName: 1,
                             },
                         },
@@ -182,7 +178,7 @@ const updateOrderStatus = tryCatch(
                 $group: {
                     _id: '$_id',
                     amount: { $first: '$amount' },
-                    packingCharges: { $first: '$packingCharges' },
+                    extraCharges: { $first: '$extraCharges' },
                     status: { $first: '$status' },
                     canteenId: { $first: '$canteenId' },
                     studentId: { $first: '$studentId' },
@@ -229,6 +225,34 @@ const updateOrderStatus = tryCatch(
             message: 'order status updated successfully',
             order: completeOrder,
         });
+    }
+);
+
+const updateExtraCharges = tryCatch(
+    'update order status',
+    async (req, res, next) => {
+        const { orderId } = req.params;
+        const { extraCharges } = req.body;
+        const contractor = req.user;
+
+        const order = await Order.findOne({
+            _id: new Types.ObjectId(orderId),
+            canteenId: new Types.ObjectId(contractor.canteenId),
+        });
+
+        if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
+        else if (order.status !== 'Pending') {
+            return next(
+                new ErrorHandler('cannot update extra charges now', FORBIDDEN)
+            );
+        }
+
+        order.extraCharges = extraCharges;
+        await order.save();
+
+        return res
+            .status(OK)
+            .json({ message: 'extra charges updated successfully' });
     }
 );
 
@@ -339,7 +363,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                 $group: {
                     _id: '$_id',
                     amount: { $first: '$amount' },
-                    packingCharges: { $first: '$packingCharges' },
+                    extraCharges: { $first: '$extraCharges' },
                     status: { $first: '$status' },
                     canteenId: { $first: '$canteenId' },
                     studentId: { $first: '$studentId' },
@@ -433,7 +457,6 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                             $project: {
                                 fullName: 1,
                                 phoneNumber: 1,
-                                avatar: 1,
                                 userName: 1,
                             },
                         },
@@ -531,7 +554,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 $group: {
                     _id: '$_id',
                     amount: { $first: '$amount' },
-                    packingCharges: { $first: '$packingCharges' },
+                    extraCharges: { $first: '$extraCharges' },
                     status: { $first: '$status' },
                     canteenId: { $first: '$canteenId' },
                     studentId: { $first: '$studentId' },
@@ -646,4 +669,5 @@ export {
     updateOrderStatus,
     getCanteenOrders,
     checkAvailability,
+    updateExtraCharges,
 };

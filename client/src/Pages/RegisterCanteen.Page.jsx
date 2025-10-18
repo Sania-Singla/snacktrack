@@ -94,7 +94,7 @@ export default function RegisterCanteenPage() {
                         })),
                     ]);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         })();
 
@@ -137,7 +137,7 @@ export default function RegisterCanteenPage() {
                 setError((prev) => ({ ...prev, root: res.message }));
             }
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setIsVerified(false);
             setInputs(initialInputs);

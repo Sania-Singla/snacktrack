@@ -24,7 +24,7 @@ export async function fetchWrapper({
         const res = await fetch(BASE_BACKEND_URL + endPoint, options);
 
         const data = await res.json();
-        // console.log(data);
+        console.log(data);
 
         if (res.status === SERVER_ERROR) throw new Error(data.message);
         else return data;

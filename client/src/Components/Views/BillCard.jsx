@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function BillCard({ bill, reference }) {
     const { _id, month, year, amount, studentInfo } = bill;
-    const { avatar, fullName, userName, email, phoneNumber } = studentInfo;
+    const { fullName, userName, email, phoneNumber } = studentInfo;
     const navigate = useNavigate();
 
     return (

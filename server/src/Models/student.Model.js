@@ -34,10 +34,6 @@ const studentSchema = new Schema(
             unique: true,
             trim: true,
         },
-        avatar: {
-            type: String,
-            required: false,
-        },
         password: {
             type: String,
             required: true,

@@ -74,7 +74,8 @@ export default function LoginPage() {
                     ]);
                 }
             } catch (err) {
-                navigate('/server-error');
+                           toast.error('Something went wrong. Please try again.');
+
             }
         })();
 
@@ -105,7 +106,8 @@ export default function LoginPage() {
                 navigate('/');
             } else toast.error(res.message);
         } catch (err) {
-            navigate('/server-error');
+                       toast.error('Something went wrong. Please try again.');
+
         } finally {
             setDisabled(false);
             setLoading(false);

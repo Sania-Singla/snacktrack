@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { adminService } from '../../Services';
-import { useNavigate } from 'react-router-dom';
 import { verifyExpression } from '../../Utils';
 import { Button, InputField } from '..';
 import { usePopupContext } from '../../Contexts';
@@ -14,7 +13,6 @@ export default function EditContractorPopup() {
     const { setPopupInfo, setShowPopup, popupInfo } = usePopupContext();
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const [inputs, setInputs] = useState({
         fullName: popupInfo.contractor?.fullName,
         phoneNumber: popupInfo.contractor?.phoneNumber,
@@ -119,7 +117,7 @@ export default function EditContractorPopup() {
                 toast.success('Contractor Updated Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);

@@ -9,6 +9,7 @@ import {
     updateOrderStatus,
     checkAvailability,
     getOrderStats,
+    updateExtraCharges,
 } from '../Controllers/order.Controller.js';
 
 orderRouter.use(verifyJwt);
@@ -24,3 +25,5 @@ orderRouter.route('/canteen/:canteenId').get(getCanteenOrders);
 orderRouter.route('/stats/:canteenId').get(getOrderStats);
 
 orderRouter.route('/:orderId').patch(updateOrderStatus);
+
+orderRouter.route('/extra-charges/:orderId').patch(updateExtraCharges);

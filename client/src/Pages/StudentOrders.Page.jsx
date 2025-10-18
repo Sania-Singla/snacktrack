@@ -15,6 +15,7 @@ import {
 } from '../Components';
 import { paginate, checkTokenExpired } from '../Utils';
 import { SOCKET_EVENTS } from '../Constants/constants';
+import toast from 'react-hot-toast';
 
 export default function StudentOrdersPage() {
     const [studentOrders, setStudentOrders] = useState([]);
@@ -62,7 +63,7 @@ export default function StudentOrdersPage() {
                 setOrdersInfo(res.ordersInfo);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setLoading(false);
         }
@@ -96,24 +97,39 @@ export default function StudentOrdersPage() {
         if (!socket) return;
 
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, (order) => {
-            if (order.studentId === studentId) {
-                setStudentOrders((prev) =>
-                    prev.map((o) =>
-                        o._id === order._id ? { ...o, status: 'Rejected' } : o
-                    )
-                );
-            }
+            setStudentOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'Rejected' } : o
+                )
+            );
         });
 
         socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, (order) => {
-            if (order.studentId === studentId) {
+            setStudentOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'PickedUp' } : o
+                )
+            );
+        });
+
+        socket.on(SOCKET_EVENTS.ORDER_PREPARED, (order) => {
+            setStudentOrders((prev) =>
+                prev.map((o) =>
+                    o._id === order._id ? { ...o, status: 'Prepared' } : o
+                )
+            );
+        });
+
+        socket.on(
+            SOCKET_EVENTS.EXTRA_CHARGES_UPDATED,
+            ({ orderId, extraCharges }) => {
                 setStudentOrders((prev) =>
                     prev.map((o) =>
-                        o._id === order._id ? { ...o, status: 'PickedUp' } : o
+                        o._id === orderId ? { ...o, extraCharges } : o
                     )
                 );
             }
-        });
+        );
 
         socket.on(
             SOCKET_EVENTS.ITEM_PREPARED,

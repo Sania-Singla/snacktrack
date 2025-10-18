@@ -21,7 +21,8 @@ export default function Logout() {
                 localStorage.removeItem('cartItems');
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+                        toast.error('Something went wrong. Please try again.');
+
         } finally {
             setLoading(false);
         }

@@ -8,12 +8,11 @@ export default function EditCartItem() {
     const item = popupInfo.item;
     const { cartItems, setCartItems } = useStudentContext();
     const [input, setInput] = useState(item.specialInstructions || '');
-    const [pack, setPack] = useState(item.isPacked || false);
 
     function handleEdit() {
         const updatedCartItems = cartItems.map((i) => {
             if (i._id === item._id) {
-                return { ...i, specialInstructions: input, isPacked: pack };
+                return { ...i, specialInstructions: input };
             } else return i;
         });
         setCartItems(updatedCartItems);
@@ -45,36 +44,20 @@ export default function EditCartItem() {
                         onChange={(e) => setInput(e.target.value)}
                         className="w-full border-[0.01rem] border-gray-300 rounded-md text-sm p-2"
                         rows={3}
-                        placeholder="E.g. No onions, extra spicy, etc."
+                        placeholder="E.g. Pack 1 pc, No onions etc."
                     />
                 </div>
             )}
 
-            <div className="flex items-center mb-3 w-full">
-                <input
-                    type="checkbox"
-                    id="packItem"
-                    checked={pack}
-                    onChange={(e) => setPack(e.target.checked)}
-                    className="size-[15px] text-[#4977ec] focus:ring-[#4977ec] border-gray-300 rounded"
-                />
-                <label
-                    htmlFor="packItem"
-                    className="ml-2 text-sm text-gray-700"
-                >
-                    Pack this item
-                </label>
-            </div>
-
             <div className="flex items-center gap-4 w-full">
                 <Button
-                    className="bg-gray-200 text-gray-800 w-full px-4 py-2 rounded-md"
+                    className="bg-gray-200 text-gray-800 w-full py-1.5 rounded-md"
                     btnText="Cancel"
                     onClick={() => setShowPopup(false)}
                 />
                 <Button
-                    className="bg-[#4977ec] text-white w-full px-4 py-2 rounded-md"
-                    btnText="Save Changes"
+                    className="bg-[#4977ec] text-white w-full py-1.5 rounded-md"
+                    btnText="Save"
                     onClick={handleEdit}
                 />
             </div>

@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import {
-    PER_ITEM_PACKAGING_CHARGES,
-    SOCKET_EVENTS,
-    TAX,
-} from '../Constants/constants';
+import { SOCKET_EVENTS, TAX } from '../Constants/constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
@@ -15,6 +11,7 @@ import {
     useUserContext,
 } from '../Contexts';
 import { checkTokenExpired } from '../Utils';
+import toast from 'react-hot-toast';
 
 export default function CartPage() {
     const [ordering, setOrdering] = useState(false);
@@ -39,7 +36,7 @@ export default function CartPage() {
                 return updatedCartItems;
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         }
     }
 
@@ -56,15 +53,9 @@ export default function CartPage() {
         (acc, item) => acc + item.price * item.quantity,
         0
     );
-    const packingCharges = cartItems.reduce(
-        (acc, item) =>
-            acc +
-            (item.isPacked ? PER_ITEM_PACKAGING_CHARGES * item.quantity : 0),
-        0
-    );
 
-    const tax = (subtotal + packingCharges) * TAX; // tax on subtotal + packing
-    const total = subtotal + packingCharges + tax;
+    const tax = subtotal * (TAX / 100);
+    const total = subtotal + tax;
 
     function updateQuantity(item, newQuantity) {
         const { _id } = item;
@@ -96,7 +87,6 @@ export default function CartPage() {
             const res = await orderService.placeOrder({
                 cartItems,
                 amount: total,
-                packingCharges,
             });
             if (res && !res.message) {
                 localStorage.removeItem('cartItems');
@@ -110,7 +100,7 @@ export default function CartPage() {
             } else checkTokenExpired(res, setUser);
             setOrdering(false);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         }
     }
 
@@ -127,7 +117,6 @@ export default function CartPage() {
             type,
             image,
             quantity,
-            isPacked,
             isAvailable,
             specialInstructions,
         } = item;
@@ -169,13 +158,8 @@ export default function CartPage() {
                         </div>
                         {/* info */}
                         <div className="space-y-[2px]">
-                            <h3 className="font-medium text-gray-900 flex gap-2 items-center">
-                                <span>{name}</span>
-                                {isPacked && (
-                                    <span className="flex items-center gap-1 text-[10px] bg-yellow-50 rounded-full font-medium border-[0.01rem] border-yellow-300 w-fit px-2 text-yellow-600">
-                                        Pack
-                                    </span>
-                                )}
+                            <h3 className="font-medium text-gray-900">
+                                {name}
                             </h3>
                             {specialInstructions && (
                                 <p className="text-xs text-red-600 italic">
@@ -279,21 +263,16 @@ export default function CartPage() {
                         Order Summary
                     </h2>
                     <div className="space-y-4">
-                        <div className="flex justify-between">
-                            <p className="text-gray-600">Subtotal</p>
-                            <p className="text-gray-900">
-                                ₹{subtotal.toFixed(2)}
-                            </p>
+                        <div className="flex justify-between text-gray-800">
+                            <p>Subtotal</p>
+                            <p>₹{subtotal.toFixed(2)}</p>
                         </div>
-                        <div className="flex justify-between">
-                            <p className="text-gray-600">Packing Charges</p>
-                            <p className="text-gray-900">
-                                ₹{packingCharges.toFixed(2)}
+                        <div className="text-center italic text-sm border-1 rounded-md p-2 border-red-300 text-red-900">
+                            <p className="flex-1">
+                                <span className="font-medium">Note - </span>
+                                Extra charges may apply based on special
+                                instructions.
                             </p>
-                        </div>
-                        <div className="flex justify-between">
-                            <p className="text-gray-600">Tax (5%)</p>
-                            <p className="text-gray-900">₹{tax.toFixed(2)}</p>
                         </div>
                         <div className="border-t border-gray-200 pt-4">
                             <div className="flex justify-between">

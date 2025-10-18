@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useSideBarContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { Button, Logout } from '..';
@@ -6,7 +6,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useRef } from 'react';
 
 export default function Sidebar() {
-    const navigate = useNavigate();
     const { user } = useUserContext();
     const { showSideBar, setShowSideBar } = useSideBarContext();
     const items = [
@@ -25,7 +24,7 @@ export default function Sidebar() {
         },
         {
             path: '/today-orders',
-            name: "Today's Orders",
+            name: 'Orders',
             icon: icons.clock,
             show: user.role === 'contractor',
         },
@@ -135,7 +134,7 @@ export default function Sidebar() {
                             <div className="h-[60px] sm:px-5 px-3 gap-5 w-full flex items-center justify-between">
                                 <Button
                                     btnText={
-                                        <div className="size-5 fill-[#434343] hover:fill-[#4977ec]">
+                                        <div className="size-5.5 fill-[#434343] hover:fill-[#4977ec]">
                                             {icons.hamburgur}
                                         </div>
                                     }
@@ -145,20 +144,7 @@ export default function Sidebar() {
                                     title="Close Sidebar"
                                 />
 
-                                {user.role === 'student' ? (
-                                    <div
-                                        onClick={() => navigate('/settings')}
-                                        className="size-8 rounded-full cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
-                                    >
-                                        <img
-                                            src={user.avatar}
-                                            alt="user avatar"
-                                            className="size-full object-cover"
-                                        />
-                                    </div>
-                                ) : (
-                                    <Logout />
-                                )}
+                                <Logout />
                             </div>
 
                             <hr className="w-full border-gray-200" />

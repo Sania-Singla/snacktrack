@@ -5,6 +5,7 @@ import { StudentBillCard } from '../Components';
 import { useUserContext } from '../Contexts';
 import { icons } from '../Assets/icons';
 import { checkTokenExpired } from '../Utils';
+import toast from 'react-hot-toast';
 
 export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
@@ -29,7 +30,7 @@ export default function StudentBillsPage() {
                 } else checkTokenExpired(res, setUser);
                 setLoading(false);
             } catch (err) {
-                navigate('/server-error');
+                toast.error('Something went wrong. Please try again.');
             }
         })();
 

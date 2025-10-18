@@ -1,11 +1,4 @@
-import {
-    OK,
-    BAD_REQUEST,
-    NOT_FOUND,
-    CREATED,
-    USER_PLACEHOLDER_IMAGE_URL,
-    SNACK_PLACEHOLDER_IMAGE_URL,
-} from '../Constants/index.js';
+import { OK, BAD_REQUEST, NOT_FOUND, CREATED } from '../Constants/index.js';
 import bcrypt from 'bcryptjs';
 import {
     verifyExpression,
@@ -15,13 +8,7 @@ import {
 } from '../Utils/index.js';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../Helpers/index.js';
 import { nanoid } from 'nanoid';
-import {
-    Canteen,
-    Snack,
-    Student,
-    PackagedFood,
-    Order,
-} from '../Models/index.js';
+import { Snack, Student, PackagedFood, Order, Bill } from '../Models/index.js';
 import { Types } from 'mongoose';
 import fs from 'fs';
 
@@ -112,9 +99,23 @@ const registerStudent = tryCatch(
     'register as student',
     async (req, res, next) => {
         const contractor = req.user; // only contractor can register a student
-        const { fullName, rollNo, phoneNumber, email } = req.body;
+        const {
+            fullName,
+            rollNo,
+            phoneNumber,
+            email,
+            hostelType,
+            hostelNumber,
+        } = req.body;
 
-        if (!fullName || !email || !phoneNumber || !rollNo) {
+        if (
+            !fullName ||
+            !email ||
+            !phoneNumber ||
+            !rollNo ||
+            !hostelType ||
+            !hostelNumber
+        ) {
             return next(new ErrorHandler('Missing fields', BAD_REQUEST));
         }
 
@@ -125,17 +126,7 @@ const registerStudent = tryCatch(
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
 
-        const canteen = await Canteen.findById(contractor.canteenId);
-        if (!canteen) {
-            return next(new ErrorHandler('Canteen not found', NOT_FOUND));
-        }
-
-        const userName = (
-            canteen.hostelType +
-            canteen.hostelNumber +
-            '-' +
-            rollNo
-        ).trim();
+        const userName = (hostelType + hostelNumber + '-' + rollNo).trim();
 
         const existingStudent = await Student.findOne({
             $or: [
@@ -158,7 +149,6 @@ const registerStudent = tryCatch(
             phoneNumber,
             email,
             password: randomPassword,
-            avatar: USER_PLACEHOLDER_IMAGE_URL,
         });
 
         // send this password on student's email
@@ -166,7 +156,7 @@ const registerStudent = tryCatch(
             receiverName: student.fullName,
             receiverMail: student.email,
             subject: 'Welcome to SnackTrack',
-            html: `Hello ${student.fullName}, <br> Your temporary password is <b>${randomPassword}</b> <br> You can update it anytime after logging in from settings.`,
+            html: `Hello ${student.fullName}, <br> Your temporary password is <b>${randomPassword}</b> <br> You can update it anytime from settings.`,
         });
 
         return res.status(CREATED).json(student);
@@ -179,23 +169,33 @@ const removeStudent = tryCatch(
         const { studentId } = req.params;
         const contractor = req.user;
 
+        // check if bills are pending
+        const pendingBill = await Bill.findOne({
+            studentId: new Types.ObjectId(studentId),
+            paid: false,
+        });
+
+        if (pendingBill) {
+            return next(
+                new ErrorHandler('student has pending bills', BAD_REQUEST)
+            );
+        }
+
         // a contractor can remove the student only if the student belongs to his canteen
         const [student] = await Promise.all([
             Student.findOneAndDelete({
                 _id: new Types.ObjectId(studentId),
                 canteenId: new Types.ObjectId(contractor.canteenId),
             }),
-            // ! 🤔 DO WE NEED TO CASCADE ?
-            // Order.deleteMany({
-            //     studentId: new Types.ObjectId(studentId),
-            // }),
+            Order.deleteMany({
+                studentId: new Types.ObjectId(studentId),
+            }),
+            Bill.deleteMany({
+                studentId: new Types.ObjectId(studentId),
+            }),
         ]);
         if (!student) {
             return next(new ErrorHandler('student not found', NOT_FOUND));
-        }
-
-        if (student.avatar !== USER_PLACEHOLDER_IMAGE_URL) {
-            await deleteFromCloudinary(student.avatar);
         }
 
         return res.status(OK).json({ message: 'account deleted successfully' });
@@ -207,23 +207,26 @@ const updateStudent = tryCatch(
     async (req, res, next) => {
         const contractor = req.user;
         const { studentId } = req.params;
-        const { fullName, phoneNumber, email, rollNo } = req.body;
+        const {
+            fullName,
+            phoneNumber,
+            email,
+            rollNo,
+            hostelNumber,
+            hostelType,
+        } = req.body;
 
-        const [student, canteen] = await Promise.all([
-            Student.findOne({
-                _id: new Types.ObjectId(studentId),
-                canteenId: new Types.ObjectId(contractor.canteenId),
-            }),
-            Canteen.findById(contractor.canteenId),
-        ]);
+        const student = await Student.findOne({
+            _id: new Types.ObjectId(studentId),
+            canteenId: new Types.ObjectId(contractor.canteenId),
+        });
 
         if (!student) {
             return next(new ErrorHandler('student not found', NOT_FOUND));
         }
 
         let alreadyExists = null;
-        const newUserName =
-            canteen.hostelType + canteen.hostelNumber + '-' + rollNo;
+        const newUserName = hostelType + hostelNumber + '-' + rollNo;
 
         if (student.userName !== newUserName) {
             alreadyExists = await Student.findOne({ userName: newUserName });
@@ -251,6 +254,7 @@ const updateStudent = tryCatch(
     }
 );
 
+// ! CRITICAL
 const removeAllStudents = tryCatch(
     'remove all students',
     async (req, res, next) => {
@@ -272,7 +276,11 @@ const removeAllStudents = tryCatch(
             Order.deleteMany({
                 cateenId: new Types.ObjectId(contractor.canteenId),
             }),
+            Bill.deleteMany({
+                canteenId: new Types.ObjectId(contractor.canteenId),
+            }),
         ]);
+
         return res
             .status(OK)
             .json({ message: 'all students removed successfully' });
@@ -286,7 +294,7 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
     try {
         const contractor = req.user;
         const { name, price } = req.body;
-        let image = req.file?.path;
+        let image = req.file?.path || '';
 
         if (!name || !price) {
             if (image) fs.unlinkSync(image);
@@ -299,7 +307,7 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
         if (alreadyExists) {
-            if (image) await deleteFromCloudinary(image);
+            if (image) fs.unlinkSync(image);
             return next(new ErrorHandler('snack already exists', BAD_REQUEST));
         }
 
@@ -313,7 +321,7 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
             canteenId: contractor.canteenId,
             name,
             price,
-            image: image || SNACK_PLACEHOLDER_IMAGE_URL,
+            image,
         });
         return res.status(CREATED).json(snack);
     } catch (err) {
@@ -331,10 +339,10 @@ const deleteSnack = tryCatch('delete post', async (req, res, next) => {
         _id: new Types.ObjectId(snackId),
         canteenId: new Types.ObjectId(contractor.canteenId),
     });
+
     if (!snack) return next(new ErrorHandler('snack not found', NOT_FOUND));
-    if (snack.image !== SNACK_PLACEHOLDER_IMAGE_URL) {
-        await deleteFromCloudinary(snack.image);
-    }
+    if (snack.image) await deleteFromCloudinary(snack.image);
+
     return res.status(OK).json({ message: 'snack deleted successfully' });
 });
 
@@ -351,29 +359,19 @@ const updateSnack = tryCatch('update snack', async (req, res, next) => {
         }
 
         const snack = await Snack.findOne({
-            _id: new Types.ObjectId(snackId),
+            name: { $regex: new RegExp(`^${name}$`, 'i') },
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
-        if (!snack) {
-            if (image) fs.unlinkSync(image);
-            return next(new ErrorHandler('snack not found', NOT_FOUND));
-        }
 
-        if (snack.name.toLowerCase() !== name.toLowerCase()) {
-            const alreadyExists = await Snack.findOne({
-                // case insensitive
-                name: { $regex: new RegExp(`^${name}$`, 'i') },
-            });
-            if (alreadyExists) {
-                return next(
-                    new ErrorHandler('snack already exists', BAD_REQUEST)
-                );
-            }
+        if (snack && snack._id.toString() !== snackId) {
+            if (image) fs.unlinkSync(image);
+            return next(new ErrorHandler('snack already exists', BAD_REQUEST));
         }
 
         if (image) {
             imageURL = (await uploadOnCloudinary(image))?.secure_url;
         }
+
         snack.image = imageURL || snack.image;
         snack.name = name.trim() || snack.name;
         snack.price = price || snack.price;
@@ -460,24 +458,17 @@ const updateItem = tryCatch('update item', async (req, res, next) => {
     }
 
     const item = await PackagedFood.findOne({
-        _id: new Types.ObjectId(itemId),
+        name: { $regex: new RegExp(`^${name}$`, 'i') },
         canteenId: new Types.ObjectId(contractor.canteenId),
     });
-    if (!item) return next(new ErrorHandler('item not found', NOT_FOUND));
-
-    if (item.name.toLowerCase() !== name.toLowerCase()) {
-        const existingItem = await PackagedFood.findOne({
-            canteenId: new Types.ObjectId(contractor.canteenId),
-            name: { $regex: new RegExp(`^${name}$`, 'i') },
-        });
-
-        if (existingItem) {
-            return next(new ErrorHandler('name already exists', BAD_REQUEST));
-        }
+    if (item && item._id.toString() !== itemId) {
+        return next(new ErrorHandler('Item already exists', BAD_REQUEST));
     }
+
     item.name = name.trim() || item.name;
     item.price = price || item.price;
     await item.save();
+
     return res.status(OK).json(item);
 });
 

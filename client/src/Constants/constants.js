@@ -15,8 +15,7 @@ export const MAX_FILE_SIZE = 5;
 export const LIMIT = 20; // Pagination limit
 export const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 export const SERVER_ERROR = 500;
-export const PER_ITEM_PACKAGING_CHARGES = 0; // ex: 0.5 rupees
-export const TAX = 0; // ex: 0.05 for 5% tax on total amount
+export const TAX = 0; // ex: 5 for 5% tax on total amount
 export const CONTRIBUTORS = [
     {
         image: SANIAIMAGE,
@@ -39,6 +38,7 @@ export const SOCKET_EVENTS = {
     ORDER_REJECTED: 'orderRejected',
     ORDER_PREPARED: 'orderPrepared',
     ORDER_PICKEDUP: 'orderPickedUp',
+    EXTRA_CHARGES_UPDATED: 'extraChargesUpdated',
 };
 
 export {

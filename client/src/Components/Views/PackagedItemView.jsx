@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { contractorService } from '../../Services';
 import { useNavigate } from 'react-router-dom';
 import { checkTokenExpired } from '../../Utils';
+import toast from 'react-hot-toast';
 
 export default function PackagedItemView({ item, reference }) {
     const { _id, name, isAvailable, price } = item;
@@ -34,7 +35,7 @@ export default function PackagedItemView({ item, reference }) {
                 );
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+            toast.error('Something went wrong. Please try again.');
         }
     }
 
@@ -56,7 +57,6 @@ export default function PackagedItemView({ item, reference }) {
             ...item,
             type: 'PackagedFood',
             quantity: 1,
-            isPacked: false,
         };
         localStorage.setItem(
             'cartItems',
@@ -87,9 +87,9 @@ export default function PackagedItemView({ item, reference }) {
             className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} shadow-sm relative bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
         >
             {/* Content */}
-            <div className="flex flex-col justify-between gap-4.5 h-full w-full py-2.5 px-3.5">
+            <div className="flex flex-col justify-between gap-4 h-full w-full py-2.5 px-3.5">
                 <div className="flex justify-between md:text-lg items-center">
-                    <p className="font-medium text-gray-900 w-[70%]">{name}</p>
+                    <p className="font-medium text-gray-900 w-full">{name}</p>
                     <p>Rs. {price}</p>
                 </div>
 

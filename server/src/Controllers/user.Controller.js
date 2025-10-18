@@ -3,7 +3,6 @@ import {
     COOKIE_OPTIONS,
     NOT_FOUND,
     BAD_REQUEST,
-    USER_PLACEHOLDER_IMAGE_URL,
 } from '../Constants/index.js';
 import {
     tryCatch,
@@ -11,11 +10,7 @@ import {
     ErrorHandler,
     sendMail,
 } from '../Utils/index.js';
-import {
-    generateTokens,
-    uploadOnCloudinary,
-    deleteFromCloudinary,
-} from '../Helpers/index.js';
+import { generateTokens } from '../Helpers/index.js';
 import { Canteen, Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
@@ -156,37 +151,6 @@ const resetPassword = tryCatch('reset password', async (req, res, next) => {
     return res.status(OK).json({ message: 'new password sent to email' });
 });
 
-const updateAvatar = tryCatch('update avatar', async (req, res, next) => {
-    let avatarURL;
-    try {
-        const { _id, avatar, role } = req.user;
-        if (!req.file) {
-            return next(new ErrorHandler('missing avatar', BAD_REQUEST));
-        }
-
-        // upload new avatar on cloudinary
-        avatarURL = (await uploadOnCloudinary(req.file.path))?.secure_url;
-
-        // update user avatar
-        const Model = role === 'contractor' ? Contractor : Student;
-        const updatedUser = await Model.findByIdAndUpdate(
-            _id,
-            { $set: { avatar: avatarURL } },
-            { new: true }
-        );
-
-        // delete old avatar
-        if (updatedUser && avatar !== USER_PLACEHOLDER_IMAGE_URL) {
-            await deleteFromCloudinary(avatar);
-        }
-
-        return res.status(OK).json({ newAvatar: updatedUser.avatar });
-    } catch (err) {
-        if (avatarURL) await deleteFromCloudinary(avatarURL);
-        throw err;
-    }
-});
-
 const updateAccountDetails = tryCatch(
     'update account details',
     async (req, res, next) => {
@@ -217,17 +181,23 @@ const updateAccountDetails = tryCatch(
 
         const Model = role === 'contractor' ? Contractor : Student;
 
-        // update or keep prev details if empty
-        await Model.findByIdAndUpdate(
-            _id,
-            {
-                $set: {
-                    email,
-                    phoneNumber,
-                },
-            },
-            { new: true }
-        );
+        // check for existing email or phone number
+        const user = await Model.findOne({
+            $or: [{ email }, { phoneNumber }],
+        });
+
+        if (user && user._id.toString() !== _id) {
+            return next(
+                new ErrorHandler(
+                    'email or phone number already in use',
+                    BAD_REQUEST
+                )
+            );
+        }
+
+        user.email = email;
+        user.phoneNumber = phoneNumber;
+        await user.save();
 
         return res
             .status(OK)
@@ -245,7 +215,6 @@ export {
     login,
     logout,
     updatePassword,
-    updateAvatar,
     updateAccountDetails,
     getCanteens,
     resetPassword,

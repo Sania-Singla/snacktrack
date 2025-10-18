@@ -70,7 +70,8 @@ export default function AddItemPopup() {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-            navigate('/server-error');
+                        toast.error('Something went wrong. Please try again.');
+
         } finally {
             setDisabled(false);
             setLoading(false);

@@ -116,7 +116,8 @@ export default function NewContractorPopup() {
                 toast.success('Contractor chnaged Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
-            navigate('/server-error');
+                        toast.error('Something went wrong. Please try again.');
+
         } finally {
             setDisabled(false);
             setLoading(false);

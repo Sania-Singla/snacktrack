@@ -1,8 +1,7 @@
 import express from 'express';
 export const userRouter = express.Router();
-import { verifyJwt, upload } from '../Middlewares/index.js';
+import { verifyJwt } from '../Middlewares/index.js';
 import {
-    updateAvatar,
     updatePassword,
     getCurrentUser,
     logout,
@@ -24,8 +23,6 @@ userRouter.route('/account').patch(updateAccountDetails);
 userRouter.route('/password').patch(updatePassword);
 
 userRouter.route('/reset-password').patch(resetPassword);
-
-userRouter.route('/avatar').patch(upload.single('avatar'), updateAvatar);
 
 userRouter.route('/logout').patch(logout);
 
