@@ -2,21 +2,19 @@ import { Button } from '..';
 import { icons } from '../../Assets/icons';
 import {
     usePopupContext,
-    useSnackContext,
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
 import { contractorService } from '../../Services';
 import { useEffect, useState } from 'react';
 import { checkTokenExpired } from '../../Utils';
-import { SNACK_PLACEHOLDER_IMAGE } from '../../Constants/constants';
+import { SNACK_PLACEHOLDER_IMAGE } from '../../Constants';
 import toast from 'react-hot-toast';
 
 export default function SnackView({ snack, reference }) {
     const { _id, image, name, isAvailable, price } = snack;
     const [quantityInCart, setQuantityInCart] = useState(snack.quantity);
     const { user, setUser } = useUserContext();
-    const { setItems } = useSnackContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
 
@@ -27,11 +25,9 @@ export default function SnackView({ snack, reference }) {
                 res &&
                 res.message === 'snack availability toggled successfully'
             ) {
-                setItems((prev) =>
-                    prev.map((s) =>
-                        s._id === _id ? { ...s, isAvailable: !isAvailable } : s
-                    )
-                );
+                toast.success('Snack Availability Toggled');
+            } else if (res && res.message !== 'tokens missing') {
+                toast.error(res?.message);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
             toast.error('Something went wrong. Please try again.');
@@ -98,7 +94,7 @@ export default function SnackView({ snack, reference }) {
                 <div className="flex flex-1 flex-col justify-between">
                     <div className="flex justify-between gap-4 items-center">
                         <div className="flex gap-1 items-center">
-                            <p className="font-semibold text-xl text-gray-900">
+                            <p className="font-semibold text-lg text-gray-900">
                                 {name}
                             </p>
 
@@ -172,7 +168,7 @@ export default function SnackView({ snack, reference }) {
                                         </div>
                                     }
                                     onClick={addToCart}
-                                    className="rounded-md size-8 sm:size-9 flex self-end items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
+                                    className="rounded-md size-8 flex self-end items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
                                 />
                             ))}
 

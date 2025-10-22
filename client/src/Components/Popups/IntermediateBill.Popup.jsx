@@ -26,8 +26,7 @@ export default function IntermediateBillPopup() {
                 toast.error(res.message);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-                        toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -47,7 +46,7 @@ export default function IntermediateBillPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-bold">Generate Intermediate Bill</p>
+            <p className="text-2xl font-semibold">Intermediate Bill</p>
 
             <div className="space-x-[5px] px-3 py-[3px] mt-3 text-sm font-bold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                 <span>

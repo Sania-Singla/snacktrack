@@ -1,11 +1,6 @@
 import { Button } from '..';
-import {
-    usePopupContext,
-    useSnackContext,
-    useUserContext,
-} from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
-import { useNavigate } from 'react-router-dom';
 import { contractorService } from '../../Services';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -14,8 +9,6 @@ import { checkTokenExpired } from '../../Utils';
 export default function RemoveSnackPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
-    const { setItems } = useSnackContext();
-    const navigate = useNavigate();
     const [check, setCheck] = useState(false);
     const [disabled, setDisabled] = useState(true);
     const { setUser } = useUserContext();
@@ -32,16 +25,12 @@ export default function RemoveSnackPopup() {
                 popupInfo.snack._id
             );
             if (res && res.message === 'snack deleted successfully') {
-                setItems((prev) =>
-                    prev.filter((snack) => snack._id !== popupInfo.snack._id)
-                );
                 toast.success('Snack Deleted Successfully 😕');
             } else if (res && res.message !== 'tokens missing') {
                 toast.error(res?.message);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-                      toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -63,7 +52,9 @@ export default function RemoveSnackPopup() {
             />
 
             <div className="flex flex-col gap-3">
-                <p className="text-2xl font-bold text-center">Remove Snack</p>
+                <p className="text-2xl font-semibold text-center">
+                    Remove Snack
+                </p>
                 <p className="text-[15px] text-center">
                     <span className="font-medium">Name: </span>
                     {popupInfo.snack.name}

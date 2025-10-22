@@ -1,4 +1,4 @@
-import SANIAIMAGE from '../Assets/images/snack.png';
+import SANIAIMAGE from '../Assets/images/sania.jpg';
 import LOGO from '../Assets/images/logo.png';
 import LOGO_SVG from '../Assets/images/logo_svg.png';
 import PU from '../Assets/images/pu.png';
@@ -12,7 +12,7 @@ export const EMAIL = 'snacktrack@gmail.com';
 export const CONTACTNUMBER = '+91 **********';
 export const ADDRESS = 'UIET, Panjab University, Chandigarh, India';
 export const MAX_FILE_SIZE = 5;
-export const LIMIT = 20; // Pagination limit
+export const LIMIT = 8; // Pagination limit
 export const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 export const SERVER_ERROR = 500;
 export const TAX = 0; // ex: 5 for 5% tax on total amount

@@ -2,12 +2,7 @@ import verifyExpression from './regex.js';
 import { ErrorHandler } from './errorHandler.js';
 import { tryCatch, safeHandler } from './tryCatch.js';
 import { verifyEmail, sendVerificationEmail } from './verificationMail.js';
-import {
-    addSocketId,
-    deleteSocketId,
-    addPreparedItem,
-    addPickedUpItem,
-} from './redis.js';
+import { addPreparedItem, addPickedUpItem } from './redis.js';
 import { sendMail } from './mailer.js';
 import {
     sendSMS,
@@ -24,8 +19,6 @@ export {
     safeHandler,
     verifyEmail,
     sendVerificationEmail,
-    addSocketId,
-    deleteSocketId,
     addPreparedItem,
     sendMail,
     sendSMS,

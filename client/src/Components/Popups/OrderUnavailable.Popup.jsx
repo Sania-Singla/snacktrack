@@ -111,8 +111,8 @@ export default function OrderUnavailablePopup() {
                             transition: { delay: 0.6 },
                         }}
                     >
-                        Sorry, this order contains items that are currently out
-                        of stock.
+                        Sorry, this order contains items that are currently
+                        unavailable.
                     </motion.p>
                 </div>
             </motion.div>

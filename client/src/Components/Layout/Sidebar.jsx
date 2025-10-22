@@ -24,14 +24,20 @@ export default function Sidebar() {
         },
         {
             path: '/today-orders',
-            name: 'Orders',
-            icon: icons.clock,
+            name: 'Today Orders',
+            icon: icons.store,
             show: user.role === 'contractor',
         },
         {
             path: '/all-bills',
             name: 'Bills',
             icon: icons.rupee,
+            show: user.role === 'contractor',
+        },
+        {
+            path: '/history',
+            name: 'History',
+            icon: icons.clock,
             show: user.role === 'contractor',
         },
         {

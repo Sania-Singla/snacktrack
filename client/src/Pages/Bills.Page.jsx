@@ -1,113 +1,69 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { billService } from '../Services';
-import { BillCard, Button, Filter } from '../Components';
+import { BillCard, Button, Dropdown } from '../Components';
 import { checkTokenExpired, paginate } from '../Utils';
 import { icons } from '../Assets/icons';
-import { usePopupContext, useSearchContext, useUserContext } from '../Contexts';
+import {
+    useOrderContext,
+    usePopupContext,
+    useSearchContext,
+    useUserContext,
+} from '../Contexts';
 import toast from 'react-hot-toast';
 
 export default function BillsPage() {
     const [bills, setBills] = useState([]);
+    const [billsInfo, setBillsInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
-    const [billsInfo, setBillsInfo] = useState({});
-    const [debouncedSearch, setDebouncedSearch] = useState('');
-    const { search } = useSearchContext();
+    const { debouncedSearch } = useSearchContext();
     const { setUser } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
-    const [searchParams] = useSearchParams();
-    const filter = searchParams.get('filter') || new Date().getMonth();
-    const navigate = useNavigate();
+    const { monthFilter, setMonthFilter } = useOrderContext();
 
     const paginateRef = paginate(billsInfo?.hasNextPage, loading, setPage);
 
-    // Debounce search input
     useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedSearch(search);
-        }, 500);
-        return () => clearTimeout(handler);
-    }, [search]);
+        setPage(1);
+    }, [monthFilter, debouncedSearch]);
 
-    const fetchBills = useCallback(
-        async (signal, currentPage = 1) => {
+    useEffect(() => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        (async function () {
             try {
                 setLoading(true);
-                if (currentPage === 1) setBills([]);
                 const res = await billService.getBills({
-                    page: currentPage,
-                    month: filter,
+                    page,
+                    month: monthFilter,
                     search: debouncedSearch,
                     signal,
                 });
 
                 if (res && !res.message) {
-                    if (currentPage === 1) {
+                    setBillsInfo(res.billsInfo);
+
+                    if (page === 1) {
                         setBills(res.bills);
                     } else {
                         setBills((prev) => prev.concat(res.bills));
                     }
-                    setBillsInfo(res.billsInfo);
                 } else checkTokenExpired(res, setUser);
-
-                setLoading(false);
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
+            } finally {
+                setLoading(false);
             }
-        },
-        [filter, setUser, debouncedSearch, navigate]
-    );
+        })();
 
-    useEffect(() => {
-        const controller = new AbortController();
-        const signal = controller.signal;
-        setPage(1); // Reset page on filter change
-        fetchBills(signal, 1);
         return () => controller.abort();
-    }, [filter, fetchBills]);
-
-    useEffect(() => {
-        if (page === 1) return;
-        const controller = new AbortController();
-        const signal = controller.signal;
-        fetchBills(signal, page);
-        return () => controller.abort();
-    }, [page, fetchBills]);
+    }, [page, monthFilter, debouncedSearch]);
 
     function generateIntermediateBill() {
         setShowPopup(true);
         setPopupInfo({ type: 'intermediateBill' });
     }
-
-    const billElements = useMemo(() => {
-        return bills.map((bill, i) => (
-            <BillCard
-                reference={
-                    i + 1 === bills.length && billsInfo?.hasNextPage
-                        ? paginateRef
-                        : null
-                }
-                key={bill._id}
-                bill={bill}
-            />
-        ));
-    }, [bills, billsInfo, paginateRef]);
-
-    const months = [
-        { value: 1, label: 'January' },
-        { value: 2, label: 'February' },
-        { value: 3, label: 'March' },
-        { value: 4, label: 'April' },
-        { value: 5, label: 'May' },
-        { value: 6, label: 'June' },
-        { value: 7, label: 'July' },
-        { value: 8, label: 'August' },
-        { value: 9, label: 'September' },
-        { value: 10, label: 'October' },
-        { value: 11, label: 'November' },
-        { value: 12, label: 'December' },
-    ];
 
     return (
         <div className="w-full pt-2 sm:p-4">
@@ -117,19 +73,46 @@ export default function BillsPage() {
                         <h1 className="text-2xl font-semibold text-gray-900">
                             Bills
                         </h1>
-                        <div className="px-3 py-[3px] text-sm font-semibold rounded-full border border-blue-200 bg-blue-50 text-blue-700">
-                            {new Date().getFullYear()}
+                        <div className="px-3 py-[3px] text-sm font-semibold space-x-2 rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                            <span>
+                                {new Date(0, monthFilter - 1).toLocaleString(
+                                    'default',
+                                    { month: 'short' }
+                                )}
+                            </span>
+                            <span>{new Date().getFullYear()}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Filter options={months} defaultOption={filter} />
                         <Button
                             onClick={generateIntermediateBill}
-                            className="hidden md:flex text-white rounded-lg py-2 w-fit font-medium text-nowrap px-4 items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="hidden md:flex text-white rounded-lg py-1.5 w-fit font-medium text-nowrap px-3 items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
                             btnText="Generate Bill"
                         />
+
+                        <div>
+                            <Dropdown
+                                options={[
+                                    { value: 1, label: 'January' },
+                                    { value: 2, label: 'February' },
+                                    { value: 3, label: 'March' },
+                                    { value: 4, label: 'April' },
+                                    { value: 5, label: 'May' },
+                                    { value: 6, label: 'June' },
+                                    { value: 7, label: 'July' },
+                                    { value: 8, label: 'August' },
+                                    { value: 9, label: 'September' },
+                                    { value: 10, label: 'October' },
+                                    { value: 11, label: 'November' },
+                                    { value: 12, label: 'December' },
+                                ]}
+                                defaultVal={monthFilter}
+                                setValue={setMonthFilter}
+                            />
+                        </div>
+
                         {bills.length > 0 && (
-                            <div className="hidden md:flex text-lg font-semibold text-gray-700 border border-blue-500 bg-blue-50 rounded-lg px-3 py-[5px]">
+                            <div className="hidden md:block shadow-sm font-medium text-[#4977ec] border-1 border-gray-200 bg-white rounded-lg px-3 py-1.5">
                                 Total: ₹{billsInfo.totalAmount.toFixed(2)}
                             </div>
                         )}
@@ -139,21 +122,31 @@ export default function BillsPage() {
 
             <div className="md:hidden flex items-center justify-center gap-4 mb-6">
                 {bills.length > 0 && (
-                    <div className="text-lg font-semibold text-gray-700 border border-blue-500 bg-blue-50 rounded-lg px-3 py-[5px]">
+                    <div className="font-medium shadow-sm text-[#4977ec] border-1 border-gray-200 bg-white rounded-lg px-3 py-1.5">
                         Total: ₹{billsInfo.totalAmount.toFixed(2)}
                     </div>
                 )}
 
                 <Button
                     onClick={generateIntermediateBill}
-                    className="text-white rounded-lg py-2 w-fit text-nowrap px-4 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                    className="text-white rounded-lg py-1.5 w-fit text-nowrap px-3 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
                     btnText="Generate Bill"
                 />
             </div>
 
             {bills.length > 0 && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {billElements}
+                    {bills.map((bill, i) => (
+                        <BillCard
+                            reference={
+                                i + 1 === bills.length && billsInfo?.hasNextPage
+                                    ? paginateRef
+                                    : null
+                            }
+                            key={bill._id}
+                            bill={bill}
+                        />
+                    ))}
                 </div>
             )}
 
@@ -165,7 +158,9 @@ export default function BillsPage() {
                 </div>
             ) : (
                 bills.length === 0 && (
-                    <div className="italic text-gray-600">No bills found</div>
+                    <div className="italic text-gray-600 flex items-center justify-center">
+                        No bills found
+                    </div>
                 )
             )}
         </div>

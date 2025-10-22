@@ -17,6 +17,7 @@
         "date-fns": "^4.1.0",
         "framer-motion": "^12.6.3",
         "libphonenumber-js": "^1.12.6",
+        "re-resizable": "^6.11.2",
         "react": "^19.0.0",
         "react-datepicker": "^8.4.0",
         "react-dom": "^19.0.0",

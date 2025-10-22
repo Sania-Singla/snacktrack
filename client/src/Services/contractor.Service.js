@@ -1,4 +1,4 @@
-import { LIMIT } from '../Constants/constants';
+import { LIMIT } from '../Constants';
 import { fetchWrapper } from '../Utils';
 
 class ContractorService {

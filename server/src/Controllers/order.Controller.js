@@ -221,6 +221,8 @@ const updateOrderStatus = tryCatch(
             });
         }
 
+        // ⚠️⚠️⚠️⚠️⚠️ send sms to student
+
         return res.status(OK).json({
             message: 'order status updated successfully',
             order: completeOrder,
@@ -241,7 +243,14 @@ const updateExtraCharges = tryCatch(
         });
 
         if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
-        else if (order.status !== 'Pending') {
+        const orderDate = moment(order.createdAt)
+            .tz('Asia/Kolkata')
+            .startOf('day');
+        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
+
+        if (!orderDate.isSame(todayDate)) {
+            return next(new ErrorHandler('too late', FORBIDDEN));
+        } else if (order.status !== 'Pending' && order.status !== 'Prepared') {
             return next(
                 new ErrorHandler('cannot update extra charges now', FORBIDDEN)
             );
@@ -257,7 +266,7 @@ const updateExtraCharges = tryCatch(
 );
 
 const getStudentOrders = tryCatch('get student orders', async (req, res) => {
-    const { limit = 10, page = 1, month, date, search = '' } = req.query;
+    const { limit = 10, page = 1, date, search = '' } = req.query;
     const { studentId } = req.params;
 
     const matchConditions = { studentId: new Types.ObjectId(studentId) };
@@ -280,47 +289,22 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
         // Remove studentId from top-level, since it’s in $expr now
         delete matchConditions.studentId;
     }
-    if (date && date !== 'undefined') {
-        // Specific date filtering
-        const istStart = moment
-            .tz(date, 'Asia/Kolkata')
-            .startOf('day')
-            .utc()
-            .toDate();
-        const istEnd = moment
-            .tz(date, 'Asia/Kolkata')
-            .endOf('day')
-            .utc()
-            .toDate();
-        matchConditions.createdAt = { $gte: istStart, $lte: istEnd };
-    } else if (month) {
-        // Month-based filtering (fallback)
-        const monthIndex = parseInt(month, 10) - 1;
-        const currentYear = moment.utc().year();
 
-        const istStart = moment
-            .tz(
-                { year: currentYear, month: monthIndex, day: 1 },
-                'Asia/Kolkata'
-            )
-            .startOf('day')
-            .utc()
-            .toDate();
+    const istDate =
+        !date || date === 'null' || !moment(date, 'YYYY-MM-DD', true).isValid()
+            ? moment.tz('Asia/Kolkata')
+            : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
 
-        const istEnd = moment
-            .tz({ year: currentYear, month: monthIndex }, 'Asia/Kolkata')
-            .endOf('month')
-            .endOf('day')
-            .utc()
-            .toDate();
-
-        matchConditions.createdAt = { $gte: istStart, $lte: istEnd };
-    }
+    const startOfDay = istDate.clone().startOf('day').utc().toDate();
+    const endOfDay = istDate.clone().endOf('day').utc().toDate();
 
     const result = await Order.aggregatePaginate(
         [
             {
-                $match: matchConditions,
+                $match: {
+                    ...matchConditions,
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
+                },
             },
             { $unwind: '$items' },
             {
@@ -425,7 +409,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
     let { date } = req.query;
 
     const istDate =
-        !date || !moment(date, 'YYYY-MM-DD', true).isValid()
+        !date || date === 'null' || !moment(date, 'YYYY-MM-DD', true).isValid()
             ? moment.tz('Asia/Kolkata')
             : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
 
@@ -481,18 +465,18 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 $match: search
                     ? {
                           $or: [
-                              {
-                                  'studentInfo.fullName': {
-                                      $regex: search,
-                                      $options: 'i',
-                                  },
-                              },
-                              {
-                                  'studentInfo.rollNumber': {
-                                      $regex: search,
-                                      $options: 'i',
-                                  },
-                              },
+                              //   {
+                              //       'studentInfo.fullName': {
+                              //           $regex: search,
+                              //           $options: 'i',
+                              //       },
+                              //   },
+                              //   {
+                              //       'studentInfo.rollNumber': {
+                              //           $regex: search,
+                              //           $options: 'i',
+                              //       },
+                              //   },
                               {
                                   $expr: {
                                       $regexMatch: {
@@ -662,6 +646,76 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
     return res.status(OK).json(result);
 });
 
+const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
+    const { canteenId } = req.user;
+
+    const istNow = moment.tz('Asia/Kolkata');
+    const startOfDay = istNow.clone().startOf('day').utc().toDate();
+    const endOfDay = istNow.clone().endOf('day').utc().toDate();
+
+    const result = await Order.aggregatePaginate(
+        [
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(canteenId),
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
+                    status: 'Pending',
+                },
+            },
+            { $unwind: '$items' },
+            { $match: { 'items.type': 'Snack' } },
+            {
+                $lookup: {
+                    from: 'snacks',
+                    localField: 'items.id',
+                    foreignField: '_id',
+                    as: 'snack',
+                    pipeline: [{ $project: { name: 1 } }],
+                },
+            },
+            { $addFields: { 'items.name': { $first: '$snack.name' } } },
+            {
+                $group: {
+                    _id: '$_id',
+                    status: { $first: '$status' },
+                    canteenId: { $first: '$canteenId' },
+                    studentId: { $first: '$studentId' },
+                    items: { $push: '$items' },
+                    createdAt: { $first: '$createdAt' },
+                    updatedAt: { $first: '$updatedAt' },
+                },
+            },
+            { $project: { snack: 0 } },
+        ],
+        { sort: { createdAt: 1 } }
+    );
+
+    if (result.docs.length) {
+        result.docs = await Promise.all(
+            result.docs.map(async (order) => {
+                const preparedItems = await redisClient.sMembers(
+                    `order_${order._id}`
+                );
+
+                const updatedItems = order.items.map((item) => {
+                    const preparedItem = preparedItems
+                        .map((i) => JSON.parse(i))
+                        .find((i) => item.id.equals(i.itemId));
+
+                    return {
+                        ...item,
+                        prepared: preparedItem || false,
+                    };
+                });
+
+                return { ...order, items: updatedItems };
+            })
+        );
+    }
+
+    return res.status(OK).json({ orders: result.docs });
+});
+
 export {
     placeOrder,
     getOrderStats,
@@ -670,4 +724,5 @@ export {
     getCanteenOrders,
     checkAvailability,
     updateExtraCharges,
+    getKitchenOrders,
 };

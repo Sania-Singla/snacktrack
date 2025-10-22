@@ -7,8 +7,10 @@ import {
     ListboxOptions,
 } from '@headlessui/react';
 
-export default function Dropdown({ options, setValue }) {
-    const [selectedValue, setSelectedValue] = useState(options[0].value);
+export default function Dropdown({ options, setValue, defaultVal = '' }) {
+    const [selectedValue, setSelectedValue] = useState(
+        defaultVal || options[0].value
+    );
     const [isOpen, setIsOpen] = useState(false);
 
     const handleClick = (value) => {
@@ -18,11 +20,11 @@ export default function Dropdown({ options, setValue }) {
     };
 
     return (
-        <div className="w-full mb-0 relative">
+        <div className="w-full relative">
             <Listbox value={selectedValue} onChange={handleClick}>
                 <ListboxButton
                     onClick={() => setIsOpen((prev) => !prev)}
-                    className="border border-gray-300 p-2 overflow-auto w-full flex justify-between items-center rounded-md"
+                    className="border border-gray-400 px-2.5 py-2 overflow-auto w-full flex justify-between items-center gap-4 rounded-lg shadow-sm bg-white cursor-pointer"
                 >
                     <span className="w-fit">
                         {options.find((o) => o.value === selectedValue)?.label}
@@ -34,7 +36,7 @@ export default function Dropdown({ options, setValue }) {
                     </div>
                 </ListboxButton>
 
-                <ListboxOptions className="focus:outline-none absolute z-[100] w-full mt-1 border border-gray-400 rounded-md bg-white shadow-sm max-h-[300px] overflow-y-auto">
+                <ListboxOptions className="focus:outline-none absolute z-[100] w-full mt-1 border border-gray-400 rounded-lg bg-white shadow-sm max-h-[400px] overflow-y-auto">
                     {options.map((opt) => (
                         <ListboxOption
                             key={opt.label}

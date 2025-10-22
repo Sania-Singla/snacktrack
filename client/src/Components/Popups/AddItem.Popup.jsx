@@ -1,17 +1,12 @@
 import { useState } from 'react';
 import { contractorService } from '../../Services';
-import {
-    usePopupContext,
-    useSnackContext,
-    useUserContext,
-} from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import { checkTokenExpired, verifyExpression } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 
 export default function AddItemPopup() {
-    const { setItems } = useSnackContext();
     const [inputs, setInputs] = useState({ name: '', price: 0 });
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(true);
@@ -53,7 +48,6 @@ export default function AddItemPopup() {
             const res = await contractorService.addItem(inputs);
             if (res && !res.message) {
                 toast.success('Item added successfully 👍');
-                setItems((prev) => [res, ...prev]);
                 setShowPopup(false);
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));
@@ -112,7 +106,7 @@ export default function AddItemPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-bold">Add New Item</p>
+            <p className="text-2xl font-semibold">Add New Item</p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (

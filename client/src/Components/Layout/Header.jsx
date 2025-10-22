@@ -1,11 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Logout, Searchbar } from '..';
-import {
-    useUserContext,
-    useSideBarContext,
-    useStudentContext,
-} from '../../Contexts';
-import { LOGO_SVG } from '../../Constants/constants';
+import { Button, Logout, Searchbar, Cart } from '..';
+import { useUserContext, useSideBarContext } from '../../Contexts';
+import { LOGO_SVG } from '../../Constants';
 import { icons } from '../../Assets/icons';
 
 export default function Header() {
@@ -13,13 +9,6 @@ export default function Header() {
     const { pathname } = useLocation();
     const { setShowSideBar } = useSideBarContext();
     const navigate = useNavigate();
-    const { cartItems } = useStudentContext();
-
-    // total quantity by adding all item quantities
-    const totalQuantity = cartItems.reduce(
-        (total, item) => total + item.quantity,
-        0
-    );
 
     const staticPages = ['/settings', '/statistics', '/cart'];
 
@@ -63,24 +52,7 @@ export default function Header() {
 
             <div className="flex gap-3.5 items-center">
                 {user.role === 'student' ? (
-                    <div className="relative">
-                        <Button
-                            btnText={
-                                <div className="size-4 group-hover:fill-[#4977ec] fill-[#434343]">
-                                    {icons.cart}
-                                </div>
-                            }
-                            title="View Cart"
-                            onClick={() => navigate('/cart')}
-                            className="bg-[#ffffff] p-2 group rounded-full shadow-sm w-fit"
-                        />
-                        {/* total quantity count */}
-                        {totalQuantity > 0 && (
-                            <span className="text-xs flex items-center justify-center leading-3 text-white absolute -top-1 -right-1 size-4 bg-red-600 rounded-full">
-                                {totalQuantity}
-                            </span>
-                        )}
-                    </div>
+                    <Cart />
                 ) : (
                     <div>
                         <Button
@@ -94,16 +66,18 @@ export default function Header() {
                                 </div>
                             }
                             title="Add Student"
-                            className="text-white rounded-md w-fit text-nowrap font-normal px-2 h-7.5 bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
                     </div>
                 )}
 
-                <div
-                    onClick={() => navigate('/settings')}
-                    className="size-8 bg-[#e96805] text-white rounded-full flex items-center justify-center cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
-                >
-                    <div>{user.fullName.slice(0, 1).toUpperCase()}</div>
+                <div>
+                    <div
+                        onClick={() => navigate('/settings')}
+                        className="size-8 bg-[#e96805] text-white rounded-full flex items-center justify-center cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
+                    >
+                        <div>{user.fullName.slice(0, 1).toUpperCase()}</div>
+                    </div>
                 </div>
 
                 {user.role === 'student' && (

@@ -10,7 +10,7 @@ export default function StudentBillCard({ bill, studentInfo }) {
     const navigate = useNavigate();
 
     return (
-        <div className="rounded-lg shadow-sm transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between">
+        <div className="rounded-md shadow-sm transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between">
             <div className="flex items-center gap-3">
                 {/* Month/year badge */}
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-12 rounded-lg flex items-center justify-center border border-blue-400">
@@ -69,9 +69,7 @@ export default function StudentBillCard({ bill, studentInfo }) {
                 <Button
                     btnText="Orders"
                     className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                    onClick={() =>
-                        navigate(`/orders/${studentInfo._id}?month=${month}`)
-                    }
+                    onClick={() => navigate(`/orders/${studentInfo._id}`)}
                 />
             </div>
         </div>

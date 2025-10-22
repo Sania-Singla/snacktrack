@@ -30,6 +30,9 @@ const snackSchema = new Schema(
     { timestamps: true }
 );
 
+snackSchema.index({ canteenId: 1, name: 1 }); // If you search snacks by name
+snackSchema.index({ canteenId: 1 }); // If you show all snacks (admin view)
+
 snackSchema.plugin(mongooseAggregatePaginate);
 
 export const Snack = new model('Snack', snackSchema);

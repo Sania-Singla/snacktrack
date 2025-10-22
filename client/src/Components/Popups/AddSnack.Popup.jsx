@@ -1,10 +1,6 @@
 import { useState, useRef } from 'react';
 import { contractorService } from '../../Services';
-import {
-    usePopupContext,
-    useSnackContext,
-    useUserContext,
-} from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import {
     verifyExpression,
@@ -13,13 +9,9 @@ import {
 } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
-import {
-    MAX_FILE_SIZE,
-    SNACK_PLACEHOLDER_IMAGE,
-} from '../../Constants/constants';
+import { MAX_FILE_SIZE, SNACK_PLACEHOLDER_IMAGE } from '../../Constants';
 
 export default function AddSnackPopup() {
-    const { setItems } = useSnackContext();
     const { setShowPopup } = usePopupContext();
     const ref = useRef();
     const [imagePreview, setImagePreview] = useState(SNACK_PLACEHOLDER_IMAGE);
@@ -87,7 +79,6 @@ export default function AddSnackPopup() {
             const res = await contractorService.addSnack(inputs);
             if (res && !res.message) {
                 toast.success('Snack added successfully 👍');
-                setItems((prev) => [res, ...prev]);
                 setShowPopup(false);
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));
@@ -146,7 +137,7 @@ export default function AddSnackPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-bold">Add New Snack</p>
+            <p className="text-2xl font-semibold">Add New Snack</p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (

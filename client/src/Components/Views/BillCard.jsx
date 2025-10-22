@@ -14,7 +14,7 @@ export default function BillCard({ bill, reference }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className="flex justify-between gap-4 bg-white p-3 cursor-pointer rounded-lg shadow-sm overflow-hidden transition-all hover:shadow-md h-fit border border-gray-200"
+            className="flex justify-between gap-4 bg-white p-3 cursor-pointer rounded-md shadow-sm overflow-hidden transition-all hover:shadow-md h-fit border border-gray-200"
         >
             {/* info */}
             <div>
@@ -46,11 +46,7 @@ export default function BillCard({ bill, reference }) {
                     <Button
                         btnText="Orders"
                         className="text-white rounded-md w-fit text-nowrap text-sm px-[10px] py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                        onClick={() =>
-                            navigate(
-                                `/orders/${studentInfo._id}?month=${month}`
-                            )
-                        }
+                        onClick={() => navigate(`/orders/${studentInfo._id}`)}
                     />
                 </div>
             </div>

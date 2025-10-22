@@ -16,6 +16,10 @@ import VerifyAdminKeyPage from './Admin/VerifyAdminKey.Page';
 import RegisterCanteenPage from './RegisterCanteen.Page';
 import BillsPage from './Bills.Page';
 import DemoCredentialsPage from './General/DemoCredentials.Page';
+import AboutPage from './General/About.Page';
+import ContactPage from './General/Contact.Page';
+import PrivacyPolicyPage from './General/Privacy.Page';
+import HistoryPage from './History.Page.jsx';
 
 export {
     StudentBillsPage,
@@ -36,4 +40,8 @@ export {
     VerifyAdminKeyPage,
     RegisterCanteenPage,
     DemoCredentialsPage,
+    AboutPage,
+    ContactPage,
+    PrivacyPolicyPage,
+    HistoryPage,
 };

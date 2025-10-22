@@ -11,15 +11,15 @@ import {
     SideBarContextProvider,
     SearchContextProvider,
     StudentContextProvider,
-    SnackContextProvider,
     SocketContextProvider,
+    OrderContextProvider,
 } from './Contexts';
 
 function Root() {
     return (
         <UserContextProvider>
-            <PopupContextProvider>
-                <SnackContextProvider>
+            <OrderContextProvider>
+                <PopupContextProvider>
                     <SocketContextProvider>
                         <StudentContextProvider>
                             <SideBarContextProvider>
@@ -29,8 +29,8 @@ function Root() {
                             </SideBarContextProvider>
                         </StudentContextProvider>
                     </SocketContextProvider>
-                </SnackContextProvider>
-            </PopupContextProvider>
+                </PopupContextProvider>
+            </OrderContextProvider>
         </UserContextProvider>
     );
 }

@@ -69,7 +69,7 @@ export default function RemoveStudentPopup() {
             />
 
             <div className="flex flex-col gap-3">
-                <p className="text-2xl font-bold text-center">
+                <p className="text-2xl font-semibold text-center">
                     Remove Student Account
                 </p>
                 <p className="text-[15px] text-center">

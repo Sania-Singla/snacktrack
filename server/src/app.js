@@ -15,13 +15,13 @@ import { router } from './Routes/index.js';
 
 app.use('/api/v1', router);
 
-app.use('/', (req, res) => {
-    return res.status(OK).json({
+app.use('/', (req, res) =>
+    res.status(OK).json({
         status: 'success',
         message: '🎉 Welcome to Snack Track !!',
         description: 'Your snack logging companion is up and running 🚀',
         version: '1.0.0',
         uptime: `${process.uptime().toFixed(2)} seconds`,
         timestamp: new Date().toISOString(),
-    });
-});
+    })
+);

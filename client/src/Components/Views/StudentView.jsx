@@ -27,7 +27,7 @@ export default function StudentView({ student, reference }) {
     return (
         <div
             ref={reference}
-            className="min-w-[250px] flex flex-col items-start justify-center gap-4 relative w-full p-3 bg-white drop-shadow-md rounded-2xl overflow-hidden h-fit"
+            className="min-w-[250px] flex flex-col items-start justify-center gap-4 relative w-full p-3 bg-white drop-shadow-md rounded-md overflow-hidden h-fit"
         >
             <div className="w-full flex justify-between gap-4">
                 <div className="flex items-center justify-start gap-4">

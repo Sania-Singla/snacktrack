@@ -7,7 +7,7 @@ import {
     useSocketContext,
 } from './Contexts';
 import { userService } from './Services';
-import { LOGO } from './Constants/constants';
+import { LOGO } from './Constants';
 import toast from 'react-hot-toast';
 
 export default function App() {

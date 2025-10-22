@@ -1,4 +1,4 @@
-import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/constants';
+import { SERVER_ERROR, BASE_BACKEND_URL } from '../Constants/index.js';
 
 export async function fetchWrapper({
     endPoint,
@@ -30,9 +30,9 @@ export async function fetchWrapper({
         else return data;
     } catch (err) {
         if (err.name === 'AbortError') {
-            // console.log(`${aim} request aborted.`);
+            console.log(`${aim} request aborted with end point: ${endPoint}.`);
         } else {
-            // console.error(`error in ${aim} service`, err.message);
+            console.error(`error in ${aim} service`, err.message);
             throw err;
         }
     }

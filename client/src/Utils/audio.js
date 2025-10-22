@@ -1,4 +1,4 @@
-import { AUDIO_FILE } from '../Constants/constants';
+import { AUDIO_FILE } from '../Constants/index.js';
 
 let audio = null;
 let audioAllowed = false;

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { SOCKET_EVENTS, TAX } from '../Constants/constants';
+import { SOCKET_EVENTS, TAX } from '../Constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
@@ -213,18 +213,22 @@ export default function CartPage() {
                         />
                     </div>
                     <div className="flex items-center gap-1">
+                        {item.type === 'Snack' ? (
+                            <Button
+                                btnText={
+                                    <div className="size-4 fill-[#4977ec]">
+                                        {icons.edit}
+                                    </div>
+                                }
+                                className="hover:bg-gray-100 p-2 rounded-full"
+                                onClick={() => editItem(item)}
+                            />
+                        ) : (
+                            <div className="size-8"></div>
+                        )}
                         <Button
                             btnText={
-                                <div className="size-[18px] fill-[#4977ec]">
-                                    {icons.edit}
-                                </div>
-                            }
-                            className="hover:bg-gray-100 p-2 rounded-full"
-                            onClick={() => editItem(item)}
-                        />
-                        <Button
-                            btnText={
-                                <div className="size-[18px] fill-red-600">
+                                <div className="size-4 fill-red-600">
                                     {icons.delete}
                                 </div>
                             }

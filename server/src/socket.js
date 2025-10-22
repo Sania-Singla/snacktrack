@@ -11,7 +11,6 @@ export const io = new Server(http, { cors: CORS_OPTIONS });
 
 io.on('connection', async (socket) => {
     const { userId, canteenId, role } = socket.handshake.auth;
-    console.log(`[USER CONNECTED] ${socket.id}`);
     await joinRoom(socket, { userId, canteenId, role });
 
     registerItemEvents(io, socket);
@@ -19,6 +18,5 @@ io.on('connection', async (socket) => {
 
     socket.on('disconnect', async () => {
         await leaveRoom(socket, { userId, canteenId, role });
-        console.log(`[USER DISCONNECTED] ${socket.id}`);
     });
 });

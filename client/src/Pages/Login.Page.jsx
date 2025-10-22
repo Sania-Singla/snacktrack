@@ -1,4 +1,4 @@
-import { LOGO } from '../Constants/constants';
+import { LOGO } from '../Constants';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
@@ -74,8 +74,7 @@ export default function LoginPage() {
                     ]);
                 }
             } catch (err) {
-                           toast.error('Something went wrong. Please try again.');
-
+                toast.error('Something went wrong. Please try again.');
             }
         })();
 
@@ -103,11 +102,11 @@ export default function LoginPage() {
             if (res && !res.message) {
                 setUser(res);
                 toast.success('Logged in Successfully 😉');
+                localStorage.removeItem('cartItems');
                 navigate('/');
             } else toast.error(res.message);
         } catch (err) {
-                       toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -147,17 +146,6 @@ export default function LoginPage() {
                         showPassword={showPassword}
                         setShowPassword={setShowPassword}
                     />
-                    {/* {field.name === 'password' && (
-                        <p
-                            onClick={() => {
-                                setShowPopup(true);
-                                setShowPopupInfo({ type: 'forgotPassword' });
-                            }}
-                            className="text-[#4977ec] text-xs text-right hover:underline cursor-pointer"
-                        >
-                            Forgot your password ?
-                        </p>
-                    )} */}
                 </div>
             )
     );

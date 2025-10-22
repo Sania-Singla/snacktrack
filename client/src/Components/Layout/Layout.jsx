@@ -28,14 +28,14 @@ export default function Layout({ renderTemplate = true }) {
                     <Sidebar />
                     <main
                         ref={layoutRef}
-                        className="flex-1 p-4 mt-[60px] overflow-y-auto bg-gray-50"
+                        className="flex-1 p-4 mt-[60px] overflow-auto bg-gray-50"
                     >
                         {!isStaticPage && (
                             <div className="mb-6 mt-2 sm:hidden">
                                 <Searchbar />
                             </div>
                         )}
-                        <div className="min-h-[calc(100vh-60px)]">
+                        <div className="mb-20 min-h-[calc(100vh-60px)]">
                             <Outlet />
                         </div>
                         <Footer />

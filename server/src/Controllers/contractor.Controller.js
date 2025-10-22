@@ -359,13 +359,27 @@ const updateSnack = tryCatch('update snack', async (req, res, next) => {
         }
 
         const snack = await Snack.findOne({
-            name: { $regex: new RegExp(`^${name}$`, 'i') },
+            _id: new Types.ObjectId(snackId),
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
-
-        if (snack && snack._id.toString() !== snackId) {
+        if (!snack) {
             if (image) fs.unlinkSync(image);
-            return next(new ErrorHandler('snack already exists', BAD_REQUEST));
+            return next(new ErrorHandler('snack not found', NOT_FOUND));
+        }
+
+        if (snack.name.toLowerCase().trim() !== name.toLowerCase().trim()) {
+            // if name is being changed, check for duplicates
+            const existingSnack = await Snack.findOne({
+                name: { $regex: new RegExp(`^${name}$`, 'i') },
+                canteenId: new Types.ObjectId(contractor.canteenId),
+            });
+
+            if (existingSnack) {
+                if (image) fs.unlinkSync(image);
+                return next(
+                    new ErrorHandler('snack already exists', BAD_REQUEST)
+                );
+            }
         }
 
         if (image) {
@@ -386,7 +400,7 @@ const updateSnack = tryCatch('update snack', async (req, res, next) => {
 
 const toggleSnackAvailability = tryCatch(
     'toggle snack availability',
-    async (req, res) => {
+    async (req, res, next) => {
         const { snackId } = req.params;
         const contractor = req.user;
 
@@ -458,11 +472,24 @@ const updateItem = tryCatch('update item', async (req, res, next) => {
     }
 
     const item = await PackagedFood.findOne({
-        name: { $regex: new RegExp(`^${name}$`, 'i') },
+        _id: new Types.ObjectId(itemId),
         canteenId: new Types.ObjectId(contractor.canteenId),
     });
-    if (item && item._id.toString() !== itemId) {
-        return next(new ErrorHandler('Item already exists', BAD_REQUEST));
+
+    if (!item) {
+        return next(new ErrorHandler('item not found', NOT_FOUND));
+    }
+
+    if (item.name.toLowerCase().trim() !== name.toLowerCase().trim()) {
+        // if name is being changed, check for duplicates
+        const existingItem = await PackagedFood.findOne({
+            name: { $regex: new RegExp(`^${name}$`, 'i') },
+            canteenId: new Types.ObjectId(contractor.canteenId),
+        });
+
+        if (existingItem) {
+            return next(new ErrorHandler('item already exists', BAD_REQUEST));
+        }
     }
 
     item.name = name.trim() || item.name;
@@ -474,7 +501,7 @@ const updateItem = tryCatch('update item', async (req, res, next) => {
 
 const toggleItemAvailability = tryCatch(
     'toggle item availability',
-    async (req, res) => {
+    async (req, res, next) => {
         const { itemId } = req.params;
         const contractor = req.user;
 

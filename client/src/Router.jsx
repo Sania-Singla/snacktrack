@@ -25,6 +25,10 @@ import {
     RegisterCanteenPage,
     VerifyAdminKeyPage,
     DemoCredentialsPage,
+    AboutPage,
+    ContactPage,
+    PrivacyPolicyPage,
+    HistoryPage,
 } from './Pages';
 
 import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
@@ -61,6 +65,7 @@ export const router = createBrowserRouter(
             <Route element={<AccessTo roles={['contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="today-orders" element={<TodayOrdersPage />} />
+                    <Route path="history" element={<HistoryPage />} />
                     <Route path="all-bills" element={<BillsPage />} />
                     <Route path="students" element={<StudentsPage />} />
                 </Route>
@@ -96,6 +101,9 @@ export const router = createBrowserRouter(
                 <Route path="new-user" element={<NewUserPage />} />
                 <Route path="demo" element={<DemoCredentialsPage />} />
                 <Route path="login" element={<LoginPage />} />
+                <Route path="about" element={<AboutPage />} />
+                <Route path="contact" element={<ContactPage />} />
+                <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="server-error" element={<ServerErrorPage />} />
                 <Route path="*" element={<NotFoundPage />} />
             </Route>

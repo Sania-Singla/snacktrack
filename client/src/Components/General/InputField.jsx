@@ -13,13 +13,6 @@ export default function InputField({
     const { name, type, required, label, placeholder, id, show, ...rest } =
         field;
 
-    const passwordVariants = [
-        'password',
-        'oldPassword',
-        'newPassword',
-        'confirmPassword',
-    ];
-
     return (
         <div key={name} className={`w-full ${className}`}>
             <div className="bg-white z-[1] ml-2 px-1 w-fit relative top-2.5 text-[15px] font-medium">
@@ -43,7 +36,7 @@ export default function InputField({
                     className={`overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-400 bg-transparent placeholder:text-sm ${inputStyling}`}
                 />
 
-                {passwordVariants.includes(name) && (
+                {name.toLowerCase().includes('password') && (
                     <div
                         onClick={() => setShowPassword((prev) => !prev)}
                         className="size-4 absolute right-0 top-[50%] transform translate-y-[-50%] mr-3 cursor-pointer fill-[#474747]"

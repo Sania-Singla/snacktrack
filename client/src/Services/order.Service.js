@@ -1,4 +1,4 @@
-import { LIMIT } from '../Constants/constants';
+import { LIMIT } from '../Constants';
 import { fetchWrapper } from '../Utils';
 
 class OrderService {
@@ -33,15 +33,14 @@ class OrderService {
 
     async getStudentOrders({
         studentId,
-        month,
-        date,
+        date = null,
         search = '',
         page = 1,
         limit = LIMIT,
         signal,
     }) {
         return await fetchWrapper({
-            endPoint: `/orders/student/${studentId}?search=${search}&date=${date}&month=${month}&page=${page}&limit=${limit}`,
+            endPoint: `/orders/student/${studentId}?search=${search}&date=${date}&page=${page}&limit=${limit}`,
             method: 'GET',
             signal,
             credentials: 'include',
@@ -52,7 +51,7 @@ class OrderService {
     async getCanteenOrders({
         status,
         canteenId,
-        date,
+        date = null,
         page = 1,
         limit = LIMIT,
         signal,
@@ -64,6 +63,16 @@ class OrderService {
             signal,
             credentials: 'include',
             aim: 'getCanteenOrders',
+        });
+    }
+
+    async getKitchenOrders(signal) {
+        return await fetchWrapper({
+            endPoint: `/orders/kitchen`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getKitchenOrders',
         });
     }
 

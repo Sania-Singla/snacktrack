@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { adminService } from '../../Services';
-import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
 import { verifyExpression } from '../../Utils';
 import { usePopupContext } from '../../Contexts';
@@ -15,7 +14,6 @@ export default function NewContractorPopup() {
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
     const { popupInfo } = usePopupContext();
-    const navigate = useNavigate();
     const [isVerified, setIsVerified] = useState(popupInfo.isVerified || false);
     const [sendingMail, setSendingMail] = useState(false);
     const [isChecked, setIsChecked] = useState(false);

@@ -1,36 +1,21 @@
-import { addSocketId, deleteSocketId } from '../Utils/index.js';
+import { redisClient } from '../server.js';
 
 export async function joinRoom(socket, { userId, canteenId, role }) {
-    let room;
-    switch (role) {
-        case 'student':
-            room = `student_${userId}`;
-            break;
-        default:
-            room = `contractor_${canteenId}`;
-            break;
+    if (role === 'student') {
+        await redisClient.setEx(userId, 3600, socket.id);
+    } else if (role === 'contractor') {
+        await redisClient.setEx(canteenId, 43200, socket.id);
     }
 
-    await addSocketId(room, socket.id);
-    await socket.join(room);
-
-    console.log(`[ROOM JOINED] ${room} (${socket.id})`);
-    return room;
+    console.log(`[USER JOINED] ${userId} (${socket.id})`);
 }
 
 export async function leaveRoom(socket, { userId, canteenId, role }) {
-    let room;
-    switch (role) {
-        case 'student':
-            room = `student_${userId}`;
-            break;
-        default:
-            room = `contractor_${canteenId}`;
-            break;
+    if (role === 'student') {
+        await redisClient.del(userId);
+    } else if (role === 'contractor') {
+        await redisClient.del(canteenId);
     }
 
-    await deleteSocketId(room, socket.id);
-    await socket.leave(room);
-
-    console.log(`[ROOM LEFT] ${room} (${socket.id})`);
+    console.log(`[USER LEFT] ${userId} (${socket.id})`);
 }

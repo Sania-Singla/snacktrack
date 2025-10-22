@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 /**
  * Generic Pagination Utility
@@ -8,18 +8,21 @@ import { useCallback } from 'react';
  * @returns {Function} A useCallback method to perform the page updation operation.
  */
 export function paginate(hasNextPage, loading, setPage) {
-    let observer;
+    const observer = useRef();
+
     return useCallback(
         (node) => {
             if (loading) return;
-            if (observer) observer.disconnect();
-            observer = new IntersectionObserver((entries) => {
-                const lastElement = entries[0];
-                if (lastElement.isIntersecting && hasNextPage) {
+            if (observer.current) observer.current.disconnect();
+
+            observer.current = new IntersectionObserver((entries) => {
+                const lastEl = entries[0];
+                if (lastEl.isIntersecting && hasNextPage) {
                     setPage((prev) => prev + 1);
                 }
             });
-            if (node) observer.observe(node);
+
+            if (node) observer.current.observe(node);
         },
         [hasNextPage]
     );

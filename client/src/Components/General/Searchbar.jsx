@@ -1,15 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import { icons } from '../../Assets/icons';
 import { useSearchContext } from '../../Contexts';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 export default function Searchbar() {
-    const { search, setSearch } = useSearchContext();
+    const { setDebouncedSearch } = useSearchContext();
+    const [search, setSearch] = useState('');
     const [placeholder, setPlaceholder] = useState('');
     const [isTyping, setIsTyping] = useState(true);
     const typingIntervalRef = useRef(null);
     const location = useLocation();
-    const [searchParams, setSearchParams] = useSearchParams();
 
     const snackNames = [
         'Search "Chips"',
@@ -22,18 +22,11 @@ export default function Searchbar() {
     ];
 
     useEffect(() => {
-        const urlSearch = searchParams.get('search') || '';
-        setSearch(urlSearch);
-    }, [location.search]);
+        const handler = setTimeout(() => {
+            setDebouncedSearch(search);
+        }, 500);
 
-    useEffect(() => {
-        const params = new URLSearchParams(searchParams);
-        if (search) {
-            params.set('search', search);
-        } else {
-            params.delete('search');
-        }
-        setSearchParams(params);
+        return () => clearTimeout(handler);
     }, [search]);
 
     const startTypingEffect = () => {
@@ -99,9 +92,11 @@ export default function Searchbar() {
                 onBlur={handleBlur}
                 className="w-full bg-white border-transparent border-[0.1rem] rounded-lg indent-8 px-[5px] py-1 text-black font-normal placeholder:font-light placeholder:text-gray-500 outline-none focus:border-[#4977ec] transition-all duration-100"
             />
+
             <div className="size-4 fill-gray-400 group-focus-within:fill-[#4977ec] absolute top-[50%] translate-y-[-50%] left-3">
                 {icons.search}
             </div>
+
             {search && (
                 <div
                     onClick={() => {

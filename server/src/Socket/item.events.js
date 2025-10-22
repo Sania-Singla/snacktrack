@@ -1,4 +1,5 @@
 import { SOCKET_EVENTS } from '../Constants/index.js';
+import { redisClient } from '../server.js';
 import {
     safeHandler,
     addPreparedItem,
@@ -9,14 +10,19 @@ export function registerItemEvents(io, socket) {
     // 🔹 ITEM PREPARED
     socket.on(
         SOCKET_EVENTS.ITEM_PREPARED,
-        safeHandler(async ({ itemId, order }) => {
-            await addPreparedItem({ itemId, orderId: order._id });
-            io.to(`contractor_${order.canteenId}`)
-                .to(`student_${order.studentId}`)
+        safeHandler(async ({ itemId, orderId, studentId, canteenId }) => {
+            const [_, stuSocketId, cantSocketId] = await Promise.all([
+                await addPreparedItem({ itemId, orderId }),
+                await redisClient.get(studentId),
+                await redisClient.get(canteenId),
+            ]);
+
+            await io
+                .to(stuSocketId)
+                .to(cantSocketId)
                 .emit(SOCKET_EVENTS.ITEM_PREPARED, {
                     itemId,
-                    orderId: order._id,
-                    stuId: order.studentId,
+                    orderId,
                 });
         })
     );
@@ -24,14 +30,19 @@ export function registerItemEvents(io, socket) {
     // 🔹 ITEM PICKED UP
     socket.on(
         SOCKET_EVENTS.ITEM_PICKEDUP,
-        safeHandler(async ({ itemId, order }) => {
-            await addPickedUpItem({ itemId, orderId: order._id });
-            io.to(`contractor_${order.canteenId}`)
-                .to(`student_${order.studentId}`)
+        safeHandler(async ({ itemId, orderId, studentId, canteenId }) => {
+            const [_, stuSocketId, cantSocketId] = await Promise.all([
+                await addPickedUpItem({ itemId, orderId }),
+                await redisClient.get(studentId),
+                await redisClient.get(canteenId),
+            ]);
+
+            await io
+                .to(stuSocketId)
+                .to(cantSocketId)
                 .emit(SOCKET_EVENTS.ITEM_PICKEDUP, {
                     itemId,
-                    orderId: order._id,
-                    stuId: order.studentId,
+                    orderId,
                 });
         })
     );

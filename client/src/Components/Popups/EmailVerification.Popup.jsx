@@ -110,7 +110,9 @@ export default function EmailVerificationPopup() {
             />
 
             <div className="flex flex-col gap-3">
-                <p className="text-2xl font-bold text-center">Verify Email</p>
+                <p className="text-2xl font-semibold text-center">
+                    Verify Email
+                </p>
                 <p className="text-[15px] text-center">
                     Enter the 6-digit code sent to your email
                 </p>

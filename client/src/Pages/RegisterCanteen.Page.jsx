@@ -6,7 +6,7 @@ import { verifyExpression } from '../Utils';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { usePopupContext } from '../Contexts';
-import { LOGO } from '../Constants/constants';
+import { LOGO } from '../Constants';
 import { motion } from 'framer-motion';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';

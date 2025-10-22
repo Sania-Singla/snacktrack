@@ -1,4 +1,4 @@
-import { MAX_FILE_SIZE, ALLOWED_EXT } from '../Constants/constants';
+import { MAX_FILE_SIZE, ALLOWED_EXT } from '../Constants/index.js';
 
 /**
  * Utility to restric file sizes and allowed extensions

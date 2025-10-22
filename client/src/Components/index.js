@@ -3,7 +3,9 @@ import Footer from './Layout/Footer';
 import Sidebar from './Layout/Sidebar';
 import Layout from './Layout/Layout';
 import Searchbar from './General/Searchbar';
-import Filter from './General/Filter';
+import Cart from './General/Cart';
+import DateBadge from './General/DateBadge';
+import AudioBtn from './Today/AudioBtn';
 import CalendarFilter from './General/CalendarFilter';
 import Dropdown from './General/Dropdown';
 import Button from './General/Button';
@@ -23,13 +25,11 @@ import IntermediateBillPopup from './Popups/IntermediateBill.Popup';
 import IntermediateBillDetailPopup from './Popups/IntermediateBillDetail.Popup';
 import RemoveItemPopup from './Popups/RemoveItem.Popup';
 import EditCartItemPopup from './Popups/EditCartItem.Popup';
-import SnackView from './Views/SnackView';
-import PackagedItemView from './Views/PackagedItemView';
+import SnackView from './Home/SnackView';
+import PackagedItemView from './Home/PackagedItemView';
 import StudentView from './Views/StudentView';
-import PendingOrders from './Views/PendingOrders';
-import Orders from './Views/Orders';
 import StudentOrderCard from './Views/StudentOrderCard';
-import ContractorOrderCard from './Views/ContractorOrderCard';
+import ActiveOrderCard from './Views/ActiveOrderCard';
 import AddSnackPopup from './Popups/AddSnack.Popup';
 import AddItemPopup from './Popups/AddItem.Popup';
 import EmailVerificationPopup from './Popups/EmailVerification.Popup';
@@ -40,13 +40,33 @@ import OrderUnavailablePopup from './Popups/OrderUnavailable.Popup';
 import EmptyCart from './Views/EmptyCart';
 import BillCard from './Views/BillCard';
 import StudentBillCard from './Views/StudentBillCard';
+import StaticOrderCard from './Views/StaticOrderCard';
+import Snacks from './Home/Snacks';
+import PackagedItems from './Home/PackagedItems';
+import Filters from './Home/Filters';
+import AddBtn from './Home/AddBtn';
+import Stats from './Today/Stats';
+import Pending from './Today/Pending';
+import Completed from './Today/Completed';
+import Rejected from './Today/Rejected';
+import Kitchen from './Today/Kitchen';
+import CompletedHistory from './History/CompletedHistory';
+import PendingHistory from './History/PendingHistory';
+import RejectedHistory from './History/RejectedHistory';
+import StatsHistory from './History/StatsHistory';
+import OrderTotal from './Views/OrderTotal.jsx';
+import OrderItem from './Views/OrderItem.jsx';
+import OrderStudentInfo from './Views/OrderStudentInfo.jsx';
+import ExtraChargeUpdate from './Views/ExtraChargeUpdate.jsx';
 
 export {
     Header,
     Footer,
+    Cart,
+    DateBadge,
     OrderUnavailablePopup,
     Sidebar,
-    Filter,
+    Stats,
     Dropdown,
     Logout,
     Layout,
@@ -55,10 +75,12 @@ export {
     Searchbar,
     InputField,
     ContributorCard,
+    StaticOrderCard,
+    AudioBtn,
     UpdateAccountDetails,
     IntermediateBillPopup,
     IntermediateBillDetailPopup,
-    ContractorOrderCard,
+    ActiveOrderCard,
     UpdatePassword,
     Popup,
     RemoveStudentPopup,
@@ -70,8 +92,6 @@ export {
     StudentView,
     BillCard,
     PackagedItemView,
-    PendingOrders,
-    Orders,
     RemoveItemPopup,
     RemoveSnackPopup,
     EditItemPopup,
@@ -84,4 +104,20 @@ export {
     EmptyCart,
     OrderPlacedPopup,
     StudentBillCard,
+    Snacks,
+    PackagedItems,
+    Filters,
+    AddBtn,
+    Pending,
+    Rejected,
+    Completed,
+    Kitchen,
+    CompletedHistory,
+    PendingHistory,
+    RejectedHistory,
+    StatsHistory,
+    OrderItem,
+    OrderTotal,
+    OrderStudentInfo,
+    ExtraChargeUpdate,
 };

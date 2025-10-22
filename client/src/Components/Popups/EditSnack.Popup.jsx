@@ -1,10 +1,6 @@
 import { useState, useRef } from 'react';
 import { contractorService } from '../../Services';
-import {
-    usePopupContext,
-    useSnackContext,
-    useUserContext,
-} from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import {
     verifyExpression,
@@ -13,13 +9,9 @@ import {
 } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
-import {
-    MAX_FILE_SIZE,
-    SNACK_PLACEHOLDER_IMAGE,
-} from '../../Constants/constants';
+import { MAX_FILE_SIZE, SNACK_PLACEHOLDER_IMAGE } from '../../Constants';
 
 export default function EditSnackPopup() {
-    const { setItems } = useSnackContext();
     const { setShowPopup, popupInfo } = usePopupContext();
     const ref = useRef();
     const [imagePreview, setImagePreview] = useState(popupInfo.snack.image);
@@ -89,18 +81,6 @@ export default function EditSnackPopup() {
             );
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
-                setItems((prev) =>
-                    prev.map((snack) => {
-                        if (snack._id === popupInfo.snack._id) {
-                            return {
-                                ...snack,
-                                name: inputs.name,
-                                price: inputs.price,
-                                image: res.image,
-                            };
-                        } else return snack;
-                    })
-                );
                 setShowPopup(false);
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));
@@ -159,7 +139,7 @@ export default function EditSnackPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-bold">Update Snack Details</p>
+            <p className="text-2xl font-semibold">Update Snack Details</p>
             <p className="text-[15px]">
                 <span className="font-medium">Name: </span>
                 {popupInfo.snack.name}

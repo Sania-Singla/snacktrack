@@ -29,6 +29,9 @@ const billSchema = new Schema(
     { timestamps: true }
 );
 
+billSchema.index({ studentId: 1 });
+billSchema.index({ canteenId: 1, month: 1 });
+
 billSchema.plugin(mongooseAggregatePaginate);
 
 export const Bill = model('Bill', billSchema);

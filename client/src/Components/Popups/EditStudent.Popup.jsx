@@ -5,7 +5,6 @@ import {
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
-import { useNavigate } from 'react-router-dom';
 import { Button, InputField } from '..';
 import { verifyExpression, getRollNo, checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
@@ -25,7 +24,6 @@ export default function EditStudentPopup() {
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const { user, setUser } = useUserContext();
 
     async function handleChange(e) {
@@ -90,8 +88,7 @@ export default function EditStudentPopup() {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-                       toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -128,13 +125,6 @@ export default function EditStudentPopup() {
             placeholder: 'Enter new email',
             required: true,
         },
-        // {
-        //     type: 'text',
-        //     name: 'phoneNumber',
-        //     label: 'PhoneNumber',
-        //     placeholder: 'Enter new Phone Number',
-        //     required: true,
-        // },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -166,7 +156,7 @@ export default function EditStudentPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-bold">Update Student Details</p>
+            <p className="text-2xl font-semibold">Update Student Details</p>
             <p className="text-[15px]">
                 <span className="font-medium">Roll No: </span>
                 {getRollNo(popupInfo.student.userName)}

@@ -1,18 +1,12 @@
 import { useState } from 'react';
 import { contractorService } from '../../Services';
-import {
-    usePopupContext,
-    useSnackContext,
-    useUserContext,
-} from '../../Contexts';
-import { useNavigate } from 'react-router-dom';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import { checkTokenExpired, verifyExpression } from '../../Utils';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
 
 export default function AddItemPopup() {
-    const { setItems } = useSnackContext();
     const { setShowPopup, popupInfo } = usePopupContext();
     const [inputs, setInputs] = useState({
         name: popupInfo.item.name || '',
@@ -21,7 +15,6 @@ export default function AddItemPopup() {
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(false);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const { setUser } = useUserContext();
 
     async function handleChange(e) {
@@ -60,18 +53,12 @@ export default function AddItemPopup() {
             );
             if (res && !res.message) {
                 toast.success('Item details updated successfully 👍');
-                setItems((prev) =>
-                    prev.map((item) =>
-                        item._id === popupInfo.item._id ? res : item
-                    )
-                );
                 setShowPopup(false);
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-                        toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -124,7 +111,7 @@ export default function AddItemPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-bold">Update Item</p>
+            <p className="text-2xl font-semibold">Update Item</p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (

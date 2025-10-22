@@ -2,13 +2,11 @@ import { Button } from '..';
 import { icons } from '../../Assets/icons';
 import {
     usePopupContext,
-    useSnackContext,
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
 import { useEffect, useState } from 'react';
 import { contractorService } from '../../Services';
-import { useNavigate } from 'react-router-dom';
 import { checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 
@@ -18,8 +16,6 @@ export default function PackagedItemView({ item, reference }) {
     const { user } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();
-    const { setItems } = useSnackContext();
-    const navigate = useNavigate();
 
     async function toggleAvailability() {
         try {
@@ -28,11 +24,9 @@ export default function PackagedItemView({ item, reference }) {
                 res &&
                 res.message === 'item availability toggled successfully'
             ) {
-                setItems((prev) =>
-                    prev.map((s) =>
-                        s._id === _id ? { ...s, isAvailable: !isAvailable } : s
-                    )
-                );
+                toast.success('Snack Availability Toggled');
+            } else if (res && res.message !== 'tokens missing') {
+                toast.error(res?.message);
             } else checkTokenExpired(res, setUser);
         } catch (err) {
             toast.error('Something went wrong. Please try again.');

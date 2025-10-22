@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
 import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
-import { LOGO, USER_PLACEHOLDER_IMAGE } from '../../Constants/constants';
+import { LOGO, USER_PLACEHOLDER_IMAGE } from '../../Constants';
 import toast from 'react-hot-toast';
 
 export default function AdminPage() {

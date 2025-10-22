@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { billService } from '../Services';
 import { StudentBillCard } from '../Components';
 import { useUserContext } from '../Contexts';
@@ -11,7 +11,6 @@ export default function StudentBillsPage() {
     const [bills, setBills] = useState([]);
     const [loading, setLoading] = useState(true);
     const { studentId } = useParams();
-    const navigate = useNavigate();
     const { user, setUser } = useUserContext();
 
     useEffect(() => {
@@ -28,20 +27,15 @@ export default function StudentBillsPage() {
                 if (res && !res.message) {
                     setBills(res);
                 } else checkTokenExpired(res, setUser);
-                setLoading(false);
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
+            } finally {
+                setLoading(false);
             }
         })();
 
         return () => controller.abort();
-    }, [studentId, navigate]);
-
-    const billElements = useMemo(() => {
-        return bills.map((bill) => (
-            <StudentBillCard studentInfo={user} key={bill._id} bill={bill} />
-        ));
-    }, [bills]);
+    }, [studentId]);
 
     return (
         <div>
@@ -58,12 +52,20 @@ export default function StudentBillsPage() {
                             {icons.loading}
                         </div>
                     </div>
-                ) : billElements.length > 0 ? (
+                ) : bills.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {billElements}
+                        {bills.map((bill) => (
+                            <StudentBillCard
+                                studentInfo={user}
+                                key={bill._id}
+                                bill={bill}
+                            />
+                        ))}
                     </div>
                 ) : (
-                    <div className="italic text-gray-600">No bills found.</div>
+                    <div className="italic text-gray-600 text-center">
+                        No bills found.
+                    </div>
                 )}
             </div>
         </div>

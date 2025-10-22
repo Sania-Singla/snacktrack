@@ -1,8 +1,23 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
 
 export default function NewUserPage() {
     const navigate = useNavigate();
+    const links = [
+        { name: 'Privacy Policy', link: '/privacy-policy' },
+        { name: 'Contact', link: '/contact' },
+        { name: 'About us', link: '/about' },
+    ];
+
+    const linkElements = links.map((link) => (
+        <Link
+            key={link.name}
+            to={link.link}
+            className="text-gray-500 hover:underline"
+        >
+            {link.name}
+        </Link>
+    ));
 
     return (
         <div className="text-center min-h-screen bg-gradient-to-r from-sky-500 to-blue-600 flex items-center justify-center p-5">
@@ -47,7 +62,7 @@ export default function NewUserPage() {
                 </div>
 
                 <p className="text-gray-500 mb-6 text-sm">
-                    Please visit your nearest Point of Contact to get started
+                    Please visit your nearest Point of Contact to get registered
                 </p>
 
                 {/* Animated Icon */}
@@ -83,9 +98,13 @@ export default function NewUserPage() {
                 <div className="flex gap-3 justify-center sm:px-4">
                     <Button
                         onClick={() => navigate('/admin')}
-                        btnText="Admin"
-                        className="bg-gray-700 text-white py-2 rounded-md hover:bg-gray-800 flex-1"
+                        btnText="Admin Dashboard"
+                        className="bg-[#3a67d8] text-white w-full py-2 rounded-md font-semibold hover:bg-[#2c4fa8] text-sm"
                     />
+                </div>
+
+                <div className="flex gap-3 items-center w-full justify-center mt-6 text-sm">
+                    {linkElements}
                 </div>
             </div>
         </div>

@@ -5,7 +5,7 @@ import { contractorService } from '../Services';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, InputField } from '../Components';
 import { verifyExpression, checkTokenExpired } from '../Utils';
-import { LOGO } from '../Constants/constants';
+import { LOGO } from '../Constants';
 import { motion } from 'framer-motion';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
@@ -84,8 +84,7 @@ export default function RegisterStudentPage() {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-                       toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);

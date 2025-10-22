@@ -1,11 +1,6 @@
 import { SOCKET_EVENTS } from '../Constants/events.js';
-import {
-    safeHandler,
-    sendOrderPickedUpSMS,
-    sendOrderPlacedSMS,
-    sendOrderPreparedSMS,
-    sendOrderRejectedSMS,
-} from '../Utils/index.js';
+import { redisClient } from '../server.js';
+import { safeHandler } from '../Utils/index.js';
 
 export function registerOrderEvents(io, socket) {
     // 🔹 NEW ORDER
@@ -13,81 +8,68 @@ export function registerOrderEvents(io, socket) {
         SOCKET_EVENTS.NEW_ORDER,
         safeHandler(async (order) => {
             order.items.forEach((i) => (i.id = i._id));
-            await Promise.all([
-                io
-                    .to(`contractor_${order.canteenId}`)
-                    .emit(SOCKET_EVENTS.NEW_ORDER, order),
-                // sendOrderPlacedSMS({
-                //     to: order.studentInfo.phoneNumber,
-                //     orderId: order._id,
-                // }),
-            ]);
+            const cantSocketId = await redisClient.get(order.canteenId);
+            await io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, order);
         })
     );
 
     // 🔹 ORDER REJECTED
     socket.on(
         SOCKET_EVENTS.ORDER_REJECTED,
-        safeHandler(async (order) => {
-            await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .to(`contractor_${order.canteenId}`)
-                    .emit(SOCKET_EVENTS.ORDER_REJECTED, order),
-                sendOrderRejectedSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
+        safeHandler(async ({ orderId, studentId, canteenId }) => {
+            const [stuSocketId, cantSocketId] = await redisClient.mGet([
+                studentId,
+                canteenId,
             ]);
+
+            await io
+                .to(stuSocketId)
+                .to(cantSocketId)
+                .emit(SOCKET_EVENTS.ORDER_REJECTED, orderId);
         })
     );
 
     // 🔹 ORDER PREPARED
     socket.on(
         SOCKET_EVENTS.ORDER_PREPARED,
-        safeHandler(async (order) => {
-            await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .to(`contractor_${order.canteenId}`)
-                    .emit(SOCKET_EVENTS.ORDER_PREPARED, order),
-                sendOrderPreparedSMS({
-                    to: order.studentInfo.phoneNumber,
-                    orderId: order._id,
-                }),
+        safeHandler(async ({ orderId, studentId, canteenId }) => {
+            const [stuSocketId, cantSocketId] = await redisClient.mGet([
+                studentId,
+                canteenId,
             ]);
+
+            await io
+                .to(stuSocketId)
+                .to(cantSocketId)
+                .emit(SOCKET_EVENTS.ORDER_PREPARED, orderId);
         })
     );
 
     // 🔹 ORDER PICKED UP
     socket.on(
         SOCKET_EVENTS.ORDER_PICKEDUP,
-        safeHandler(async (order) => {
-            await Promise.all([
-                io
-                    .to(`student_${order.studentId}`)
-                    .to(`contractor_${order.canteenId}`)
-                    .emit(SOCKET_EVENTS.ORDER_PICKEDUP, order),
-                // sendOrderPickedUpSMS({
-                //     to: order.studentInfo.phoneNumber,
-                //     orderId: order._id,
-                // }),
+        safeHandler(async ({ orderId, studentId, canteenId }) => {
+            const [stuSocketId, cantSocketId] = await redisClient.mGet([
+                studentId,
+                canteenId,
             ]);
+
+            await io
+                .to(stuSocketId)
+                .to(cantSocketId)
+                .emit(SOCKET_EVENTS.ORDER_PICKEDUP, orderId);
         })
     );
 
     // 🔹 EXTRA CHARGES UPDATED
-
     socket.on(
         SOCKET_EVENTS.EXTRA_CHARGES_UPDATED,
         safeHandler(async ({ orderId, extraCharges, studentId }) => {
-            io.to(`student_${studentId}`).emit(
-                SOCKET_EVENTS.EXTRA_CHARGES_UPDATED,
-                {
-                    orderId,
-                    extraCharges,
-                }
-            );
+            const stuSocketId = await redisClient.get(studentId);
+            await io.to(stuSocketId).emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
+                orderId,
+                extraCharges,
+            });
         })
     );
 }

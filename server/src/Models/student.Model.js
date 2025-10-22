@@ -46,6 +46,10 @@ const studentSchema = new Schema(
     { timestamps: true }
 );
 
+studentSchema.index({ canteenId: 1, fullName: 1 }); // If you search students by name
+studentSchema.index({ canteenId: 1, userName: 1 }); // If you search students by userName
+studentSchema.index({ canteenId: 1 }); // If you show all students
+
 studentSchema.plugin(mongooseAggregatePaginate);
 
 // Hash password before saving pre hook
