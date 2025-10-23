@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { SOCKET_EVENTS, TAX } from '../Constants';
+import { SNACK_PLACEHOLDER_IMAGE, TAX } from '../Constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
-    useSocketContext,
     useStudentContext,
     useUserContext,
 } from '../Contexts';
@@ -20,7 +19,6 @@ export default function CartPage() {
     const { cartItems, setCartItems, setOrderPlaced } = useStudentContext();
     const [loading, setLoading] = useState(true);
     const { setUser } = useUserContext();
-    const { socket } = useSocketContext();
 
     async function checkAvailability() {
         try {
@@ -90,7 +88,6 @@ export default function CartPage() {
             });
             if (res && !res.message) {
                 localStorage.removeItem('cartItems');
-                socket.emit(SOCKET_EVENTS.NEW_ORDER, res);
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
                 setCartItems([]);
@@ -146,7 +143,7 @@ export default function CartPage() {
                         <div className="size-[40px] bg-gray-50 overflow-hidden border-1 border-gray-300 rounded-lg flex items-center justify-center">
                             {type === 'Snack' ? (
                                 <img
-                                    src={image}
+                                    src={image || SNACK_PLACEHOLDER_IMAGE}
                                     alt={`${name} image`}
                                     className="object-cover size-full"
                                 />
@@ -170,9 +167,9 @@ export default function CartPage() {
                         </div>
                     </div>
 
-                    <div className="sm:hidden flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                    <div className="sm:hidden flex items-center border-1 border-gray-300 rounded-md overflow-hidden">
                         <Button
-                            className="px-3 py-1 text-gray-500 hover:bg-gray-100"
+                            className="px-3 py-1 text-gray-500 hover:bg-gray-100 font-medium"
                             onClick={() =>
                                 quantity === 1
                                     ? removeFromCart(item)
@@ -184,7 +181,7 @@ export default function CartPage() {
                             {quantity}
                         </span>
                         <Button
-                            className="px-3 py-1 text-gray-500 hover:bg-gray-100"
+                            className="px-3 py-1 text-gray-500 hover:bg-gray-100 font-medium"
                             onClick={() => updateQuantity(item, quantity + 1)}
                             btnText="+"
                         />
@@ -193,9 +190,9 @@ export default function CartPage() {
 
                 {/* price & quantity */}
                 <div className="flex items-center space-x-4 mt-3 sm:mt-0">
-                    <div className="hidden sm:flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                    <div className="hidden sm:flex items-center border-1 border-gray-300 rounded-md overflow-hidden">
                         <Button
-                            className="px-3 py-1 text-gray-500 hover:bg-gray-100"
+                            className="px-3 py-1 text-gray-500 hover:bg-gray-100 font-medium"
                             onClick={() =>
                                 quantity === 1
                                     ? removeFromCart(item)
@@ -207,7 +204,7 @@ export default function CartPage() {
                             {quantity}
                         </span>
                         <Button
-                            className="px-3 py-1 text-gray-500 hover:bg-gray-100"
+                            className="px-3 py-1 text-gray-500 hover:bg-gray-100 font-medium"
                             onClick={() => updateQuantity(item, quantity + 1)}
                             btnText="+"
                         />
@@ -249,7 +246,7 @@ export default function CartPage() {
         </div>
     ) : cartItems.length > 0 ? (
         <div className="w-full py-2 px-2 sm:px-6">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-8">
+            <h1 className="text-xl font-semibold text-gray-900 mb-8">
                 Your Cart
             </h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

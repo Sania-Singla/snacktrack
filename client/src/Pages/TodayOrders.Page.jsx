@@ -3,7 +3,6 @@ import { icons } from '../Assets/icons';
 import { Completed, Pending, Rejected, Stats, Kitchen } from '../Components';
 import { useOrderContext } from '../Contexts';
 import { Resizable } from 're-resizable';
-import { motion } from 'framer-motion';
 
 export default function TodayOrdersPage() {
     const { statusFilter } = useOrderContext();
@@ -12,9 +11,9 @@ export default function TodayOrdersPage() {
     return (
         <div className="flex gap-4 h-full">
             <Resizable
-                defaultSize={{ width: '30%' }}
+                defaultSize={{ width: '25%' }}
                 enable={showOrderSide ? { right: true } : {}}
-                className={`${showOrderSide ? '' : 'hidden'} min-w-[40%] max-w-[50%] lg:min-w-[30%] h-full border-r border-gray-200 pr-4`}
+                className={`${showOrderSide ? 'min-w-[40%] max-w-[50%] lg:min-w-[25%] border-r border-gray-200 pr-4' : 'hidden'} h-full`}
                 style={{ width: showOrderSide ? undefined : 0 }}
             >
                 <div className="h-full overflow-hidden">

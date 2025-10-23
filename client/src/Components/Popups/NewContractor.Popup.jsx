@@ -114,8 +114,7 @@ export default function NewContractorPopup() {
                 toast.success('Contractor chnaged Successfully');
             } else setError((prev) => ({ ...prev, root: res.message }));
         } catch (err) {
-                        toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -198,7 +197,7 @@ export default function NewContractorPopup() {
                 onClick={() => setShowPopup(false)}
                 className="absolute top-3 right-3"
             />
-            <p className="text-center text-2xl font-semibold">
+            <p className="text-center text-xl font-semibold">
                 Change Contractor
             </p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
@@ -258,8 +257,8 @@ export default function NewContractorPopup() {
                             className="ml-2 text-md text-red-600 font-semibold"
                             htmlFor="confirmation"
                         >
-                            I understand that, this will permanently clear out the information
-                            about the old contractor.
+                            I understand that, this will permanently clear out
+                            the information about the old contractor.
                         </label>
                         <Button
                             type="submit"

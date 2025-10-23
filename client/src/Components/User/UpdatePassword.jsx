@@ -79,8 +79,7 @@ export default function UpdatePassword() {
                 } else checkTokenExpired(res, setUser);
             }
         } catch (err) {
-                       toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
@@ -98,8 +97,7 @@ export default function UpdatePassword() {
                 toast.success('New password sent to your email');
             } else checkTokenExpired(res, setUser);
         } catch (err) {
-                     toast.error('Something went wrong. Please try again.');
-
+            toast.error('Something went wrong. Please try again.');
         } finally {
             setResetting(false);
         }
@@ -177,14 +175,14 @@ export default function UpdatePassword() {
 
     return (
         <div className="w-full p-2">
-            <div className="rounded-lg drop-shadow-sm flex flex-col sm:flex-row bg-white py-7 px-6 sm:gap-14">
+            <div className="rounded-md border-1 border-gray-200 shadow-xs flex flex-col sm:flex-row bg-white py-7 px-6 sm:gap-14">
                 <div className="w-full">
-                    <h3 className="text-2xl font-semibold">Update Password</h3>
+                    <h3 className="text-xl font-semibold">Update Password</h3>
                     <p className="mt-4 text-gray-600">
                         Update your password here. Please note that changes
                         cannot be undone.
                     </p>
-                    <div className="my-4">
+                    {/* <div className="my-4">
                         <Button
                             btnText={
                                 resetting ? (
@@ -201,7 +199,7 @@ export default function UpdatePassword() {
                             disabled={resetting || loading}
                             className="text-white rounded-md h-9 w-fit px-4 bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
-                    </div>
+                    </div> */}
                 </div>
                 <form onSubmit={handleSubmit} className="w-full max-w-[600px]">
                     <div className="flex flex-col gap-2">{inputElements}</div>

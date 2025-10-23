@@ -24,7 +24,7 @@ export default function HistoryPage() {
     }, []);
 
     return loading ? null : (
-        <>
+        <div className="pl-2">
             <div className="flex items-center justify-between gap-6 mb-4">
                 <h1 className="flex gap-4 justify-between items-center">
                     <p className="text-xl font-semibold text-gray-900">
@@ -48,6 +48,6 @@ export default function HistoryPage() {
             {statusFilter === 'Pending' && <PendingHistory />}
             {statusFilter === 'PickedUp' && <CompletedHistory />}
             {statusFilter === 'Rejected' && <RejectedHistory />}
-        </>
+        </div>
     );
 }

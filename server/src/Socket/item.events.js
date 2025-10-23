@@ -11,19 +11,14 @@ export function registerItemEvents(io, socket) {
     socket.on(
         SOCKET_EVENTS.ITEM_PREPARED,
         safeHandler(async ({ itemId, orderId, studentId, canteenId }) => {
-            const [_, stuSocketId, cantSocketId] = await Promise.all([
-                await addPreparedItem({ itemId, orderId }),
-                await redisClient.get(studentId),
-                await redisClient.get(canteenId),
+            const [_, [stuSocketId, cantSocketId]] = await Promise.all([
+                addPreparedItem({ itemId, orderId }),
+                redisClient.mGet([studentId.toString(), canteenId.toString()]),
             ]);
 
-            await io
-                .to(stuSocketId)
+            io.to(stuSocketId)
                 .to(cantSocketId)
-                .emit(SOCKET_EVENTS.ITEM_PREPARED, {
-                    itemId,
-                    orderId,
-                });
+                .emit(SOCKET_EVENTS.ITEM_PREPARED, { itemId, orderId });
         })
     );
 
@@ -31,19 +26,14 @@ export function registerItemEvents(io, socket) {
     socket.on(
         SOCKET_EVENTS.ITEM_PICKEDUP,
         safeHandler(async ({ itemId, orderId, studentId, canteenId }) => {
-            const [_, stuSocketId, cantSocketId] = await Promise.all([
-                await addPickedUpItem({ itemId, orderId }),
-                await redisClient.get(studentId),
-                await redisClient.get(canteenId),
+            const [_, [stuSocketId, cantSocketId]] = await Promise.all([
+                addPickedUpItem({ itemId, orderId }),
+                redisClient.mGet([studentId.toString(), canteenId.toString()]),
             ]);
 
-            await io
-                .to(stuSocketId)
+            io.to(stuSocketId)
                 .to(cantSocketId)
-                .emit(SOCKET_EVENTS.ITEM_PICKEDUP, {
-                    itemId,
-                    orderId,
-                });
+                .emit(SOCKET_EVENTS.ITEM_PICKEDUP, { itemId, orderId });
         })
     );
 }

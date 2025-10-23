@@ -21,7 +21,13 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
         (async function () {
             try {
                 const res = await orderService.getKitchenOrders(signal);
-                if (res && !res.message) setOrders(res.orders);
+                if (res && !res.message) {
+                    const updatedOrders = res.orders.map((o) => {
+                        o.items = o.items.filter((i) => !i.prepared);
+                        return o;
+                    });
+                    setOrders(updatedOrders);
+                }
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
             } finally {
@@ -75,12 +81,6 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
                                     'Something went wrong. Please try again.'
                                 )
                             );
-
-                        socket.emit(SOCKET_EVENTS.ORDER_PREPARED, {
-                            orderId,
-                            studentId: o.studentId,
-                            canteenId: o.canteenId,
-                        });
                         return acc; // skip adding
                     }
 
@@ -149,7 +149,6 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
         const newSummary = {};
         orders.forEach((o) => {
             o.items.forEach((i) => {
-                if (i.prepared) return;
                 newSummary[i.name] = (newSummary[i.name] || 0) + i.quantity;
             });
         });
@@ -205,7 +204,7 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
                         <Resizable
                             defaultSize={{ width: '30%' }}
                             enable={{ left: true }}
-                            className="flex-1 max-w-full min-w-full lg:min-w-[30%] lg:max-w-[50%] lg:border-l-1 border-l-gray-200 lg:pl-4 space-y-4"
+                            className="max-w-full min-w-full lg:min-w-[30%] lg:max-w-[50%] lg:border-l-1 border-l-gray-200 lg:pl-4 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4"
                         >
                             {orderElements}
                         </Resizable>

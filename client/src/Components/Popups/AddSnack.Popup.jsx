@@ -137,7 +137,7 @@ export default function AddSnackPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-semibold">Add New Snack</p>
+            <p className="text-xl font-semibold">Add New Snack</p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (

@@ -10,7 +10,7 @@ export default function StudentBillCard({ bill, studentInfo }) {
     const navigate = useNavigate();
 
     return (
-        <div className="rounded-md shadow-sm transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between">
+        <div className="rounded-md shadow-xs border-1 border-gray-200 transition-all bg-white hover:shadow-md h-fit cursor-pointer px-3 py-2 flex justify-between">
             <div className="flex items-center gap-3">
                 {/* Month/year badge */}
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 size-12 rounded-lg flex items-center justify-center border border-blue-400">

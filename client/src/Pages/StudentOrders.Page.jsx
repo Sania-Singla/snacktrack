@@ -92,75 +92,77 @@ export default function StudentOrdersPage() {
             }
         );
 
-        socket.on(SOCKET_EVENTS.ITEM_PREPARED, async ({ orderId, itemId }) => {
-            setOrders((prev) => {
-                const updatedOrders = prev.map((o) => {
-                    if (o._id !== orderId) return o;
+        // we dont have per item updates yet ✨✨
 
-                    const updatedItems = o.items.map((i) =>
-                        i.id === itemId ? { ...i, prepared: true } : i
-                    );
+        // socket.on(SOCKET_EVENTS.ITEM_PREPARED, async ({ orderId, itemId }) => {
+        //     setOrders((prev) => {
+        //         const updatedOrders = prev.map((o) => {
+        //             if (o._id !== orderId) return o;
 
-                    const allPrepared = updatedItems.every((i) => i.prepared);
-                    return {
-                        ...o,
-                        items: updatedItems,
-                        status: allPrepared ? 'Prepared' : o.status,
-                    };
-                });
+        //             const updatedItems = o.items.map((i) =>
+        //                 i.id === itemId ? { ...i, prepared: true } : i
+        //             );
 
-                return updatedOrders;
-            });
-        });
+        //             const allPrepared = updatedItems.every((i) => i.prepared);
+        //             return {
+        //                 ...o,
+        //                 items: updatedItems,
+        //                 status: allPrepared ? 'Prepared' : o.status,
+        //             };
+        //         });
 
-        socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, ({ orderId, itemId }) => {
-            setOrders((prev) => {
-                const updatedOrders = prev.map((o) => {
-                    if (o._id !== orderId) return o;
+        //         return updatedOrders;
+        //     });
+        // });
 
-                    const updatedItems = o.items.map((i) =>
-                        i.id === itemId ? { ...i, pickedUp: true } : i
-                    );
+        // socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, ({ orderId, itemId }) => {
+        //     setOrders((prev) => {
+        //         const updatedOrders = prev.map((o) => {
+        //             if (o._id !== orderId) return o;
 
-                    const allPickedUp = updatedItems.every((i) => i.pickedUp);
-                    return {
-                        ...o,
-                        items: updatedItems,
-                        status: allPickedUp ? 'PickedUp' : o.status,
-                    };
-                });
+        //             const updatedItems = o.items.map((i) =>
+        //                 i.id === itemId ? { ...i, pickedUp: true } : i
+        //             );
 
-                return updatedOrders;
-            });
-        });
+        //             const allPickedUp = updatedItems.every((i) => i.pickedUp);
+        //             return {
+        //                 ...o,
+        //                 items: updatedItems,
+        //                 status: allPickedUp ? 'PickedUp' : o.status,
+        //             };
+        //         });
+
+        //         return updatedOrders;
+        //     });
+        // });
 
         return () => {
             socket.off(SOCKET_EVENTS.ORDER_REJECTED);
             socket.off(SOCKET_EVENTS.ORDER_PREPARED);
             socket.off(SOCKET_EVENTS.ORDER_PICKEDUP);
-            socket.off(SOCKET_EVENTS.ITEM_PREPARED);
-            socket.off(SOCKET_EVENTS.ITEM_PICKEDUP);
+            // socket.off(SOCKET_EVENTS.ITEM_PREPARED);
+            // socket.off(SOCKET_EVENTS.ITEM_PICKEDUP);
             socket.off(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED);
         };
     }, [socket]);
 
     return (
-        <div className="w-full sm:p-4">
+        <div className="pl-2">
             <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-6 mb-8">
                 <div className="flex gap-4 justify-between items-center w-full">
-                    <h1 className="text-2xl text-nowrap font-semibold w-full sm:w-fit text-gray-900 flex items-center gap-4">
+                    <h1 className="text-xl text-nowrap font-semibold w-full sm:w-fit text-gray-900 flex items-center gap-4">
                         <p>{user._id === studentId ? 'My Orders' : 'Orders'}</p>
                         <DateBadge />
                     </h1>
 
-                    <div className="text-nowrap sm:hidden text-center border-1 border-gray-200 rounded-lg px-3 py-1.5 bg-white shadow-sm text-[#4977ec] font-medium">
+                    <div className="text-nowrap sm:hidden text-center border-1 border-gray-200 rounded-md px-2 py-1 bg-white text-sm text-[#4977ec] font-medium">
                         Total Orders: {ordersInfo.totalOrders}
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <CalendarFilter />
-                    <div className="hidden text-nowrap sm:block text-center border-1 border-gray-200 rounded-lg px-3 py-1.5 bg-white shadow-sm text-[#4977ec] font-medium">
+                    <div className="hidden text-nowrap sm:block text-center border-1 border-gray-200 rounded-md px-2 py-1 bg-white text-sm text-[#4977ec] font-medium">
                         Total Orders: {ordersInfo.totalOrders}
                     </div>
                 </div>

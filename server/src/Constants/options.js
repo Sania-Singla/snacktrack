@@ -3,13 +3,11 @@ const COOKIE_OPTIONS = {
     path: '/',
     secure: true,
     sameSite: 'None',
-    domain: process.env.FRONTEND_URL.includes('.live')
-        ? '.snacktrack.live'
-        : '', // required for iOS
+    domain: process.env.ENV === 'prod' ? '.snacktrack.live' : '', // required for iOS
 };
 
 const CORS_OPTIONS = {
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.WHITELIST ? process.env.WHITELIST.split(',') : [],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
     optionsSuccessStatus: 200,

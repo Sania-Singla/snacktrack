@@ -29,6 +29,7 @@ import {
     ContactPage,
     PrivacyPolicyPage,
     HistoryPage,
+    VerifyKitchenKeyPage,
 } from './Pages';
 
 import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
@@ -36,7 +37,6 @@ import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
 export const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
-            {/* all */}
             <Route element={<AccessTo roles={['student', 'contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="" element={<HomePage />} />
@@ -46,10 +46,6 @@ export const router = createBrowserRouter(
             {/* Student & Contractor only */}
             <Route element={<AccessTo roles={['student', 'contractor']} />}>
                 <Route element={<Layout />}>
-                    <Route path="settings" element={<SettingsPage />}>
-                        <Route path="" element={<UpdateAccountDetails />} />
-                        <Route path="password" element={<UpdatePassword />} />
-                    </Route>
                     <Route
                         path="orders/:studentId"
                         element={<StudentOrdersPage />}
@@ -81,6 +77,10 @@ export const router = createBrowserRouter(
             {/* Student only */}
             <Route element={<AccessTo roles={['student']} />}>
                 <Route element={<Layout />}>
+                    <Route path="settings" element={<SettingsPage />}>
+                        <Route path="" element={<UpdateAccountDetails />} />
+                        <Route path="password" element={<UpdatePassword />} />
+                    </Route>
                     <Route path="cart" element={<CartPage />} />
                 </Route>
             </Route>
@@ -97,6 +97,11 @@ export const router = createBrowserRouter(
                         />
                     </Route>
                 </Route>
+
+                <Route
+                    path="verify-kitchen-key"
+                    element={<VerifyKitchenKeyPage />}
+                />
 
                 <Route path="new-user" element={<NewUserPage />} />
                 <Route path="demo" element={<DemoCredentialsPage />} />

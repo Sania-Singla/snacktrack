@@ -4,14 +4,14 @@ import { Snack, PackagedFood } from '../Models/index.js';
 import { Types } from 'mongoose';
 
 export const getSnacks = tryCatch('get snacks', async (req, res) => {
-    const user = req.user;
     const { page = 1, limit = 50, search = '' } = req.query;
+    const { canteenId } = req.params;
 
     const result = await Snack.aggregatePaginate(
         [
             {
                 $match: {
-                    canteenId: new Types.ObjectId(user.canteenId),
+                    canteenId: new Types.ObjectId(canteenId),
                     ...(search && {
                         name: { $regex: search, $options: 'i' }, // case-insensitive
                     }),
@@ -36,14 +36,14 @@ export const getSnacks = tryCatch('get snacks', async (req, res) => {
 });
 
 export const getItems = tryCatch('get packaged items', async (req, res) => {
-    const user = req.user;
     const { page = 1, limit = 50, search = '' } = req.query;
+    const { canteenId } = req.params;
 
     const result = await PackagedFood.aggregatePaginate(
         [
             {
                 $match: {
-                    canteenId: new Types.ObjectId(user.canteenId),
+                    canteenId: new Types.ObjectId(canteenId),
                     ...(search && {
                         name: { $regex: search, $options: 'i' }, // case-insensitive
                     }),

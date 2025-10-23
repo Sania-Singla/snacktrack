@@ -66,14 +66,14 @@ export default function BillsPage() {
     }
 
     return (
-        <div className="w-full pt-2 sm:p-4">
+        <div className="pl-2">
             <div className="flex flex-col gap-6 sm:gap-4 sm:flex-row sm:items-center justify-between w-full mb-6">
                 <div className="flex items-center justify-between gap-4 w-full">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-semibold text-gray-900">
+                        <h1 className="text-xl font-semibold text-gray-900">
                             Bills
                         </h1>
-                        <div className="px-3 py-[3px] text-sm font-semibold space-x-2 rounded-full border border-blue-200 bg-blue-50 text-blue-700">
+                        <div className="px-2 py-0.5 text-xs font-semibold space-x-2 rounded-full border border-blue-200 bg-blue-50 text-blue-700">
                             <span>
                                 {new Date(0, monthFilter - 1).toLocaleString(
                                     'default',
@@ -86,7 +86,7 @@ export default function BillsPage() {
                     <div className="flex items-center gap-4">
                         <Button
                             onClick={generateIntermediateBill}
-                            className="hidden md:flex text-white rounded-lg py-1.5 w-fit font-medium text-nowrap px-3 items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                            className="hidden md:flex text-white rounded-md py-1.5 text-sm w-fit text-nowrap px-3 items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
                             btnText="Generate Bill"
                         />
 
@@ -108,6 +108,7 @@ export default function BillsPage() {
                                 ]}
                                 defaultVal={monthFilter}
                                 setValue={setMonthFilter}
+                                className="px-2 py-1"
                             />
                         </div>
 

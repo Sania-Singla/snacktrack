@@ -6,14 +6,8 @@ export default function PrivacyPolicyPage() {
             </h1>
 
             <p className="mb-4">
-                SnackTrack (
-                <a
-                    href="https://pu.snacktrack.live"
-                    className="text-[#4977ec] hover:underline"
-                >
-                    https://pu.snacktrack.live
-                </a>
-                ) is a web portal designed for students and staff of the{' '}
+                SnackTrack is a web portal designed for students and staff of
+                the{' '}
                 <strong>
                     University Institute of Engineering and Technology (UIET),
                     Panjab University
@@ -68,7 +62,7 @@ export default function PrivacyPolicyPage() {
                 active. After graduation or account deactivation, your data may
                 be archived or deleted per university policy.
             </p>
-
+            {/* 
             <h2 className="text-2xl font-semibold mt-8 mb-3">Contact</h2>
             <p className="mb-4">
                 For privacy-related concerns, contact us at{' '}
@@ -79,7 +73,7 @@ export default function PrivacyPolicyPage() {
                     support@snacktrack.live
                 </a>
                 .
-            </p>
+            </p> */}
 
             <p className="text-sm text-gray-500 mt-8">
                 Last updated: October 2025

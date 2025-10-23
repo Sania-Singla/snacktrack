@@ -9,8 +9,7 @@ import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
-    const [inputs, setInputs] = useState({ loginInput: '', password: '' });
-    const [role, setRole] = useState('');
+    const [inputs, setInputs] = useState({ userName: '', password: '' });
     const [hostel, setHostel] = useState('');
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(true);
@@ -20,11 +19,6 @@ export default function LoginPage() {
     const [hostels, setHostels] = useState([
         { value: '', label: 'Select Hostel' },
     ]);
-    const roles = [
-        { value: '', label: 'Select Role' },
-        { value: 'student', label: 'Student' },
-        { value: 'contractor', label: 'Contractor' },
-    ];
 
     function handleChange(e) {
         let { value, name } = e.target;
@@ -37,12 +31,7 @@ export default function LoginPage() {
     }
 
     function handleDisable() {
-        if (
-            !inputs.loginInput ||
-            !inputs.password ||
-            !role ||
-            (role === 'student' && !hostel)
-        ) {
+        if (!inputs.userName || !inputs.password || !hostel) {
             return true;
         } else return false;
     }
@@ -91,17 +80,13 @@ export default function LoginPage() {
         setDisabled(true);
         try {
             const res = await userService.login({
-                loginInput:
-                    role === 'contractor'
-                        ? inputs.loginInput
-                        : `${hostel}-${inputs.loginInput}`,
+                userName: `${hostel}-${inputs.userName}`,
                 password: inputs.password,
-                role,
             });
 
             if (res && !res.message) {
-                setUser(res);
                 toast.success('Logged in Successfully 😉');
+                setUser(res);
                 localStorage.removeItem('cartItems');
                 navigate('/');
             } else toast.error(res.message);
@@ -115,14 +100,12 @@ export default function LoginPage() {
 
     const inputFields = [
         {
-            type: role === 'student' ? 'number' : 'email',
-            name: 'loginInput',
-            label: role === 'student' ? 'Roll No' : 'Email',
-            value: inputs.loginInput,
-            placeholder:
-                role === 'student' ? 'Enter your Roll no' : 'Enter your email',
+            type: 'number',
+            name: 'userName',
+            label: 'Roll No',
+            value: inputs.userName,
+            placeholder: 'Enter your Roll no',
             required: true,
-            show: role,
         },
         {
             type: showPassword ? 'text' : 'password',
@@ -131,24 +114,19 @@ export default function LoginPage() {
             value: inputs.password,
             placeholder: 'Enter password',
             required: true,
-            show: true,
         },
     ];
 
-    const inputElements = inputFields.map(
-        (field) =>
-            field.show && (
-                <div className="w-full" key={field.name}>
-                    <InputField
-                        field={field}
-                        handleChange={handleChange}
-                        inputs={inputs}
-                        showPassword={showPassword}
-                        setShowPassword={setShowPassword}
-                    />
-                </div>
-            )
-    );
+    const inputElements = inputFields.map((field) => (
+        <InputField
+            key={field.name}
+            field={field}
+            handleChange={handleChange}
+            inputs={inputs}
+            showPassword={showPassword}
+            setShowPassword={setShowPassword}
+        />
+    ));
 
     return (
         <div className="text-black flex flex-col items-center justify-center gap-5 min-h-screen">
@@ -175,40 +153,56 @@ export default function LoginPage() {
                     className="h-[0.05rem] relative -top-1 bg-[#333333]"
                 />
             </div>
-            <div className="text-black max-w-[500px] min-w-[300px] mt-4 flex flex-col items-center gap-4">
-                <Dropdown options={roles} setValue={setRole} />
+
+            <div className="text-black max-w-[500px] min-w-[300px] flex flex-col items-center gap-3">
+                <Button
+                    className="text-gray-800 rounded-md mt-3 h-[40px] flex items-center justify-center w-full transition-all duration-200 border-1 border-[#4977ec] hover:bg-[#4977ec]/10 hover:shadow-sm active:scale-[98%]"
+                    btnText={
+                        <div className="flex gap-2.5 items-center">
+                            <span className="text-[#4977ec] text-[15px] font-medium">
+                                Upload QR
+                            </span>
+                            <div className="size-5.5 fill-[#4977ec]">
+                                {icons.upload}
+                            </div>
+                        </div>
+                    }
+                    disabled={loading}
+                />
+
+                <div className="flex gap-2 items-center w-full">
+                    <hr className="text-gray-300 w-full" />
+                    <p className="text-gray-400 text-sm font-light pb-1">or</p>
+                    <hr className="text-gray-300 w-full" />
+                </div>
 
                 <form
                     onSubmit={handleSubmit}
-                    className="w-full flex flex-col gap-4"
+                    className="w-full flex flex-col gap-2"
                 >
-                    {role === 'student' && (
-                        <div className="w-full flex justify-center mt-4">
-                            <Dropdown options={hostels} setValue={setHostel} />
-                        </div>
-                    )}
+                    <div className="w-full flex justify-center">
+                        <Dropdown options={hostels} setValue={setHostel} />
+                    </div>
 
                     <div className="w-full flex flex-col gap-2">
                         {inputElements}
                     </div>
 
-                    <div>
-                        <Button
-                            className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
-                            onMouseOver={onMouseOver}
-                            type="submit"
-                            btnText={
-                                loading ? (
-                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                        {icons.loading}
-                                    </div>
-                                ) : (
-                                    'Login'
-                                )
-                            }
-                            disabled={disabled}
-                        />
-                    </div>
+                    <Button
+                        className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                        onMouseOver={onMouseOver}
+                        type="submit"
+                        btnText={
+                            loading ? (
+                                <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                    {icons.loading}
+                                </div>
+                            ) : (
+                                'Login'
+                            )
+                        }
+                        disabled={disabled}
+                    />
                 </form>
             </div>
         </div>

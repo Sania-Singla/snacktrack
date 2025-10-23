@@ -14,11 +14,12 @@ export default function OrderItem({ item, order, type = 'static' }) {
     const itemStatus =
         type === 'static' ? (
             <div>
-                {item.prepared && !item.pickedUp && (
+                {null}
+                {/* {item.prepared && !item.pickedUp && (
                     <span className="flex items-center gap-1 text-xs bg-green-50 rounded-full font-medium border-[0.01rem] border-green-300 w-fit px-2 text-green-600">
                         Ready
                     </span>
-                )}
+                )} */}
             </div>
         ) : (
             <div>

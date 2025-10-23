@@ -17,6 +17,7 @@ export default function EditContractorPopup() {
         fullName: popupInfo.contractor?.fullName,
         phoneNumber: popupInfo.contractor?.phoneNumber,
         email: popupInfo.contractor?.email,
+        password: '',
     });
     const [isVerified, setIsVerified] = useState(true);
     const [sendingMail, setSendingMail] = useState(false);
@@ -24,7 +25,7 @@ export default function EditContractorPopup() {
     function handleChange(e) {
         const { value, name } = e.target;
         setInputs((prev) => ({ ...prev, [name]: value }));
-        if (value) {
+        if (value && name !== 'password') {
             verifyExpression(name, value, setError);
         } else setError((prev) => ({ ...prev, [name]: '' }));
         if (name === 'email') {
@@ -139,6 +140,13 @@ export default function EditContractorPopup() {
             placeholder: 'Enter your Email',
             required: true,
         },
+        {
+            type: 'password',
+            name: 'password',
+            label: 'Password',
+            placeholder: 'Enter your password',
+            required: true,
+        },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -201,8 +209,8 @@ export default function EditContractorPopup() {
                 className="absolute top-3 right-3"
             />
 
-            <p className="text-center text-2xl font-semibold">
-                Edit Contractor
+            <p className="text-center text-xl font-semibold">
+                Edit Canteen Details
             </p>
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (

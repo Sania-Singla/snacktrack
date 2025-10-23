@@ -50,7 +50,7 @@ export default function Sidebar() {
             path: '/settings',
             name: 'Settings',
             icon: icons.settings,
-            show: true,
+            show: user.role === 'student',
         },
     ];
 

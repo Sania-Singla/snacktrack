@@ -16,8 +16,7 @@ import {
     sendMail,
 } from '../Utils/index.js';
 import { Canteen, Contractor } from '../Models/index.js';
-import { nanoid, random } from 'nanoid';
-import { Types } from 'mongoose';
+import { nanoid } from 'nanoid';
 import { generateAccessToken } from '../Helpers/tokens.js';
 import bcrypt from 'bcryptjs';
 
@@ -51,11 +50,18 @@ const verifyAdminKey = tryCatch('verify admin key', async (req, res, next) => {
 const registerCanteen = tryCatch(
     'register as contractor',
     async (req, res, next) => {
-        const { fullName, email, phoneNumber, hostel } = req.body;
+        let { fullName, email, phoneNumber, hostel } = req.body;
+        fullName = fullName?.trim();
+        email = email?.toLowerCase().trim();
+        phoneNumber = phoneNumber?.trim();
 
         if (!fullName || !email || !phoneNumber || !hostel) {
             return next(new ErrorHandler('Missing fields', BAD_REQUEST));
         }
+
+        let { hostelName, hostelNumber, hostelType } = hostel;
+        hostelName = hostelName.trim();
+        hostelType = hostelType.trim();
 
         const isValid = ['fullName', 'email', 'phoneNumber'].every((key) =>
             verifyExpression(key, req.body[key]?.trim())
@@ -69,20 +75,12 @@ const registerCanteen = tryCatch(
         const [existingCanteen, existingContractor] = await Promise.all([
             Canteen.findOne({
                 $or: [
-                    { hostelName: hostel.hostelName.trim() },
-                    {
-                        $and: [
-                            { hostelNumber: hostel.hostelNumber },
-                            { hostelType: hostel.hostelType.trim() },
-                        ],
-                    },
+                    { hostelName },
+                    { $and: [{ hostelNumber }, { hostelType }] },
                 ],
             }),
             Contractor.findOne({
-                $or: [
-                    { email: email.trim() },
-                    { phoneNumber: phoneNumber.trim() },
-                ],
+                $or: [{ email }, { phoneNumber }],
             }),
         ]);
 
@@ -119,7 +117,7 @@ const registerCanteen = tryCatch(
         await canteen.save();
 
         // send this password on contractor's email
-        await sendMail({
+        sendMail({
             receiverName: fullName,
             receiverMail: email,
             subject: 'Welcome to SnackTrack',
@@ -128,7 +126,6 @@ const registerCanteen = tryCatch(
                 Welcome to SnackTrack! <br>
                 You are now the manager of the canteen of Hostel: ${hostel.hostelType}${hostel.hostelNumber}-${hostel.hostelName}. <br>
                 Your Temporary password is <b>${randomPassword}</b> <br>
-                <i>*These values can be updated anytime from settings.*</i> <br>
             `,
         });
 
@@ -171,9 +168,12 @@ const updateContractor = tryCatch(
     'update contractor',
     async (req, res, next) => {
         const { contractorId } = req.params;
-        const { fullName, phoneNumber, email } = req.body;
+        let { fullName, phoneNumber, email, password } = req.body;
+        fullName = fullName?.trim();
+        email = email?.toLowerCase().trim();
+        phoneNumber = phoneNumber?.trim();
 
-        if (!fullName || !phoneNumber || !email) {
+        if (!fullName || !phoneNumber || !email || !password) {
             return res.status(BAD_REQUEST).json({ message: 'Missing Fields' });
         }
 
@@ -185,8 +185,13 @@ const updateContractor = tryCatch(
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
 
+        const contractor = await Contractor.findById(contractorId);
+        if (!contractor) {
+            return next(new ErrorHandler('contractor not found', NOT_FOUND));
+        }
+
         const alreadyExists = await Contractor.findOne({
-            $or: [{ phoneNumber }, { email: email.toLowerCase() }],
+            $or: [{ phoneNumber }, { email }],
             _id: { $ne: contractorId },
         });
 
@@ -196,17 +201,19 @@ const updateContractor = tryCatch(
             );
         }
 
-        const contractor = await Contractor.findByIdAndUpdate(
-            contractorId,
-            {
-                $set: {
-                    fullName,
-                    phoneNumber,
-                    email,
-                },
-            },
-            { new: true }
+        const isPassCorrect = await bcrypt.compare(
+            password,
+            contractor.password
         );
+        if (!isPassCorrect) {
+            return next(new ErrorHandler('Incorrect password', FORBIDDEN));
+        }
+
+        contractor.fullName = fullName || contractor.fullName;
+        contractor.phoneNumber = phoneNumber || contractor.phoneNumber;
+        contractor.email = email || contractor.email;
+        await contractor.save();
+
         return res.status(OK).json(contractor);
     }
 );

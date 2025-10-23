@@ -11,7 +11,7 @@ import { checkTokenExpired, paginate } from '../../Utils';
 import toast from 'react-hot-toast';
 
 export default function PackagedItems() {
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [items, setItems] = useState([]);
     const [itemsInfo, setItemsInfo] = useState({});
     const [loading, setLoading] = useState(true);
@@ -40,6 +40,7 @@ export default function PackagedItems() {
             try {
                 setLoading(true);
                 const res = await snackService.getItems({
+                    canteenId: user.canteenId,
                     page,
                     signal,
                     search: debouncedSearch,
@@ -93,7 +94,9 @@ export default function PackagedItems() {
                 </div>
             ) : (
                 items.length === 0 && (
-                    <div className="italic text-gray-600">No items found</div>
+                    <div className="italic text-center text-gray-600">
+                        No items found
+                    </div>
                 )
             )}
         </>

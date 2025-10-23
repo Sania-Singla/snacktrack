@@ -5,10 +5,16 @@ export default function AccessTo({ roles = [] }) {
     const { user } = useUserContext();
     const location = useLocation();
 
-    if (!user || (roles.length && !roles.includes(user.role))) {
-        if (location.pathname.includes('admin'))
+    if (!user) {
+        if (location.pathname.includes('admin')) {
             return <Navigate to="/admin/verify-key" replace />;
-        else return <Navigate to={'/new-user'} replace />;
+        } else {
+            return <Navigate to={'/new-user'} replace />;
+        }
+    }
+
+    if (roles.length && !roles.includes(user.role)) {
+        return <Navigate to={'/not-found'} replace />;
     }
 
     return <Outlet />;

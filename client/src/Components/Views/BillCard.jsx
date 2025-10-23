@@ -14,7 +14,7 @@ export default function BillCard({ bill, reference }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.2 }}
-            className="flex justify-between gap-4 bg-white p-3 cursor-pointer rounded-md shadow-sm overflow-hidden transition-all hover:shadow-md h-fit border border-gray-200"
+            className="flex justify-between gap-4 bg-white p-3 cursor-pointer rounded-md shadow-xs border-1 border-gray-100 overflow-hidden transition-all hover:shadow-md h-fit"
         >
             {/* info */}
             <div>

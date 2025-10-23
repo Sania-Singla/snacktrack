@@ -1,8 +1,7 @@
 import { Button } from '..';
 import { useState } from 'react';
 import { icons } from '../../Assets/icons';
-import { SOCKET_EVENTS } from '../../Constants';
-import { useSocketContext, useUserContext } from '../../Contexts';
+import { useUserContext } from '../../Contexts';
 import { orderService } from '../../Services';
 import toast from 'react-hot-toast';
 import { checkTokenExpired } from '../../Utils';
@@ -11,7 +10,6 @@ export default function ExtraChargeUpdate({ order, rejecting = false }) {
     const [extraChgs, setExtraChgs] = useState(order.extraCharges || 0);
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(true);
-    const { socket } = useSocketContext();
     const { setUser } = useUserContext();
 
     async function handleExtraChargesUpdate() {
@@ -24,11 +22,6 @@ export default function ExtraChargeUpdate({ order, rejecting = false }) {
             });
             if (res && res.message === 'extra charges updated successfully') {
                 toast.success('Extra charges updated successfully');
-                socket.emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
-                    orderId: order._id,
-                    extraCharges: chgs,
-                    studentId: order.studentId,
-                });
             } else if (res && res.message === 'too late') {
                 toast.error('Too Late');
             } else checkTokenExpired(res, setUser);

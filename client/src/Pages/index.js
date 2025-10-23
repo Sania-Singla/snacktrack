@@ -11,8 +11,8 @@ import TodayOrdersPage from './TodayOrders.Page';
 import StudentOrdersPage from './StudentOrders.Page';
 import CartPage from './Cart.Page';
 import StudentBillsPage from './StudentBills.Page';
-import AdminPage from './Admin/Admin.Page';
-import VerifyAdminKeyPage from './Admin/VerifyAdminKey.Page';
+import AdminPage from './Admin/Admin.Page.jsx';
+import VerifyAdminKeyPage from './Admin/VerifyAdminKey.Page.jsx';
 import RegisterCanteenPage from './RegisterCanteen.Page';
 import BillsPage from './Bills.Page';
 import DemoCredentialsPage from './General/DemoCredentials.Page';
@@ -20,6 +20,7 @@ import AboutPage from './General/About.Page';
 import ContactPage from './General/Contact.Page';
 import PrivacyPolicyPage from './General/Privacy.Page';
 import HistoryPage from './History.Page.jsx';
+import VerifyKitchenKeyPage from './VerifyKitchenKey.Page.jsx';
 
 export {
     StudentBillsPage,
@@ -44,4 +45,5 @@ export {
     ContactPage,
     PrivacyPolicyPage,
     HistoryPage,
+    VerifyKitchenKeyPage,
 };

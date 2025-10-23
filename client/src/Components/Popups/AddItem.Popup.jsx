@@ -106,7 +106,7 @@ export default function AddItemPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-semibold">Add New Item</p>
+            <p className="text-xl font-semibold">Add New Item</p>
 
             <div className="w-full flex flex-col items-center justify-center gap-3">
                 {error.root && (

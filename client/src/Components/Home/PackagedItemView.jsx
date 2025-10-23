@@ -78,7 +78,7 @@ export default function PackagedItemView({ item, reference }) {
     return (
         <div
             ref={reference}
-            className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} shadow-sm relative bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
+            className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} shadow-xs border-1 border-gray-100 relative bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
         >
             {/* Content */}
             <div className="flex flex-col justify-between gap-4 h-full w-full py-2.5 px-3.5">
@@ -152,7 +152,7 @@ export default function PackagedItemView({ item, reference }) {
                                         {icons.editUnfilled}
                                     </div>
                                 }
-                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                className="bg-[#f0efef] p-2 group rounded-full shadow-xs hover:bg-[#ebeaea]"
                                 onClick={editItem}
                             />
                             <div>
@@ -162,7 +162,7 @@ export default function PackagedItemView({ item, reference }) {
                                             {icons.delete}
                                         </div>
                                     }
-                                    className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                    className="bg-[#f0efef] p-2 group rounded-full shadow-xs hover:bg-[#ebeaea]"
                                     onClick={removeItem}
                                 />
                             </div>

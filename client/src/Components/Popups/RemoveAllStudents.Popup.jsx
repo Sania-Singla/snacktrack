@@ -69,7 +69,7 @@ export default function RemoveAllStudentsPopup() {
             />
 
             <div className="flex flex-col gap-3">
-                <p className="text-2xl font-semibold text-center">
+                <p className="text-xl font-semibold text-center">
                     Remove All Students
                 </p>
                 <p className="text-[15px] text-center font-medium">

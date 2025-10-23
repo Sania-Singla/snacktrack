@@ -38,36 +38,34 @@ export default function StudentBillsPage() {
     }, [studentId]);
 
     return (
-        <div>
-            <div className="w-full p-2 md:p-4">
-                <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-2xl font-semibold text-gray-900">
-                        My Bills
-                    </h1>
-                </div>
-
-                {loading ? (
-                    <div className="flex justify-center py-12">
-                        <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
-                            {icons.loading}
-                        </div>
-                    </div>
-                ) : bills.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {bills.map((bill) => (
-                            <StudentBillCard
-                                studentInfo={user}
-                                key={bill._id}
-                                bill={bill}
-                            />
-                        ))}
-                    </div>
-                ) : (
-                    <div className="italic text-gray-600 text-center">
-                        No bills found.
-                    </div>
-                )}
+        <div className="pl-2">
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-xl font-semibold text-gray-900">
+                    My Bills
+                </h1>
             </div>
+
+            {loading ? (
+                <div className="flex justify-center py-12">
+                    <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                        {icons.loading}
+                    </div>
+                </div>
+            ) : bills.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {bills.map((bill) => (
+                        <StudentBillCard
+                            studentInfo={user}
+                            key={bill._id}
+                            bill={bill}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div className="italic text-gray-600 text-center">
+                    No bills found.
+                </div>
+            )}
         </div>
     );
 }

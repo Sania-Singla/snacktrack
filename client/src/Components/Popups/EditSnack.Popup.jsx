@@ -139,7 +139,7 @@ export default function EditSnackPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-semibold">Update Snack Details</p>
+            <p className="text-xl font-semibold">Update Snack Details</p>
             <p className="text-[15px]">
                 <span className="font-medium">Name: </span>
                 {popupInfo.snack.name}

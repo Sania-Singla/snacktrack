@@ -75,7 +75,7 @@ export default function Completed() {
     return (
         <>
             {orders.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
                     {orders.map((order, i) => (
                         <StaticOrderCard
                             order={order}

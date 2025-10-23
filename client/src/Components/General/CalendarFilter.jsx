@@ -1,5 +1,4 @@
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import { useOrderContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 

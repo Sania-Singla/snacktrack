@@ -4,14 +4,12 @@ import { formatTime, checkTokenExpired } from '../../Utils';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { orderService } from '../../Services';
-import { useSocketContext, useUserContext } from '../../Contexts';
+import { useUserContext } from '../../Contexts';
 import toast from 'react-hot-toast';
-import { SOCKET_EVENTS } from '../../Constants';
 
 export default function ActiveOrderCard({ order, reference }) {
     const [expanded, setExpanded] = useState(false);
     const { amount, _id, createdAt, items, studentInfo, extraCharges } = order;
-    const { socket } = useSocketContext();
     const { setUser } = useUserContext();
     const [loading, setLoading] = useState(false);
     const [rejecting, setRejecting] = useState(false);
@@ -28,11 +26,7 @@ export default function ActiveOrderCard({ order, reference }) {
             });
 
             if (res && res.message === 'order status updated successfully') {
-                socket.emit(SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`], {
-                    orderId: _id,
-                    studentId: order.studentId,
-                    canteenId: order.canteenId,
-                });
+                // do nothing
             } else if (res && res.message === 'too late') {
                 toast.error('Too Late');
             } else checkTokenExpired(res, setUser);
@@ -47,7 +41,7 @@ export default function ActiveOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="h-fit w-full bg-white rounded-md shadow-xs border-1 border-gray-200 overflow-visible transition-all hover:shadow-sm"
+            className="h-fit w-full bg-white rounded-md shadow-xs border-1 border-gray-100 overflow-visible transition-all hover:shadow-sm"
         >
             <div
                 className="p-3 cursor-pointer"
@@ -56,7 +50,7 @@ export default function ActiveOrderCard({ order, reference }) {
                 <div className="flex justify-between items-center mb-2 w-full">
                     <OrderStudentInfo studentInfo={studentInfo} />
 
-                    {order.status === 'Pending' && (
+                    {/* {order.status === 'Pending' && (
                         <Button
                             btnText="Ready"
                             className="rounded-sm text-white bg-green-600 hover:bg-green-700 text-xs font-medium text-center px-2.5 py-1 mb-0.5"
@@ -65,7 +59,7 @@ export default function ActiveOrderCard({ order, reference }) {
                                 handleStatusChange('Prepared');
                             }}
                         />
-                    )}
+                    )} */}
 
                     {order.status === 'Prepared' && (
                         <Button

@@ -1,12 +1,22 @@
 import { fetchWrapper } from '../Utils';
 
 class UserService {
-    async login({ loginInput, password, role }) {
+    async verifyKitchenKey({ key, canteenId }) {
+        return await fetchWrapper({
+            endPoint: `/users/verify-kitchen-key/${canteenId}`,
+            method: 'POST',
+            credentials: 'include',
+            body: { key },
+            aim: 'verifyKitchenKey',
+        });
+    }
+
+    async login({ userName, password }) {
         return await fetchWrapper({
             endPoint: `/users/login`,
             method: 'PATCH',
             credentials: 'include',
-            body: { loginInput, password, role },
+            body: { userName, password },
             aim: 'login',
         });
     }

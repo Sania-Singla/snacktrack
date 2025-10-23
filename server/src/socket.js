@@ -2,7 +2,6 @@ import { app } from './app.js';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
 import { CORS_OPTIONS } from './Constants/index.js';
-import { registerOrderEvents } from './Socket/order.events.js';
 import { registerItemEvents } from './Socket/item.events.js';
 import { joinRoom, leaveRoom } from './Socket/room.events.js';
 
@@ -14,7 +13,6 @@ io.on('connection', async (socket) => {
     await joinRoom(socket, { userId, canteenId, role });
 
     registerItemEvents(io, socket);
-    registerOrderEvents(io, socket);
 
     socket.on('disconnect', async () => {
         await leaveRoom(socket, { userId, canteenId, role });

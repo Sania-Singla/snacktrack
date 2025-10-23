@@ -128,7 +128,7 @@ export default function OrderPlacedPopup() {
                     </motion.div>
 
                     <motion.h2
-                        className="text-2xl font-bold text-gray-900"
+                        className="text-xl font-bold text-gray-900"
                         initial={{ y: 10, opacity: 0 }}
                         animate={{
                             y: 0,

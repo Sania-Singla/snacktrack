@@ -33,7 +33,7 @@ export default function InputField({
                     onBlur={handleBlur}
                     placeholder={placeholder}
                     {...rest}
-                    className={`overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed shadow-sm py-2 rounded-md px-3 w-full border-[0.01rem] border-gray-400 bg-transparent placeholder:text-sm ${inputStyling}`}
+                    className={`overflow-x-scroll disabled:opacity-50 disabled:cursor-not-allowed py-2 rounded-md px-3 w-full border-1 border-gray-400 bg-transparent placeholder:text-sm ${inputStyling}`}
                 />
 
                 {name.toLowerCase().includes('password') && (

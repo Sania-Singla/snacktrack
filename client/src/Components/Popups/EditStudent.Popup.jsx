@@ -156,7 +156,7 @@ export default function EditStudentPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-semibold">Update Student Details</p>
+            <p className="text-xl font-semibold">Update Student Details</p>
             <p className="text-[15px]">
                 <span className="font-medium">Roll No: </span>
                 {getRollNo(popupInfo.student.userName)}

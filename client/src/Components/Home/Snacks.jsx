@@ -13,7 +13,7 @@ import toast from 'react-hot-toast';
 export default function Snacks() {
     const [snacks, setSnacks] = useState([]);
     const [snacksInfo, setSnacksInfo] = useState({});
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [loading, setLoading] = useState(true);
     const { cartItems, orderPlaced } = useStudentContext();
     const { debouncedSearch } = useSearchContext();
@@ -40,6 +40,7 @@ export default function Snacks() {
             try {
                 setLoading(true);
                 const res = await snackService.getSnacks({
+                    canteenId: user.canteenId,
                     page,
                     signal,
                     search: debouncedSearch,
@@ -96,7 +97,7 @@ export default function Snacks() {
                 </div>
             ) : (
                 snacks.length === 0 && (
-                    <p className="text-center italic text-gray-800">
+                    <p className="text-center italic text-gray-600">
                         No snacks found
                     </p>
                 )

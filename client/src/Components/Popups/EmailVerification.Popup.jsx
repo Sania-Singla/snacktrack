@@ -110,7 +110,7 @@ export default function EmailVerificationPopup() {
             />
 
             <div className="flex flex-col gap-3">
-                <p className="text-2xl font-semibold text-center">
+                <p className="text-xl font-semibold text-center">
                     Verify Email
                 </p>
                 <p className="text-[15px] text-center">
@@ -129,7 +129,7 @@ export default function EmailVerificationPopup() {
                             }
                             onKeyDown={(e) => handleKeyDown(index, e)}
                             ref={(el) => (inputRefs.current[index] = el)}
-                            className="size-10 text-2xl text-center border-2 border-gray-300 rounded-lg focus:border-[#4977ec] focus:outline-none"
+                            className="size-10 text-xl text-center border-2 border-gray-300 rounded-lg focus:border-[#4977ec] focus:outline-none"
                             autoFocus={index === 0}
                         />
                     ))}

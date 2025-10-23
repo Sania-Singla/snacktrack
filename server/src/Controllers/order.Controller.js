@@ -1,9 +1,10 @@
-import { FORBIDDEN, OK, NOT_FOUND } from '../Constants/index.js';
+import { FORBIDDEN, OK, NOT_FOUND, SOCKET_EVENTS } from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Order, PackagedFood, Snack } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment-timezone';
 import { redisClient } from '../server.js';
+import { io } from '../socket.js';
 
 const checkAvailability = tryCatch('check availability', async (req, res) => {
     const { cartItems } = req.body;
@@ -53,13 +54,15 @@ const placeOrder = tryCatch('place order', async (req, res) => {
     const packagedItems = cartItems.filter((i) => i.type === 'PackagedFood');
     const allPackaged = packagedItems.length === cartItems.length;
 
-    const order = await Order.create({
+    let order = await Order.create({
         studentId: student._id,
         canteenId: student.canteenId,
         amount,
         status: allPackaged ? 'Prepared' : 'Pending',
         items: updatedCartItems,
     });
+
+    order = order.toObject();
 
     await Promise.all([
         packagedItems.map((item) => {
@@ -72,12 +75,13 @@ const placeOrder = tryCatch('place order', async (req, res) => {
 
     const items = cartItems.map((item) => ({
         ...item,
+        id: item._id,
         prepared: item.type === 'Snack' ? false : true,
         pickedUp: false,
     }));
 
     const data = {
-        ...order.toObject(),
+        ...order,
         items,
         studentInfo: {
             fullName: student.fullName,
@@ -85,6 +89,10 @@ const placeOrder = tryCatch('place order', async (req, res) => {
             userName: student.userName,
         },
     };
+
+    // notify canteen about new order
+    const cantSocketId = await redisClient.get(order.canteenId.toString());
+    io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, data);
 
     return res.status(OK).json(data);
 });
@@ -221,7 +229,20 @@ const updateOrderStatus = tryCatch(
             });
         }
 
-        // ⚠️⚠️⚠️⚠️⚠️ send sms to student
+        // todo: send sms to student
+
+        // socket event
+        const [stuSocketId, cantSocketId] = await redisClient.mGet([
+            order.studentId.toString(),
+            order.canteenId.toString(),
+        ]);
+
+        io.to(stuSocketId)
+            .to(cantSocketId)
+            .emit(
+                SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`],
+                order._id.toString()
+            );
 
         return res.status(OK).json({
             message: 'order status updated successfully',
@@ -258,6 +279,19 @@ const updateExtraCharges = tryCatch(
 
         order.extraCharges = extraCharges;
         await order.save();
+
+        // socket event
+        const [stuSocketId, cantSocketId] = await redisClient.mGet([
+            order.studentId.toString(),
+            order.canteenId.toString(),
+        ]);
+
+        io.to(stuSocketId)
+            .to(cantSocketId)
+            .emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
+                orderId,
+                extraCharges,
+            });
 
         return res
             .status(OK)
@@ -382,7 +416,7 @@ const getStudentOrders = tryCatch('get student orders', async (req, res) => {
                         order.status === 'Pending' ||
                         order.status === 'Prepared'
                     ) {
-                        item.prepared = preparedItem ? true : false;
+                        item.prepared = Boolean(preparedItem);
                         item.pickedUp = preparedItem
                             ? JSON.parse(preparedItem).pickedUp
                             : false;
@@ -465,35 +499,29 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 $match: search
                     ? {
                           $or: [
-                              //   {
-                              //       'studentInfo.fullName': {
-                              //           $regex: search,
-                              //           $options: 'i',
-                              //       },
-                              //   },
-                              //   {
-                              //       'studentInfo.rollNumber': {
-                              //           $regex: search,
-                              //           $options: 'i',
-                              //       },
-                              //   },
                               {
-                                  $expr: {
-                                      $regexMatch: {
-                                          input: {
-                                              $substr: [
-                                                  { $toString: '$_id' },
-                                                  16,
-                                                  8,
-                                              ],
-                                          },
-                                          regex: new RegExp(
-                                              search.toLowerCase(),
-                                              'i'
-                                          ),
-                                      },
+                                  'studentInfo.rollNumber': {
+                                      $regex: search,
+                                      $options: 'i',
                                   },
                               },
+                              //   {
+                              //       $expr: {
+                              //           $regexMatch: {
+                              //               input: {
+                              //                   $substr: [
+                              //                       { $toString: '$_id' },
+                              //                       16,
+                              //                       8,
+                              //                   ],
+                              //               },
+                              //               regex: new RegExp(
+                              //                   search.toLowerCase(),
+                              //                   'i'
+                              //               ),
+                              //           },
+                              //       },
+                              //   },
                           ],
                       }
                     : {},
@@ -570,7 +598,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                         order.status === 'Pending' ||
                         order.status === 'Prepared'
                     ) {
-                        item.prepared = preparedItem ? true : false;
+                        item.prepared = Boolean(preparedItem);
                         item.pickedUp = preparedItem
                             ? JSON.parse(preparedItem).pickedUp
                             : false;
@@ -693,19 +721,17 @@ const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
     if (result.docs.length) {
         result.docs = await Promise.all(
             result.docs.map(async (order) => {
-                const preparedItems = await redisClient.sMembers(
+                let preparedItems = await redisClient.sMembers(
                     `order_${order._id}`
                 );
 
                 const updatedItems = order.items.map((item) => {
-                    const preparedItem = preparedItems
-                        .map((i) => JSON.parse(i))
-                        .find((i) => item.id.equals(i.itemId));
+                    let preparedItem = preparedItems.find((i) => {
+                        const parsedItem = JSON.parse(i);
+                        return item.id.equals(parsedItem.itemId);
+                    });
 
-                    return {
-                        ...item,
-                        prepared: preparedItem || false,
-                    };
+                    return { ...item, prepared: Boolean(preparedItem) };
                 });
 
                 return { ...order, items: updatedItems };

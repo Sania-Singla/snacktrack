@@ -72,12 +72,19 @@ export default function Header() {
                 )}
 
                 <div>
-                    <div
-                        onClick={() => navigate('/settings')}
-                        className="size-8 bg-[#e96805] text-white rounded-full flex items-center justify-center cursor-pointer hover:brightness-90 overflow-hidden shadow-sm"
-                    >
-                        <div>{user.fullName.slice(0, 1).toUpperCase()}</div>
-                    </div>
+                    {user.role === 'student' ? (
+                        <div
+                            onClick={() => navigate('/settings')}
+                            className="size-8 bg-[#e96805] text-white rounded-full flex items-center justify-center cursor-pointer hover:brightness-90 overflow-hidden shadow-xs"
+                        >
+                            <div>{user.fullName.slice(0, 1).toUpperCase()}</div>
+                        </div>
+                    ) : (
+                        <div className="font-semibold text-[#4977ec] rounded-md bg-white border-1 border-gray-200 px-2 py-0.5">
+                            {user.hostelType}
+                            {user.hostelNumber}
+                        </div>
+                    )}
                 </div>
 
                 {user.role === 'student' && (

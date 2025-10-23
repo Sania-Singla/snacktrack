@@ -58,9 +58,9 @@ export default function StudentsPage() {
     }, [page, debouncedSearch]);
 
     return (
-        <div className="sm:p-4 pt-2">
-            <div className=" w-full flex justify-between gap-4 mb-8">
-                <div className="bg-white px-3 py-1.5 rounded-md shadow-sm">
+        <div className="pl-2">
+            <div className=" w-full flex justify-between gap-4 mb-6">
+                <div className="bg-white px-3 py-1.5 text-sm rounded-md border-1 border-gray-200">
                     <div className="flex items-center justify-between gap-2.5">
                         <h3 className="font-medium text-gray-800">
                             Total Students
@@ -93,7 +93,7 @@ export default function StudentsPage() {
 
             {students.length > 0 && (
                 <div
-                    className={`grid gap-6 ${students.length <= 1 ? 'grid-cols-[repeat(auto-fit,minmax(350px,550px))]' : 'grid-cols-[repeat(auto-fit,minmax(350px,1fr))]'}`}
+                    className={`grid gap-4 ${students.length <= 1 ? 'grid-cols-[repeat(auto-fit,minmax(350px,550px))]' : 'grid-cols-[repeat(auto-fit,minmax(350px,1fr))]'}`}
                 >
                     {students?.map((student, i) => (
                         <StudentView

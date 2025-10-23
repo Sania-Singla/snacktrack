@@ -2,10 +2,12 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Header, Footer, Sidebar, Popup, Searchbar } from '..';
 import { Toaster } from 'react-hot-toast';
 import { useEffect, useRef } from 'react';
+import { useUserContext } from '../../Contexts';
 
 export default function Layout({ renderTemplate = true }) {
     const { pathname } = useLocation();
     const layoutRef = useRef(null);
+    const { user } = useUserContext();
 
     // scrolling to top on route change
     useEffect(() => {
@@ -25,7 +27,7 @@ export default function Layout({ renderTemplate = true }) {
                 <Header />
                 <hr className="w-full" />
                 <div className="flex flex-1 overflow-hidden">
-                    <Sidebar />
+                    {user && <Sidebar />}
                     <main
                         ref={layoutRef}
                         className="flex-1 p-4 mt-[60px] overflow-auto bg-gray-50"

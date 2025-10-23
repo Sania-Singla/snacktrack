@@ -27,7 +27,7 @@ export default function StudentView({ student, reference }) {
     return (
         <div
             ref={reference}
-            className="min-w-[250px] flex flex-col items-start justify-center gap-4 relative w-full p-3 bg-white drop-shadow-md rounded-md overflow-hidden h-fit"
+            className="min-w-[250px] flex flex-col items-start justify-center gap-4 relative w-full p-3 bg-white shadow-xs border-1 border-gray-100 rounded-md overflow-hidden h-fit"
         >
             <div className="w-full flex justify-between gap-4">
                 <div className="flex items-center justify-start gap-4">
@@ -61,7 +61,7 @@ export default function StudentView({ student, reference }) {
                                     {icons.editUnfilled}
                                 </div>
                             }
-                            className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                            className="bg-[#f0efef] p-1.5 group rounded-md shadow-xs hover:bg-[#ebeaea]"
                             onClick={editStudent}
                         />
                         <div>
@@ -71,7 +71,7 @@ export default function StudentView({ student, reference }) {
                                         {icons.delete}
                                     </div>
                                 }
-                                className="bg-[#f0efef] p-2 group rounded-full shadow-sm hover:bg-[#ebeaea]"
+                                className="bg-[#f0efef] p-1.5 group rounded-md shadow-xs hover:bg-[#ebeaea]"
                                 onClick={removeStudent}
                             />
                         </div>

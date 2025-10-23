@@ -2,13 +2,14 @@ import { Button } from '..';
 import { userService } from '../../Services';
 import { icons } from '../../Assets/icons';
 import { useState } from 'react';
-import { useUserContext } from '../../Contexts';
+import { useStudentContext, useUserContext } from '../../Contexts';
 import { checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 
 export default function Logout() {
     const [loading, setLoading] = useState(false);
     const { setUser } = useUserContext();
+    const { setCartItems } = useStudentContext();
 
     async function logout() {
         setLoading(true);
@@ -17,6 +18,7 @@ export default function Logout() {
             if (res && res.message === 'user loggedout successfully') {
                 setUser(null);
                 localStorage.removeItem('cartItems');
+                setCartItems([]);
                 toast.success('Logged out Successfully 🙂');
             } else checkTokenExpired(res, setUser);
         } catch (err) {

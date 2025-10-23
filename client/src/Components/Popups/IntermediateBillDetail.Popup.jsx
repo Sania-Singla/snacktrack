@@ -21,7 +21,7 @@ export default function IntermediateBillDetailPopup() {
                 className="absolute top-2 right-2"
             />
 
-            <p className="text-2xl font-semibold">Bill Details</p>
+            <p className="text-xl font-semibold">Bill Details</p>
 
             <div className="bg-gray-50 p-4 mt-3 w-full rounded-lg border border-gray-100 space-y-2 shadow-sm">
                 <div className="flex justify-between items-start">

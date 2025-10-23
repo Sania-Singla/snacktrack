@@ -23,7 +23,7 @@ export default function Cart() {
                 }
                 title="View Cart"
                 onClick={() => navigate('/cart')}
-                className="bg-[#ffffff] p-2 group rounded-full shadow-sm w-fit"
+                className="bg-[#ffffff] p-2 group rounded-full border-1 border-gray-200 w-fit"
             />
             {/* total quantity count */}
             {totalQuantity > 0 && (

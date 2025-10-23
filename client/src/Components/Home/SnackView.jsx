@@ -80,7 +80,7 @@ export default function SnackView({ snack, reference }) {
     return (
         <div
             ref={reference}
-            className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} p-3 flex flex-col shadow-sm relative h-full bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
+            className={`${!isAvailable && user.role !== 'contractor' ? 'brightness-95 opacity-50' : 'hover:shadow-md'} p-3 flex flex-col shadow-xs border-1 border-gray-100 relative h-full bg-white transition-all rounded-lg overflow-hidden cursor-pointer`}
         >
             {/* Image */}
             <div className="flex gap-4">
@@ -137,9 +137,9 @@ export default function SnackView({ snack, reference }) {
                         {user.role === 'student' &&
                             isAvailable &&
                             (quantityInCart > 0 ? (
-                                <div className="flex items-center border-1 text-white h-full self-end w-fit bg-[#4977ec] border-blue-300 rounded-lg overflow-hidden">
+                                <div className="flex items-center h-full self-end w-fit border-1 border-gray-300 rounded-md overflow-hidden">
                                     <Button
-                                        className="px-3 py-1 font-bold"
+                                        className="px-3 py-1 font-bold text-gray-500 hover:bg-gray-100"
                                         onClick={() =>
                                             quantityInCart === 1
                                                 ? removeFromCart()
@@ -149,11 +149,11 @@ export default function SnackView({ snack, reference }) {
                                         }
                                         btnText="-"
                                     />
-                                    <span className="px-3 py-1">
+                                    <span className="px-3 py-1 text-gray-900">
                                         {quantityInCart}
                                     </span>
                                     <Button
-                                        className="px-3 py-1 font-bold"
+                                        className="px-3 py-1 font-bold text-gray-500 hover:bg-gray-100"
                                         onClick={() =>
                                             updateQuantity(quantityInCart + 1)
                                         }
@@ -168,7 +168,7 @@ export default function SnackView({ snack, reference }) {
                                         </div>
                                     }
                                     onClick={addToCart}
-                                    className="rounded-md size-8 flex self-end items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-md"
+                                    className="rounded-md size-8 flex self-end items-center justify-center text-white bg-[#4977ec] hover:bg-[#3b62c2] shadow-xs"
                                 />
                             ))}
 
@@ -180,7 +180,7 @@ export default function SnackView({ snack, reference }) {
                                             {icons.editUnfilled}
                                         </div>
                                     }
-                                    className="bg-[#f0efef] p-1.5 group rounded-md shadow-sm hover:bg-[#ebeaea]"
+                                    className="bg-[#f0efef] p-1.5 group rounded-md shadow-xs hover:bg-[#ebeaea]"
                                     onClick={editSnack}
                                 />
                                 <div>
@@ -190,7 +190,7 @@ export default function SnackView({ snack, reference }) {
                                                 {icons.delete}
                                             </div>
                                         }
-                                        className="bg-[#f0efef] p-1.5 group rounded-md shadow-sm hover:bg-[#ebeaea]"
+                                        className="bg-[#f0efef] p-1.5 group rounded-md shadow-xs hover:bg-[#ebeaea]"
                                         onClick={removeSnack}
                                     />
                                 </div>

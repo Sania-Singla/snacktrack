@@ -100,78 +100,90 @@ export default function Pending() {
             setOrders((prev) => prev.filter((o) => o._id !== orderId));
         }
 
-        function itemPrepared({ orderId, itemId }) {
+        function extraChargeUpdated({ orderId, extraCharges }) {
             setOrders((prev) =>
-                prev.map((o) => {
-                    if (o._id !== orderId) return o;
-
-                    const updatedItems = o.items.map((i) =>
-                        i.id === itemId ? { ...i, prepared: true } : i
-                    );
-
-                    return { ...o, items: updatedItems };
-                })
+                prev.map((o) =>
+                    o._id === orderId ? { ...o, extraCharges } : o
+                )
             );
         }
 
-        function itemPickedUp({ orderId, itemId }) {
-            setOrders((prev) => {
-                const updatedOrders = prev
-                    .map((o) =>
-                        o._id === orderId
-                            ? {
-                                  ...o,
-                                  items: o.items.map((i) =>
-                                      i.id === itemId
-                                          ? { ...i, pickedUp: true }
-                                          : i
-                                  ),
-                              }
-                            : o
-                    )
-                    .filter((o) => o.items.some((i) => !i.pickedUp));
+        // we dont have per item updates yet ✨✨
 
-                const removed = !updatedOrders.some((o) => o._id === orderId);
+        // function itemPrepared({ orderId, itemId }) {
+        //     setOrders((prev) =>
+        //         prev.map((o) => {
+        //             if (o._id !== orderId) return o;
 
-                if (removed) {
-                    // fire and forget
-                    orderService
-                        .updateOrderStatus({
-                            orderId,
-                            status: 'PickedUp',
-                        })
-                        .catch((err) =>
-                            toast.error(
-                                'Something went wrong. Please try again.'
-                            )
-                        );
-                }
+        //             const updatedItems = o.items.map((i) =>
+        //                 i.id === itemId ? { ...i, prepared: true } : i
+        //             );
 
-                return updatedOrders;
-            });
-        }
+        //             return { ...o, items: updatedItems };
+        //         })
+        //     );
+        // }
+
+        // function itemPickedUp({ orderId, itemId }) {
+        //     setOrders((prev) => {
+        //         const updatedOrders = prev
+        //             .map((o) =>
+        //                 o._id === orderId
+        //                     ? {
+        //                           ...o,
+        //                           items: o.items.map((i) =>
+        //                               i.id === itemId
+        //                                   ? { ...i, pickedUp: true }
+        //                                   : i
+        //                           ),
+        //                       }
+        //                     : o
+        //             )
+        //             .filter((o) => o.items.some((i) => !i.pickedUp));
+
+        //         const removed = !updatedOrders.some((o) => o._id === orderId);
+
+        //         if (removed) {
+        //             // fire and forget
+        //             orderService
+        //                 .updateOrderStatus({
+        //                     orderId,
+        //                     status: 'PickedUp',
+        //                 })
+        //                 .catch((err) =>
+        //                     toast.error(
+        //                         'Something went wrong. Please try again.'
+        //                     )
+        //                 );
+        //         }
+
+        //         return updatedOrders;
+        //     });
+        // }
 
         socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
         socket.on(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
         socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
-        socket.on(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
-        socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
+        // socket.on(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
+        // socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
+        socket.on(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, extraChargeUpdated);
 
         return () => {
             socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
             socket.off(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
             socket.off(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
             socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
-            socket.off(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
-            socket.off(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
+            // socket.off(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
+            // socket.off(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
+            socket.off(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, extraChargeUpdated);
         };
     }, [socket]);
 
     return (
         <>
             {orders.length > 0 && (
-                <div className="space-y-4">
+                <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
                     {orders.map((order, i) => (
                         <ActiveOrderCard
                             order={order}

@@ -49,7 +49,7 @@ export default function Footer() {
                             <img
                                 src={PU}
                                 alt="PU Logo"
-                                className="size-8 sm:size-9 rounded-full object-cover shadow-sm"
+                                className="size-8 sm:size-9 rounded-full object-cover shadow-xs"
                             />
                         </Link>
                         <Link
@@ -60,7 +60,7 @@ export default function Footer() {
                             <img
                                 src={UIET}
                                 alt="UIET Logo"
-                                className="size-8 sm:size-9 rounded-full object-cover shadow-sm"
+                                className="size-8 sm:size-9 rounded-full object-cover shadow-xs"
                             />
                         </Link>
                     </div>

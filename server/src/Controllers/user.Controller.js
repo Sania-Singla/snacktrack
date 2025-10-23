@@ -15,46 +15,39 @@ import { Canteen, Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 
-const login = tryCatch('login as contractor', async (req, res, next) => {
-    const { loginInput, password, role } = req.body;
+const login = tryCatch('login as student', async (req, res, next) => {
+    const { userName, password } = req.body;
 
-    if (!loginInput || !password) {
+    if (!userName || !password) {
         return next(new ErrorHandler('missing fields', BAD_REQUEST));
     }
 
-    let user = null;
-    if (role === 'contractor') {
-        user = await Contractor.findOne({
-            $or: [{ email: loginInput }, { phoneNumber: loginInput }],
-        });
-    } else user = await Student.findOne({ userName: loginInput });
+    const student = await Student.findOne({ userName })
+        .select('-refreshToken')
+        .populate('canteenId')
+        .lean();
 
-    if (!user) return next(new ErrorHandler('user not found', NOT_FOUND));
+    if (!student) return next(new ErrorHandler('student not found', NOT_FOUND));
 
-    const isPassValid = bcrypt.compareSync(password, user.password);
+    const hostelName = student.canteenId.hostelName;
+    const hostelNumber = student.canteenId.hostelNumber;
+    const hostelType = student.canteenId.hostelType;
+    student.canteenId = student.canteenId._id;
+
+    const isPassValid = bcrypt.compareSync(password, student.password);
     if (!isPassValid) {
         return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
     }
 
     // generate tokens
     const { accessToken, refreshToken } = await generateTokens({
-        _id: user._id,
-        role,
+        _id: student._id,
+        role: 'student',
     });
 
-    const Model = role === 'contractor' ? Contractor : Student;
-    const [loggedInUser, canteen] = await Promise.all([
-        Model.findByIdAndUpdate(
-            user._id,
-            { $set: { refreshToken } },
-            { new: true }
-        )
-            .select('-password -refreshToken')
-            .lean(),
-        Canteen.findById(user.canteenId)
-            .select('hostelType hostelNumber hostelName -_id')
-            .lean(),
-    ]);
+    await Student.findByIdAndUpdate(student._id, { $set: { refreshToken } });
+
+    const { password: _, ...user } = student;
 
     return res
         .status(OK)
@@ -66,8 +59,13 @@ const login = tryCatch('login as contractor', async (req, res, next) => {
             ...COOKIE_OPTIONS,
             maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
         })
-        .clearCookie('staffToken', COOKIE_OPTIONS)
-        .json({ ...loggedInUser, role, ...canteen });
+        .json({
+            ...user,
+            role: 'student',
+            hostelType,
+            hostelNumber,
+            hostelName,
+        });
 });
 
 const logout = tryCatch('logout user', async (req, res, next) => {
@@ -210,6 +208,94 @@ const getCanteens = tryCatch('get canteens', async (req, res) => {
     return res.status(OK).json(canteens);
 });
 
+const verifyKitchenKey = tryCatch(
+    'verify kitchen key',
+    async (req, res, next) => {
+        const { key } = req.body;
+        const { canteenId } = req.params;
+
+        if (!key) {
+            return next(new ErrorHandler('missing key', BAD_REQUEST));
+        }
+
+        const [canteen, contractor] = await Promise.all([
+            Canteen.findOne({ _id: canteenId }).lean(),
+            Contractor.findOne({ canteenId }).lean(),
+        ]);
+        if (!canteen) {
+            return next(new ErrorHandler('canteen not found', NOT_FOUND));
+        }
+        if (!contractor) {
+            return next(new ErrorHandler('contractor not found', NOT_FOUND));
+        }
+
+        const isValid = await bcrypt.compare(key, contractor.password);
+        if (!isValid) {
+            return next(new ErrorHandler('invalid key', BAD_REQUEST));
+        }
+
+        const { password, ...rest } = contractor;
+
+        const { accessToken, refreshToken } = await generateTokens({
+            _id: contractor._id,
+            role: 'contractor',
+        });
+
+        return res
+            .status(OK)
+            .cookie('accessToken', accessToken, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+            })
+            .cookie('refreshToken', refreshToken, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
+            })
+            .json({
+                ...rest,
+                role: 'contractor',
+                hostelType: canteen.hostelType,
+                hostelNumber: canteen.hostelNumber,
+                hostelName: canteen.hostelName,
+            });
+    }
+);
+
+const verifyKioskKey = tryCatch(
+    'verify kitchen key for kiosk',
+    async (req, res, next) => {
+        const { key } = req.body;
+        const { canteenId } = req.params;
+
+        if (!key) {
+            return next(new ErrorHandler('missing key', BAD_REQUEST));
+        }
+
+        const [canteen, contractor] = await Promise.all([
+            Canteen.findOne({ _id: canteenId }),
+            Contractor.findOne({ canteenId }),
+        ]);
+        if (!canteen) {
+            return next(new ErrorHandler('canteen not found', NOT_FOUND));
+        }
+        if (!contractor) {
+            return next(new ErrorHandler('contractor not found', NOT_FOUND));
+        }
+
+        const isValid = await bcrypt.compare(key, contractor.password);
+        if (!isValid) {
+            return next(new ErrorHandler('invalid key', BAD_REQUEST));
+        }
+
+        return res.status(OK).json({
+            canteenId: canteen._id,
+            hostelType: canteen.hostelType,
+            hostelNumber: canteen.hostelNumber,
+            hostelName: canteen.hostelName,
+        });
+    }
+);
+
 export {
     getCurrentUser,
     login,
@@ -218,4 +304,6 @@ export {
     updateAccountDetails,
     getCanteens,
     resetPassword,
+    verifyKitchenKey,
+    verifyKioskKey,
 };

@@ -11,7 +11,7 @@ export default function ContactPage() {
             </p>
 
             <div className="space-y-4">
-                <p>
+                {/* <p>
                     <strong>Support Email:</strong>{' '}
                     <a
                         href="mailto:support@snacktrack.live"
@@ -29,7 +29,7 @@ export default function ContactPage() {
                     >
                         cse@uiet.puchd.ac.in
                     </a>
-                </p>
+                </p> */}
 
                 <p>
                     <strong>Department:</strong> Computer Science & Engineering,

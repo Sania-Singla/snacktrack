@@ -8,8 +8,7 @@ export default function AboutPage() {
             </h1>
 
             <p className="mb-4">
-                <strong>SnackTrack</strong> is an official student portal
-                developed for the{' '}
+                SnackTrack is an official student portal developed for the{' '}
                 <strong>
                     University Institute of Engineering and Technology (UIET)
                 </strong>

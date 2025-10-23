@@ -30,7 +30,7 @@ export default function SettingsPage() {
     );
 
     return (
-        <div className="w-full h-full overflow-scroll px-1 py-2 sm:px-3">
+        <div className="w-full h-full overflow-hidden px-1 py-2 sm:px-3">
             <div className="flex gap-4 items-center justify-start mb-7">
                 {/* avatar */}
                 <div className="relative">
@@ -47,7 +47,7 @@ export default function SettingsPage() {
                     <div className="flex justify-between gap-4 w-full items-center">
                         <p className="text-xl font-semibold">{user.fullName}</p>
 
-                        <p className="text-sm md:text-base font-medium w-fit text-center text-gray-700 shadow-sm bg-[#f9f9f9] border-1 border-gray-200 px-2 py-1 rounded-lg">
+                        <p className="text-sm font-medium w-fit text-center text-gray-700 bg-white border-1 border-gray-200 px-2 py-1 rounded-md">
                             <span className="font-semibold text-[#4977ec]">
                                 {user.hostelType}
                                 {user.hostelNumber}
@@ -71,7 +71,7 @@ export default function SettingsPage() {
                 {tabElements}
             </div>
 
-            <div className="border-t-1 py-4 border-gray-300 md:px-4 mt-6">
+            <div className="border-t-1 py-4 border-gray-300 md:px-2 mt-6">
                 <Outlet />
             </div>
         </div>

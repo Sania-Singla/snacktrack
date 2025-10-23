@@ -12,7 +12,7 @@ export default function StaticOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="h-fit w-full bg-white rounded-md shadow-xs border-1 border-gray-200 overflow-visible transition-all hover:shadow-sm"
+            className="h-fit w-full bg-white rounded-md shadow-xs border-1 border-gray-100 overflow-visible transition-all hover:shadow-sm"
         >
             <div
                 className="p-3 cursor-pointer"

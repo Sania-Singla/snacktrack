@@ -11,7 +11,7 @@ export default function StudentOrderCard({ order, reference }) {
     return (
         <div
             ref={reference}
-            className="bg-white rounded-md shadow-xs overflow-hidden transition-all hover:shadow-sm h-fit"
+            className="bg-white rounded-md shadow-xs border-1 border-gray-100 overflow-hidden transition-all hover:shadow-sm h-fit"
         >
             <div
                 className="p-3 cursor-pointer"
@@ -34,8 +34,8 @@ export default function StudentOrderCard({ order, reference }) {
                         )}
 
                         {status === 'Prepared' && (
-                            <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-purple-50 text-purple-700">
-                                Prepared
+                            <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-green-50 text-green-700">
+                                Ready
                             </div>
                         )}
 
