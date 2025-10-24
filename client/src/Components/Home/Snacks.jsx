@@ -3,21 +3,21 @@ import { icons } from '../../Assets/icons';
 import { useEffect, useState } from 'react';
 import {
     useSearchContext,
+    useSocketContext,
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
 import { snackService } from '../../Services';
-import { checkTokenExpired, paginate } from '../../Utils';
+import { checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 
 export default function Snacks() {
     const [snacks, setSnacks] = useState([]);
-    const [snacksInfo, setSnacksInfo] = useState({});
     const { user, setUser } = useUserContext();
     const [loading, setLoading] = useState(true);
     const { cartItems, orderPlaced } = useStudentContext();
     const { debouncedSearch } = useSearchContext();
-    const [page, setPage] = useState(1);
+    const { socket } = useSocketContext();
 
     function compute(data) {
         return data.map((s) => ({
@@ -26,12 +26,6 @@ export default function Snacks() {
         }));
     }
 
-    const paginateRef = paginate(snacksInfo.hasNextPage, loading, setPage);
-
-    useEffect(() => {
-        setPage(1);
-    }, [debouncedSearch]);
-
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
@@ -39,22 +33,70 @@ export default function Snacks() {
         (async function () {
             try {
                 setLoading(true);
-                const res = await snackService.getSnacks({
+
+                const cached = JSON.parse(localStorage.getItem('snacks'));
+                const cachedVersion = localStorage.getItem('snacksVersion');
+
+                const versionRes = await snackService.getSnacksVersion({
                     canteenId: user.canteenId,
-                    page,
                     signal,
-                    search: debouncedSearch,
                 });
 
-                if (res && !res.message) {
-                    setSnacksInfo(res.snacksInfo);
+                if (!versionRes || versionRes.message) {
+                    checkTokenExpired(versionRes, setUser);
+                    return;
+                }
 
-                    if (page === 1) {
-                        setSnacks(compute(res.snacks));
-                    } else {
-                        setSnacks((prev) => [...prev, ...compute(res.snacks)]);
-                    }
-                } else checkTokenExpired(res, setUser);
+                const serverVersion = versionRes.version;
+
+                const shouldFetch =
+                    !cached ||
+                    !cachedVersion ||
+                    cachedVersion !== serverVersion;
+
+                if (shouldFetch) {
+                    const res = await snackService.getSnacks({
+                        canteenId: user.canteenId,
+                        signal,
+                        page: 1,
+                        limit: 1000,
+                    });
+
+                    if (res && !res.message) {
+                        localStorage.setItem(
+                            'snacks',
+                            JSON.stringify(res.snacks)
+                        );
+                        localStorage.setItem('snacksVersion', serverVersion);
+                        setSnacks(
+                            compute(
+                                res.snacks.filter((s) =>
+                                    debouncedSearch
+                                        ? s.name
+                                              .toLowerCase()
+                                              .includes(
+                                                  debouncedSearch.toLowerCase()
+                                              )
+                                        : true
+                                )
+                            )
+                        );
+                    } else checkTokenExpired(res, setUser);
+                } else {
+                    setSnacks(
+                        compute(
+                            cached.filter((s) =>
+                                debouncedSearch
+                                    ? s.name
+                                          .toLowerCase()
+                                          .includes(
+                                              debouncedSearch.toLowerCase()
+                                          )
+                                    : true
+                            )
+                        )
+                    );
+                }
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
             } finally {
@@ -63,7 +105,7 @@ export default function Snacks() {
         })();
 
         return () => controller.abort();
-    }, [page, debouncedSearch]);
+    }, [debouncedSearch]);
 
     useEffect(() => {
         if (orderPlaced) {
@@ -71,36 +113,59 @@ export default function Snacks() {
         }
     }, [orderPlaced]);
 
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('snackUpdated', (snack) => {
+            if (snack.canteenId !== user.canteenId) return;
+
+            const data = JSON.parse(localStorage.getItem('snacks')) || [];
+            const newData = data.map((s) =>
+                s._id === snack._id ? { ...s, ...snack } : s
+            );
+            localStorage.setItem('snacks', JSON.stringify(newData));
+            setSnacks(newData);
+        });
+
+        socket.on('snackAdded', (s) => {
+            if (s.canteenId !== user.canteenId) return;
+
+            const data = JSON.parse(localStorage.getItem('snacks')) || [];
+            const newData = [s, ...data];
+            localStorage.setItem('snacks', JSON.stringify(newData));
+            setSnacks(newData);
+        });
+
+        socket.on('snackDeleted', ({ snackId, canteenId }) => {
+            if (canteenId !== user.canteenId) return;
+
+            const data = JSON.parse(localStorage.getItem('snacks')) || [];
+            const newData = data.filter((s) => s._id !== snackId);
+            localStorage.setItem('snacks', JSON.stringify(newData));
+            setSnacks(newData);
+        });
+    }, [socket]);
+
     return (
         <>
-            {snacks.length > 0 && (
-                <div
-                    className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
-                >
-                    {snacks.map((s, i) => (
-                        <SnackView
-                            key={s._id}
-                            snack={s}
-                            reference={
-                                i + 1 === snacks.length ? paginateRef : null
-                            }
-                        />
-                    ))}
-                </div>
-            )}
-
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
                         {icons.loading}
                     </div>
                 </div>
+            ) : snacks.length === 0 ? (
+                <p className="text-center italic text-gray-400">
+                    No snacks found
+                </p>
             ) : (
-                snacks.length === 0 && (
-                    <p className="text-center italic text-gray-600">
-                        No snacks found
-                    </p>
-                )
+                <div
+                    className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
+                >
+                    {snacks.map((s) => (
+                        <SnackView key={s._id} snack={s} />
+                    ))}
+                </div>
             )}
         </>
     );

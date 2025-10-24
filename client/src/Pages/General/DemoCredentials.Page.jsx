@@ -9,7 +9,7 @@ export default function DemoCredentialsPage() {
 
     const credentials = {
         contractor: {
-            email: 'groseeru2206@gmail.com',
+            hostel: 'WWH1 - Sushila Nayyar Hall',
             password: '12345678',
             description: 'Access contractor features and management tools',
             dashboardPath: '/contractor',
@@ -251,7 +251,9 @@ export default function DemoCredentialsPage() {
                         onClick={() =>
                             activeRole === 'admin'
                                 ? navigate('/admin')
-                                : navigate('/login')
+                                : activeRole === 'contractor'
+                                  ? navigate('/verify-kitchen-key')
+                                  : navigate('/login')
                         }
                         className="bg-[#3a67d8] text-white py-2 rounded-md font-semibold hover:bg-[#2c4fa8]"
                         btnText={`Go to ${activeRole === 'admin' ? activeRole.charAt(0).toUpperCase() + activeRole.slice(1) + ' Dashboard' : 'Login'}`}

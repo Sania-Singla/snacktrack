@@ -11,6 +11,8 @@ import toast from 'react-hot-toast';
 import { orderService } from '../../Services';
 import { SOCKET_EVENTS } from '../../Constants';
 
+// with per item planning (remove prepared stats)
+
 export default function Pending() {
     const [orders, setOrders] = useState([]);
     const [ordersInfo, setOrdersInfo] = useState({});
@@ -80,12 +82,16 @@ export default function Pending() {
         async function newOrder(o) {
             // !!⚠️⚠️⚠️⚠️⚠️⚠️!!!!!!!!!!!!!!!!!!!!!!!!! show popup
 
-            setOrders((prev) => [o, ...prev]);
+            setOrders((prev) => [...prev, o]); // append at end
             await playSound();
         }
 
-        function orderPrepared({ orderId, order }) {
-            setOrders((prev) => prev.filter((o) => o._id !== orderId));
+        function orderPrepared(orderId) {
+            setOrders((prev) =>
+                prev.map((o) =>
+                    o._id === orderId ? { ...o, status: 'Prepared' } : o
+                )
+            );
         }
 
         function orderPickedUp(orderId) {
@@ -104,10 +110,65 @@ export default function Pending() {
             );
         }
 
+        // we dont have per item updates yet ✨✨
+
+        // function itemPrepared({ orderId, itemId }) {
+        //     setOrders((prev) =>
+        //         prev.map((o) => {
+        //             if (o._id !== orderId) return o;
+
+        //             const updatedItems = o.items.map((i) =>
+        //                 i.id === itemId ? { ...i, prepared: true } : i
+        //             );
+
+        //             return { ...o, items: updatedItems };
+        //         })
+        //     );
+        // }
+
+        // function itemPickedUp({ orderId, itemId }) {
+        //     setOrders((prev) => {
+        //         const updatedOrders = prev
+        //             .map((o) =>
+        //                 o._id === orderId
+        //                     ? {
+        //                           ...o,
+        //                           items: o.items.map((i) =>
+        //                               i.id === itemId
+        //                                   ? { ...i, pickedUp: true }
+        //                                   : i
+        //                           ),
+        //                       }
+        //                     : o
+        //             )
+        //             .filter((o) => o.items.some((i) => !i.pickedUp));
+
+        //         const removed = !updatedOrders.some((o) => o._id === orderId);
+
+        //         if (removed) {
+        //             // fire and forget
+        //             orderService
+        //                 .updateOrderStatus({
+        //                     orderId,
+        //                     status: 'PickedUp',
+        //                 })
+        //                 .catch((err) =>
+        //                     toast.error(
+        //                         'Something went wrong. Please try again.'
+        //                     )
+        //                 );
+        //         }
+
+        //         return updatedOrders;
+        //     });
+        // }
+
         socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
         socket.on(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
         socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+        // socket.on(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
+        // socket.on(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
         socket.on(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, extraChargeUpdated);
 
         return () => {
@@ -115,6 +176,8 @@ export default function Pending() {
             socket.off(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
             socket.off(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
             socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+            // socket.off(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
+            // socket.off(SOCKET_EVENTS.ITEM_PICKEDUP, itemPickedUp);
             socket.off(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, extraChargeUpdated);
         };
     }, [socket]);
@@ -143,7 +206,7 @@ export default function Pending() {
                 </div>
             ) : (
                 orders.length === 0 && (
-                    <div className="italic text-gray-400 text-center">
+                    <div className="italic text-gray-600 text-center">
                         No orders found
                     </div>
                 )

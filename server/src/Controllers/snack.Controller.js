@@ -66,3 +66,33 @@ export const getItems = tryCatch('get packaged items', async (req, res) => {
         },
     });
 });
+
+export const getSnacksVersion = tryCatch(
+    'get snack version',
+    async (req, res) => {
+        const { canteenId } = req.params;
+
+        const latestSnack = await Snack.findOne({ canteenId })
+            .sort({ updatedAt: -1 })
+            .select('updatedAt -_id');
+
+        return res.status(OK).json({
+            version: latestSnack?.updatedAt?.toISOString() || null,
+        });
+    }
+);
+
+export const getItemsVersion = tryCatch(
+    'get item version',
+    async (req, res) => {
+        const { canteenId } = req.params;
+
+        const latestItem = await PackagedFood.findOne({ canteenId })
+            .sort({ updatedAt: -1 })
+            .select('updatedAt -_id');
+
+        return res.status(OK).json({
+            version: latestItem?.updatedAt?.toISOString() || null,
+        });
+    }
+);

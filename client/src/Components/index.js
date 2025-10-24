@@ -47,10 +47,12 @@ import Filters from './Home/Filters';
 import AddBtn from './Home/AddBtn';
 import Stats from './Today/Stats';
 import Pending from './Today/Pending';
+import Prepared from './Today/Prepared';
 import Completed from './Today/Completed';
 import Rejected from './Today/Rejected';
 import Kitchen from './Today/Kitchen';
 import CompletedHistory from './History/CompletedHistory';
+import PreparedHistory from './History/PreparedHistory';
 import PendingHistory from './History/PendingHistory';
 import RejectedHistory from './History/RejectedHistory';
 import StatsHistory from './History/StatsHistory';
@@ -114,6 +116,8 @@ export {
     Kitchen,
     CompletedHistory,
     PendingHistory,
+    Prepared,
+    PreparedHistory,
     RejectedHistory,
     StatsHistory,
     OrderItem,

@@ -11,9 +11,9 @@ import { checkTokenExpired } from '../../Utils';
 import { SNACK_PLACEHOLDER_IMAGE } from '../../Constants';
 import toast from 'react-hot-toast';
 
-export default function SnackView({ snack, reference }) {
+export default function SnackView({ snack, reference = null }) {
     const { _id, image, name, isAvailable, price } = snack;
-    const [quantityInCart, setQuantityInCart] = useState(snack.quantity);
+    const [quantityInCart, setQuantityInCart] = useState(snack.quantity || 0);
     const { user, setUser } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();

@@ -3,6 +3,7 @@ import {
     CalendarFilter,
     StatsHistory,
     PendingHistory,
+    PreparedHistory,
     RejectedHistory,
     CompletedHistory,
     DateBadge,
@@ -46,6 +47,7 @@ export default function HistoryPage() {
             </div>
 
             {statusFilter === 'Pending' && <PendingHistory />}
+            {statusFilter === 'Prepared' && <PreparedHistory />}
             {statusFilter === 'PickedUp' && <CompletedHistory />}
             {statusFilter === 'Rejected' && <RejectedHistory />}
         </div>

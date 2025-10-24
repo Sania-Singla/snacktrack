@@ -237,12 +237,14 @@ const updateOrderStatus = tryCatch(
             order.canteenId.toString(),
         ]);
 
+        const data =
+            status === 'Prepared'
+                ? { order: completeOrder, orderId }
+                : order._id.toString();
+
         io.to(stuSocketId)
             .to(cantSocketId)
-            .emit(
-                SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`],
-                order._id.toString()
-            );
+            .emit(SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`], data);
 
         return res.status(OK).json({
             message: 'order status updated successfully',
@@ -264,6 +266,7 @@ const updateExtraCharges = tryCatch(
         });
 
         if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
+        
         const orderDate = moment(order.createdAt)
             .tz('Asia/Kolkata')
             .startOf('day');
@@ -458,10 +461,7 @@ const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
                 $match: {
                     canteenId: new Types.ObjectId(canteenId),
                     createdAt: { $gte: startOfDay, $lt: endOfDay },
-                    status:
-                        status === 'Pending'
-                            ? { $in: ['Pending', 'Prepared'] }
-                            : status,
+                    status,
                 },
             },
             { $unwind: '$items' },
@@ -669,7 +669,7 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
         result[stat.status] = stat.count;
     });
 
-    result.Pending = result.Pending + result.Prepared;
+    result.incomplete = result.Pending + result.Prepared;
 
     return res.status(OK).json(result);
 });

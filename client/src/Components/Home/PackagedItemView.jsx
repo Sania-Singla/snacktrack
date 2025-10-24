@@ -10,9 +10,9 @@ import { contractorService } from '../../Services';
 import { checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 
-export default function PackagedItemView({ item, reference }) {
+export default function PackagedItemView({ item, reference = null }) {
     const { _id, name, isAvailable, price } = item;
-    const [quantityInCart, setQuantityInCart] = useState(item.quantity);
+    const [quantityInCart, setQuantityInCart] = useState(item.quantity || 0);
     const { user } = useUserContext();
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems } = useStudentContext();

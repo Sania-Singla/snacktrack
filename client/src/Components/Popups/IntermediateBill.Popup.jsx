@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { billService } from '../../Services';
-import { usePopupContext } from '../../Contexts';
-import { useNavigate } from 'react-router-dom';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import { checkTokenExpired } from '../../Utils';
 import { icons } from '../../Assets/icons';
@@ -12,7 +11,7 @@ export default function IntermediateBillPopup() {
     const [rollNo, setRollNo] = useState('');
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const { setUser } = useUserContext();
 
     async function handleSubmit(e) {
         e.preventDefault();

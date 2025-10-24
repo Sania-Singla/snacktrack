@@ -1,15 +1,23 @@
 import { useState } from 'react';
 import { icons } from '../Assets/icons';
-import { Completed, Pending, Rejected, Stats, Kitchen } from '../Components';
+import {
+    Completed,
+    Pending,
+    Prepared,
+    Rejected,
+    Stats,
+    Kitchen,
+    Dropdown,
+} from '../Components';
 import { useOrderContext } from '../Contexts';
 import { Resizable } from 're-resizable';
 
 export default function TodayOrdersPage() {
-    const { statusFilter } = useOrderContext();
+    const { statusFilter, setStatusFilter } = useOrderContext();
     const [showOrderSide, setShowOrderSide] = useState(true);
 
     return (
-        <div className="flex gap-4 h-full">
+        <div className="flex gap-4 h-full min-h-[calc(100vh-4rem)]">
             <Resizable
                 defaultSize={{ width: '25%' }}
                 enable={showOrderSide ? { right: true } : {}}
@@ -21,27 +29,41 @@ export default function TodayOrdersPage() {
                         <h1 className="text-xl font-semibold text-gray-900">
                             Orders
                         </h1>
-                        <div
+                        {/* <div
                             onClick={() => setShowOrderSide(false)}
                             className="size-8 rounded-full border-1 border-gray-200 flex items-center justify-center bg-white cursor-pointer"
                         >
                             <div className="size-3.5 fill-gray-800 rotate-90">
                                 {icons.arrowDown}
                             </div>
+                        </div> */}
+                        <div>
+                            <Dropdown
+                                options={[
+                                    { label: 'Prepared', value: 'Prepared' },
+                                    { label: 'Pending', value: 'Pending' },
+                                    { label: 'Completed', value: 'PickedUp' },
+                                    { label: 'Rejected', value: 'Rejected' },
+                                ]}
+                                className="py-1 text-sm px-3 border-1 border-gray-200 text-[#4977ec] font-medium"
+                                setValue={setStatusFilter}
+                                size="sm"
+                            />
                         </div>
                     </div>
 
-                    <div className="mb-4">
+                    {/* <div className="mb-4">
                         <Stats />
-                    </div>
+                    </div> */}
 
                     {statusFilter === 'Pending' && <Pending />}
+                    {statusFilter === 'Prepared' && <Prepared />}
                     {statusFilter === 'PickedUp' && <Completed />}
                     {statusFilter === 'Rejected' && <Rejected />}
                 </div>
             </Resizable>
 
-            <div className="flex-1 h-full">
+            <div className="flex-1 h-full min-h-[calc(100vh-4rem)]">
                 <Kitchen
                     setShowOrderSide={setShowOrderSide}
                     showOrderSide={showOrderSide}

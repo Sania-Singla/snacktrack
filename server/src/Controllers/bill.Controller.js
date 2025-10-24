@@ -1,4 +1,4 @@
-import { NOT_FOUND, OK } from '../Constants/index.js';
+import { NOT_FOUND, OK, TAX } from '../Constants/index.js';
 import { ErrorHandler, tryCatch } from '../Utils/index.js';
 import { Bill, Canteen, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
@@ -101,13 +101,14 @@ const getBills = tryCatch('get bills', async (req, res) => {
                 limit: parseInt(limit),
             }
         ),
+
         // total amount
         Bill.aggregate([
             { $match: matchStage },
             {
                 $group: {
                     _id: null,
-                    totalAmount: { $sum: '$amount' },
+                    totalAmount: { $sum: '$grandTotal' },
                 },
             },
         ]),
@@ -176,10 +177,16 @@ const generateIntermediateBill = tryCatch(
             },
         ]);
 
+        const subtotal = bill ? bill.totalAmount : 0;
+        const tax = subtotal * TAX;
+        const grandTotal = subtotal + tax;
+
         return res.status(OK).json({
             studentInfo: student,
             canteenId,
-            amount: bill ? bill.totalAmount : 0,
+            amount,
+            tax,
+            grandTotal,
         });
     }
 );

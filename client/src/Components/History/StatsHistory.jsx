@@ -50,6 +50,16 @@ export default function StatsHistory() {
             </div>
 
             <div
+                onClick={() => setStatusFilter('Prepared')}
+                className={`bg-white w-full py-1 space-y-1.5 text-center text-sm cursor-pointer hover:border-purple-500 rounded-md border ${statusFilter === 'Prepared' ? 'border-purple-500' : 'border-gray-200'}`}
+            >
+                <h3 className="font-medium text-gray-800">Prepared</h3>
+                <span className="text-purple-600 font-bold">
+                    {stats.Prepared}
+                </span>
+            </div>
+
+            <div
                 onClick={() => setStatusFilter('PickedUp')}
                 className={`bg-white w-full py-1 space-y-1.5 text-center text-sm cursor-pointer hover:border-green-500 rounded-md border ${statusFilter === 'PickedUp' ? 'border-green-500' : 'border-gray-200'}`}
             >

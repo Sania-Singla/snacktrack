@@ -1,8 +1,6 @@
-const OK = 200;
-const BAD_REQUEST = 400;
-const SERVER_ERROR = 500;
-const FORBIDDEN = 403;
-const NOT_FOUND = 404;
-const CREATED = 201;
-
-export { OK, BAD_REQUEST, NOT_FOUND, CREATED, SERVER_ERROR, FORBIDDEN };
+export const OK = 200;
+export const BAD_REQUEST = 400;
+export const SERVER_ERROR = 500;
+export const FORBIDDEN = 403;
+export const NOT_FOUND = 404;
+export const CREATED = 201;

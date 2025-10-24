@@ -15,7 +15,6 @@ export const MAX_FILE_SIZE = 5;
 export const LIMIT = 8; // Pagination limit
 export const ALLOWED_EXT = ['png', 'jpg', 'jpeg'];
 export const SERVER_ERROR = 500;
-export const TAX = 0; // ex: 5 for 5% tax on total amount
 export const CONTRIBUTORS = [
     {
         image: SANIAIMAGE,

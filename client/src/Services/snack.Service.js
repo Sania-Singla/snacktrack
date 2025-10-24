@@ -33,6 +33,26 @@ class SnackService {
             aim: 'getItems',
         });
     }
+
+    async getSnacksVersion({ canteenId = '', signal }) {
+        return await fetchWrapper({
+            endPoint: `/snacks/version/${canteenId}`,
+            method: 'GET',
+            credentials: 'include',
+            signal,
+            aim: 'getSnacksVersion',
+        });
+    }
+
+    async getItemsVersion({ canteenId = '', signal }) {
+        return await fetchWrapper({
+            endPoint: `/snacks/packaged/version/${canteenId}`,
+            method: 'GET',
+            credentials: 'include',
+            signal,
+            aim: 'getItemsVersion',
+        });
+    }
 }
 
 export const snackService = new SnackService();

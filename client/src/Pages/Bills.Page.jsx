@@ -140,9 +140,7 @@ export default function BillsPage() {
                     {bills.map((bill, i) => (
                         <BillCard
                             reference={
-                                i + 1 === bills.length && billsInfo?.hasNextPage
-                                    ? paginateRef
-                                    : null
+                                i + 1 === bills.length ? paginateRef : null
                             }
                             key={bill._id}
                             bill={bill}

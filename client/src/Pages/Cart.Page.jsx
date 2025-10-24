@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { SNACK_PLACEHOLDER_IMAGE, TAX } from '../Constants';
+import { SNACK_PLACEHOLDER_IMAGE } from '../Constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
@@ -52,9 +52,6 @@ export default function CartPage() {
         0
     );
 
-    const tax = subtotal * (TAX / 100);
-    const total = subtotal + tax;
-
     function updateQuantity(item, newQuantity) {
         const { _id } = item;
         const updatedCartItems = cartItems.map((i) =>
@@ -84,7 +81,7 @@ export default function CartPage() {
             }
             const res = await orderService.placeOrder({
                 cartItems,
-                amount: total,
+                amount: subtotal,
             });
             if (res && !res.message) {
                 localStorage.removeItem('cartItems');
@@ -281,7 +278,7 @@ export default function CartPage() {
                                     Total
                                 </p>
                                 <p className="text-lg font-semibold text-gray-900">
-                                    ₹{total.toFixed(2)}
+                                    ₹{subtotal.toFixed(2)}
                                 </p>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ import { nanoid } from 'nanoid';
 import { Snack, Student, PackagedFood, Order, Bill } from '../Models/index.js';
 import { Types } from 'mongoose';
 import fs from 'fs';
+import { io } from '../socket.js';
 
 // student management
 
@@ -323,6 +324,9 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
             price,
             image,
         });
+
+        io.emit('snackAdded', snack);
+
         return res.status(CREATED).json(snack);
     } catch (err) {
         if (imageURL) await deleteFromCloudinary(imageURL);
@@ -342,6 +346,8 @@ const deleteSnack = tryCatch('delete post', async (req, res, next) => {
 
     if (!snack) return next(new ErrorHandler('snack not found', NOT_FOUND));
     if (snack.image) await deleteFromCloudinary(snack.image);
+
+    io.emit('snackDeleted', { snackId: snack._id, canteenId: snack.canteenId });
 
     return res.status(OK).json({ message: 'snack deleted successfully' });
 });
@@ -391,6 +397,14 @@ const updateSnack = tryCatch('update snack', async (req, res, next) => {
         snack.price = price || snack.price;
         await snack.save();
 
+        io.emit('snackUpdated', {
+            _id: snack._id,
+            canteenId: snack.canteenId,
+            name: snack.name,
+            price: snack.price,
+            image: snack.image,
+        });
+
         return res.status(OK).json(snack);
     } catch (err) {
         if (imageURL) await deleteFromCloudinary(imageURL);
@@ -413,6 +427,13 @@ const toggleSnackAvailability = tryCatch(
 
         snack.isAvailable = !snack.isAvailable;
         await snack.save();
+
+        io.emit('snackUpdated', {
+            _id: snack._id,
+            canteenId: snack.canteenId,
+            isAvailable: snack.isAvailable,
+        });
+
         return res
             .status(OK)
             .json({ message: 'snack availability toggled successfully' });
@@ -443,6 +464,8 @@ const addItem = tryCatch('add item', async (req, res, next) => {
         price,
     });
 
+    io.emit('itemAdded', item);
+
     return res.status(CREATED).json(item);
 });
 
@@ -458,6 +481,8 @@ const deleteItem = tryCatch('delete item', async (req, res, next) => {
     if (!item) {
         return next(new ErrorHandler('item not found', NOT_FOUND));
     }
+
+    io.emit('itemDeleted', { itemId: item._id, canteenId: item.canteenId });
 
     return res.status(OK).json({ message: 'item deleted successfully' });
 });
@@ -496,6 +521,13 @@ const updateItem = tryCatch('update item', async (req, res, next) => {
     item.price = price || item.price;
     await item.save();
 
+    io.emit('itemUpdated', {
+        _id: item._id,
+        canteenId: item.canteenId,
+        name: item.name,
+        price: item.price,
+    });
+
     return res.status(OK).json(item);
 });
 
@@ -513,6 +545,13 @@ const toggleItemAvailability = tryCatch(
 
         item.isAvailable = !item.isAvailable;
         await item.save();
+
+        io.emit('itemUpdated', {
+            _id: item._id,
+            canteenId: item.canteenId,
+            isAvailable: item.isAvailable,
+        });
+
         return res
             .status(OK)
             .json({ message: 'item availability toggled successfully' });

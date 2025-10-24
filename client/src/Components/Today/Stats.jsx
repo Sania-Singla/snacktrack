@@ -49,6 +49,14 @@ export default function Stats() {
             }));
         }
 
+        async function orderPrepared() {
+            setStats((prev) => ({
+                ...prev,
+                Pending: prev.Pending - 1,
+                Prepared: prev.Prepared + 1,
+            }));
+        }
+
         function orderPickedUp() {
             setStats((prev) => ({
                 ...prev,
@@ -68,17 +76,19 @@ export default function Stats() {
         socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
         socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+        socket.on(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
 
         return () => {
             socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
             socket.off(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
             socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
+            socket.off(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
         };
     }, [socket]);
 
     return (
         !loading && (
-            <div className="flex gap-4 items-center justify-center w-full">
+            <div className="flex gap-2 items-center justify-center w-full">
                 <div
                     onClick={() => setStatusFilter('Pending')}
                     className={`bg-white w-full py-1 space-y-1.5 text-center text-sm cursor-pointer hover:border-blue-500 rounded-md border ${statusFilter === 'Pending' ? 'border-blue-500' : 'border-gray-200'}`}
@@ -86,6 +96,16 @@ export default function Stats() {
                     <h3 className="font-medium text-gray-800">Pending</h3>
                     <span className="text-blue-600 font-bold">
                         {stats.Pending}
+                    </span>
+                </div>
+
+                <div
+                    onClick={() => setStatusFilter('Prepared')}
+                    className={`bg-white w-full py-1 space-y-1.5 text-center text-sm cursor-pointer hover:border-purple-500 rounded-md border ${statusFilter === 'Prepared' ? 'border-purple-500' : 'border-gray-200'}`}
+                >
+                    <h3 className="font-medium text-gray-800">Prepared</h3>
+                    <span className="text-purple-600 font-bold">
+                        {stats.Prepared}
                     </span>
                 </div>
 

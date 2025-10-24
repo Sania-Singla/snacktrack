@@ -15,6 +15,7 @@ import {
 } from './errorCodes.js';
 import { HOSTELS } from './hostels.js';
 import { SOCKET_EVENTS } from './events.js';
+import { TAX } from './billing.js';
 
 export {
     MAX_FILE_SIZE,
@@ -31,4 +32,5 @@ export {
     FORBIDDEN,
     HOSTELS,
     SOCKET_EVENTS,
+    TAX,
 };

@@ -19,7 +19,7 @@ export default function App() {
     const { socket } = useSocketContext();
 
     useEffect(() => {
-        (async function currentUser() {
+        (async function () {
             try {
                 const res = await userService.getCurrentUser();
                 if (res && !res.message) setUser(res);

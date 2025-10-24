@@ -1,6 +1,7 @@
 import { Bill, Order } from '../Models/index.js';
 import cron from 'node-cron';
 import moment from 'moment-timezone';
+import { TAX } from '../Constants/index.js';
 
 async function generateBills() {
     try {
@@ -23,7 +24,8 @@ async function generateBills() {
             {
                 $group: {
                     _id: '$studentId',
-                    totalAmount: { $sum: '$amount' },
+                    totalAmount: { $sum: '$amount' }, // sum of all amounts
+                    totalExtra: { $sum: '$extraCharges' }, // sum of extra charges
                     canteenId: { $first: '$canteenId' },
                 },
             },
@@ -34,27 +36,32 @@ async function generateBills() {
                 `👥 Found ${studentsWithOrders.length} students with orders.`
             );
         } else {
-            console.log(
-                'ℹ️ No students with picked up orders for this period.'
-            );
+            console.log('ℹ️ No students with prepared orders for this period.');
             return;
         }
 
-        const operations = studentsWithOrders.map((student) => ({
-            updateOne: {
-                filter: { studentId: student._id, month, year },
-                update: {
-                    $setOnInsert: {
-                        studentId: student._id,
-                        canteenId: student.canteenId,
-                        amount: student.totalAmount,
-                        month,
-                        year,
+        const operations = studentsWithOrders.map((student) => {
+            const subtotal = student.totalAmount + student.totalExtra;
+            const grandTotal = subtotal + subtotal * TAX;
+
+            return {
+                updateOne: {
+                    filter: { studentId: student._id, month, year },
+                    update: {
+                        $setOnInsert: {
+                            studentId: student._id,
+                            canteenId: student.canteenId,
+                            amount: subtotal,
+                            tax: subtotal * TAX,
+                            grandTotal,
+                            month,
+                            year,
+                        },
                     },
+                    upsert: true,
                 },
-                upsert: true,
-            },
-        }));
+            };
+        });
 
         const result = await Bill.bulkWrite(operations);
 
@@ -98,15 +105,23 @@ async function deleteOldOrders() {
 export const startBillingCronJob = () => {
     console.log('💵 Billing scheduled on 1st of every month at 12:05 AM');
 
-    return cron.schedule('5 0 1 * *', async () => {
-        await generateBills();
-    });
+    return cron.schedule(
+        '5 0 1 * *',
+        async () => {
+            await generateBills();
+        },
+        { timezone: 'Asia/Kolkata' }
+    );
 };
 
 export const startCleanupCronJob = () => {
-    console.log('🧹 Cleanup scheduled on 1st of every month at 12:05 AM');
+    console.log('🧹 Cleanup scheduled on 2nd of every month at 12:05 AM');
 
-    return cron.schedule('10 0 1 * *', async () => {
-        await deleteOldOrders();
-    });
+    return cron.schedule(
+        '5 0 2 * *',
+        async () => {
+            await deleteOldOrders();
+        },
+        { timezone: 'Asia/Kolkata' }
+    );
 };

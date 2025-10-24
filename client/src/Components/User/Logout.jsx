@@ -17,7 +17,7 @@ export default function Logout() {
             const res = await userService.logout();
             if (res && res.message === 'user loggedout successfully') {
                 setUser(null);
-                localStorage.removeItem('cartItems');
+                localStorage.clear();
                 setCartItems([]);
                 toast.success('Logged out Successfully 🙂');
             } else checkTokenExpired(res, setUser);

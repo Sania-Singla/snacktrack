@@ -24,6 +24,17 @@ const billSchema = new Schema(
         amount: {
             type: Number,
             required: true,
+            default: 0,
+        },
+        tax: {
+            type: Number,
+            required: true,
+            default: 0,
+        },
+        grandTotal: {
+            type: Number,
+            required: true,
+            default: 0,
         },
     },
     { timestamps: true }

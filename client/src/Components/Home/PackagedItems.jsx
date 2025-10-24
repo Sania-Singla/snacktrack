@@ -3,21 +3,21 @@ import { icons } from '../../Assets/icons';
 import { useEffect, useState } from 'react';
 import {
     useSearchContext,
+    useSocketContext,
     useStudentContext,
     useUserContext,
 } from '../../Contexts';
 import { snackService } from '../../Services';
-import { checkTokenExpired, paginate } from '../../Utils';
+import { checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
 
 export default function PackagedItems() {
     const { user, setUser } = useUserContext();
     const [items, setItems] = useState([]);
-    const [itemsInfo, setItemsInfo] = useState({});
     const [loading, setLoading] = useState(true);
     const { cartItems, orderPlaced } = useStudentContext();
     const { debouncedSearch } = useSearchContext();
-    const [page, setPage] = useState(1);
+    const { socket } = useSocketContext();
 
     function compute(data) {
         return data.map((s) => ({
@@ -26,12 +26,6 @@ export default function PackagedItems() {
         }));
     }
 
-    const paginateRef = paginate(itemsInfo.hasNextPage, loading, setPage);
-
-    useEffect(() => {
-        setPage(1);
-    }, [debouncedSearch]);
-
     useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
@@ -39,32 +33,79 @@ export default function PackagedItems() {
         (async function () {
             try {
                 setLoading(true);
-                const res = await snackService.getItems({
+
+                const cached = JSON.parse(localStorage.getItem('items'));
+                const cachedVersion = localStorage.getItem('itemsVersion');
+
+                const versionRes = await snackService.getItemsVersion({
                     canteenId: user.canteenId,
-                    page,
                     signal,
-                    search: debouncedSearch,
                 });
 
-                setLoading(false);
+                if (!versionRes || versionRes.message) {
+                    checkTokenExpired(versionRes, setUser);
+                    return;
+                }
 
-                if (res && !res.message) {
-                    setItemsInfo(res.itemsInfo);
+                const serverVersion = versionRes.version;
 
-                    if (page === 1) {
-                        setItems(compute(res.items));
-                    } else {
-                        setItems((prev) => [...prev, ...compute(res.items)]);
-                    }
-                } else checkTokenExpired(res, setUser);
+                const shouldFetch =
+                    !cached ||
+                    !cachedVersion ||
+                    cachedVersion !== serverVersion;
+
+                if (shouldFetch) {
+                    const res = await snackService.getItems({
+                        canteenId: user.canteenId,
+                        signal,
+                        page: 1,
+                        limit: 1000,
+                    });
+
+                    if (res && !res.message) {
+                        localStorage.setItem(
+                            'items',
+                            JSON.stringify(res.items)
+                        );
+                        localStorage.setItem('itemsVersion', serverVersion);
+                        setItems(
+                            compute(
+                                res.items.filter((i) =>
+                                    debouncedSearch
+                                        ? i.name
+                                              .toLowerCase()
+                                              .includes(
+                                                  debouncedSearch.toLowerCase()
+                                              )
+                                        : true
+                                )
+                            )
+                        );
+                    } else checkTokenExpired(res, setUser);
+                } else {
+                    setItems(
+                        compute(
+                            cached.filter((i) =>
+                                debouncedSearch
+                                    ? i.name
+                                          .toLowerCase()
+                                          .includes(
+                                              debouncedSearch.toLowerCase()
+                                          )
+                                    : true
+                            )
+                        )
+                    );
+                }
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
             } finally {
+                setLoading(false);
             }
         })();
 
         return () => controller.abort();
-    }, [page, debouncedSearch]);
+    }, [debouncedSearch]);
 
     useEffect(() => {
         if (orderPlaced) {
@@ -72,32 +113,59 @@ export default function PackagedItems() {
         }
     }, [orderPlaced]);
 
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on('itemUpdated', (item) => {
+            if (item.canteenId !== user.canteenId) return;
+
+            const data = JSON.parse(localStorage.getItem('items')) || [];
+            const newData = data.map((i) =>
+                i._id === item._id ? { ...i, ...item } : i
+            );
+            localStorage.setItem('items', JSON.stringify(newData));
+            setItems(newData);
+        });
+
+        socket.on('itemAdded', (item) => {
+            if (item.canteenId !== user.canteenId) return;
+
+            const data = JSON.parse(localStorage.getItem('items')) || [];
+            const newData = [item, ...data];
+            localStorage.setItem('items', JSON.stringify(newData));
+            setItems(newData);
+        });
+
+        socket.on('itemDeleted', ({ itemId, canteenId }) => {
+            if (canteenId !== user.canteenId) return;
+
+            const data = JSON.parse(localStorage.getItem('items')) || [];
+            const newData = data.filter((i) => i._id !== itemId);
+            localStorage.setItem('items', JSON.stringify(newData));
+            setItems(newData);
+        });
+    }, [socket]);
+
     return (
         <>
-            <div
-                className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
-            >
-                {items.map((item, i) => (
-                    <PackagedItemView
-                        key={item._id}
-                        item={item}
-                        reference={i + 1 === items.length ? paginateRef : null}
-                    />
-                ))}
-            </div>
-
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
                         {icons.loading}
                     </div>
                 </div>
+            ) : items.length === 0 ? (
+                <div className="italic text-center text-gray-600">
+                    No items found
+                </div>
             ) : (
-                items.length === 0 && (
-                    <div className="italic text-center text-gray-600">
-                        No items found
-                    </div>
-                )
+                <div
+                    className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
+                >
+                    {items.map((item, i) => (
+                        <PackagedItemView key={item._id} item={item} />
+                    ))}
+                </div>
             )}
         </>
     );

@@ -49,17 +49,7 @@ export default function Rejected() {
                     if (page === 1) {
                         setOrders(res.orders);
                     } else {
-                        // avoid duplicates
-                        setOrders((prev) => {
-                            const newOrders = res.orders.filter(
-                                (newOrder) =>
-                                    !prev.some(
-                                        (existingOrder) =>
-                                            existingOrder._id === newOrder._id
-                                    )
-                            );
-                            return prev.concat(newOrders);
-                        });
+                        setOrders((prev) => prev.concat(res.orders));
                     }
                 } else checkTokenExpired(res, setUser);
             } catch (err) {
@@ -96,7 +86,7 @@ export default function Rejected() {
                 </div>
             ) : (
                 orders.length === 0 && (
-                    <div className="italic text-gray-600 text-center">
+                    <div className="italic text-gray-400 text-center">
                         No orders found
                     </div>
                 )

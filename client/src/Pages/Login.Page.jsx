@@ -87,7 +87,7 @@ export default function LoginPage() {
             if (res && !res.message) {
                 toast.success('Logged in Successfully 😉');
                 setUser(res);
-                localStorage.removeItem('cartItems');
+                localStorage.clear();
                 navigate('/');
             } else toast.error(res.message);
         } catch (err) {
