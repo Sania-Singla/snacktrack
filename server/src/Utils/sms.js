@@ -7,7 +7,6 @@ export async function sendSMS({ to, message }) {
         //     to,
         //     body: message,
         // });
-
         // return msg.sid;
     } catch (err) {
         console.error('[Error sending sms]: ', err);

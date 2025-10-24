@@ -2,7 +2,10 @@ import { redisClient } from '../server.js';
 
 async function addPreparedItem({ itemId, orderId }) {
     const newItem = { itemId: itemId.toString(), pickedUp: false };
-    await redisClient.sAdd(`order_${orderId.toString()}`, JSON.stringify(newItem));
+    await redisClient.sAdd(
+        `order_${orderId.toString()}`,
+        JSON.stringify(newItem)
+    );
 }
 
 async function addPickedUpItem({ itemId, orderId }) {
@@ -16,7 +19,10 @@ async function addPickedUpItem({ itemId, orderId }) {
         const parsedItem = JSON.parse(existingItem);
         parsedItem.pickedUp = true; // No Partial Pickups
         await redisClient.sRem(`order_${orderId.toString()}`, existingItem);
-        await redisClient.sAdd(`order_${orderId.toString()}`, JSON.stringify(parsedItem));
+        await redisClient.sAdd(
+            `order_${orderId.toString()}`,
+            JSON.stringify(parsedItem)
+        );
     }
 }
 

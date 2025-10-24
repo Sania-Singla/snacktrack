@@ -2,57 +2,57 @@ name: CI/CD Pipeline
 run-name: ${{ github.actor }} ran this pipeline
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📃 Checkout code
-        uses: actions/checkout@v3
+    build-and-push:
+        runs-on: ubuntu-latest
+        steps:
+            - name: 📃 Checkout code
+              uses: actions/checkout@v3
 
-      - name: 🔐 Login to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+            - name: 🔐 Login to Docker Hub
+              uses: docker/login-action@v2
+              with:
+                  username: ${{ secrets.DOCKER_HUB_USERNAME }}
+                  password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: 🔢 Get app version from package.json
-        id: vars
-        run: |
-          VERSION=$(jq -r .version package.json)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
+            - name: 🔢 Get app version from package.json
+              id: vars
+              run: |
+                  VERSION=$(jq -r .version package.json)
+                  echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: 🛠️ Build Docker Image
-        run: |
-          echo "Building Docker image version $VERSION"
-          docker build -t saniasingla/snacktrack-server:latest \
-                       -t saniasingla/snacktrack-server:$VERSION .
+            - name: 🛠️ Build Docker Image
+              run: |
+                  echo "Building Docker image version $VERSION"
+                  docker build -t saniasingla/snacktrack-server:latest \
+                               -t saniasingla/snacktrack-server:$VERSION .
 
-      - name: 🚀 Push Docker Image
-        run: |
-          docker push saniasingla/snacktrack-server:latest
-          docker push saniasingla/snacktrack-server:$VERSION
+            - name: 🚀 Push Docker Image
+              run: |
+                  docker push saniasingla/snacktrack-server:latest
+                  docker push saniasingla/snacktrack-server:$VERSION
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    steps:
-      - name: 🔐 Set up SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/snacktrack_server_key.pem
-          chmod 400 ~/.ssh/snacktrack_server_key.pem
+    deploy:
+        runs-on: ubuntu-latest
+        needs: build-and-push
+        steps:
+            - name: 🔐 Set up SSH key
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/snacktrack_server_key.pem
+                  chmod 400 ~/.ssh/snacktrack_server_key.pem
 
-      - name: 🎉 SSH into EC2 and Deploy via Docker Compose
-        run: |
-          echo "Using the snacktrack-server/docker-compose.yml file and /etc/snacktrack-server.env on the server"
-      
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/snacktrack_server_key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
-            cd ~/snacktrack-server
-            docker compose pull       # Pull latest image
-            docker compose up -d      # Recreate container if image changed
-            docker system prune -f    # removes previous (dangling) images
-          EOF
+            - name: 🎉 SSH into EC2 and Deploy via Docker Compose
+              run: |
+                  echo "Using the snacktrack-server/docker-compose.yml file and /etc/snacktrack-server.env on the server"
+
+                  ssh -o StrictHostKeyChecking=no -i ~/.ssh/snacktrack_server_key.pem ubuntu@${{ secrets.EC2_PUBLIC_IP }} << 'EOF'
+                    cd ~/snacktrack-server
+                    docker compose pull       # Pull latest image
+                    docker compose up -d      # Recreate container if image changed
+                    docker system prune -f    # removes previous (dangling) images
+                  EOF

@@ -266,7 +266,7 @@ const updateExtraCharges = tryCatch(
         });
 
         if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
-        
+
         const orderDate = moment(order.createdAt)
             .tz('Asia/Kolkata')
             .startOf('day');

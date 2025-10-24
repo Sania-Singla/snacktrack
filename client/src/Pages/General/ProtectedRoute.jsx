@@ -13,6 +13,10 @@ export default function AccessTo({ roles = [] }) {
         }
     }
 
+    if (user.role === 'admin' && !location.pathname.includes('admin')) {
+        return <Navigate to={'/new-user'} replace />;
+    }
+
     if (roles.length && !roles.includes(user.role)) {
         return <Navigate to={'/not-found'} replace />;
     }

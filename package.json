@@ -3,11 +3,14 @@
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
+        "prepare": "husky",
+        "prepush": "lint-staged",
         "format": "prettier --write .",
         "client": "cd client && npm run dev",
         "server": "cd server && npm run dev",
-        "dev": "concurrently \"npm run client\" \"npm run server\"",
-        "build": "npm i && npm i --prefix client && npm i --prefix server"
+        "kiosk": "cd kiosk && npm run dev",
+        "dev": "concurrently \"npm run client\" \"npm run server\" \"npm run kiosk\"",
+        "build": "npm i && npm i --prefix client && npm i --prefix server && npm i --prefix kiosk"
     },
     "keywords": [],
     "author": "Sania",
@@ -15,6 +18,11 @@
     "description": "A web application to track your snacks",
     "devDependencies": {
         "concurrently": "^9.2.1",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.2.6",
         "prettier": "^3.6.2"
+    },
+    "lint-staged": {
+        "*.{js,jsx,ts,tsx,json,md}": "prettier --write"
     }
 }
