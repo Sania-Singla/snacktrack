@@ -15,7 +15,7 @@ import { Canteen, Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcryptjs';
 import { nanoid } from 'nanoid';
 
-const login = tryCatch('login as student', async (req, res, next) => {
+export const login = tryCatch('login as student', async (req, res, next) => {
     const { userName, password } = req.body;
 
     if (!userName || !password) {
@@ -68,7 +68,7 @@ const login = tryCatch('login as student', async (req, res, next) => {
         });
 });
 
-const logout = tryCatch('logout user', async (req, res, next) => {
+export const logout = tryCatch('logout user', async (req, res, next) => {
     const { _id, role } = req.user;
     const Model = role === 'contractor' ? Contractor : Student;
     await Model.findByIdAndUpdate(
@@ -84,72 +84,83 @@ const logout = tryCatch('logout user', async (req, res, next) => {
         .json({ message: 'user loggedout successfully' });
 });
 
-const getCurrentUser = tryCatch('get current user', async (req, res, next) => {
-    let { password, refreshToken, ...user } = req.user;
+export const getCurrentUser = tryCatch(
+    'get current user',
+    async (req, res, next) => {
+        let { password, refreshToken, ...user } = req.user;
 
-    if (user.role === 'admin') {
-        return res.status(OK).json(req.user);
+        if (user.role === 'admin') {
+            return res.status(OK).json(req.user);
+        }
+
+        // populate canteen Info
+        const canteen = await Canteen.findById(user.canteenId);
+        const { hostelName, hostelNumber, hostelType } = canteen;
+
+        return res
+            .status(OK)
+            .json({ ...user, hostelType, hostelNumber, hostelName });
     }
+);
 
-    // populate canteen Info
-    const canteen = await Canteen.findById(user.canteenId);
-    const { hostelName, hostelNumber, hostelType } = canteen;
+export const updatePassword = tryCatch(
+    'update password',
+    async (req, res, next) => {
+        const { oldPassword, newPassword } = req.body;
+        const { password, _id, role } = req.user;
 
-    return res
-        .status(OK)
-        .json({ ...user, hostelType, hostelNumber, hostelName });
-});
+        const isPassValid = bcrypt.compareSync(oldPassword, password);
+        if (!isPassValid) {
+            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
+        }
 
-const updatePassword = tryCatch('update password', async (req, res, next) => {
-    const { oldPassword, newPassword } = req.body;
-    const { password, _id, role } = req.user;
+        const isValid = verifyExpression('password', newPassword);
+        if (!isValid) {
+            return next(new ErrorHandler('invalid password', BAD_REQUEST));
+        }
 
-    const isPassValid = bcrypt.compareSync(oldPassword, password);
-    if (!isPassValid) {
-        return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
+        // hash new password
+        const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+
+        const Model = role === 'contractor' ? Contractor : Student;
+        await Model.findByIdAndUpdate(_id, {
+            $set: { password: hashedNewPassword },
+        });
+
+        return res
+            .status(OK)
+            .json({ message: 'password updated successfully' });
     }
+);
 
-    const isValid = verifyExpression('password', newPassword);
-    if (!isValid) {
-        return next(new ErrorHandler('invalid password', BAD_REQUEST));
+export const resetPassword = tryCatch(
+    'reset password',
+    async (req, res, next) => {
+        const { _id, role, email, fullName } = req.user;
+
+        const randomPassword = nanoid(8);
+
+        // hash new password
+        const hashedNewPassword = bcrypt.hashSync(randomPassword, 10);
+
+        const Model = role === 'contractor' ? Contractor : Student;
+        await Model.findByIdAndUpdate(_id, {
+            $set: { password: hashedNewPassword },
+        });
+
+        // send this password on student's email
+        await sendMail({
+            receiverName: fullName,
+            receiverMail: email,
+            subject: 'Welcome to SnackTrack',
+            html: `Hello ${fullName}, <br> Your temporary password is <b>${randomPassword}</b>`,
+        });
+
+        return res.status(OK).json({ message: 'new password sent to email' });
     }
+);
 
-    // hash new password
-    const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
-
-    const Model = role === 'contractor' ? Contractor : Student;
-    await Model.findByIdAndUpdate(_id, {
-        $set: { password: hashedNewPassword },
-    });
-
-    return res.status(OK).json({ message: 'password updated successfully' });
-});
-
-const resetPassword = tryCatch('reset password', async (req, res, next) => {
-    const { _id, role, email, fullName } = req.user;
-
-    const randomPassword = nanoid(8);
-
-    // hash new password
-    const hashedNewPassword = bcrypt.hashSync(randomPassword, 10);
-
-    const Model = role === 'contractor' ? Contractor : Student;
-    await Model.findByIdAndUpdate(_id, {
-        $set: { password: hashedNewPassword },
-    });
-
-    // send this password on student's email
-    await sendMail({
-        receiverName: fullName,
-        receiverMail: email,
-        subject: 'Welcome to SnackTrack',
-        html: `Hello ${fullName}, <br> Your temporary password is <b>${randomPassword}</b><br> You can update it anytime after logging in from settings.`,
-    });
-
-    return res.status(OK).json({ message: 'new password sent to email' });
-});
-
-const updateAccountDetails = tryCatch(
+export const updateAccountDetails = tryCatch(
     'update account details',
     async (req, res, next) => {
         const { _id, password } = req.user;
@@ -203,12 +214,12 @@ const updateAccountDetails = tryCatch(
     }
 );
 
-const getCanteens = tryCatch('get canteens', async (req, res) => {
+export const getCanteens = tryCatch('get canteens', async (req, res) => {
     const canteens = await Canteen.find();
     return res.status(OK).json(canteens);
 });
 
-const verifyKitchenKey = tryCatch(
+export const verifyKitchenKey = tryCatch(
     'verify kitchen key',
     async (req, res, next) => {
         const { key } = req.body;
@@ -220,7 +231,7 @@ const verifyKitchenKey = tryCatch(
 
         const [canteen, contractor] = await Promise.all([
             Canteen.findOne({ _id: canteenId }).lean(),
-            Contractor.findOne({ canteenId }).lean(),
+            Contractor.findOne({ canteenId }).select('-refreshToken').lean(),
         ]);
         if (!canteen) {
             return next(new ErrorHandler('canteen not found', NOT_FOUND));
@@ -261,7 +272,7 @@ const verifyKitchenKey = tryCatch(
     }
 );
 
-const verifyKioskKey = tryCatch(
+export const verifyKioskKey = tryCatch(
     'verify kitchen key for kiosk',
     async (req, res, next) => {
         const { key } = req.body;
@@ -295,15 +306,3 @@ const verifyKioskKey = tryCatch(
         });
     }
 );
-
-export {
-    getCurrentUser,
-    login,
-    logout,
-    updatePassword,
-    updateAccountDetails,
-    getCanteens,
-    resetPassword,
-    verifyKitchenKey,
-    verifyKioskKey,
-};

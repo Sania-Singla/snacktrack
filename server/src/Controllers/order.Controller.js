@@ -6,40 +6,43 @@ import moment from 'moment-timezone';
 import { redisClient } from '../server.js';
 import { io } from '../socket.js';
 
-const checkAvailability = tryCatch('check availability', async (req, res) => {
-    const { cartItems } = req.body;
+export const checkAvailability = tryCatch(
+    'check availability',
+    async (req, res) => {
+        const { cartItems } = req.body;
 
-    const [snacks, packagedItems] = await Promise.all([
-        Snack.find({
-            _id: {
-                $in: cartItems
-                    .filter((i) => i.type === 'Snack')
-                    .map((i) => i._id),
-            },
-            isAvailable: true,
-        }),
-        PackagedFood.find({
-            _id: {
-                $in: cartItems
-                    .filter((i) => i.type === 'PackagedFood')
-                    .map((i) => i._id),
-            },
-            isAvailable: true,
-        }),
-    ]);
+        const [snacks, packagedItems] = await Promise.all([
+            Snack.find({
+                _id: {
+                    $in: cartItems
+                        .filter((i) => i.type === 'Snack')
+                        .map((i) => i._id),
+                },
+                isAvailable: true,
+            }),
+            PackagedFood.find({
+                _id: {
+                    $in: cartItems
+                        .filter((i) => i.type === 'PackagedFood')
+                        .map((i) => i._id),
+                },
+                isAvailable: true,
+            }),
+        ]);
 
-    const availableItems = cartItems.filter((i) => {
-        if (i.type === 'Snack') {
-            return snacks.some((s) => s._id.equals(i._id));
-        } else {
-            return packagedItems.some((p) => p._id.equals(i._id));
-        }
-    });
+        const availableItems = cartItems.filter((i) => {
+            if (i.type === 'Snack') {
+                return snacks.some((s) => s._id.equals(i._id));
+            } else {
+                return packagedItems.some((p) => p._id.equals(i._id));
+            }
+        });
 
-    return res.status(OK).json(availableItems);
-});
+        return res.status(OK).json(availableItems);
+    }
+);
 
-const placeOrder = tryCatch('place order', async (req, res) => {
+export const placeOrder = tryCatch('place order', async (req, res) => {
     const { cartItems, amount } = req.body;
     const student = req.user;
 
@@ -97,7 +100,7 @@ const placeOrder = tryCatch('place order', async (req, res) => {
     return res.status(OK).json(data);
 });
 
-const updateOrderStatus = tryCatch(
+export const updateOrderStatus = tryCatch(
     'update order status',
     async (req, res, next) => {
         const { orderId } = req.params;
@@ -253,7 +256,7 @@ const updateOrderStatus = tryCatch(
     }
 );
 
-const updateExtraCharges = tryCatch(
+export const updateExtraCharges = tryCatch(
     'update order status',
     async (req, res, next) => {
         const { orderId } = req.params;
@@ -302,327 +305,346 @@ const updateExtraCharges = tryCatch(
     }
 );
 
-const getStudentOrders = tryCatch('get student orders', async (req, res) => {
-    const { limit = 10, page = 1, date, search = '' } = req.query;
-    const { studentId } = req.params;
+export const getStudentOrders = tryCatch(
+    'get student orders',
+    async (req, res) => {
+        const { limit = 10, page = 1, date, search = '' } = req.query;
+        const { studentId } = req.params;
 
-    const matchConditions = { studentId: new Types.ObjectId(studentId) };
+        const matchConditions = { studentId: new Types.ObjectId(studentId) };
 
-    if (search) {
-        const searchRegex = new RegExp(search.toLowerCase(), 'i');
+        if (search) {
+            const searchRegex = new RegExp(search.toLowerCase(), 'i');
 
-        matchConditions.$expr = {
-            $and: [
-                { $eq: ['$studentId', new Types.ObjectId(studentId)] },
-                {
-                    $regexMatch: {
-                        input: { $substr: [{ $toString: '$_id' }, 16, 8] },
-                        regex: searchRegex,
+            matchConditions.$expr = {
+                $and: [
+                    { $eq: ['$studentId', new Types.ObjectId(studentId)] },
+                    {
+                        $regexMatch: {
+                            input: { $substr: [{ $toString: '$_id' }, 16, 8] },
+                            regex: searchRegex,
+                        },
                     },
-                },
-            ],
-        };
+                ],
+            };
 
-        // Remove studentId from top-level, since it’s in $expr now
-        delete matchConditions.studentId;
-    }
-
-    const istDate =
-        !date || date === 'null' || !moment(date, 'YYYY-MM-DD', true).isValid()
-            ? moment.tz('Asia/Kolkata')
-            : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
-
-    const startOfDay = istDate.clone().startOf('day').utc().toDate();
-    const endOfDay = istDate.clone().endOf('day').utc().toDate();
-
-    const result = await Order.aggregatePaginate(
-        [
-            {
-                $match: {
-                    ...matchConditions,
-                    createdAt: { $gte: startOfDay, $lt: endOfDay },
-                },
-            },
-            { $unwind: '$items' },
-            {
-                $lookup: {
-                    from: 'snacks',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    as: 'snack',
-                    pipeline: [{ $project: { name: 1, image: 1 } }],
-                },
-            },
-            {
-                $lookup: {
-                    from: 'packagedfoods',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    as: 'packaged',
-                    pipeline: [{ $project: { name: 1 } }],
-                },
-            },
-            {
-                $addFields: {
-                    'items.name': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $first: '$snack.name' },
-                            { $first: '$packaged.name' },
-                        ],
-                    },
-                    'items.image': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $first: '$snack.image' },
-                            null,
-                        ],
-                    },
-                },
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    amount: { $first: '$amount' },
-                    extraCharges: { $first: '$extraCharges' },
-                    status: { $first: '$status' },
-                    canteenId: { $first: '$canteenId' },
-                    studentId: { $first: '$studentId' },
-                    items: { $push: '$items' },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
-                },
-            },
-            { $project: { snack: 0, packaged: 0 } },
-        ],
-        {
-            page: parseInt(page),
-            limit: parseInt(limit),
-            sort: { createdAt: -1 },
+            // Remove studentId from top-level, since it’s in $expr now
+            delete matchConditions.studentId;
         }
-    );
 
-    if (result.docs.length) {
-        result.docs = await Promise.all(
-            result.docs.map(async (order) => {
-                const preparedItems = await redisClient.sMembers(
-                    `order_${order._id}`
-                );
+        const istDate =
+            !date ||
+            date === 'null' ||
+            !moment(date, 'YYYY-MM-DD', true).isValid()
+                ? moment.tz('Asia/Kolkata')
+                : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
 
-                const updatedItems = order.items.map((item) => {
-                    const preparedItem = preparedItems.find((i) => {
-                        const parsedItem = JSON.parse(i);
-                        return item.id.equals(parsedItem.itemId);
+        const startOfDay = istDate.clone().startOf('day').utc().toDate();
+        const endOfDay = istDate.clone().endOf('day').utc().toDate();
+
+        const result = await Order.aggregatePaginate(
+            [
+                {
+                    $match: {
+                        ...matchConditions,
+                        createdAt: { $gte: startOfDay, $lt: endOfDay },
+                    },
+                },
+                { $unwind: '$items' },
+                {
+                    $lookup: {
+                        from: 'snacks',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        as: 'snack',
+                        pipeline: [{ $project: { name: 1, image: 1 } }],
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'packagedfoods',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        as: 'packaged',
+                        pipeline: [{ $project: { name: 1 } }],
+                    },
+                },
+                {
+                    $addFields: {
+                        'items.name': {
+                            $cond: [
+                                { $eq: ['$items.type', 'Snack'] },
+                                { $first: '$snack.name' },
+                                { $first: '$packaged.name' },
+                            ],
+                        },
+                        'items.image': {
+                            $cond: [
+                                { $eq: ['$items.type', 'Snack'] },
+                                { $first: '$snack.image' },
+                                null,
+                            ],
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        amount: { $first: '$amount' },
+                        extraCharges: { $first: '$extraCharges' },
+                        status: { $first: '$status' },
+                        canteenId: { $first: '$canteenId' },
+                        studentId: { $first: '$studentId' },
+                        items: { $push: '$items' },
+                        createdAt: { $first: '$createdAt' },
+                        updatedAt: { $first: '$updatedAt' },
+                    },
+                },
+                { $project: { snack: 0, packaged: 0 } },
+            ],
+            {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                sort: { createdAt: -1 },
+            }
+        );
+
+        if (result.docs.length) {
+            result.docs = await Promise.all(
+                result.docs.map(async (order) => {
+                    const preparedItems = await redisClient.sMembers(
+                        `order_${order._id}`
+                    );
+
+                    const updatedItems = order.items.map((item) => {
+                        const preparedItem = preparedItems.find((i) => {
+                            const parsedItem = JSON.parse(i);
+                            return item.id.equals(parsedItem.itemId);
+                        });
+
+                        if (
+                            order.status === 'Pending' ||
+                            order.status === 'Prepared'
+                        ) {
+                            item.prepared = Boolean(preparedItem);
+                            item.pickedUp = preparedItem
+                                ? JSON.parse(preparedItem).pickedUp
+                                : false;
+                        }
+                        return item;
                     });
 
-                    if (
-                        order.status === 'Pending' ||
-                        order.status === 'Prepared'
-                    ) {
-                        item.prepared = Boolean(preparedItem);
-                        item.pickedUp = preparedItem
-                            ? JSON.parse(preparedItem).pickedUp
-                            : false;
-                    }
-                    return item;
-                });
-
-                return { ...order, items: updatedItems };
-            })
-        );
-    }
-    return res.status(OK).json({
-        orders: result.docs,
-        ordersInfo: {
-            hasNextPage: result.hasNextPage,
-            hasPrevPage: result.hasPrevPage,
-            totalOrders: result.totalDocs,
-        },
-    });
-});
-
-const getCanteenOrders = tryCatch('get canteen orders', async (req, res) => {
-    const { limit = 10, page = 1, status = 'Pending', search = '' } = req.query;
-    let { date } = req.query;
-
-    const istDate =
-        !date || date === 'null' || !moment(date, 'YYYY-MM-DD', true).isValid()
-            ? moment.tz('Asia/Kolkata')
-            : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
-
-    const startOfDay = istDate.clone().startOf('day').utc().toDate();
-    const endOfDay = istDate.clone().endOf('day').utc().toDate();
-
-    const canteenId = req.user.canteenId;
-
-    const result = await Order.aggregatePaginate(
-        [
-            {
-                $match: {
-                    canteenId: new Types.ObjectId(canteenId),
-                    createdAt: { $gte: startOfDay, $lt: endOfDay },
-                    status,
-                },
+                    return { ...order, items: updatedItems };
+                })
+            );
+        }
+        return res.status(OK).json({
+            orders: result.docs,
+            ordersInfo: {
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage,
+                totalOrders: result.totalDocs,
             },
-            { $unwind: '$items' },
-            {
-                $lookup: {
-                    from: 'students',
-                    localField: 'studentId',
-                    foreignField: '_id',
-                    pipeline: [
-                        {
-                            $project: {
-                                fullName: 1,
-                                phoneNumber: 1,
-                                userName: 1,
-                            },
-                        },
-                        {
-                            $addFields: {
-                                rollNumber: {
-                                    $arrayElemAt: [
-                                        { $split: ['$userName', '-'] },
-                                        1,
-                                    ],
+        });
+    }
+);
+
+export const getCanteenOrders = tryCatch(
+    'get canteen orders',
+    async (req, res) => {
+        const {
+            limit = 10,
+            page = 1,
+            status = 'Pending',
+            search = '',
+        } = req.query;
+        let { date } = req.query;
+
+        const istDate =
+            !date ||
+            date === 'null' ||
+            !moment(date, 'YYYY-MM-DD', true).isValid()
+                ? moment.tz('Asia/Kolkata')
+                : moment.tz(date, 'YYYY-MM-DD', 'Asia/Kolkata');
+
+        const startOfDay = istDate.clone().startOf('day').utc().toDate();
+        const endOfDay = istDate.clone().endOf('day').utc().toDate();
+
+        const canteenId = req.user.canteenId;
+
+        const result = await Order.aggregatePaginate(
+            [
+                {
+                    $match: {
+                        canteenId: new Types.ObjectId(canteenId),
+                        createdAt: { $gte: startOfDay, $lt: endOfDay },
+                        status,
+                    },
+                },
+                { $unwind: '$items' },
+                {
+                    $lookup: {
+                        from: 'students',
+                        localField: 'studentId',
+                        foreignField: '_id',
+                        pipeline: [
+                            {
+                                $project: {
+                                    fullName: 1,
+                                    phoneNumber: 1,
+                                    userName: 1,
                                 },
                             },
-                        },
-                    ],
-                    as: 'studentInfo',
+                            {
+                                $addFields: {
+                                    rollNumber: {
+                                        $arrayElemAt: [
+                                            { $split: ['$userName', '-'] },
+                                            1,
+                                        ],
+                                    },
+                                },
+                            },
+                        ],
+                        as: 'studentInfo',
+                    },
                 },
-            },
-            {
-                $unwind: '$studentInfo',
-            },
-            {
-                $match: search
-                    ? {
-                          $or: [
-                              {
-                                  'studentInfo.rollNumber': {
-                                      $regex: search,
-                                      $options: 'i',
+                {
+                    $unwind: '$studentInfo',
+                },
+                {
+                    $match: search
+                        ? {
+                              $or: [
+                                  {
+                                      'studentInfo.rollNumber': {
+                                          $regex: search,
+                                          $options: 'i',
+                                      },
                                   },
-                              },
-                              //   {
-                              //       $expr: {
-                              //           $regexMatch: {
-                              //               input: {
-                              //                   $substr: [
-                              //                       { $toString: '$_id' },
-                              //                       16,
-                              //                       8,
-                              //                   ],
-                              //               },
-                              //               regex: new RegExp(
-                              //                   search.toLowerCase(),
-                              //                   'i'
-                              //               ),
-                              //           },
-                              //       },
-                              //   },
-                          ],
-                      }
-                    : {},
-            },
-            {
-                $lookup: {
-                    from: 'snacks',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    pipeline: [{ $project: { name: 1, image: 1 } }],
-                    as: 'snack',
+                                  //   {
+                                  //       $expr: {
+                                  //           $regexMatch: {
+                                  //               input: {
+                                  //                   $substr: [
+                                  //                       { $toString: '$_id' },
+                                  //                       16,
+                                  //                       8,
+                                  //                   ],
+                                  //               },
+                                  //               regex: new RegExp(
+                                  //                   search.toLowerCase(),
+                                  //                   'i'
+                                  //               ),
+                                  //           },
+                                  //       },
+                                  //   },
+                              ],
+                          }
+                        : {},
                 },
-            },
-            {
-                $lookup: {
-                    from: 'packagedfoods',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    pipeline: [{ $project: { name: 1 } }],
-                    as: 'packaged',
-                },
-            },
-            {
-                $addFields: {
-                    'items.name': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $first: '$snack.name' },
-                            { $first: '$packaged.name' },
-                        ],
-                    },
-                    'items.image': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $first: '$snack.image' },
-                            null,
-                        ],
+                {
+                    $lookup: {
+                        from: 'snacks',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        pipeline: [{ $project: { name: 1, image: 1 } }],
+                        as: 'snack',
                     },
                 },
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    amount: { $first: '$amount' },
-                    extraCharges: { $first: '$extraCharges' },
-                    status: { $first: '$status' },
-                    canteenId: { $first: '$canteenId' },
-                    studentId: { $first: '$studentId' },
-                    items: { $push: '$items' },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
-                    studentInfo: { $first: '$studentInfo' },
+                {
+                    $lookup: {
+                        from: 'packagedfoods',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        pipeline: [{ $project: { name: 1 } }],
+                        as: 'packaged',
+                    },
                 },
-            },
-            { $project: { snack: 0, packaged: 0 } },
-        ],
-        { page: parseInt(page), limit: parseInt(limit), sort: { createdAt: 1 } }
-    );
+                {
+                    $addFields: {
+                        'items.name': {
+                            $cond: [
+                                { $eq: ['$items.type', 'Snack'] },
+                                { $first: '$snack.name' },
+                                { $first: '$packaged.name' },
+                            ],
+                        },
+                        'items.image': {
+                            $cond: [
+                                { $eq: ['$items.type', 'Snack'] },
+                                { $first: '$snack.image' },
+                                null,
+                            ],
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: '$_id',
+                        amount: { $first: '$amount' },
+                        extraCharges: { $first: '$extraCharges' },
+                        status: { $first: '$status' },
+                        canteenId: { $first: '$canteenId' },
+                        studentId: { $first: '$studentId' },
+                        items: { $push: '$items' },
+                        createdAt: { $first: '$createdAt' },
+                        updatedAt: { $first: '$updatedAt' },
+                        studentInfo: { $first: '$studentInfo' },
+                    },
+                },
+                { $project: { snack: 0, packaged: 0 } },
+            ],
+            {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                sort: { createdAt: 1 },
+            }
+        );
 
-    if (result.docs.length) {
-        result.docs = await Promise.all(
-            result.docs.map(async (order) => {
-                const preparedItems = await redisClient.sMembers(
-                    `order_${order._id}`
-                );
+        if (result.docs.length) {
+            result.docs = await Promise.all(
+                result.docs.map(async (order) => {
+                    const preparedItems = await redisClient.sMembers(
+                        `order_${order._id}`
+                    );
 
-                const updatedItems = order.items.map((item) => {
-                    let preparedItem = preparedItems.find((i) => {
-                        const parsedItem = JSON.parse(i);
-                        return item.id.equals(parsedItem.itemId);
+                    const updatedItems = order.items.map((item) => {
+                        let preparedItem = preparedItems.find((i) => {
+                            const parsedItem = JSON.parse(i);
+                            return item.id.equals(parsedItem.itemId);
+                        });
+
+                        if (
+                            order.status === 'Pending' ||
+                            order.status === 'Prepared'
+                        ) {
+                            item.prepared = Boolean(preparedItem);
+                            item.pickedUp = preparedItem
+                                ? JSON.parse(preparedItem).pickedUp
+                                : false;
+                        }
+
+                        return item;
                     });
 
-                    if (
-                        order.status === 'Pending' ||
-                        order.status === 'Prepared'
-                    ) {
-                        item.prepared = Boolean(preparedItem);
-                        item.pickedUp = preparedItem
-                            ? JSON.parse(preparedItem).pickedUp
-                            : false;
-                    }
+                    return { ...order, items: updatedItems };
+                })
+            );
+        }
 
-                    return item;
-                });
-
-                return { ...order, items: updatedItems };
-            })
-        );
+        return res.status(OK).json({
+            orders: result.docs,
+            ordersInfo: {
+                hasNextPage: result.hasNextPage,
+                hasPrevPage: result.hasPrevPage,
+                totalOrders: result.totalDocs,
+            },
+        });
     }
+);
 
-    return res.status(OK).json({
-        orders: result.docs,
-        ordersInfo: {
-            hasNextPage: result.hasNextPage,
-            hasPrevPage: result.hasPrevPage,
-            totalOrders: result.totalDocs,
-        },
-    });
-});
-
-const getOrderStats = tryCatch('get order stats', async (req, res) => {
+export const getOrderStats = tryCatch('get order stats', async (req, res) => {
     const { canteenId } = req.params;
     let { date } = req.query;
 
@@ -674,81 +696,73 @@ const getOrderStats = tryCatch('get order stats', async (req, res) => {
     return res.status(OK).json(result);
 });
 
-const getKitchenOrders = tryCatch('get kitchen orders', async (req, res) => {
-    const { canteenId } = req.user;
+export const getKitchenOrders = tryCatch(
+    'get kitchen orders',
+    async (req, res) => {
+        const { canteenId } = req.user;
 
-    const istNow = moment.tz('Asia/Kolkata');
-    const startOfDay = istNow.clone().startOf('day').utc().toDate();
-    const endOfDay = istNow.clone().endOf('day').utc().toDate();
+        const istNow = moment.tz('Asia/Kolkata');
+        const startOfDay = istNow.clone().startOf('day').utc().toDate();
+        const endOfDay = istNow.clone().endOf('day').utc().toDate();
 
-    const result = await Order.aggregatePaginate(
-        [
-            {
-                $match: {
-                    canteenId: new Types.ObjectId(canteenId),
-                    createdAt: { $gte: startOfDay, $lt: endOfDay },
-                    status: 'Pending',
+        const result = await Order.aggregatePaginate(
+            [
+                {
+                    $match: {
+                        canteenId: new Types.ObjectId(canteenId),
+                        createdAt: { $gte: startOfDay, $lt: endOfDay },
+                        status: 'Pending',
+                    },
                 },
-            },
-            { $unwind: '$items' },
-            { $match: { 'items.type': 'Snack' } },
-            {
-                $lookup: {
-                    from: 'snacks',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    as: 'snack',
-                    pipeline: [{ $project: { name: 1 } }],
+                { $unwind: '$items' },
+                { $match: { 'items.type': 'Snack' } },
+                {
+                    $lookup: {
+                        from: 'snacks',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        as: 'snack',
+                        pipeline: [{ $project: { name: 1 } }],
+                    },
                 },
-            },
-            { $addFields: { 'items.name': { $first: '$snack.name' } } },
-            {
-                $group: {
-                    _id: '$_id',
-                    status: { $first: '$status' },
-                    canteenId: { $first: '$canteenId' },
-                    studentId: { $first: '$studentId' },
-                    items: { $push: '$items' },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
+                { $addFields: { 'items.name': { $first: '$snack.name' } } },
+                {
+                    $group: {
+                        _id: '$_id',
+                        status: { $first: '$status' },
+                        canteenId: { $first: '$canteenId' },
+                        studentId: { $first: '$studentId' },
+                        items: { $push: '$items' },
+                        createdAt: { $first: '$createdAt' },
+                        updatedAt: { $first: '$updatedAt' },
+                    },
                 },
-            },
-            { $project: { snack: 0 } },
-        ],
-        { sort: { createdAt: 1 } }
-    );
+                { $project: { snack: 0 } },
+            ],
+            { sort: { createdAt: 1 } }
+        );
 
-    if (result.docs.length) {
-        result.docs = await Promise.all(
-            result.docs.map(async (order) => {
-                let preparedItems = await redisClient.sMembers(
-                    `order_${order._id}`
-                );
+        if (result.docs.length) {
+            result.docs = await Promise.all(
+                result.docs.map(async (order) => {
+                    let preparedItems = await redisClient.sMembers(
+                        `order_${order._id}`
+                    );
 
-                const updatedItems = order.items.map((item) => {
-                    let preparedItem = preparedItems.find((i) => {
-                        const parsedItem = JSON.parse(i);
-                        return item.id.equals(parsedItem.itemId);
+                    const updatedItems = order.items.map((item) => {
+                        let preparedItem = preparedItems.find((i) => {
+                            const parsedItem = JSON.parse(i);
+                            return item.id.equals(parsedItem.itemId);
+                        });
+
+                        return { ...item, prepared: Boolean(preparedItem) };
                     });
 
-                    return { ...item, prepared: Boolean(preparedItem) };
-                });
+                    return { ...order, items: updatedItems };
+                })
+            );
+        }
 
-                return { ...order, items: updatedItems };
-            })
-        );
+        return res.status(OK).json({ orders: result.docs });
     }
-
-    return res.status(OK).json({ orders: result.docs });
-});
-
-export {
-    placeOrder,
-    getOrderStats,
-    getStudentOrders,
-    updateOrderStatus,
-    getCanteenOrders,
-    checkAvailability,
-    updateExtraCharges,
-    getKitchenOrders,
-};
+);

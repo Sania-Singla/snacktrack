@@ -15,7 +15,7 @@ import { io } from '../socket.js';
 
 // student management
 
-const getStudents = tryCatch('get students', async (req, res) => {
+export const getStudents = tryCatch('get students', async (req, res) => {
     const { limit = 10, page = 1, search = '' } = req.query;
     const result = await Student.aggregatePaginate(
         [
@@ -96,7 +96,7 @@ const getStudents = tryCatch('get students', async (req, res) => {
     }
 });
 
-const registerStudent = tryCatch(
+export const registerStudent = tryCatch(
     'register as student',
     async (req, res, next) => {
         const contractor = req.user; // only contractor can register a student
@@ -160,11 +160,13 @@ const registerStudent = tryCatch(
             html: `Hello ${student.fullName}, <br> Your temporary password is <b>${randomPassword}</b> <br> You can update it anytime from settings.`,
         });
 
-        return res.status(CREATED).json(student);
+        const { password: _, refreshToken: __, ...rest } = student.toObject();
+
+        return res.status(CREATED).json(rest);
     }
 );
 
-const removeStudent = tryCatch(
+export const removeStudent = tryCatch(
     'remove student account',
     async (req, res, next) => {
         const { studentId } = req.params;
@@ -203,7 +205,7 @@ const removeStudent = tryCatch(
     }
 );
 
-const updateStudent = tryCatch(
+export const updateStudent = tryCatch(
     'update account details',
     async (req, res, next) => {
         const contractor = req.user;
@@ -242,21 +244,31 @@ const updateStudent = tryCatch(
             return next(new ErrorHandler('user already exists', BAD_REQUEST));
         }
 
-        const updatedStudent = await Student.findByIdAndUpdate(studentId, {
-            $set: {
-                userName: newUserName,
-                phoneNumber,
-                fullName,
-                email,
+        const updatedStudent = await Student.findByIdAndUpdate(
+            studentId,
+            {
+                $set: {
+                    userName: newUserName,
+                    phoneNumber,
+                    fullName,
+                    email,
+                },
             },
-        });
+            { new: true }
+        );
 
-        return res.status(OK).json(updatedStudent);
+        const {
+            password: _,
+            refreshToken: __,
+            ...rest
+        } = updatedStudent.toObject();
+
+        return res.status(OK).json(rest);
     }
 );
 
 // ! CRITICAL
-const removeAllStudents = tryCatch(
+export const removeAllStudents = tryCatch(
     'remove all students',
     async (req, res, next) => {
         const { password } = req.body;
@@ -290,7 +302,7 @@ const removeAllStudents = tryCatch(
 
 // snack management
 
-const addSnack = tryCatch('add snack', async (req, res, next) => {
+export const addSnack = tryCatch('add snack', async (req, res, next) => {
     let imageURL;
     try {
         const contractor = req.user;
@@ -334,7 +346,7 @@ const addSnack = tryCatch('add snack', async (req, res, next) => {
     }
 });
 
-const deleteSnack = tryCatch('delete post', async (req, res, next) => {
+export const deleteSnack = tryCatch('delete post', async (req, res, next) => {
     const { snackId } = req.params;
     const contractor = req.user;
 
@@ -352,7 +364,7 @@ const deleteSnack = tryCatch('delete post', async (req, res, next) => {
     return res.status(OK).json({ message: 'snack deleted successfully' });
 });
 
-const updateSnack = tryCatch('update snack', async (req, res, next) => {
+export const updateSnack = tryCatch('update snack', async (req, res, next) => {
     let imageURL;
     try {
         const { snackId } = req.params;
@@ -412,7 +424,7 @@ const updateSnack = tryCatch('update snack', async (req, res, next) => {
     }
 });
 
-const toggleSnackAvailability = tryCatch(
+export const toggleSnackAvailability = tryCatch(
     'toggle snack availability',
     async (req, res, next) => {
         const { snackId } = req.params;
@@ -442,7 +454,7 @@ const toggleSnackAvailability = tryCatch(
 
 // packaged food management
 
-const addItem = tryCatch('add item', async (req, res, next) => {
+export const addItem = tryCatch('add item', async (req, res, next) => {
     const contractor = req.user;
     const { name, price } = req.body;
 
@@ -469,7 +481,7 @@ const addItem = tryCatch('add item', async (req, res, next) => {
     return res.status(CREATED).json(item);
 });
 
-const deleteItem = tryCatch('delete item', async (req, res, next) => {
+export const deleteItem = tryCatch('delete item', async (req, res, next) => {
     const { itemId } = req.params;
     const contractor = req.user;
 
@@ -487,7 +499,7 @@ const deleteItem = tryCatch('delete item', async (req, res, next) => {
     return res.status(OK).json({ message: 'item deleted successfully' });
 });
 
-const updateItem = tryCatch('update item', async (req, res, next) => {
+export const updateItem = tryCatch('update item', async (req, res, next) => {
     const { itemId } = req.params;
     const contractor = req.user;
     const { name, price } = req.body;
@@ -531,7 +543,7 @@ const updateItem = tryCatch('update item', async (req, res, next) => {
     return res.status(OK).json(item);
 });
 
-const toggleItemAvailability = tryCatch(
+export const toggleItemAvailability = tryCatch(
     'toggle item availability',
     async (req, res, next) => {
         const { itemId } = req.params;
@@ -557,19 +569,3 @@ const toggleItemAvailability = tryCatch(
             .json({ message: 'item availability toggled successfully' });
     }
 );
-
-export {
-    getStudents,
-    registerStudent,
-    removeAllStudents,
-    removeStudent,
-    updateStudent,
-    addSnack,
-    deleteSnack,
-    updateSnack,
-    toggleSnackAvailability,
-    addItem,
-    deleteItem,
-    updateItem,
-    toggleItemAvailability,
-};

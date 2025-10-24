@@ -4,20 +4,23 @@ import { Bill, Canteen, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment';
 
-const getStudentBills = tryCatch('get student bills', async (req, res) => {
-    const { studentId } = req.params;
-    const bills = await Bill.find({
-        studentId: new Types.ObjectId(studentId),
-    }).sort({ month: -1, year: -1 });
+export const getStudentBills = tryCatch(
+    'get student bills',
+    async (req, res) => {
+        const { studentId } = req.params;
+        const bills = await Bill.find({
+            studentId: new Types.ObjectId(studentId),
+        }).sort({ month: -1, year: -1 });
 
-    if (bills.length) {
-        return res.status(OK).json(bills);
-    } else {
-        return res.status(OK).json({ message: 'no bills found' });
+        if (bills.length) {
+            return res.status(OK).json(bills);
+        } else {
+            return res.status(OK).json({ message: 'no bills found' });
+        }
     }
-});
+);
 
-const getBills = tryCatch('get bills', async (req, res) => {
+export const getBills = tryCatch('get bills', async (req, res) => {
     const contractor = req.user;
     const {
         page = 1,
@@ -130,7 +133,7 @@ const getBills = tryCatch('get bills', async (req, res) => {
 });
 
 // generate bill for a specific student in mid of the current month
-const generateIntermediateBill = tryCatch(
+export const generateIntermediateBill = tryCatch(
     'generate intermediate bill for student',
     async (req, res, next) => {
         const { rollNo } = req.params;
@@ -191,4 +194,7 @@ const generateIntermediateBill = tryCatch(
     }
 );
 
-export { getBills, generateIntermediateBill, getStudentBills };
+export const generateIntermediateBillsForAll = tryCatch(
+    'generate intermediate bills for all students',
+    async (req, res) => {}
+);

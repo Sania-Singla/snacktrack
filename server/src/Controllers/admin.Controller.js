@@ -116,6 +116,12 @@ const registerCanteen = tryCatch(
         canteen.contractorId = contractor._id;
         await canteen.save();
 
+        const {
+            password: _,
+            refreshToken: __,
+            ...rest
+        } = contractor.toObject();
+
         // send this password on contractor's email
         sendMail({
             receiverName: fullName,
@@ -125,11 +131,11 @@ const registerCanteen = tryCatch(
                 Hello ${fullName}, <br>
                 Welcome to SnackTrack! <br>
                 You are now the manager of the canteen of Hostel: ${hostel.hostelType}${hostel.hostelNumber}-${hostel.hostelName}. <br>
-                Your Temporary password is <b>${randomPassword}</b> <br>
+                Your Temporary password is <b>${randomPassword}</b>
             `,
         });
 
-        return res.status(CREATED).json(contractor);
+        return res.status(CREATED).json(rest);
     }
 );
 
@@ -185,9 +191,18 @@ const updateContractor = tryCatch(
             return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
         }
 
-        const contractor = await Contractor.findById(contractorId);
+        const contractor =
+            await Contractor.findById(contractorId).select('-refeshToken');
         if (!contractor) {
             return next(new ErrorHandler('contractor not found', NOT_FOUND));
+        }
+
+        const isPassCorrect = await bcrypt.compare(
+            password,
+            contractor.password
+        );
+        if (!isPassCorrect) {
+            return next(new ErrorHandler('Incorrect password', FORBIDDEN));
         }
 
         const alreadyExists = await Contractor.findOne({
@@ -201,23 +216,18 @@ const updateContractor = tryCatch(
             );
         }
 
-        const isPassCorrect = await bcrypt.compare(
-            password,
-            contractor.password
-        );
-        if (!isPassCorrect) {
-            return next(new ErrorHandler('Incorrect password', FORBIDDEN));
-        }
-
         contractor.fullName = fullName || contractor.fullName;
         contractor.phoneNumber = phoneNumber || contractor.phoneNumber;
         contractor.email = email || contractor.email;
         await contractor.save();
 
-        return res.status(OK).json(contractor);
+        const { password: _, ...rest } = contractor.toObject();
+
+        return res.status(OK).json(rest);
     }
 );
 
+// todo: remove this feature instead add update password
 const changeContractor = tryCatch(
     'chnage contractor',
     async (req, res, next) => {
@@ -272,8 +282,7 @@ const changeContractor = tryCatch(
                 Hello ${fullName}, <br>
                 Welcome to SnackTrack! <br>
                 You are now the manager of the Canteen of Hostel: ${canteen.hostelType}${canteen.hostelNumber}-${canteen.hostelName}. <br>
-                Your Temporary password is <b>${randomPassword}</b> <br>
-                <i>*You can update your password anytime from settings.*</i> <br>
+                Your Temporary password is <b>${randomPassword}</b>
             `,
         });
 
