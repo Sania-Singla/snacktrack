@@ -20,34 +20,37 @@ import { nanoid } from 'nanoid';
 import { generateAccessToken } from '../Helpers/tokens.js';
 import bcrypt from 'bcryptjs';
 
-const verifyAdminKey = tryCatch('verify admin key', async (req, res, next) => {
-    const { key } = req.body;
+export const verifyAdminKey = tryCatch(
+    'verify admin key',
+    async (req, res, next) => {
+        const { key } = req.body;
 
-    if (!key) {
-        return next(new ErrorHandler('missing key', BAD_REQUEST));
+        if (!key) {
+            return next(new ErrorHandler('missing key', BAD_REQUEST));
+        }
+
+        if (key !== process.env.ADMIN_KEY) {
+            return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
+        }
+
+        const token = await generateAccessToken({ role: 'admin', key });
+
+        return res
+            .status(OK)
+            .cookie('accessToken', token, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+            })
+            .clearCookie('refreshToken', COOKIE_OPTIONS)
+            .json({
+                user: {
+                    role: 'admin',
+                },
+            });
     }
+);
 
-    if (key !== process.env.ADMIN_KEY) {
-        return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
-    }
-
-    const token = await generateAccessToken({ role: 'admin', key });
-
-    return res
-        .status(OK)
-        .cookie('accessToken', token, {
-            ...COOKIE_OPTIONS,
-            maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
-        })
-        .clearCookie('refreshToken', COOKIE_OPTIONS)
-        .json({
-            user: {
-                role: 'admin',
-            },
-        });
-});
-
-const registerCanteen = tryCatch(
+export const registerCanteen = tryCatch(
     'register as contractor',
     async (req, res, next) => {
         let { fullName, email, phoneNumber, hostel } = req.body;
@@ -139,7 +142,7 @@ const registerCanteen = tryCatch(
     }
 );
 
-const sendVerificationCode = tryCatch(
+export const sendVerificationCode = tryCatch(
     'send verification email',
     async (req, res) => {
         const { fullName, email } = req.body;
@@ -153,7 +156,7 @@ const sendVerificationCode = tryCatch(
     }
 );
 
-const verifyCode = tryCatch('verify email', async (req, res) => {
+export const verifyCode = tryCatch('verify email', async (req, res) => {
     const { email, code } = req.body;
 
     if (!email || !code) {
@@ -170,7 +173,7 @@ const verifyCode = tryCatch('verify email', async (req, res) => {
     return res.status(OK).json({ message: 'Email verified Successfully' });
 });
 
-const updateContractor = tryCatch(
+export const updateContractor = tryCatch(
     'update contractor',
     async (req, res, next) => {
         const { contractorId } = req.params;
@@ -228,7 +231,7 @@ const updateContractor = tryCatch(
 );
 
 // todo: remove this feature instead add update password
-const changeContractor = tryCatch(
+export const changeContractor = tryCatch(
     'chnage contractor',
     async (req, res, next) => {
         const { contractorId } = req.params;
@@ -290,7 +293,7 @@ const changeContractor = tryCatch(
     }
 );
 
-const getContractors = tryCatch('get contractors', async (req, res) => {
+export const getContractors = tryCatch('get contractors', async (req, res) => {
     const canteens = await Canteen.aggregate([
         {
             $lookup: {
@@ -316,17 +319,6 @@ const getContractors = tryCatch('get contractors', async (req, res) => {
     return res.status(OK).json(canteens);
 });
 
-const getHostels = tryCatch('get hostels', async (req, res, next) => {
+export const getHostels = tryCatch('get hostels', async (req, res, next) => {
     return res.status(OK).json(HOSTELS);
 });
-
-export {
-    registerCanteen,
-    updateContractor,
-    getContractors,
-    getHostels,
-    sendVerificationCode,
-    changeContractor,
-    verifyCode,
-    verifyAdminKey,
-};

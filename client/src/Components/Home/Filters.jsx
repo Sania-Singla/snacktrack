@@ -13,10 +13,10 @@ export default function Filters() {
                     params.set('filter', 'snacks');
                     setSearchParams(params);
                 }}
-                className="hover:bg-[#4977ec] hover:text-white active:bg-[#4977ec] active:text-white group transition-all duration-100 bg-white border-1 border-gray-200 rounded-md px-2 py-1"
+                className="hover:bg-gray-100 border bg-white border-gray-200 shadow-xs rounded-md px-2 py-1"
                 btnText={
                     <div className="flex items-center justify-center gap-2">
-                        <div className="size-3.5 fill-gray-700 group-hover:fill-white">
+                        <div className="size-3.5 fill-gray-700">
                             {icons.snack}
                         </div>
                         <span>Snacks</span>
@@ -30,10 +30,10 @@ export default function Filters() {
                     params.set('filter', 'packaged');
                     setSearchParams(params);
                 }}
-                className="hover:bg-[#4977ec]  hover:text-white active:bg-[#4977ec]  active:text-white group transition-all duration-100 bg-white border-1 border-gray-200 rounded-md px-2 py-1"
+                className="hover:bg-gray-100 border bg-white border-gray-200 shadow-xs rounded-md px-2 py-1"
                 btnText={
                     <div className="flex items-center justify-center gap-2">
-                        <div className="size-4 stroke-gray-600 group-hover:stroke-white">
+                        <div className="size-4 stroke-gray-600">
                             {icons.soda}
                         </div>
                         <span>Packaged</span>

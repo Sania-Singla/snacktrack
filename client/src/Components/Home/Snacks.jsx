@@ -146,27 +146,15 @@ export default function Snacks() {
         });
     }, [socket]);
 
-    return (
-        <>
-            {loading ? (
-                <div className="flex justify-center py-12">
-                    <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
-                        {icons.loading}
-                    </div>
-                </div>
-            ) : snacks.length === 0 ? (
-                <p className="text-center italic text-gray-400">
-                    No snacks found
-                </p>
-            ) : (
-                <div
-                    className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
-                >
-                    {snacks.map((s) => (
-                        <SnackView key={s._id} snack={s} />
-                    ))}
-                </div>
-            )}
-        </>
+    if (loading) return null;
+
+    return snacks.length === 0 ? (
+        <p className="text-center italic text-gray-400">No snacks found</p>
+    ) : (
+        <div className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}>
+            {snacks.map((s) => (
+                <SnackView key={s._id} snack={s} />
+            ))}
+        </div>
     );
 }

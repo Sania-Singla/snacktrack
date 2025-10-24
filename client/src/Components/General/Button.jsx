@@ -10,7 +10,7 @@ export default function Button({
             type={type}
             disabled={disabled}
             {...props}
-            className={`disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer ${className}`}
+            className={`disabled:cursor-not-allowed disabled:opacity-50 active:scale-[98%] transition-all duration-100 cursor-pointer ${className}`}
         >
             {btnText}
         </button>
