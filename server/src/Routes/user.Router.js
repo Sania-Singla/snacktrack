@@ -11,12 +11,15 @@ import {
     updateAccountDetails,
     verifyKitchenKey,
     verifyKioskKey,
+    loginFromQR,
 } from '../Controllers/user.Controller.js';
 
 // for dropdowns
 userRouter.route('/canteens').get(getCanteens);
 
 userRouter.route('/login').patch(login);
+
+userRouter.route('/login-by-qr').patch(loginFromQR);
 
 userRouter.route('/verify-kiosk-key/:canteenId').post(verifyKioskKey);
 

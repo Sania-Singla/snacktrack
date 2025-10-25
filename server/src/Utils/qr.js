@@ -1,27 +1,21 @@
-const secret = '1234';
-import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+import QRCode from 'qrcode';
 
-export function encrypt(rollno) {
-    const sign = crypto.createHmac('sha256', secret).digest('base64url');
-
-    return `${rollno}-${sign}`;
-}
-
-export function decrypt(data) {
-    const arr = data.split('-');
-    const rollno = arr[0];
-    const sign = arr[1] + '-' + arr[2];
-
-    const decipher = crypto.createHmac('sha256', secret).digest('base64url');
-
-    if (sign !== decipher) {
-        console.error('Invalid QR Code');
+export async function genQR(data) {
+    try {
+        const token = jwt.sign({ data }, process.env.QR_SECRET);
+        const qrDataURL = await QRCode.toDataURL(token);
+        return qrDataURL; // qrDataURL is a base64 PNG image you can embed in <img> tag
+    } catch (err) {
+        throw new Error(`Failed to generate QR code ${err}`);
     }
-
-    return rollno;
 }
 
-// console.log(encrypt(12));
-const code = encrypt(12);
-console.log('code', code);
-console.log(decrypt(code));
+export function verifyQR(token) {
+    try {
+        const decoded = jwt.verify(token, process.env.QR_SECRET);
+        return decoded.data;
+    } catch (err) {
+        throw new Error(`Invalid or expired QR code ${err}`);
+    }
+}

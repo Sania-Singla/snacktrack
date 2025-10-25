@@ -6,6 +6,10 @@ const canteenSchema = new Schema(
             type: Types.ObjectId,
             ref: 'Contractor',
         },
+        isOpen: {
+            type: Boolean,
+            default: false,
+        },
         hostelType: {
             type: String,
             enum: ['GH', 'BH', 'IH', 'WWH'],

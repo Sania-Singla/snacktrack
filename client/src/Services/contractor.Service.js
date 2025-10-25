@@ -2,6 +2,16 @@ import { LIMIT } from '../Constants';
 import { fetchWrapper } from '../Utils';
 
 class ContractorService {
+    async changeCanteenStatus(status) {
+        return await fetchWrapper({
+            endPoint: `/contractors/status`,
+            method: 'PATCH',
+            body: { status },
+            credentials: 'include',
+            aim: 'changeCanteenStatus',
+        });
+    }
+
     // student management tasks
 
     async getStudents({ signal, search, page = 1, limit = LIMIT }) {

@@ -3,9 +3,10 @@ import { Button, Logout, Searchbar, Cart } from '..';
 import { useUserContext, useSideBarContext } from '../../Contexts';
 import { LOGO_SVG } from '../../Constants';
 import { icons } from '../../Assets/icons';
+import { contractorService } from '../../Services';
 
 export default function Header() {
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const { pathname } = useLocation();
     const { setShowSideBar } = useSideBarContext();
     const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function Header() {
 
     return (
         <header className="border-b border-b-gray-200 fixed top-0 z-[10] w-full bg-gray-50 text-black h-[60px] sm:px-5 px-3 font-medium flex items-center justify-between gap-4">
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center justify-center gap-3">
                 {/* hamburgur menu btn */}
                 <Button
                     btnText={
@@ -45,16 +46,41 @@ export default function Header() {
             </div>
 
             <div
-                className={`${isStaticPage ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] mx-4 w-full`}
+                className={`${isStaticPage ? 'hidden' : 'hidden sm:block'} max-w-[400px] lg:max-w-[500px] mx-2 w-full`}
             >
                 <Searchbar />
             </div>
 
-            <div className="flex gap-3.5 items-center">
+            <div className="flex gap-3 items-center">
                 {user.role === 'student' ? (
                     <Cart />
                 ) : (
-                    <div>
+                    <div className="flex gap-3 items-center">
+                        <Button
+                            onClick={async () => {
+                                const res =
+                                    await contractorService.changeCanteenStatus(
+                                        !user.isOpen
+                                    );
+                                if (res) {
+                                    setUser((prev) => ({
+                                        ...prev,
+                                        isOpen: !prev.isOpen,
+                                    }));
+                                }
+                            }}
+                            btnText={
+                                <div className="flex items-center justify-center gap-1.5">
+                                    {user.isOpen
+                                        ? 'Close Canteen'
+                                        : 'Open Canteen'}
+                                </div>
+                            }
+                            title={
+                                user.isOpen ? 'Close Canteen' : 'Open Canteen'
+                            }
+                            className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                        />
                         <Button
                             onClick={() => navigate('/register-student')}
                             btnText={

@@ -58,10 +58,9 @@ const orderSchema = new Schema(
     { timestamps: true }
 );
 
-orderSchema.index({ canteenId: 1, status: 1, createdAt: -1 }); // Main query index
-orderSchema.index({ canteenId: 1, createdAt: -1 }); // For date filtering without status
-orderSchema.index({ studentId: 1, createdAt: -1 }); // For student's order history
-orderSchema.index({ _id: 1, canteenId: 1 });
+orderSchema.index({ canteenId: 1, status: 1 }); // Main query index
+orderSchema.index({ canteenId: 1 }); // For date filtering without status
+orderSchema.index({ studentId: 1 }); // For student's order history
 
 orderSchema.plugin(aggregatePaginate);
 

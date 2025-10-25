@@ -1,6 +1,12 @@
 import { FORBIDDEN, OK, NOT_FOUND, SOCKET_EVENTS } from '../Constants/index.js';
-import { ErrorHandler, tryCatch } from '../Utils/index.js';
-import { Order, PackagedFood, Snack } from '../Models/index.js';
+import { ErrorHandler, tryCatch, verifyQR } from '../Utils/index.js';
+import {
+    Canteen,
+    Order,
+    PackagedFood,
+    Snack,
+    Student,
+} from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment-timezone';
 import { redisClient } from '../server.js';
@@ -45,6 +51,12 @@ export const checkAvailability = tryCatch(
 export const placeOrder = tryCatch('place order', async (req, res) => {
     const { cartItems, amount } = req.body;
     const student = req.user;
+
+    const canteen = await Canteen.findById(student.canteenId);
+
+    if (!canteen.isOpen) {
+        return next(new ErrorHandler('canteen is closed', FORBIDDEN));
+    }
 
     const updatedCartItems = cartItems.map((i) => ({
         id: i._id,
@@ -99,6 +111,81 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
 
     return res.status(OK).json(data);
 });
+
+export const placeOrderByQR = tryCatch(
+    'place order by qr',
+    async (req, res) => {
+        const { cartItems, amount, canteenId } = req.body;
+        const { _id } = verifyQR(req.body.token);
+
+        const student = await Student.findOne({ _id, canteenId })
+            .populate(canteenId, 'isOpen')
+            .select('-password -refreshToken');
+
+        if (!student) {
+            return next(new ErrorHandler('student not found', NOT_FOUND));
+        }
+
+        if (!student.canteenId.isOpen) {
+            return next(new ErrorHandler('canteen is closed', FORBIDDEN));
+        }
+
+        const updatedCartItems = cartItems.map((i) => ({
+            id: i._id,
+            type: i.type,
+            price: i.price,
+            quantity: i.quantity,
+            specialInstructions: i.specialInstructions,
+        }));
+
+        const packagedItems = cartItems.filter(
+            (i) => i.type === 'PackagedFood'
+        );
+        const allPackaged = packagedItems.length === cartItems.length;
+
+        let order = await Order.create({
+            studentId: student._id,
+            canteenId: student.canteenId,
+            amount,
+            status: allPackaged ? 'Prepared' : 'Pending',
+            items: updatedCartItems,
+        });
+
+        order = order.toObject();
+
+        await Promise.all([
+            packagedItems.map((item) => {
+                redisClient.sAdd(
+                    `order_${order._id}`,
+                    JSON.stringify({ itemId: item._id, pickedUp: false })
+                );
+            }),
+        ]);
+
+        const items = cartItems.map((item) => ({
+            ...item,
+            id: item._id,
+            prepared: item.type === 'Snack' ? false : true,
+            pickedUp: false,
+        }));
+
+        const data = {
+            ...order,
+            items,
+            studentInfo: {
+                fullName: student.fullName,
+                phoneNumber: student.phoneNumber,
+                userName: student.userName,
+            },
+        };
+
+        // notify canteen about new order
+        const cantSocketId = await redisClient.get(canteenId.toString());
+        io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, data);
+
+        return res.status(OK).json(data);
+    }
+);
 
 export const updateOrderStatus = tryCatch(
     'update order status',

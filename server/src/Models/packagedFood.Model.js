@@ -25,7 +25,6 @@ const packagedFoodSchema = new Schema(
     { timestamps: true }
 );
 
-packagedFoodSchema.index({ canteenId: 1, name: 1 }); // If you search items by name
 packagedFoodSchema.index({ canteenId: 1 }); // If you show all items (admin view)
 
 packagedFoodSchema.plugin(aggregatePaginate);

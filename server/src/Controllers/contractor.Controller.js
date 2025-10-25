@@ -1,4 +1,10 @@
-import { OK, BAD_REQUEST, NOT_FOUND, CREATED } from '../Constants/index.js';
+import {
+    OK,
+    BAD_REQUEST,
+    NOT_FOUND,
+    CREATED,
+    SOCKET_EVENTS,
+} from '../Constants/index.js';
 import bcrypt from 'bcryptjs';
 import {
     verifyExpression,
@@ -8,10 +14,41 @@ import {
 } from '../Utils/index.js';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../Helpers/index.js';
 import { nanoid } from 'nanoid';
-import { Snack, Student, PackagedFood, Order, Bill } from '../Models/index.js';
+import {
+    Snack,
+    Student,
+    PackagedFood,
+    Order,
+    Bill,
+    Canteen,
+} from '../Models/index.js';
 import { Types } from 'mongoose';
 import fs from 'fs';
 import { io } from '../socket.js';
+
+// canteen management
+
+export const changeCanteenStatus = tryCatch(
+    'change canteen status',
+    async (req, res, next) => {
+        const contractor = req.user;
+        const { status } = req.body;
+
+        await Canteen.findByIdAndUpdate(contractor.canteenId, {
+            isOpen: status,
+        });
+
+        io.emit(SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED, {
+            isOpen: status,
+            canteenId: contractor.canteenId,
+        });
+        return res
+            .status(OK)
+            .json({
+                message: `canteen ${status ? 'opened' : 'closed'} successfully`,
+            });
+    }
+);
 
 // student management
 

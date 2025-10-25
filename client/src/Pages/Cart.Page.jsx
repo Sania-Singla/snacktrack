@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { SNACK_PLACEHOLDER_IMAGE } from '../Constants';
+import { SNACK_PLACEHOLDER_IMAGE, SOCKET_EVENTS } from '../Constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
+    useSocketContext,
     useStudentContext,
     useUserContext,
 } from '../Contexts';
@@ -18,7 +19,24 @@ export default function CartPage() {
     const { setShowPopup, setPopupInfo } = usePopupContext();
     const { cartItems, setCartItems, setOrderPlaced } = useStudentContext();
     const [loading, setLoading] = useState(true);
-    const { setUser } = useUserContext();
+    const { user, setUser } = useUserContext();
+    const { socket } = useSocketContext();
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on(
+            SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED,
+            ({ isOpen, canteenId }) => {
+                if (user.canteenId !== canteenId) return;
+                setUser((prevUser) => ({ ...prevUser, isOpen }));
+            }
+        );
+
+        return () => {
+            socket.off(SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED);
+        };
+    }, [socket]);
 
     async function checkAvailability() {
         try {
@@ -83,7 +101,9 @@ export default function CartPage() {
                 cartItems,
                 amount: subtotal,
             });
-            if (res && !res.message) {
+            if (res && res.message === 'canteen is closed') {
+                toast.error('Canteen is currently closed');
+            } else if (res && !res.message) {
                 localStorage.removeItem('cartItems');
                 let count = 0;
                 cartItems.forEach((i) => (count += i.quantity));
@@ -92,9 +112,10 @@ export default function CartPage() {
                 setShowPopup(true);
                 setPopupInfo({ type: 'orderPlaced', count });
             } else checkTokenExpired(res, setUser);
-            setOrdering(false);
         } catch (err) {
             toast.error('Something went wrong. Please try again.');
+        } finally {
+            setOrdering(false);
         }
     }
 
@@ -286,6 +307,7 @@ export default function CartPage() {
                     <div className="flex items-center justify-center w-full gap-4 mt-4">
                         <Button
                             onClick={placeOrder}
+                            disabled={ordering || !user.isOpen}
                             className="text-white rounded-md py-2 h-[40px] flex items-center justify-center w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                             btnText={
                                 ordering ? (

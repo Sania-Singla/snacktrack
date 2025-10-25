@@ -11,13 +11,16 @@ import {
     getOrderStats,
     updateExtraCharges,
     getKitchenOrders,
+    placeOrderByQR,
 } from '../Controllers/order.Controller.js';
+
+orderRouter.route('/availability').post(checkAvailability);
+
+orderRouter.route('/place-by-qr').post(placeOrderByQR);
 
 orderRouter.use(verifyJwt);
 
 orderRouter.route('/place').post(placeOrder);
-
-orderRouter.route('/availability').post(checkAvailability);
 
 orderRouter.route('/student/:studentId').get(getStudentOrders);
 

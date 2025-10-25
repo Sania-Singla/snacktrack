@@ -11,6 +11,7 @@ import {
     sendOrderPreparedSMS,
     sendOrderRejectedSMS,
 } from './sms.js';
+import { verifyQR, genQR } from './qr.js';
 
 export {
     verifyExpression,
@@ -27,4 +28,6 @@ export {
     sendOrderPlacedSMS,
     sendOrderPreparedSMS,
     sendOrderRejectedSMS,
+    verifyQR,
+    genQR,
 };

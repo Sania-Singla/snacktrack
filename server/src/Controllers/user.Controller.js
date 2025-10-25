@@ -68,6 +68,56 @@ export const login = tryCatch('login as student', async (req, res, next) => {
         });
 });
 
+export const loginFromQR = tryCatch(
+    'login as student from qr',
+    async (req, res, next) => {
+        const { token } = req.body;
+        const decodedData = verifyQR(token);
+        const { _id, userName } = decodedData;
+
+        const student = await Student.findById(_id)
+            .select('-refreshToken -password')
+            .populate('canteenId')
+            .lean();
+
+        if (!student)
+            return next(new ErrorHandler('student not found', NOT_FOUND));
+
+        const hostelName = student.canteenId.hostelName;
+        const hostelNumber = student.canteenId.hostelNumber;
+        const hostelType = student.canteenId.hostelType;
+        student.canteenId = student.canteenId._id;
+
+        // generate tokens
+        const { accessToken, refreshToken } = await generateTokens({
+            _id: student._id,
+            role: 'student',
+        });
+
+        await Student.findByIdAndUpdate(student._id, {
+            $set: { refreshToken },
+        });
+
+        return res
+            .status(OK)
+            .cookie('accessToken', accessToken, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+            })
+            .cookie('refreshToken', refreshToken, {
+                ...COOKIE_OPTIONS,
+                maxAge: Number(process.env.REFRESH_TOKEN_MAXAGE),
+            })
+            .json({
+                ...student,
+                role: 'student',
+                hostelType,
+                hostelNumber,
+                hostelName,
+            });
+    }
+);
+
 export const logout = tryCatch('logout user', async (req, res, next) => {
     const { _id, role } = req.user;
     const Model = role === 'contractor' ? Contractor : Student;
@@ -95,11 +145,11 @@ export const getCurrentUser = tryCatch(
 
         // populate canteen Info
         const canteen = await Canteen.findById(user.canteenId);
-        const { hostelName, hostelNumber, hostelType } = canteen;
+        const { hostelName, hostelNumber, hostelType, isOpen } = canteen;
 
         return res
             .status(OK)
-            .json({ ...user, hostelType, hostelNumber, hostelName });
+            .json({ ...user, hostelType, hostelNumber, hostelName, isOpen });
     }
 );
 

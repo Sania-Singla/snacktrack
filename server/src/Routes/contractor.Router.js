@@ -15,10 +15,12 @@ import {
     addItem,
     deleteItem,
     updateItem,
-    toggleItemAvailability,
+    toggleItemAvailability,changeCanteenStatus
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.use(verifyJwt);
+
+contractorRouter.patch('/status', changeCanteenStatus);
 
 // student management
 

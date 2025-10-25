@@ -6,4 +6,5 @@ export const SOCKET_EVENTS = {
     ORDER_PREPARED: 'orderPrepared',
     ORDER_PICKEDUP: 'orderPickedUp',
     EXTRA_CHARGES_UPDATED: 'extraChargesUpdated',
+    CANTEEN_OPEN_STATUS_CHANGED: 'canteenOpenStatusChanged',
 };
