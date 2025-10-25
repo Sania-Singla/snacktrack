@@ -21,7 +21,7 @@ export default function BillCard({ bill, reference }) {
                 className="flex justify-between gap-4"
             >
                 {/* info */}
-                <div>
+                <div className='space-y-3'>
                     <div className="hover:text-[#5c5c5c] text-[16px] font-semibold text-black">
                         {fullName}
                     </div>
@@ -31,7 +31,7 @@ export default function BillCard({ bill, reference }) {
                         {getRollNo(userName)}
                     </div>
 
-                    <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                    {/* <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
                         <span className="font-medium">Phone Number: </span>
                         {phoneNumber}
                     </div>
@@ -39,30 +39,28 @@ export default function BillCard({ bill, reference }) {
                     <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
                         <span className="font-medium">Email: </span>
                         {email}
-                    </div>
+                    </div> */}
                 </div>
 
-                <div>
-                    <div className="flex flex-col justify-between h-full items-end">
-                        <p className="font-semibold text-lg text-gray-900">
-                            ₹{grandTotal.toFixed(2)}
-                        </p>
+                <div className="flex flex-col justify-between h-full items-end gap-2">
+                    <p className="font-semibold text-lg text-gray-900">
+                        ₹{grandTotal.toFixed(2)}
+                    </p>
 
-                        <div className="flex items-center gap-2">
-                            <Button
-                                btnText="Orders"
-                                className="text-white rounded-sm w-fit text-nowrap text-xs px-2 py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    navigate(`/orders/${studentInfo._id}`);
-                                }}
-                            />
+                    <div className="flex items-center gap-2">
+                        <Button
+                            btnText="Orders"
+                            className="text-white rounded-sm w-fit text-nowrap text-xs px-2 py-[3px] bg-[#4977ec] hover:bg-[#3b62c2]"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/orders/${studentInfo._id}`);
+                            }}
+                        />
 
-                            <div
-                                className={`transition-transform ${expanded ? 'rotate-180' : ''} size-3 fill-gray-500`}
-                            >
-                                {icons.arrowDown}
-                            </div>
+                        <div
+                            className={`transition-transform ${expanded ? 'rotate-180' : ''} size-3 fill-gray-500`}
+                        >
+                            {icons.arrowDown}
                         </div>
                     </div>
                 </div>

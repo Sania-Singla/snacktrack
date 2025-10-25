@@ -77,6 +77,12 @@ export default function Prepared() {
     useEffect(() => {
         if (!socket) return;
 
+        function newOrder(order) {
+            if (order.status === 'Prepared') {
+                setOrders((prev) => [...prev, order]);
+            }
+        }
+
         function orderPrepared({ orderId, order }) {
             // we need complete order to append
             setOrders((prev) => [order, ...prev]);
@@ -98,12 +104,14 @@ export default function Prepared() {
             );
         }
 
+        socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
         socket.on(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
         socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
         socket.on(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, extraChargeUpdated);
 
         return () => {
+            socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
             socket.off(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
             socket.off(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
             socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);

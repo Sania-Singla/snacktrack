@@ -32,7 +32,7 @@ export default function StudentView({ student, reference }) {
             <div className="w-full flex justify-between gap-4">
                 <div className="flex items-center justify-start gap-4">
                     {/* info */}
-                    <div className="">
+                    <div className="space-y-3">
                         <div className="text-ellipsis line-clamp-1 hover:text-[#5c5c5c] text-[16px] font-semibold text-black w-fit">
                             {fullName}
                         </div>
@@ -42,18 +42,18 @@ export default function StudentView({ student, reference }) {
                             {getRollNo(userName)}
                         </div>
 
-                        <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                        {/* <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
                             <span className="font-medium">Phone Number: </span>{' '}
                             {phoneNumber}
                         </div>
 
                         <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
                             <span className="font-medium">Email: </span> {email}
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-between items-end">
+                <div className="flex flex-col justify-between items-end gap-3">
                     <div className="flex h-fit gap-3">
                         <Button
                             btnText={

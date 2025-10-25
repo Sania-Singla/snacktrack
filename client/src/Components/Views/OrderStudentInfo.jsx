@@ -22,9 +22,9 @@ export default function OrderStudentInfo({ studentInfo }) {
                         Roll No: {getRollNo(studentInfo.userName)}
                     </span>
                 </h3>
-                <div className="flex items-center gap-1 text-xs text-gray-600">
+                {/* <div className="flex items-center gap-1 text-xs text-gray-600">
                     {studentInfo.phoneNumber}
-                </div>
+                </div> */}
             </div>
         </div>
     );

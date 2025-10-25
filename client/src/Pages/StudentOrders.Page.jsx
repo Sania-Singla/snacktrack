@@ -1,5 +1,5 @@
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { orderService } from '../Services';
 import {
     useUserContext,
@@ -23,8 +23,15 @@ export default function StudentOrdersPage() {
     const { debouncedSearch } = useSearchContext();
     const { dateFilter } = useOrderContext();
     const { socket } = useSocketContext();
+    const navigate = useNavigate();
 
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
+
+    useLayoutEffect(() => {
+        if (studentId && user._id !== studentId) {
+            navigate('/not-found');
+        }
+    }, []);
 
     useEffect(() => {
         setPage(1);

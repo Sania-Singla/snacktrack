@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { billService } from '../Services';
 import { StudentBillCard } from '../Components';
 import { useUserContext } from '../Contexts';
@@ -12,6 +12,13 @@ export default function StudentBillsPage() {
     const [loading, setLoading] = useState(true);
     const { studentId } = useParams();
     const { user, setUser } = useUserContext();
+    const navigate = useNavigate();
+
+    useLayoutEffect(() => {
+        if (studentId && user._id !== studentId) {
+            navigate('/not-found');
+        }
+    }, []);
 
     useEffect(() => {
         const controller = new AbortController();

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { icons } from '../Assets/icons';
 import {
     Completed,
@@ -15,6 +15,10 @@ import { Resizable } from 're-resizable';
 export default function TodayOrdersPage() {
     const { statusFilter, setStatusFilter } = useOrderContext();
     const [showOrderSide, setShowOrderSide] = useState(true);
+
+    useLayoutEffect(() => {
+        setStatusFilter('Prepared');
+    }, []);
 
     return (
         <div className="flex gap-4 h-full min-h-[calc(100vh-4rem)]">
