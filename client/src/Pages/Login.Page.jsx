@@ -184,6 +184,7 @@ export default function LoginPage() {
             <div className="text-black max-w-[500px] min-w-[300px] flex flex-col items-center gap-3">
                 <input
                     type="file"
+                    multiple={false}
                     className="hidden"
                     accept="image/*"
                     name="qr"
