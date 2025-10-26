@@ -71,7 +71,7 @@ export default function OrderItem({ item, order, type = 'static' }) {
         >
             {/* ✅ */}
             {(status === 'Pending' || status === 'Prepared') &&
-                !item.pickedUp && (
+                item.pickedUp && (
                     <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center">
                         <div className="fill-green-600 size-6 p-1">
                             {icons.check}

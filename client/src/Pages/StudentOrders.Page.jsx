@@ -88,7 +88,7 @@ export default function StudentOrdersPage() {
             helper(orderId, { status: 'PickedUp' });
         });
 
-        socket.on(SOCKET_EVENTS.ORDER_PREPARED, (orderId) => {
+        socket.on(SOCKET_EVENTS.ORDER_PREPARED, ({ orderId }) => {
             helper(orderId, { status: 'Prepared' });
         });
 

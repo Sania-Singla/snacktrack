@@ -10,14 +10,14 @@ export async function joinRoom(socket, { userId, canteenId, role }) {
         case 'contractor': {
             const room = `contractor_${canteenId}`;
             await redisClient.sAdd(room, socket.id);
-            socket.join(room);
+            await socket.join(room);
             console.log(`[USER JOINED] ${room} (${socket.id})`);
             break;
         }
         case 'kiosk': {
             const room = `kiosk_${canteenId}`;
             await redisClient.sAdd(room, socket.id);
-            socket.join(room);
+            await socket.join(room);
             console.log(`[KIOSK JOINED] ${room} (${socket.id})`);
             break;
         }
@@ -37,14 +37,14 @@ export async function leaveRoom(socket, { userId, canteenId, role }) {
         case 'contractor': {
             const room = `contractor_${canteenId}`;
             await redisClient.sRem(room, socket.id);
-            socket.leave(room);
+            await socket.leave(room);
             console.log(`[USER LEFT] ${room} (${socket.id})`);
             break;
         }
         case 'kiosk': {
             const room = `kiosk_${canteenId}`;
             await redisClient.sRem(room, socket.id);
-            socket.leave(room);
+            await socket.leave(room);
             console.log(`[KIOSK LEFT] ${room} (${socket.id})`);
             break;
         }
