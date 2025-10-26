@@ -75,6 +75,7 @@ export const proceedAsAdmin = tryCatch('proceed as admin', async (req, res) => {
     const hostelType = contractor.canteenId.hostelType;
     const hostelNumber = contractor.canteenId.hostelNumber;
     const hostelName = contractor.canteenId.hostelName;
+    const isOpen = contractor.canteenId.isOpen;
     contractor.canteenId = canteenId;
 
     const { password: _, ...rest } = contractor;
@@ -89,6 +90,7 @@ export const proceedAsAdmin = tryCatch('proceed as admin', async (req, res) => {
         .json({
             role: 'admin',
             ...rest,
+            isOpen,
             hostelType,
             hostelNumber,
             hostelName,

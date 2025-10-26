@@ -56,7 +56,7 @@ export default function Header() {
                     <Cart />
                 ) : (
                     <div className="flex gap-3 items-center">
-                        {user.role === 'contractor' && (
+                        {user.role === 'contractor' ? (
                             <Button
                                 onClick={async () => {
                                     const res =
@@ -84,6 +84,12 @@ export default function Header() {
                                 }
                                 className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                             />
+                        ) : (
+                            <p
+                                className={`rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
+                            >
+                                {user.isOpen ? 'Open' : 'Closed'}
+                            </p>
                         )}
                         {user.role === 'admin' && (
                             <Button

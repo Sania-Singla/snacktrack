@@ -34,6 +34,7 @@ export const login = tryCatch('login student', async (req, res) => {
     const hostelName = student.canteenId.hostelName;
     const hostelNumber = student.canteenId.hostelNumber;
     const hostelType = student.canteenId.hostelType;
+    const isOpen = student.canteenId.isOpen;
     student.canteenId = student.canteenId._id;
 
     const isPassValid = bcrypt.compareSync(password, student.password);
@@ -64,6 +65,7 @@ export const login = tryCatch('login student', async (req, res) => {
         .json({
             ...user,
             role: 'student',
+            isOpen,
             hostelType,
             hostelNumber,
             hostelName,
@@ -92,6 +94,7 @@ export const loginFromQR = tryCatch(
         const hostelName = student.canteenId.hostelName;
         const hostelNumber = student.canteenId.hostelNumber;
         const hostelType = student.canteenId.hostelType;
+        const isOpen = student.canteenId.isOpen;
         student.canteenId = student.canteenId._id;
 
         // generate tokens
@@ -115,6 +118,7 @@ export const loginFromQR = tryCatch(
             .json({
                 ...student,
                 role: 'student',
+                isOpen,
                 hostelType,
                 hostelNumber,
                 hostelName,
