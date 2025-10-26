@@ -52,8 +52,6 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 items-center">
-                {user.role === 'student' && <Cart />}
-                
                 <div className="flex gap-3 items-center">
                     {user.role === 'contractor' ? (
                         <Button
@@ -83,12 +81,12 @@ export default function Header() {
                         />
                     ) : (
                         <p
-                            className={`rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
+                            className={`rounded-md w-fit text-nowrap px-2 py-1 text-sm font-medium ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
                         >
                             {user.isOpen ? 'Open' : 'Closed'}
                         </p>
                     )}
-                   
+
                     {user.role === 'admin' && (
                         <Button
                             onClick={() => navigate('/register-student')}
@@ -105,6 +103,8 @@ export default function Header() {
                         />
                     )}
                 </div>
+
+                {user.role === 'student' && <Cart />}
 
                 <div>
                     {user.role === 'student' ? (
