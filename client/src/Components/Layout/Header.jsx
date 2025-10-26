@@ -52,62 +52,59 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 items-center">
-                {user.role === 'student' ? (
-                    <Cart />
-                ) : (
-                    <div className="flex gap-3 items-center">
-                        {user.role === 'contractor' ? (
-                            <Button
-                                onClick={async () => {
-                                    const res =
-                                        await contractorService.changeCanteenStatus(
-                                            !user.isOpen
-                                        );
-                                    if (res) {
-                                        setUser((prev) => ({
-                                            ...prev,
-                                            isOpen: !prev.isOpen,
-                                        }));
-                                    }
-                                }}
-                                btnText={
-                                    <div className="flex items-center justify-center gap-1.5">
-                                        {user.isOpen
-                                            ? 'Close Canteen'
-                                            : 'Open Canteen'}
-                                    </div>
+                {user.role === 'student' && <Cart />}
+                
+                <div className="flex gap-3 items-center">
+                    {user.role === 'contractor' ? (
+                        <Button
+                            onClick={async () => {
+                                const res =
+                                    await contractorService.changeCanteenStatus(
+                                        !user.isOpen
+                                    );
+                                if (res) {
+                                    setUser((prev) => ({
+                                        ...prev,
+                                        isOpen: !prev.isOpen,
+                                    }));
                                 }
-                                title={
-                                    user.isOpen
+                            }}
+                            btnText={
+                                <div className="flex items-center justify-center gap-1.5">
+                                    {user.isOpen
                                         ? 'Close Canteen'
-                                        : 'Open Canteen'
-                                }
-                                className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
-                            />
-                        ) : (
-                            <p
-                                className={`rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
-                            >
-                                {user.isOpen ? 'Open' : 'Closed'}
-                            </p>
-                        )}
-                        {user.role === 'admin' && (
-                            <Button
-                                onClick={() => navigate('/register-student')}
-                                btnText={
-                                    <div className="flex items-center justify-center gap-1.5">
-                                        <div className="size-3 fill-white">
-                                            {icons.plus}
-                                        </div>
-                                        <span>Student</span>
+                                        : 'Open Canteen'}
+                                </div>
+                            }
+                            title={
+                                user.isOpen ? 'Close Canteen' : 'Open Canteen'
+                            }
+                            className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                        />
+                    ) : (
+                        <p
+                            className={`rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
+                        >
+                            {user.isOpen ? 'Open' : 'Closed'}
+                        </p>
+                    )}
+                   
+                    {user.role === 'admin' && (
+                        <Button
+                            onClick={() => navigate('/register-student')}
+                            btnText={
+                                <div className="flex items-center justify-center gap-1.5">
+                                    <div className="size-3 fill-white">
+                                        {icons.plus}
                                     </div>
-                                }
-                                title="Add Student"
-                                className="text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal bg-[#4977ec] hover:bg-[#3b62c2]"
-                            />
-                        )}
-                    </div>
-                )}
+                                    <span>Student</span>
+                                </div>
+                            }
+                            title="Add Student"
+                            className="text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal bg-[#4977ec] hover:bg-[#3b62c2]"
+                        />
+                    )}
+                </div>
 
                 <div>
                     {user.role === 'student' ? (
@@ -124,7 +121,6 @@ export default function Header() {
                         </div>
                     )}
                 </div>
-
                 {user.role === 'student' && (
                     <div className="hidden md:block">
                         <Logout />
