@@ -45,9 +45,9 @@ export default function StudentBillsPage() {
     }, [studentId]);
 
     return (
-        <div className="pl-2">
+        <>
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="pl-2 text-xl font-semibold text-gray-900">
                     My Bills
                 </h1>
             </div>
@@ -73,6 +73,6 @@ export default function StudentBillsPage() {
                     No bills found.
                 </div>
             )}
-        </div>
+        </>
     );
 }

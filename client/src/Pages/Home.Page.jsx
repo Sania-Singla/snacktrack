@@ -8,7 +8,7 @@ export default function HomePage() {
     const { user } = useUserContext();
 
     return (
-        <div className="pl-2">
+        <>
             <div className="mb-6 flex justify-between items-center">
                 {user?.role === 'contractor' && <AddBtn />}
 
@@ -29,6 +29,6 @@ export default function HomePage() {
             </div>
 
             {filter === 'snacks' ? <Snacks /> : <PackagedItems />}
-        </div>
+        </>
     );
 }

@@ -66,11 +66,11 @@ export default function BillsPage() {
     }
 
     return (
-        <div className="pl-2">
+        <>
             <div className="flex flex-col gap-6 sm:gap-4 sm:flex-row sm:items-center justify-between w-full mb-6">
                 <div className="flex items-center justify-between gap-4 w-full">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-xl font-semibold text-gray-900">
+                        <h1 className="pl-2 text-xl font-semibold text-gray-900">
                             Bills
                         </h1>
                         <div className="px-2 py-0.5 text-xs font-semibold space-x-2 rounded-full border border-blue-200 bg-blue-50 text-blue-700">
@@ -162,6 +162,6 @@ export default function BillsPage() {
                     </div>
                 )
             )}
-        </div>
+        </>
     );
 }

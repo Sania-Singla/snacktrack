@@ -154,10 +154,10 @@ export default function StudentOrdersPage() {
     }, [socket]);
 
     return (
-        <div className="pl-2">
+        <>
             <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-6 mb-8">
                 <div className="flex gap-4 justify-between items-center w-full">
-                    <h1 className="text-xl text-nowrap font-semibold w-full sm:w-fit text-gray-900 flex items-center gap-4">
+                    <h1 className="pl-2 text-xl text-nowrap font-semibold w-full sm:w-fit text-gray-900 flex items-center gap-4">
                         <p>{user._id === studentId ? 'My Orders' : 'Orders'}</p>
                         <DateBadge />
                     </h1>
@@ -202,6 +202,6 @@ export default function StudentOrdersPage() {
                     </p>
                 )
             )}
-        </div>
+        </>
     );
 }
