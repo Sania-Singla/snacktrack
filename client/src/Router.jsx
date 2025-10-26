@@ -33,6 +33,7 @@ import {
 } from './Pages';
 
 import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
+import RegisterBulk from './Pages/RegisterBulk';
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -65,6 +66,8 @@ export const router = createBrowserRouter(
                     <Route path="all-bills" element={<BillsPage />} />
                     <Route path="students" element={<StudentsPage />} />
                 </Route>
+
+                <Route path="register-all" element={<RegisterBulk />} />
 
                 <Route
                     path="register-student"

@@ -1,4 +1,4 @@
-import { LIMIT } from '../Constants';
+import { BASE_BACKEND_URL, LIMIT } from '../Constants';
 import { fetchWrapper } from '../Utils';
 
 class ContractorService {
@@ -45,6 +45,19 @@ class ContractorService {
                 hostelNumber,
                 phoneNumber,
             },
+        });
+    }
+
+    async registerBulk(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        return await fetchWrapper({
+            endPoint: `/contractors/students/register-all`,
+            method: 'POST',
+            credentials: 'include',
+            aim: 'bulk registeration',
+            body: formData,
+            type: 'formData',
         });
     }
 
