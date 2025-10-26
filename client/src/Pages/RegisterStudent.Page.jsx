@@ -130,6 +130,39 @@ export default function RegisterStudentPage() {
         </div>
     ));
 
+    const handleUpload = async (e) => {
+        setLoading(true);
+
+        try {
+            const files = e.target.files;
+
+            if (!files || files.length === 0) return;
+
+            const res = await contractorService.registerBulk(files[0]);
+            if (res instanceof Response) {
+                // It's a file
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'students_result.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+
+                toast.success('Bulk registration successful!');
+            } else {
+                // It's JSON
+                toast.error(res.message || 'No new users to register');
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error(err.message || 'Error uploading or downloading file');
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <div className="py-10 text-black flex flex-col items-center justify-center gap-4 min-h-screen">
             <Link
@@ -160,10 +193,10 @@ export default function RegisterStudentPage() {
                 <input
                     type="file"
                     className="hidden"
-                    accept="image/*"
+                    accept=".xlsx,.xls,.csv"
                     name="excel"
                     id="excel"
-                    onChange={() => {}}
+                    onChange={handleUpload}
                 />
 
                 <label
@@ -171,7 +204,7 @@ export default function RegisterStudentPage() {
                     className="border mt-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
                 >
                     <span className="text-[#4977ec] text-[15px] font-medium">
-                        Upload Excel
+                        {loading ? 'Uploading...' : 'Upload Excel'}
                     </span>
                     <div className="size-5.5 fill-[#4977ec]">
                         {icons.upload}

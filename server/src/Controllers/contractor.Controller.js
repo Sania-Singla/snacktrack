@@ -263,7 +263,7 @@ export const registerBulkStudents = async (req, res) => {
 
         if (!newUsers.length) {
             fs.unlinkSync(filePath);
-            return res.status(200).json({
+            return res.status(400).json({
                 message: 'All users already exist. No new registrations added.',
             });
         }
