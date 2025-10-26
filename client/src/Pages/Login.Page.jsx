@@ -7,6 +7,7 @@ import { userService } from '../Services';
 import { Button, Dropdown, InputField } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
+import { readQR } from '../Utils';
 
 export default function LoginPage() {
     const [inputs, setInputs] = useState({ userName: '', password: '' });
@@ -98,6 +99,33 @@ export default function LoginPage() {
         }
     }
 
+    async function handleUpload(e) {
+        setDisabled(true);
+        try {
+            const files = e.target.files;
+
+            if (!files || files.length === 0) return;
+
+            const decode = await readQR(files[0]);
+            console.log('decoded', decode);
+            setLoading(true);
+
+            const res = await userService.loginByQR({ decode });
+
+            if (res && !res.message) {
+                toast.success('Logged in Successfully 😉');
+                setUser(res);
+                localStorage.clear();
+                navigate('/');
+            } else toast.error(res.message);
+        } catch (error) {
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+            setDisabled(false);
+        }
+    }
+
     const inputFields = [
         {
             type: 'number',
@@ -155,20 +183,28 @@ export default function LoginPage() {
             </div>
 
             <div className="text-black max-w-[500px] min-w-[300px] flex flex-col items-center gap-3">
-                <Button
-                    className="text-gray-800 rounded-md mt-3 h-[40px] flex items-center justify-center w-full transition-all duration-200 border-1 border-[#4977ec] hover:bg-[#4977ec]/10 hover:shadow-sm active:scale-[98%]"
-                    btnText={
-                        <div className="flex gap-2.5 items-center">
-                            <span className="text-[#4977ec] text-[15px] font-medium">
-                                Upload QR
-                            </span>
-                            <div className="size-5.5 fill-[#4977ec]">
-                                {icons.upload}
-                            </div>
-                        </div>
-                    }
-                    disabled={loading}
+                <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    name="qr"
+                    id="qr"
+                    onChange={handleUpload}
                 />
+
+                <label
+                    htmlFor="qr"
+                    className="border-1 py-2 text-center border-[#4977ec] rounded-md w-full"
+                >
+                    <div className="flex gap-2.5 items-center justify-center">
+                        <span className="text-[#4977ec] text-[15px] font-medium">
+                            Upload QR
+                        </span>
+                        <div className="size-5.5 fill-[#4977ec]">
+                            {icons.upload}
+                        </div>
+                    </div>
+                </label>
 
                 <div className="flex gap-2 items-center w-full">
                     <hr className="text-gray-300 w-full" />

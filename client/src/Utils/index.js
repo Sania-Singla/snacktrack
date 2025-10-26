@@ -14,6 +14,7 @@ import {
     audioAllowed,
 } from './audio';
 import { fetchWrapper } from './fetchWrapper';
+import { readQR } from './qr';
 
 export {
     verifyExpression,
@@ -30,4 +31,5 @@ export {
     playSound,
     audioAllowed,
     fetchWrapper,
+    readQR,
 };

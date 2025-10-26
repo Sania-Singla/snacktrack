@@ -10,6 +10,7 @@ import {
     verifyExpression,
     ErrorHandler,
     sendMail,
+    verifyQR,
 } from '../Utils/index.js';
 import { generateTokens } from '../Helpers/index.js';
 import { Canteen, Student, Contractor } from '../Models/index.js';
