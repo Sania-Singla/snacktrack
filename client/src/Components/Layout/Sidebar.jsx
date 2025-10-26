@@ -32,25 +32,25 @@ export default function Sidebar() {
             path: '/all-bills',
             name: 'Bills',
             icon: icons.rupee,
-            show: user.role === 'contractor',
+            show: user.role === 'contractor' || user.role === 'admin',
         },
         {
             path: '/history',
             name: 'History',
             icon: icons.clock,
-            show: user.role === 'contractor',
+            show: user.role === 'contractor' || user.role === 'admin',
         },
         {
             path: '/students',
             name: 'Students',
             icon: icons.group,
-            show: user.role === 'contractor',
+            show: user.role === 'contractor' || user.role === 'admin',
         },
         {
             path: '/settings',
             name: 'Settings',
             icon: icons.settings,
-            show: user.role === 'student',
+            show: user.role === 'student' || user.role === 'admin',
         },
     ];
 

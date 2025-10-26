@@ -72,14 +72,23 @@ export default function OrderItem({ item, order, type = 'static' }) {
             {/* ✅ */}
             {(status === 'Pending' || status === 'Prepared') &&
                 item.pickedUp && (
-                    <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center -z-10">
+                    <div className="absolute inset-0 bg-[#caffdd] border-green-300 border-[0.01rem] flex items-center h-full w-full justify-center">
                         <div className="fill-green-600 size-6 p-1">
                             {icons.check}
                         </div>
                     </div>
                 )}
 
-            <div className="flex justify-between items-center">
+            {!name && (
+                <div className="absolute inset-0 border-[0.01rem] border-red-300 bg-red-50 flex items-center justify-center">
+                    <div className="fill-red-600 size-6 p-1">{icons.ban}</div>
+                    <span className="text-red-600 text-sm font-medium">
+                        Removed from menu
+                    </span>
+                </div>
+            )}
+
+            <div className="flex justify-between items-center relative">
                 <div className="flex items-center gap-3">
                     <div className="size-7.5 bg-gray-50 rounded-md border-1 border-gray-300 overflow-hidden flex items-center justify-center">
                         {item.type === 'Snack' ? (

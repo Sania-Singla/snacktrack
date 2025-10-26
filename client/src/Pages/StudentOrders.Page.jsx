@@ -28,7 +28,7 @@ export default function StudentOrdersPage() {
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
     useLayoutEffect(() => {
-        if (studentId && user._id !== studentId) {
+        if (studentId && user.role === 'student' && user._id !== studentId) {
             navigate('/not-found');
         }
     }, []);
@@ -88,7 +88,7 @@ export default function StudentOrdersPage() {
             helper(orderId, { status: 'PickedUp' });
         });
 
-        socket.on(SOCKET_EVENTS.ORDER_PREPARED, (orderId) => {
+        socket.on(SOCKET_EVENTS.ORDER_PREPARED, ({ orderId }) => {
             helper(orderId, { status: 'Prepared' });
         });
 

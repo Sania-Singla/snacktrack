@@ -1,7 +1,10 @@
 import { USER_PLACEHOLDER_IMAGE } from '../../Constants';
+import { useUserContext } from '../../Contexts';
 import { getRollNo } from '../../Utils';
 
 export default function OrderStudentInfo({ studentInfo }) {
+    const { user } = useUserContext();
+
     return (
         <div className="flex items-center gap-3">
             <div className="size-7.5 rounded-full overflow-hidden shadow-xs">
@@ -22,9 +25,11 @@ export default function OrderStudentInfo({ studentInfo }) {
                         Roll No: {getRollNo(studentInfo.userName)}
                     </span>
                 </h3>
-                {/* <div className="flex items-center gap-1 text-xs text-gray-600">
-                    {studentInfo.phoneNumber}
-                </div> */}
+                {user.role === 'admin' && (
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                        {studentInfo.phoneNumber}
+                    </div>
+                )}
             </div>
         </div>
     );

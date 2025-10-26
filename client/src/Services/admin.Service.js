@@ -11,6 +11,16 @@ class AdminService {
         });
     }
 
+    async proceedAsAdmin({ key, canteenId }) {
+        return await fetchWrapper({
+            endPoint: `/admins/proceed-as-admin/${canteenId}`,
+            method: 'POST',
+            credentials: 'include',
+            body: { key },
+            aim: 'proceedAsAdmin',
+        });
+    }
+
     async registerCanteen({ fullName, phoneNumber, email, hostel }) {
         return await fetchWrapper({
             endPoint: `/admins/canteen/register`,

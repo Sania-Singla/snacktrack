@@ -145,8 +145,8 @@ export default function RegisterStudentPage() {
                 </div>
             </Link>
             <div className="w-fit">
-                <p className="text-center text-2xl font-semibold">
-                    Register a New Student
+                <p className="text-center text-[22px] font-semibold">
+                    Register New Student
                 </p>
                 <motion.div
                     initial={{ width: 0 }}
@@ -156,7 +156,34 @@ export default function RegisterStudentPage() {
                 />
             </div>
 
-            <div className="max-w-[500px] min-w-[300px] flex flex-col items-center justify-center gap-3">
+            <div className="max-w-[500px] min-w-[300px] flex flex-col items-center justify-center">
+                <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    name="excel"
+                    id="excel"
+                    onChange={() => {}}
+                />
+
+                <label
+                    htmlFor="excel"
+                    className="border mt-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
+                >
+                    <span className="text-[#4977ec] text-[15px] font-medium">
+                        Upload Excel
+                    </span>
+                    <div className="size-5.5 fill-[#4977ec]">
+                        {icons.upload}
+                    </div>
+                </label>
+
+                <div className="flex gap-2 items-center w-full mt-3">
+                    <hr className="text-gray-300 w-full" />
+                    <p className="text-gray-400 text-sm font-light pb-1">or</p>
+                    <hr className="text-gray-300 w-full" />
+                </div>
+
                 {error.root && (
                     <div className="text-red-500 w-full text-center">
                         {error.root}
@@ -167,12 +194,12 @@ export default function RegisterStudentPage() {
                     onSubmit={handleSubmit}
                     className="flex flex-col items-start justify-center gap-4 w-full"
                 >
-                    <div className="w-full flex flex-col gap-2">
+                    <div className="w-full flex flex-col gap-1">
                         {inputElements}
 
                         {/* phone number field */}
-                        <div className="w-full shadow-md shadow-[#f8f0eb]">
-                            <div className="bg-white z-[10] text-[15px] ml-2 px-1 w-fit relative top-3 font-medium">
+                        <div className="w-full">
+                            <div className="bg-white z-[10] text-sm ml-2 px-1 w-fit relative top-3 font-medium">
                                 <label htmlFor="phoneNumber">
                                     <span className="text-red-500">* </span>
                                     Phone Number
@@ -190,8 +217,8 @@ export default function RegisterStudentPage() {
                                         required: true,
                                         id: 'phoneNumber',
                                     }}
-                                    inputClass="!w-full !h-[42px] !indent-2 !rounded-md !shadow-sm !border-[0.01rem] !border-[#858585] !outline-[#f68533] !bg-transparent"
-                                    buttonClass="!h-[42px] !w-[45px] !bg-white !hover:bg-white !z-[1] !rounded-r-none !rounded-md !border-[0.01rem] !border-[#858585] !outline-[#f68533]"
+                                    inputClass="!w-full !h-[42px] !indent-2 !rounded-md !border-1 !border-gray-400 !outline-[#f68533] !bg-transparent"
+                                    buttonClass="!h-[42px] !w-[45px] !bg-white !hover:bg-white !z-[1] !rounded-r-none !rounded-md !border-1 !border-gray-400 !outline-[#f68533]"
                                 />
                             </div>
                             {error.phoneNumber && (
@@ -204,7 +231,7 @@ export default function RegisterStudentPage() {
 
                     <Button
                         type="submit"
-                        className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                        className="text-white rounded-md py-2 mt-3 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
                         disabled={disabled}
                         onMouseOver={onMouseOver}
                         btnText={

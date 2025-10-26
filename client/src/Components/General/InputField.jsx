@@ -15,7 +15,7 @@ export default function InputField({
 
     return (
         <div key={name} className={`w-full ${className}`}>
-            <div className="bg-white z-[1] ml-2 px-1 w-fit relative top-2.5 text-[15px] font-medium">
+            <div className="bg-white z-[1] ml-2 px-1 w-fit relative top-2.5 text-sm font-medium">
                 <label htmlFor={name}>
                     {required && <span className="text-red-500 mr-0.5">*</span>}
                     {label}

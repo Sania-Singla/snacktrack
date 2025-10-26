@@ -11,11 +11,14 @@ import {
     getHostels,
     verifyAdminKey,
     changeContractor,
+    proceedAsAdmin,
 } from '../Controllers/admin.Controller.js';
 
 adminRouter.route('/verify-key').post(verifyAdminKey);
 
 adminRouter.use(verifyJwt);
+
+adminRouter.route('/proceed-as-admin/:canteenId').post(proceedAsAdmin);
 
 adminRouter.route('/contractor').get(getContractors);
 

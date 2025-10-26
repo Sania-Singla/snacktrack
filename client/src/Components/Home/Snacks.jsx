@@ -27,6 +27,26 @@ export default function Snacks() {
     }
 
     useEffect(() => {
+        const cached = JSON.parse(localStorage.getItem('snacks')) || [];
+
+        if (!debouncedSearch) {
+            setSnacks(compute(cached));
+        }
+
+        setSnacks(
+            compute(
+                cached.filter((s) =>
+                    debouncedSearch
+                        ? s.name
+                              .toLowerCase()
+                              .includes(debouncedSearch.toLowerCase())
+                        : true
+                )
+            )
+        );
+    }, [debouncedSearch]);
+
+    useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
 
@@ -68,34 +88,10 @@ export default function Snacks() {
                             JSON.stringify(res.snacks)
                         );
                         localStorage.setItem('snacksVersion', serverVersion);
-                        setSnacks(
-                            compute(
-                                res.snacks.filter((s) =>
-                                    debouncedSearch
-                                        ? s.name
-                                              .toLowerCase()
-                                              .includes(
-                                                  debouncedSearch.toLowerCase()
-                                              )
-                                        : true
-                                )
-                            )
-                        );
+                        setSnacks(compute(res.snacks));
                     } else checkTokenExpired(res, setUser);
                 } else {
-                    setSnacks(
-                        compute(
-                            cached.filter((s) =>
-                                debouncedSearch
-                                    ? s.name
-                                          .toLowerCase()
-                                          .includes(
-                                              debouncedSearch.toLowerCase()
-                                          )
-                                    : true
-                            )
-                        )
-                    );
+                    setSnacks(compute(cached));
                 }
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
@@ -105,7 +101,7 @@ export default function Snacks() {
         })();
 
         return () => controller.abort();
-    }, [debouncedSearch]);
+    }, [user.canteenId]);
 
     useEffect(() => {
         if (orderPlaced) {

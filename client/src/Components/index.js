@@ -14,7 +14,12 @@ import ContributorCard from './Views/ContributorCard';
 import Popup from './Popups/Popup';
 import Logout from './User/Logout';
 import UpdateAccountDetails from './User/UpdateAccountDetails';
+import UpdateAccountDetailsStudent from './User/UpdateAccountDetailsStudent';
+import UpdateAccountDetailsAdmin from './User/UpdateAccountDetailsAdmin';
 import UpdatePassword from './User/UpdatePassword';
+import UpdatePasswordAdmin from './User/UpdatePasswordAdmin';
+import UpdatePasswordStudent from './User/UpdatePasswordStudent';
+import ProceedAsAdminPopup from './Popups/ProceedAsAdmin.Popup';
 import RemoveStudentPopup from './Popups/RemoveStudent.Popup';
 import RemoveAllStudentsPopup from './Popups/RemoveAllStudents.Popup';
 import EditStudentPopup from './Popups/EditStudent.Popup';
@@ -80,8 +85,13 @@ export {
     StaticOrderCard,
     AudioBtn,
     UpdateAccountDetails,
+    UpdatePasswordStudent,
+    UpdatePasswordAdmin,
+    UpdateAccountDetailsAdmin,
+    UpdateAccountDetailsStudent,
     IntermediateBillPopup,
     IntermediateBillDetailPopup,
+    ProceedAsAdminPopup,
     ActiveOrderCard,
     UpdatePassword,
     Popup,

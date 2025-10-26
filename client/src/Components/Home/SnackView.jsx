@@ -176,7 +176,7 @@ export default function SnackView({ snack, reference = null }) {
                             <div className="flex gap-2 justify-end">
                                 <Button
                                     btnText={
-                                        <div className="size-4 group-hover:stroke-[#4977ec] stroke-black fill-none">
+                                        <div className="size-3.5 group-hover:stroke-[#4977ec] stroke-black fill-none">
                                             {icons.editUnfilled}
                                         </div>
                                     }
@@ -186,7 +186,7 @@ export default function SnackView({ snack, reference = null }) {
                                 <div>
                                     <Button
                                         btnText={
-                                            <div className="size-4 group-hover:fill-red-700">
+                                            <div className="size-3.5 group-hover:fill-red-700">
                                                 {icons.delete}
                                             </div>
                                         }

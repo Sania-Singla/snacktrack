@@ -105,9 +105,8 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
         },
     };
 
-    // notify canteen about new order
-    const cantSocketId = await redisClient.get(order.canteenId.toString());
-    io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, data);
+    // notify canteen room about new order
+    io.to(`contractor_${order.canteenId}`).emit(SOCKET_EVENTS.NEW_ORDER, data);
 
     return res.status(OK).json(data);
 });
@@ -188,9 +187,8 @@ export const placeOrderByQR = tryCatch(
             },
         };
 
-        // notify canteen about new order
-        const cantSocketId = await redisClient.get(canteenId.toString());
-        io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, result);
+        // notify canteen room about new order
+        io.to(`contractor_${canteenId}`).emit(SOCKET_EVENTS.NEW_ORDER, result);
 
         return res.status(OK).json(result);
     }
@@ -331,10 +329,7 @@ export const updateOrderStatus = tryCatch(
         // todo: send sms to student
 
         // socket event
-        const [stuSocketId, cantSocketId] = await redisClient.mGet([
-            order.studentId.toString(),
-            order.canteenId.toString(),
-        ]);
+        const stuSocketId = await redisClient.get(order.studentId.toString());
 
         const data =
             status === 'Prepared'
@@ -342,7 +337,7 @@ export const updateOrderStatus = tryCatch(
                 : order._id.toString();
 
         io.to(stuSocketId)
-            .to(cantSocketId)
+            .to(`contractor_${order.canteenId}`)
             .emit(SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`], data);
 
         return res.status(OK).json({
@@ -384,13 +379,10 @@ export const updateExtraCharges = tryCatch(
         await order.save();
 
         // socket event
-        const [stuSocketId, cantSocketId] = await redisClient.mGet([
-            order.studentId.toString(),
-            order.canteenId.toString(),
-        ]);
+        const stuSocketId = await redisClient.get(order.studentId.toString());
 
         io.to(stuSocketId)
-            .to(cantSocketId)
+            .to(`contractor_${order.canteenId}`)
             .emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
                 orderId,
                 extraCharges,

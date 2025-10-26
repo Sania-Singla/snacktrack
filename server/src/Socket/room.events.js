@@ -8,13 +8,17 @@ export async function joinRoom(socket, { userId, canteenId, role }) {
             break;
         }
         case 'contractor': {
-            await redisClient.setEx(canteenId.toString(), 43200, socket.id);
-            console.log(`[USER JOINED] ${canteenId} (${socket.id})`);
+            const room = `contractor_${canteenId}`;
+            await redisClient.sAdd(room, socket.id);
+            await socket.join(room);
+            console.log(`[USER JOINED] ${room} (${socket.id})`);
             break;
         }
         case 'kiosk': {
-            await redisClient.setEx(`kiosk_${canteenId}`, 43200, socket.id);
-            console.log(`[KIOSK JOINED] kiosk_${canteenId} (${socket.id})`);
+            const room = `kiosk_${canteenId}`;
+            await redisClient.sAdd(room, socket.id);
+            await socket.join(room);
+            console.log(`[KIOSK JOINED] ${room} (${socket.id})`);
             break;
         }
         default: {
@@ -31,13 +35,17 @@ export async function leaveRoom(socket, { userId, canteenId, role }) {
             break;
         }
         case 'contractor': {
-            await redisClient.del(canteenId.toString());
-            console.log(`[USER LEFT] ${canteenId} (${socket.id})`);
+            const room = `contractor_${canteenId}`;
+            await redisClient.sRem(room, socket.id);
+            await socket.leave(room);
+            console.log(`[USER LEFT] ${room} (${socket.id})`);
             break;
         }
         case 'kiosk': {
-            await redisClient.del(`kiosk_${canteenId}`);
-            console.log(`[KIOSK LEFT] kiosk_${canteenId} (${socket.id})`);
+            const room = `kiosk_${canteenId}`;
+            await redisClient.sRem(room, socket.id);
+            await socket.leave(room);
+            console.log(`[KIOSK LEFT] ${room} (${socket.id})`);
             break;
         }
         default: {

@@ -52,10 +52,8 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 items-center">
-                {user.role === 'student' ? (
-                    <Cart />
-                ) : (
-                    <div className="flex gap-3 items-center">
+                <div className="flex gap-3 items-center">
+                    {user.role === 'contractor' ? (
                         <Button
                             onClick={async () => {
                                 const res =
@@ -81,6 +79,15 @@ export default function Header() {
                             }
                             className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                         />
+                    ) : (
+                        <p
+                            className={`rounded-md w-fit text-nowrap px-2 py-1 text-sm font-medium ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
+                        >
+                            {user.isOpen ? 'Open' : 'Closed'}
+                        </p>
+                    )}
+
+                    {user.role === 'admin' && (
                         <Button
                             onClick={() => navigate('/register-student')}
                             btnText={
@@ -94,8 +101,10 @@ export default function Header() {
                             title="Add Student"
                             className="text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal bg-[#4977ec] hover:bg-[#3b62c2]"
                         />
-                    </div>
-                )}
+                    )}
+                </div>
+
+                {user.role === 'student' && <Cart />}
 
                 <div>
                     {user.role === 'student' ? (
@@ -112,7 +121,6 @@ export default function Header() {
                         </div>
                     )}
                 </div>
-
                 {user.role === 'student' && (
                     <div className="hidden md:block">
                         <Logout />

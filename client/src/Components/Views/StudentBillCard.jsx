@@ -52,12 +52,12 @@ export default function StudentBillCard({ bill, studentInfo }) {
                                     {getRollNo(studentInfo.userName)}
                                 </div>
 
-                                {/* <div className="text-gray-800 hover:text-[#5c5c5c] text-xs w-fit">
+                                <div className="text-gray-800 hover:text-[#5c5c5c] text-xs w-fit">
                                     <span className="font-medium">
                                         Phone Number:{' '}
                                     </span>
                                     {studentInfo.phoneNumber}
-                                </div> */}
+                                </div>
                             </div>
                         ) : (
                             <div className="flex flex-col gap-[2px]">

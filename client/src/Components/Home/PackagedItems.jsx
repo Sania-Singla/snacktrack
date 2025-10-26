@@ -27,6 +27,26 @@ export default function PackagedItems() {
     }
 
     useEffect(() => {
+        const cached = JSON.parse(localStorage.getItem('items')) || [];
+
+        if (!debouncedSearch) {
+            setItems(compute(cached));
+        }
+
+        setItems(
+            compute(
+                cached.filter((i) =>
+                    debouncedSearch
+                        ? i.name
+                              .toLowerCase()
+                              .includes(debouncedSearch.toLowerCase())
+                        : true
+                )
+            )
+        );
+    }, [debouncedSearch]);
+
+    useEffect(() => {
         const controller = new AbortController();
         const signal = controller.signal;
 
@@ -68,34 +88,10 @@ export default function PackagedItems() {
                             JSON.stringify(res.items)
                         );
                         localStorage.setItem('itemsVersion', serverVersion);
-                        setItems(
-                            compute(
-                                res.items.filter((i) =>
-                                    debouncedSearch
-                                        ? i.name
-                                              .toLowerCase()
-                                              .includes(
-                                                  debouncedSearch.toLowerCase()
-                                              )
-                                        : true
-                                )
-                            )
-                        );
+                        setItems(compute(res.items));
                     } else checkTokenExpired(res, setUser);
                 } else {
-                    setItems(
-                        compute(
-                            cached.filter((i) =>
-                                debouncedSearch
-                                    ? i.name
-                                          .toLowerCase()
-                                          .includes(
-                                              debouncedSearch.toLowerCase()
-                                          )
-                                    : true
-                            )
-                        )
-                    );
+                    setItems(compute(cached));
                 }
             } catch (err) {
                 toast.error('Something went wrong. Please try again.');
@@ -105,7 +101,7 @@ export default function PackagedItems() {
         })();
 
         return () => controller.abort();
-    }, [debouncedSearch]);
+    }, [user.canteenId]);
 
     useEffect(() => {
         if (orderPlaced) {
