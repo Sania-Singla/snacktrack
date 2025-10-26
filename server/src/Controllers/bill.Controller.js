@@ -135,7 +135,7 @@ export const getBills = tryCatch('get bills', async (req, res) => {
 // generate bill for a specific student in mid of the current month
 export const generateIntermediateBill = tryCatch(
     'generate intermediate bill for student',
-    async (req, res, next) => {
+    async (req, res) => {
         const { rollNo } = req.params;
         const { canteenId } = req.user;
 
@@ -151,7 +151,7 @@ export const generateIntermediateBill = tryCatch(
         );
 
         if (!student) {
-            return next(new ErrorHandler('Student Not found', NOT_FOUND));
+            throw new ErrorHandler('Student Not found', NOT_FOUND);
         }
 
         // get orders of current month (picked up) and prepare bill

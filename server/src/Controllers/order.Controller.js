@@ -55,7 +55,7 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
     const canteen = await Canteen.findById(student.canteenId);
 
     if (!canteen.isOpen) {
-        return next(new ErrorHandler('canteen is closed', FORBIDDEN));
+        throw new ErrorHandler('canteen is closed', FORBIDDEN);
     }
 
     const updatedCartItems = cartItems.map((i) => ({
@@ -115,20 +115,29 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
 export const placeOrderByQR = tryCatch(
     'place order by qr',
     async (req, res) => {
-        const { cartItems, amount, canteenId } = req.body;
-        const { _id } = verifyQR(req.body.token);
+        const { cartItems, amount, canteenId, decode } = req.body;
+        const { _id, token } = decode;
+
+        if (!_id || !token) {
+            throw new ErrorHandler('invalid qr code', FORBIDDEN);
+        }
 
         const student = await Student.findOne({ _id, canteenId })
-            .populate(canteenId, 'isOpen')
-            .select('-password -refreshToken');
+            .populate('canteenId', 'isOpen')
+            .select('-refreshToken')
+            .lean();
 
         if (!student) {
-            return next(new ErrorHandler('student not found', NOT_FOUND));
+            throw new ErrorHandler('invalid qr code', NOT_FOUND);
         }
 
+        verifyQR({ token, passHash: student.password });
+
         if (!student.canteenId.isOpen) {
-            return next(new ErrorHandler('canteen is closed', FORBIDDEN));
+            throw new ErrorHandler('canteen is closed', FORBIDDEN);
         }
+
+        student.canteenId = canteenId;
 
         const updatedCartItems = cartItems.map((i) => ({
             id: i._id,
@@ -144,8 +153,8 @@ export const placeOrderByQR = tryCatch(
         const allPackaged = packagedItems.length === cartItems.length;
 
         let order = await Order.create({
-            studentId: student._id,
-            canteenId: student.canteenId,
+            studentId: _id,
+            canteenId,
             amount,
             status: allPackaged ? 'Prepared' : 'Pending',
             items: updatedCartItems,
@@ -169,7 +178,7 @@ export const placeOrderByQR = tryCatch(
             pickedUp: false,
         }));
 
-        const data = {
+        const result = {
             ...order,
             items,
             studentInfo: {
@@ -181,15 +190,15 @@ export const placeOrderByQR = tryCatch(
 
         // notify canteen about new order
         const cantSocketId = await redisClient.get(canteenId.toString());
-        io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, data);
+        io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, result);
 
-        return res.status(OK).json(data);
+        return res.status(OK).json(result);
     }
 );
 
 export const updateOrderStatus = tryCatch(
     'update order status',
-    async (req, res, next) => {
+    async (req, res) => {
         const { orderId } = req.params;
         const { status } = req.query;
         const contractor = req.user;
@@ -199,7 +208,7 @@ export const updateOrderStatus = tryCatch(
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
 
-        if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
+        if (!order) throw new ErrorHandler('order not found', NOT_FOUND);
 
         const orderDate = moment(order.createdAt)
             .tz('Asia/Kolkata')
@@ -207,7 +216,7 @@ export const updateOrderStatus = tryCatch(
         const todayDate = moment().tz('Asia/Kolkata').startOf('day');
 
         if (!orderDate.isSame(todayDate)) {
-            return next(new ErrorHandler('too late', FORBIDDEN));
+            throw new ErrorHandler('too late', FORBIDDEN);
         }
 
         order.status = status;
@@ -344,8 +353,8 @@ export const updateOrderStatus = tryCatch(
 );
 
 export const updateExtraCharges = tryCatch(
-    'update order status',
-    async (req, res, next) => {
+    'update extra charges',
+    async (req, res) => {
         const { orderId } = req.params;
         const { extraCharges } = req.body;
         const contractor = req.user;
@@ -355,7 +364,7 @@ export const updateExtraCharges = tryCatch(
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
 
-        if (!order) return next(new ErrorHandler('order not found', NOT_FOUND));
+        if (!order) throw new ErrorHandler('order not found', NOT_FOUND);
 
         const orderDate = moment(order.createdAt)
             .tz('Asia/Kolkata')
@@ -363,10 +372,11 @@ export const updateExtraCharges = tryCatch(
         const todayDate = moment().tz('Asia/Kolkata').startOf('day');
 
         if (!orderDate.isSame(todayDate)) {
-            return next(new ErrorHandler('too late', FORBIDDEN));
+            throw new ErrorHandler('too late', FORBIDDEN);
         } else if (order.status !== 'Pending' && order.status !== 'Prepared') {
-            return next(
-                new ErrorHandler('cannot update extra charges now', FORBIDDEN)
+            throw new ErrorHandler(
+                'cannot update extra charges now',
+                FORBIDDEN
             );
         }
 

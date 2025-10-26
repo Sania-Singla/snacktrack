@@ -43,9 +43,10 @@ const studentSchema = new Schema(
             default: '',
         },
         qr: {
+            // token not base64 image
             type: String,
             default: '',
-        }
+        },
     },
     { timestamps: true }
 );

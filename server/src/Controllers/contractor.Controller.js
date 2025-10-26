@@ -30,7 +30,7 @@ import { io } from '../socket.js';
 
 export const changeCanteenStatus = tryCatch(
     'change canteen status',
-    async (req, res, next) => {
+    async (req, res) => {
         const contractor = req.user;
         const { status } = req.body;
 
@@ -42,11 +42,9 @@ export const changeCanteenStatus = tryCatch(
             isOpen: status,
             canteenId: contractor.canteenId,
         });
-        return res
-            .status(OK)
-            .json({
-                message: `canteen ${status ? 'opened' : 'closed'} successfully`,
-            });
+        return res.status(OK).json({
+            message: `canteen ${status ? 'opened' : 'closed'} successfully`,
+        });
     }
 );
 
@@ -134,8 +132,8 @@ export const getStudents = tryCatch('get students', async (req, res) => {
 });
 
 export const registerStudent = tryCatch(
-    'register as student',
-    async (req, res, next) => {
+    'register student',
+    async (req, res) => {
         const contractor = req.user; // only contractor can register a student
         const {
             fullName,
@@ -154,14 +152,14 @@ export const registerStudent = tryCatch(
             !hostelType ||
             !hostelNumber
         ) {
-            return next(new ErrorHandler('Missing fields', BAD_REQUEST));
+            throw new ErrorHandler('Missing fields', BAD_REQUEST);
         }
 
         const isValid = ['fullName', 'email', 'phoneNumber', 'rollNo'].every(
             (key) => verifyExpression(key, req.body[key]?.trim())
         );
         if (!isValid) {
-            return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
+            throw new ErrorHandler('Invalid input data', BAD_REQUEST);
         }
 
         const userName = (hostelType + hostelNumber + '-' + rollNo).trim();
@@ -175,7 +173,7 @@ export const registerStudent = tryCatch(
         });
 
         if (existingStudent) {
-            return next(new ErrorHandler('user already exists', BAD_REQUEST));
+            throw new ErrorHandler('user already exists', BAD_REQUEST);
         }
 
         const randomPassword = nanoid(8); // unique temporary random password
@@ -203,120 +201,106 @@ export const registerStudent = tryCatch(
     }
 );
 
-export const removeStudent = tryCatch(
-    'remove student account',
-    async (req, res, next) => {
-        const { studentId } = req.params;
-        const contractor = req.user;
+export const removeStudent = tryCatch('remove student', async (req, res) => {
+    const { studentId } = req.params;
+    const contractor = req.user;
 
-        // check if bills are pending
-        const pendingBill = await Bill.findOne({
-            studentId: new Types.ObjectId(studentId),
-            paid: false,
-        });
+    // check if bills are pending
+    const pendingBill = await Bill.findOne({
+        studentId: new Types.ObjectId(studentId),
+        paid: false,
+    });
 
-        if (pendingBill) {
-            return next(
-                new ErrorHandler('student has pending bills', BAD_REQUEST)
-            );
-        }
-
-        // a contractor can remove the student only if the student belongs to his canteen
-        const [student] = await Promise.all([
-            Student.findOneAndDelete({
-                _id: new Types.ObjectId(studentId),
-                canteenId: new Types.ObjectId(contractor.canteenId),
-            }),
-            Order.deleteMany({
-                studentId: new Types.ObjectId(studentId),
-            }),
-            Bill.deleteMany({
-                studentId: new Types.ObjectId(studentId),
-            }),
-        ]);
-        if (!student) {
-            return next(new ErrorHandler('student not found', NOT_FOUND));
-        }
-
-        return res.status(OK).json({ message: 'account deleted successfully' });
+    if (pendingBill) {
+        throw new ErrorHandler('student has pending bills', BAD_REQUEST);
     }
-);
 
-export const updateStudent = tryCatch(
-    'update account details',
-    async (req, res, next) => {
-        const contractor = req.user;
-        const { studentId } = req.params;
-        const {
-            fullName,
-            phoneNumber,
-            email,
-            rollNo,
-            hostelNumber,
-            hostelType,
-        } = req.body;
-
-        const student = await Student.findOne({
+    // a contractor can remove the student only if the student belongs to his canteen
+    const [student] = await Promise.all([
+        Student.findOneAndDelete({
             _id: new Types.ObjectId(studentId),
             canteenId: new Types.ObjectId(contractor.canteenId),
-        });
-
-        if (!student) {
-            return next(new ErrorHandler('student not found', NOT_FOUND));
-        }
-
-        let alreadyExists = null;
-        const newUserName = hostelType + hostelNumber + '-' + rollNo;
-
-        if (student.userName !== newUserName) {
-            alreadyExists = await Student.findOne({ userName: newUserName });
-        } else if (student.phoneNumber !== phoneNumber) {
-            alreadyExists = await Student.findOne({ phoneNumber });
-        } else if (student.email !== email.toLowerCase()) {
-            alreadyExists = await Student.findOne({
-                email: email.toLowerCase(),
-            });
-        }
-        if (alreadyExists) {
-            return next(new ErrorHandler('user already exists', BAD_REQUEST));
-        }
-
-        const updatedStudent = await Student.findByIdAndUpdate(
-            studentId,
-            {
-                $set: {
-                    userName: newUserName,
-                    phoneNumber,
-                    fullName,
-                    email,
-                },
-            },
-            { new: true }
-        );
-
-        const {
-            password: _,
-            refreshToken: __,
-            ...rest
-        } = updatedStudent.toObject();
-
-        return res.status(OK).json(rest);
+        }),
+        Order.deleteMany({
+            studentId: new Types.ObjectId(studentId),
+        }),
+        Bill.deleteMany({
+            studentId: new Types.ObjectId(studentId),
+        }),
+    ]);
+    if (!student) {
+        throw new ErrorHandler('student not found', NOT_FOUND);
     }
-);
+
+    return res.status(OK).json({ message: 'account deleted successfully' });
+});
+
+export const updateStudent = tryCatch('update student', async (req, res) => {
+    const contractor = req.user;
+    const { studentId } = req.params;
+    const { fullName, phoneNumber, email, rollNo, hostelNumber, hostelType } =
+        req.body;
+
+    const student = await Student.findOne({
+        _id: new Types.ObjectId(studentId),
+        canteenId: new Types.ObjectId(contractor.canteenId),
+    });
+
+    if (!student) {
+        throw new ErrorHandler('student not found', NOT_FOUND);
+    }
+
+    let alreadyExists = null;
+    const newUserName = hostelType + hostelNumber + '-' + rollNo;
+
+    if (student.userName !== newUserName) {
+        alreadyExists = await Student.findOne({ userName: newUserName });
+    } else if (student.phoneNumber !== phoneNumber) {
+        alreadyExists = await Student.findOne({ phoneNumber });
+    } else if (student.email !== email.toLowerCase()) {
+        alreadyExists = await Student.findOne({
+            email: email.toLowerCase(),
+        });
+    }
+    if (alreadyExists) {
+        throw new ErrorHandler('user already exists', BAD_REQUEST);
+    }
+
+    const updatedStudent = await Student.findByIdAndUpdate(
+        studentId,
+        {
+            $set: {
+                userName: newUserName,
+                phoneNumber,
+                fullName,
+                email,
+            },
+        },
+        { new: true }
+    );
+
+    const {
+        password: _,
+        refreshToken: __,
+        ...rest
+    } = updatedStudent.toObject();
+
+    return res.status(OK).json(rest);
+});
 
 // ! CRITICAL
 export const removeAllStudents = tryCatch(
     'remove all students',
-    async (req, res, next) => {
+    async (req, res) => {
         const { password } = req.body;
         const contractor = req.user;
         if (!password) {
-            return next(new ErrorHandler('missing fields', BAD_REQUEST));
+            throw new ErrorHandler('missing fields', BAD_REQUEST);
         }
 
         const isPassValid = bcrypt.compareSync(password, contractor.password);
         if (!isPassValid) {
-            return next(new ErrorHandler('invalid credentials', BAD_REQUEST));
+            throw new ErrorHandler('invalid credentials', BAD_REQUEST);
         }
 
         await Promise.all([
@@ -339,7 +323,7 @@ export const removeAllStudents = tryCatch(
 
 // snack management
 
-export const addSnack = tryCatch('add snack', async (req, res, next) => {
+export const addSnack = tryCatch('add snack', async (req, res) => {
     let imageURL;
     try {
         const contractor = req.user;
@@ -348,7 +332,7 @@ export const addSnack = tryCatch('add snack', async (req, res, next) => {
 
         if (!name || !price) {
             if (image) fs.unlinkSync(image);
-            return next(new ErrorHandler('missing fields', BAD_REQUEST));
+            throw new ErrorHandler('missing fields', BAD_REQUEST);
         }
 
         const alreadyExists = await Snack.findOne({
@@ -358,7 +342,7 @@ export const addSnack = tryCatch('add snack', async (req, res, next) => {
         });
         if (alreadyExists) {
             if (image) fs.unlinkSync(image);
-            return next(new ErrorHandler('snack already exists', BAD_REQUEST));
+            throw new ErrorHandler('snack already exists', BAD_REQUEST);
         }
 
         // upload image on cloudinary if have any
@@ -383,7 +367,7 @@ export const addSnack = tryCatch('add snack', async (req, res, next) => {
     }
 });
 
-export const deleteSnack = tryCatch('delete post', async (req, res, next) => {
+export const deleteSnack = tryCatch('delete post', async (req, res) => {
     const { snackId } = req.params;
     const contractor = req.user;
 
@@ -393,7 +377,7 @@ export const deleteSnack = tryCatch('delete post', async (req, res, next) => {
         canteenId: new Types.ObjectId(contractor.canteenId),
     });
 
-    if (!snack) return next(new ErrorHandler('snack not found', NOT_FOUND));
+    if (!snack) throw new ErrorHandler('snack not found', NOT_FOUND);
     if (snack.image) await deleteFromCloudinary(snack.image);
 
     io.emit('snackDeleted', { snackId: snack._id, canteenId: snack.canteenId });
@@ -401,7 +385,7 @@ export const deleteSnack = tryCatch('delete post', async (req, res, next) => {
     return res.status(OK).json({ message: 'snack deleted successfully' });
 });
 
-export const updateSnack = tryCatch('update snack', async (req, res, next) => {
+export const updateSnack = tryCatch('update snack', async (req, res) => {
     let imageURL;
     try {
         const { snackId } = req.params;
@@ -410,7 +394,7 @@ export const updateSnack = tryCatch('update snack', async (req, res, next) => {
         let image = req.file?.path;
 
         if (!name && !price && !image) {
-            return next(new ErrorHandler('missing fields', BAD_REQUEST));
+            throw new ErrorHandler('missing fields', BAD_REQUEST);
         }
 
         const snack = await Snack.findOne({
@@ -419,7 +403,7 @@ export const updateSnack = tryCatch('update snack', async (req, res, next) => {
         });
         if (!snack) {
             if (image) fs.unlinkSync(image);
-            return next(new ErrorHandler('snack not found', NOT_FOUND));
+            throw new ErrorHandler('snack not found', NOT_FOUND);
         }
 
         if (snack.name.toLowerCase().trim() !== name.toLowerCase().trim()) {
@@ -431,9 +415,7 @@ export const updateSnack = tryCatch('update snack', async (req, res, next) => {
 
             if (existingSnack) {
                 if (image) fs.unlinkSync(image);
-                return next(
-                    new ErrorHandler('snack already exists', BAD_REQUEST)
-                );
+                throw new ErrorHandler('snack already exists', BAD_REQUEST);
             }
         }
 
@@ -463,7 +445,7 @@ export const updateSnack = tryCatch('update snack', async (req, res, next) => {
 
 export const toggleSnackAvailability = tryCatch(
     'toggle snack availability',
-    async (req, res, next) => {
+    async (req, res) => {
         const { snackId } = req.params;
         const contractor = req.user;
 
@@ -472,7 +454,7 @@ export const toggleSnackAvailability = tryCatch(
             _id: new Types.ObjectId(snackId),
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
-        if (!snack) return next(new ErrorHandler('snack not found', NOT_FOUND));
+        if (!snack) throw new ErrorHandler('snack not found', NOT_FOUND);
 
         snack.isAvailable = !snack.isAvailable;
         await snack.save();
@@ -491,12 +473,12 @@ export const toggleSnackAvailability = tryCatch(
 
 // packaged food management
 
-export const addItem = tryCatch('add item', async (req, res, next) => {
+export const addItem = tryCatch('add item', async (req, res) => {
     const contractor = req.user;
     const { name, price } = req.body;
 
     if (!name || !price) {
-        return next(new ErrorHandler('missing fields', BAD_REQUEST));
+        throw new ErrorHandler('missing fields', BAD_REQUEST);
     }
 
     const alreadyExists = await PackagedFood.findOne({
@@ -504,7 +486,7 @@ export const addItem = tryCatch('add item', async (req, res, next) => {
         name: { $regex: new RegExp(`^${name}$`, 'i') },
     });
     if (alreadyExists) {
-        return next(new ErrorHandler('name already exists', BAD_REQUEST));
+        throw new ErrorHandler('name already exists', BAD_REQUEST);
     }
 
     const item = await PackagedFood.create({
@@ -518,7 +500,7 @@ export const addItem = tryCatch('add item', async (req, res, next) => {
     return res.status(CREATED).json(item);
 });
 
-export const deleteItem = tryCatch('delete item', async (req, res, next) => {
+export const deleteItem = tryCatch('delete item', async (req, res) => {
     const { itemId } = req.params;
     const contractor = req.user;
 
@@ -528,7 +510,7 @@ export const deleteItem = tryCatch('delete item', async (req, res, next) => {
         canteenId: new Types.ObjectId(contractor.canteenId),
     });
     if (!item) {
-        return next(new ErrorHandler('item not found', NOT_FOUND));
+        throw new ErrorHandler('item not found', NOT_FOUND);
     }
 
     io.emit('itemDeleted', { itemId: item._id, canteenId: item.canteenId });
@@ -536,13 +518,13 @@ export const deleteItem = tryCatch('delete item', async (req, res, next) => {
     return res.status(OK).json({ message: 'item deleted successfully' });
 });
 
-export const updateItem = tryCatch('update item', async (req, res, next) => {
+export const updateItem = tryCatch('update item', async (req, res) => {
     const { itemId } = req.params;
     const contractor = req.user;
     const { name, price } = req.body;
 
     if (!name && !price) {
-        return next(new ErrorHandler('missing fields', BAD_REQUEST));
+        throw new ErrorHandler('missing fields', BAD_REQUEST);
     }
 
     const item = await PackagedFood.findOne({
@@ -551,7 +533,7 @@ export const updateItem = tryCatch('update item', async (req, res, next) => {
     });
 
     if (!item) {
-        return next(new ErrorHandler('item not found', NOT_FOUND));
+        throw new ErrorHandler('item not found', NOT_FOUND);
     }
 
     if (item.name.toLowerCase().trim() !== name.toLowerCase().trim()) {
@@ -562,7 +544,7 @@ export const updateItem = tryCatch('update item', async (req, res, next) => {
         });
 
         if (existingItem) {
-            return next(new ErrorHandler('item already exists', BAD_REQUEST));
+            throw new ErrorHandler('item already exists', BAD_REQUEST);
         }
     }
 
@@ -590,7 +572,7 @@ export const toggleItemAvailability = tryCatch(
             _id: new Types.ObjectId(itemId),
             canteenId: new Types.ObjectId(contractor.canteenId),
         });
-        if (!item) return next(new ErrorHandler('item not found', NOT_FOUND));
+        if (!item) throw new ErrorHandler('item not found', NOT_FOUND);
 
         item.isAvailable = !item.isAvailable;
         await item.save();

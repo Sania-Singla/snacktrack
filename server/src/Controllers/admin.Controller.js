@@ -20,46 +20,43 @@ import { nanoid } from 'nanoid';
 import { generateAccessToken } from '../Helpers/tokens.js';
 import bcrypt from 'bcryptjs';
 
-export const verifyAdminKey = tryCatch(
-    'verify admin key',
-    async (req, res, next) => {
-        const { key } = req.body;
+export const verifyAdminKey = tryCatch('verify admin key', async (req, res) => {
+    const { key } = req.body;
 
-        if (!key) {
-            return next(new ErrorHandler('missing key', BAD_REQUEST));
-        }
-
-        if (key !== process.env.ADMIN_KEY) {
-            return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
-        }
-
-        const token = await generateAccessToken({ role: 'admin', key });
-
-        return res
-            .status(OK)
-            .cookie('accessToken', token, {
-                ...COOKIE_OPTIONS,
-                maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
-            })
-            .clearCookie('refreshToken', COOKIE_OPTIONS)
-            .json({
-                user: {
-                    role: 'admin',
-                },
-            });
+    if (!key) {
+        throw new ErrorHandler('missing key', BAD_REQUEST);
     }
-);
+
+    if (key !== process.env.ADMIN_KEY) {
+        return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
+    }
+
+    const token = await generateAccessToken({ role: 'admin', key });
+
+    return res
+        .status(OK)
+        .cookie('accessToken', token, {
+            ...COOKIE_OPTIONS,
+            maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+        })
+        .clearCookie('refreshToken', COOKIE_OPTIONS)
+        .json({
+            user: {
+                role: 'admin',
+            },
+        });
+});
 
 export const registerCanteen = tryCatch(
     'register as contractor',
-    async (req, res, next) => {
+    async (req, res) => {
         let { fullName, email, phoneNumber, hostel } = req.body;
         fullName = fullName?.trim();
         email = email?.toLowerCase().trim();
         phoneNumber = phoneNumber?.trim();
 
         if (!fullName || !email || !phoneNumber || !hostel) {
-            return next(new ErrorHandler('Missing fields', BAD_REQUEST));
+            throw new ErrorHandler('Missing fields', BAD_REQUEST);
         }
 
         let { hostelName, hostelNumber, hostelType } = hostel;
@@ -71,7 +68,7 @@ export const registerCanteen = tryCatch(
         );
 
         if (!isValid) {
-            return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
+            throw new ErrorHandler('Invalid input data', BAD_REQUEST);
         }
 
         // single canteen -> single contractor & single contractor -> single canteen
@@ -88,13 +85,11 @@ export const registerCanteen = tryCatch(
         ]);
 
         if (existingCanteen) {
-            return next(new ErrorHandler('canteen already exists', NOT_FOUND));
+            throw new ErrorHandler('canteen already exists', NOT_FOUND);
         }
 
         if (existingContractor) {
-            return next(
-                new ErrorHandler('contractor already exists', BAD_REQUEST)
-            );
+            throw new ErrorHandler('contractor already exists', BAD_REQUEST);
         }
 
         // Now register the contractor & canteen
@@ -175,7 +170,7 @@ export const verifyCode = tryCatch('verify email', async (req, res) => {
 
 export const updateContractor = tryCatch(
     'update contractor',
-    async (req, res, next) => {
+    async (req, res) => {
         const { contractorId } = req.params;
         let { fullName, phoneNumber, email, password } = req.body;
         fullName = fullName?.trim();
@@ -191,13 +186,13 @@ export const updateContractor = tryCatch(
         );
 
         if (!isValid) {
-            return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
+            throw new ErrorHandler('Invalid input data', BAD_REQUEST);
         }
 
         const contractor =
             await Contractor.findById(contractorId).select('-refeshToken');
         if (!contractor) {
-            return next(new ErrorHandler('contractor not found', NOT_FOUND));
+            throw new ErrorHandler('contractor not found', NOT_FOUND);
         }
 
         const isPassCorrect = await bcrypt.compare(
@@ -205,7 +200,7 @@ export const updateContractor = tryCatch(
             contractor.password
         );
         if (!isPassCorrect) {
-            return next(new ErrorHandler('Incorrect password', FORBIDDEN));
+            throw new ErrorHandler('Incorrect password', FORBIDDEN);
         }
 
         const alreadyExists = await Contractor.findOne({
@@ -214,9 +209,7 @@ export const updateContractor = tryCatch(
         });
 
         if (alreadyExists) {
-            return next(
-                new ErrorHandler('contractor already exists', BAD_REQUEST)
-            );
+            throw new ErrorHandler('contractor already exists', BAD_REQUEST);
         }
 
         contractor.fullName = fullName || contractor.fullName;
@@ -233,7 +226,7 @@ export const updateContractor = tryCatch(
 // todo: remove this feature instead add update password
 export const changeContractor = tryCatch(
     'chnage contractor',
-    async (req, res, next) => {
+    async (req, res) => {
         const { contractorId } = req.params;
         const { fullName, phoneNumber, email } = req.body;
 
@@ -246,7 +239,7 @@ export const changeContractor = tryCatch(
         );
 
         if (!isValid) {
-            return next(new ErrorHandler('Invalid input data', BAD_REQUEST));
+            throw new ErrorHandler('Invalid input data', BAD_REQUEST);
         }
 
         let alreadyExists = await Contractor.findOne({
@@ -255,9 +248,7 @@ export const changeContractor = tryCatch(
         });
 
         if (alreadyExists) {
-            return next(
-                new ErrorHandler('contractor already exists', BAD_REQUEST)
-            );
+            throw new ErrorHandler('contractor already exists', BAD_REQUEST);
         }
 
         let randomPassword = nanoid(8);
@@ -319,6 +310,6 @@ export const getContractors = tryCatch('get contractors', async (req, res) => {
     return res.status(OK).json(canteens);
 });
 
-export const getHostels = tryCatch('get hostels', async (req, res, next) => {
+export const getHostels = tryCatch('get hostels', async (req, res) => {
     return res.status(OK).json(HOSTELS);
 });

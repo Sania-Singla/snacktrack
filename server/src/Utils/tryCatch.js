@@ -1,4 +1,5 @@
-import { ErrorHandler } from './errorHandler.js';
+import { SERVER_ERROR } from '../Constants/errorCodes.js';
+// import { ErrorHandler } from './errorHandler.js';
 
 /**
  * try catch wrapper
@@ -12,7 +13,10 @@ export function tryCatch(aim, fn) {
             await fn(req, res, next);
         } catch (err) {
             console.error(`[ERROR] in ${aim}: `, err);
-            next(new ErrorHandler(err.message));
+            // next(new ErrorHandler(err.message, err.status || SERVER_ERROR));
+            return res
+                .status(err.status || SERVER_ERROR)
+                .json({ message: err.message || 'Internal Server Error' });
         }
     };
 }
