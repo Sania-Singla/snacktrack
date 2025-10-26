@@ -13,8 +13,12 @@ export default function AccessTo({ roles = [] }) {
         }
     }
 
-    if (user.role === 'admin' && !location.pathname.includes('admin')) {
-        return <Navigate to={'/new-user'} replace />;
+    if (
+        user.role === 'admin' &&
+        !user.canteenId && // abhi proceeding nhi hua sirf admin key verify krke baitha hai
+        !location.pathname.includes('admin')
+    ) {
+        return <Navigate to={'/admin'} replace />;
     }
 
     if (roles.length && !roles.includes(user.role)) {

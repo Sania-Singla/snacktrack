@@ -56,44 +56,50 @@ export default function Header() {
                     <Cart />
                 ) : (
                     <div className="flex gap-3 items-center">
-                        <Button
-                            onClick={async () => {
-                                const res =
-                                    await contractorService.changeCanteenStatus(
-                                        !user.isOpen
-                                    );
-                                if (res) {
-                                    setUser((prev) => ({
-                                        ...prev,
-                                        isOpen: !prev.isOpen,
-                                    }));
-                                }
-                            }}
-                            btnText={
-                                <div className="flex items-center justify-center gap-1.5">
-                                    {user.isOpen
-                                        ? 'Close Canteen'
-                                        : 'Open Canteen'}
-                                </div>
-                            }
-                            title={
-                                user.isOpen ? 'Close Canteen' : 'Open Canteen'
-                            }
-                            className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
-                        />
-                        <Button
-                            onClick={() => navigate('/register-student')}
-                            btnText={
-                                <div className="flex items-center justify-center gap-1.5">
-                                    <div className="size-3 fill-white">
-                                        {icons.plus}
+                        {user.role === 'contractor' && (
+                            <Button
+                                onClick={async () => {
+                                    const res =
+                                        await contractorService.changeCanteenStatus(
+                                            !user.isOpen
+                                        );
+                                    if (res) {
+                                        setUser((prev) => ({
+                                            ...prev,
+                                            isOpen: !prev.isOpen,
+                                        }));
+                                    }
+                                }}
+                                btnText={
+                                    <div className="flex items-center justify-center gap-1.5">
+                                        {user.isOpen
+                                            ? 'Close Canteen'
+                                            : 'Open Canteen'}
                                     </div>
-                                    <span>Student</span>
-                                </div>
-                            }
-                            title="Add Student"
-                            className="text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal bg-[#4977ec] hover:bg-[#3b62c2]"
-                        />
+                                }
+                                title={
+                                    user.isOpen
+                                        ? 'Close Canteen'
+                                        : 'Open Canteen'
+                                }
+                                className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                            />
+                        )}
+                        {user.role === 'admin' && (
+                            <Button
+                                onClick={() => navigate('/register-student')}
+                                btnText={
+                                    <div className="flex items-center justify-center gap-1.5">
+                                        <div className="size-3 fill-white">
+                                            {icons.plus}
+                                        </div>
+                                        <span>Student</span>
+                                    </div>
+                                }
+                                title="Add Student"
+                                className="text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal bg-[#4977ec] hover:bg-[#3b62c2]"
+                            />
+                        )}
                     </div>
                 )}
 

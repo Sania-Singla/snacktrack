@@ -17,6 +17,7 @@ import {
     NewContractorPopup,
     IntermediateBillPopup,
     IntermediateBillDetailPopup,
+    ProceedAsAdminPopup,
 } from '..';
 import { usePopupContext } from '../../Contexts';
 
@@ -41,6 +42,12 @@ export default function Popup() {
     if (!showPopup) return null;
 
     switch (popupInfo.type) {
+        case 'proceedAsAdmin':
+            return (
+                <Wrapper>
+                    <ProceedAsAdminPopup />
+                </Wrapper>
+            );
         case 'editCartItem':
             return (
                 <Wrapper>

@@ -223,7 +223,7 @@ export default function RegisterCanteenPage() {
                 </div>
             </Link>
             <div>
-                <p className="text-center text-2xl font-semibold">
+                <p className="text-center text-[22px] font-semibold">
                     Register a New Canteen
                 </p>
                 <motion.div
@@ -271,8 +271,8 @@ export default function RegisterCanteenPage() {
                                         required: true,
                                         id: 'phoneNumber',
                                     }}
-                                    inputClass="!w-full !h-[42px] !indent-2 !rounded-md !shadow-sm !border-[0.01rem] !border-[#858585] !outline-[#f68533] !bg-transparent"
-                                    buttonClass="!h-[42px] !w-[45px] !bg-white !hover:bg-white !z-[1] !rounded-r-none !rounded-md !border-[0.01rem] !border-[#858585] !outline-[#f68533]"
+                                    inputClass="!w-full !h-[42px] !indent-2 !rounded-md !border-1 !border-gray-400 !outline-[#f68533] !bg-transparent"
+                                    buttonClass="!h-[42px] !w-[45px] !bg-white !hover:bg-white !z-[1] !rounded-r-none !rounded-md !border-1 !border-gray-400 !outline-[#f68533]"
                                 />
                             </div>
                             {error.phoneNumber && (

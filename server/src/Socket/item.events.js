@@ -17,7 +17,7 @@ export function registerItemEvents(io, socket) {
             ]);
 
             io.to(stuSocketId)
-                .to(cantSocketId)
+                .to(`contractor_${cantSocketId}`)
                 .emit(SOCKET_EVENTS.ITEM_PREPARED, { itemId, orderId });
         })
     );
@@ -32,7 +32,7 @@ export function registerItemEvents(io, socket) {
             ]);
 
             io.to(stuSocketId)
-                .to(cantSocketId)
+                .to(`contractor_${cantSocketId}`)
                 .emit(SOCKET_EVENTS.ITEM_PICKEDUP, { itemId, orderId });
         })
     );

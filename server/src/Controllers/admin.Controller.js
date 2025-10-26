@@ -31,7 +31,7 @@ export const verifyAdminKey = tryCatch('verify admin key', async (req, res) => {
         return res.status(BAD_REQUEST).json({ message: 'Invalid key' });
     }
 
-    const token = await generateAccessToken({ role: 'admin', key });
+    const token = await generateAccessToken({ role: 'admin' });
 
     return res
         .status(OK)
@@ -44,6 +44,54 @@ export const verifyAdminKey = tryCatch('verify admin key', async (req, res) => {
             user: {
                 role: 'admin',
             },
+        });
+});
+
+export const proceedAsAdmin = tryCatch('proceed as admin', async (req, res) => {
+    const { key } = req.body; // kitchen key
+    const { canteenId } = req.params;
+
+    if (!key) {
+        throw new ErrorHandler('missing key', BAD_REQUEST);
+    }
+
+    const contractor = await Contractor.findOne({ canteenId })
+        .populate('canteenId', 'hostelType hostelNumber hostelName')
+        .select('-refreshToken')
+        .lean();
+
+    if (!contractor) {
+        throw new ErrorHandler('contractor not found', NOT_FOUND);
+    }
+
+    const isValid = await bcrypt.compare(key, contractor.password);
+    if (!isValid) throw new ErrorHandler('invalid key', BAD_REQUEST);
+
+    const accessToken = await generateAccessToken({
+        canteenId,
+        role: 'admin',
+    });
+
+    const hostelType = contractor.canteenId.hostelType;
+    const hostelNumber = contractor.canteenId.hostelNumber;
+    const hostelName = contractor.canteenId.hostelName;
+    contractor.canteenId = canteenId;
+
+    const { password: _, ...rest } = contractor;
+
+    return res
+        .status(OK)
+        .cookie('accessToken', accessToken, {
+            ...COOKIE_OPTIONS,
+            maxAge: Number(process.env.ACCESS_TOKEN_MAXAGE),
+        })
+        .clearCookie('refreshToken', COOKIE_OPTIONS)
+        .json({
+            role: 'admin',
+            ...rest,
+            hostelType,
+            hostelNumber,
+            hostelName,
         });
 });
 

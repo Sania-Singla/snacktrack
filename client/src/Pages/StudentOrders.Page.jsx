@@ -28,7 +28,7 @@ export default function StudentOrdersPage() {
     const paginateRef = paginate(ordersInfo?.hasNextPage, loading, setPage);
 
     useLayoutEffect(() => {
-        if (studentId && user._id !== studentId) {
+        if (studentId && user.role === 'student' && user._id !== studentId) {
             navigate('/not-found');
         }
     }, []);

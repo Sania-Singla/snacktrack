@@ -10,7 +10,6 @@ import { Student, Contractor } from '../Models/index.js';
  */
 async function verifyToken(token, secret) {
     const decodedToken = jwt.verify(token, secret);
-
     if (!decodedToken) throw new Error(`invalid jwt token`);
 
     let user = { role: decodedToken.role };
@@ -29,15 +28,17 @@ async function verifyToken(token, secret) {
             user = { ...user, ...contractor };
             break;
         case 'admin':
-            if (decodedToken.key !== process.env.ADMIN_KEY) {
-                throw new Error('invalid admin key');
+            if (decodedToken.canteenId) {
+                const contractor = await Contractor.findOne({
+                    canteenId: decodedToken.canteenId,
+                }).lean();
+                if (!contractor) throw new Error('user not found');
+                user = { ...user, ...contractor };
             }
-            user = { ...user };
             break;
         default:
             throw new Error('invalid role');
     }
-
     return user;
 }
 

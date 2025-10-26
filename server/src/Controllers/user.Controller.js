@@ -141,17 +141,16 @@ export const logout = tryCatch('logout user', async (req, res) => {
 export const getCurrentUser = tryCatch('get current user', async (req, res) => {
     let { password, refreshToken, ...user } = req.user;
 
-    if (user.role === 'admin') {
+    if (user.canteenId) {
+        // populate canteen Info
+        const canteen = await Canteen.findById(user.canteenId);
+        const { hostelName, hostelNumber, hostelType, isOpen } = canteen;
+        return res
+            .status(OK)
+            .json({ ...user, hostelType, hostelNumber, hostelName, isOpen });
+    } else {
         return res.status(OK).json(req.user);
     }
-
-    // populate canteen Info
-    const canteen = await Canteen.findById(user.canteenId);
-    const { hostelName, hostelNumber, hostelType, isOpen } = canteen;
-
-    return res
-        .status(OK)
-        .json({ ...user, hostelType, hostelNumber, hostelName, isOpen });
 });
 
 export const updatePassword = tryCatch('update password', async (req, res) => {
@@ -266,13 +265,11 @@ export const verifyKitchenKey = tryCatch(
             throw new ErrorHandler('missing key', BAD_REQUEST);
         }
 
-        const [canteen, contractor] = await Promise.all([
-            Canteen.findOne({ _id: canteenId }).lean(),
-            Contractor.findOne({ canteenId }).select('-refreshToken').lean(),
-        ]);
-        if (!canteen) {
-            throw new ErrorHandler('canteen not found', NOT_FOUND);
-        }
+        const contractor = await Contractor.findOne({ canteenId })
+            .populate('canteenId')
+            .select('-refreshToken')
+            .lean();
+
         if (!contractor) {
             throw new ErrorHandler('contractor not found', NOT_FOUND);
         }
@@ -300,9 +297,10 @@ export const verifyKitchenKey = tryCatch(
             .json({
                 ...rest,
                 role: 'contractor',
-                hostelType: canteen.hostelType,
-                hostelNumber: canteen.hostelNumber,
-                hostelName: canteen.hostelName,
+                hostelType: contractor.canteenId.hostelType,
+                hostelNumber: contractor.canteenId.hostelNumber,
+                hostelName: contractor.canteenId.hostelName,
+                canteenId: contractor.canteenId._id,
             });
     }
 );

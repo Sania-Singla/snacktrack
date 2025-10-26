@@ -70,6 +70,18 @@ export default function AdminPage() {
 
                     <div className="flex gap-2 flex-col h-fit self-end">
                         <Button
+                            btnText="Details"
+                            className="bg-[#4977ec] px-2 py-1 rounded-md shadow-xs text-white"
+                            onClick={() => {
+                                setShowPopup(true);
+                                setPopupInfo({
+                                    type: 'proceedAsAdmin',
+                                    canteenId: canteen._id,
+                                });
+                            }}
+                        />
+
+                        {/* <Button
                             btnText={
                                 <div className="size-4 fill-none stroke-black group-hover:stroke-[#4977ec]">
                                     {icons.editUnfilled}
@@ -83,7 +95,7 @@ export default function AdminPage() {
                                     contractor: canteen.contractor,
                                 });
                             }}
-                        />
+                        /> */}
 
                         {/* add edit password instead ✨✨ but think about a proper reset mechanism ki koi aur kisi ki canteen ka password edit na kr paye */}
                         {/* <Button

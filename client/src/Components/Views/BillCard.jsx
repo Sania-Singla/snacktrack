@@ -4,12 +4,14 @@ import { Button } from '..';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { icons } from '../../Assets/icons';
+import { useUserContext } from '../../Contexts';
 
 export default function BillCard({ bill, reference }) {
     const { _id, month, year, amount, grandTotal, tax, studentInfo } = bill;
     const { fullName, userName, email, phoneNumber } = studentInfo;
     const navigate = useNavigate();
     const [expanded, setExpanded] = useState(false);
+    const { user } = useUserContext();
 
     return (
         <div
@@ -21,7 +23,7 @@ export default function BillCard({ bill, reference }) {
                 className="flex justify-between gap-4"
             >
                 {/* info */}
-                <div className='space-y-3'>
+                <div className="flex flex-col justify-between">
                     <div className="hover:text-[#5c5c5c] text-[16px] font-semibold text-black">
                         {fullName}
                     </div>
@@ -31,18 +33,24 @@ export default function BillCard({ bill, reference }) {
                         {getRollNo(userName)}
                     </div>
 
-                    {/* <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
-                        <span className="font-medium">Phone Number: </span>
-                        {phoneNumber}
-                    </div>
+                    {user.role === 'admin' && (
+                        <>
+                            <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                                <span className="font-medium">
+                                    Phone Number:{' '}
+                                </span>
+                                {phoneNumber}
+                            </div>
 
-                    <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
-                        <span className="font-medium">Email: </span>
-                        {email}
-                    </div> */}
+                            <div className="text-black hover:text-[#5c5c5c] text-[12px] w-fit">
+                                <span className="font-medium">Email: </span>
+                                {email}
+                            </div>
+                        </>
+                    )}
                 </div>
 
-                <div className="flex flex-col justify-between h-full items-end gap-2">
+                <div className="flex flex-col justify-between items-end gap-2">
                     <p className="font-semibold text-lg text-gray-900">
                         ₹{grandTotal.toFixed(2)}
                     </p>

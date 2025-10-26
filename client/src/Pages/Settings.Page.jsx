@@ -1,12 +1,9 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Button } from '../Components';
-import { usePopupContext, useUserContext } from '../Contexts';
-import { icons } from '../Assets/icons';
+import { useUserContext } from '../Contexts';
 import { getRollNo } from '../Utils';
 
 export default function SettingsPage() {
     const { user } = useUserContext();
-    const { setShowPopup, setPopupInfo } = usePopupContext();
 
     const tabOptions = [
         { name: 'Personal Information', path: '', show: true },
@@ -62,7 +59,7 @@ export default function SettingsPage() {
                             {getRollNo(user.userName)}
                         </p>
                     ) : (
-                        <p className="text-gray-600">Canteen Manager</p>
+                        <p className="text-gray-600">Management</p>
                     )}
                 </div>
             </div>

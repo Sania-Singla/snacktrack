@@ -37,14 +37,14 @@ import { UpdateAccountDetails, UpdatePassword, Layout } from './Components';
 export const router = createBrowserRouter(
     createRoutesFromElements(
         <Route path="/" element={<App />}>
-            <Route element={<AccessTo roles={['student', 'contractor']} />}>
+            <Route element={<AccessTo />}>
                 <Route element={<Layout />}>
                     <Route path="" element={<HomePage />} />
                 </Route>
             </Route>
 
             {/* Student & Contractor only */}
-            <Route element={<AccessTo roles={['student', 'contractor']} />}>
+            <Route element={<AccessTo />}>
                 <Route element={<Layout />}>
                     <Route
                         path="orders/:studentId"
@@ -61,11 +61,18 @@ export const router = createBrowserRouter(
             <Route element={<AccessTo roles={['contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="today-orders" element={<TodayOrdersPage />} />
+                </Route>
+            </Route>
+
+            <Route element={<AccessTo roles={['contractor', 'admin']} />}>
+                <Route element={<Layout />}>
                     <Route path="history" element={<HistoryPage />} />
                     <Route path="all-bills" element={<BillsPage />} />
                     <Route path="students" element={<StudentsPage />} />
                 </Route>
+            </Route>
 
+            <Route element={<AccessTo roles={['admin']} />}>
                 <Route
                     path="register-student"
                     element={<Layout renderTemplate={false} />}
@@ -75,7 +82,7 @@ export const router = createBrowserRouter(
             </Route>
 
             {/* Student only */}
-            <Route element={<AccessTo roles={['student']} />}>
+            <Route element={<AccessTo roles={['student', 'admin']} />}>
                 <Route element={<Layout />}>
                     <Route path="settings" element={<SettingsPage />}>
                         <Route path="" element={<UpdateAccountDetails />} />

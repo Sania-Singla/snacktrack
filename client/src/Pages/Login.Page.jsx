@@ -107,7 +107,6 @@ export default function LoginPage() {
             if (!files || files.length === 0) return;
 
             const decode = await readQR(files[0]);
-            console.log('decoded', decode);
             setLoading(true);
 
             const res = await userService.loginByQR({ decode });
@@ -171,7 +170,7 @@ export default function LoginPage() {
                 </div>
             </Link>
             <div className="w-fit">
-                <p className="text-center text-2xl font-medium">
+                <p className="text-center text-[22px] font-medium">
                     Login to Your Account
                 </p>
                 <motion.div
@@ -194,15 +193,13 @@ export default function LoginPage() {
 
                 <label
                     htmlFor="qr"
-                    className="border-1 py-2 text-center border-[#4977ec] rounded-md w-full"
+                    className="border mt-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
                 >
-                    <div className="flex gap-2.5 items-center justify-center">
-                        <span className="text-[#4977ec] text-[15px] font-medium">
-                            Upload QR
-                        </span>
-                        <div className="size-5.5 fill-[#4977ec]">
-                            {icons.upload}
-                        </div>
+                    <span className="text-[#4977ec] text-[15px] font-medium">
+                        Upload QR
+                    </span>
+                    <div className="size-5.5 fill-[#4977ec]">
+                        {icons.upload}
                     </div>
                 </label>
 
@@ -225,7 +222,7 @@ export default function LoginPage() {
                     </div>
 
                     <Button
-                        className="text-white rounded-md py-2 mt-4 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                        className="text-white rounded-md py-2 mt-4 h-10 flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
                         onMouseOver={onMouseOver}
                         type="submit"
                         btnText={

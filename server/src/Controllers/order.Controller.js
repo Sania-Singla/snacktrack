@@ -107,7 +107,7 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
 
     // notify canteen about new order
     const cantSocketId = await redisClient.get(order.canteenId.toString());
-    io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, data);
+    io.to(`contractor_${cantSocketId}`).emit(SOCKET_EVENTS.NEW_ORDER, data);
 
     return res.status(OK).json(data);
 });
@@ -190,7 +190,7 @@ export const placeOrderByQR = tryCatch(
 
         // notify canteen about new order
         const cantSocketId = await redisClient.get(canteenId.toString());
-        io.to(cantSocketId).emit(SOCKET_EVENTS.NEW_ORDER, result);
+        io.to(`contractor_${cantSocketId}`).emit(SOCKET_EVENTS.NEW_ORDER, result);
 
         return res.status(OK).json(result);
     }
@@ -342,7 +342,7 @@ export const updateOrderStatus = tryCatch(
                 : order._id.toString();
 
         io.to(stuSocketId)
-            .to(cantSocketId)
+            .to(`contractor_${cantSocketId}`)
             .emit(SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`], data);
 
         return res.status(OK).json({
@@ -390,7 +390,7 @@ export const updateExtraCharges = tryCatch(
         ]);
 
         io.to(stuSocketId)
-            .to(cantSocketId)
+            .to(`contractor_${cantSocketId}`)
             .emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
                 orderId,
                 extraCharges,

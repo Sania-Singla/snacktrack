@@ -46,10 +46,8 @@ const generateRefreshToken = async (data) => {
  */
 const extractTokens = (req) => {
     return {
-        accessToken:
-            req.cookies?.accessToken ||
-            req.headers['authorization']?.split(' ')[1],
-        refreshToken: req.cookies?.refreshToken || req.headers['x-refresh'],
+        accessToken: req.cookies?.accessToken,
+        refreshToken: req.cookies?.refreshToken,
     };
 };
 
