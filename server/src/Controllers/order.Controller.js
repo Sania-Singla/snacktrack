@@ -52,7 +52,9 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
     const { cartItems, amount } = req.body;
     const student = req.user;
 
-    const canteen = await Canteen.findById(student.canteenId);
+    const canteen = await Canteen.findById(student.canteenId)
+        .select('isOpen')
+        .lean();
 
     if (!canteen.isOpen) {
         throw new ErrorHandler('canteen is closed', FORBIDDEN);
@@ -81,10 +83,7 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
 
     await Promise.all([
         packagedItems.map((item) => {
-            redisClient.sAdd(
-                `order_${order._id}`,
-                JSON.stringify({ itemId: item._id, pickedUp: false })
-            );
+            redisClient.sAdd(`order:${order._id}:items`, item._id.toString());
         }),
     ]);
 
@@ -106,7 +105,10 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
     };
 
     // notify canteen room about new order
-    io.to(`contractor_${order.canteenId}`).emit(SOCKET_EVENTS.NEW_ORDER, data);
+    io.to(`contractor_${student.canteenId}`).emit(
+        SOCKET_EVENTS.NEW_ORDER,
+        data
+    );
 
     return res.status(OK).json(data);
 });
@@ -164,8 +166,8 @@ export const placeOrderByQR = tryCatch(
         await Promise.all([
             packagedItems.map((item) => {
                 redisClient.sAdd(
-                    `order_${order._id}`,
-                    JSON.stringify({ itemId: item._id, pickedUp: false })
+                    `order:${order._id}:items`,
+                    item._id.toString()
                 );
             }),
         ]);
@@ -200,150 +202,137 @@ export const updateOrderStatus = tryCatch(
         const { orderId } = req.params;
         const { status } = req.query;
         const contractor = req.user;
+        const { canteenId } = contractor;
 
-        const order = await Order.findOne({
-            _id: new Types.ObjectId(orderId),
-            canteenId: new Types.ObjectId(contractor.canteenId),
-        });
+        const startOfDay = moment().tz('Asia/Kolkata').startOf('day').toDate();
+        const endOfDay = moment().tz('Asia/Kolkata').endOf('day').toDate();
 
-        if (!order) throw new ErrorHandler('order not found', NOT_FOUND);
+        const order = await Order.findOneAndUpdate(
+            {
+                _id: orderId,
+                canteenId,
+                createdAt: { $gte: startOfDay, $lte: endOfDay },
+            },
+            { $set: { status } },
+            { new: true }
+        )
+            .select('studentId')
+            .lean();
 
-        const orderDate = moment(order.createdAt)
-            .tz('Asia/Kolkata')
-            .startOf('day');
-        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
-
-        if (!orderDate.isSame(todayDate)) {
-            throw new ErrorHandler('too late', FORBIDDEN);
+        if (!order) {
+            throw new ErrorHandler('too late or not found', FORBIDDEN);
         }
 
-        order.status = status;
-        await order.save();
-
-        const [completeOrder] = await Order.aggregate([
-            { $match: { _id: new Types.ObjectId(orderId) } },
-            { $unwind: '$items' },
-            {
-                $lookup: {
-                    from: 'students',
-                    localField: 'studentId',
-                    foreignField: '_id',
-                    as: 'studentInfo',
-                    pipeline: [
-                        {
-                            $project: {
-                                fullName: 1,
-                                phoneNumber: 1,
-                                userName: 1,
+        let completeOrder = null;
+        if (status === 'Prepared') {
+            [completeOrder] = await Order.aggregate([
+                { $match: { _id: new Types.ObjectId(orderId) } },
+                {
+                    $lookup: {
+                        from: 'students',
+                        localField: 'studentId',
+                        foreignField: '_id',
+                        as: 'studentInfo',
+                        pipeline: [
+                            {
+                                $project: {
+                                    fullName: 1,
+                                    phoneNumber: 1,
+                                    userName: 1,
+                                },
                             },
+                        ],
+                    },
+                },
+                { $unwind: '$studentInfo' },
+                { $unwind: '$items' },
+                {
+                    $lookup: {
+                        from: 'snacks',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        pipeline: [{ $project: { name: 1, image: 1 } }],
+                        as: 'snack',
+                    },
+                },
+                {
+                    $lookup: {
+                        from: 'packagedfoods',
+                        localField: 'items.id',
+                        foreignField: '_id',
+                        pipeline: [{ $project: { name: 1 } }],
+                        as: 'packaged',
+                    },
+                },
+                {
+                    $addFields: {
+                        'items.name': {
+                            $cond: [
+                                { $eq: ['$items.type', 'Snack'] },
+                                { $first: '$snack.name' },
+                                { $first: '$packaged.name' },
+                            ],
                         },
-                    ],
-                },
-            },
-            {
-                $unwind: '$studentInfo',
-            },
-            {
-                $lookup: {
-                    from: 'snacks',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    pipeline: [{ $project: { name: 1, image: 1 } }],
-                    as: 'snack',
-                },
-            },
-            {
-                $lookup: {
-                    from: 'packagedfoods',
-                    localField: 'items.id',
-                    foreignField: '_id',
-                    pipeline: [{ $project: { name: 1 } }],
-                    as: 'packaged',
-                },
-            },
-            {
-                $addFields: {
-                    'items.name': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $first: '$snack.name' },
-                            { $first: '$packaged.name' },
-                        ],
-                    },
-                    'items.image': {
-                        $cond: [
-                            { $eq: ['$items.type', 'Snack'] },
-                            { $first: '$snack.image' },
-                            null,
-                        ],
+                        'items.image': {
+                            $cond: [
+                                { $eq: ['$items.type', 'Snack'] },
+                                { $first: '$snack.image' },
+                                null,
+                            ],
+                        },
                     },
                 },
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    amount: { $first: '$amount' },
-                    extraCharges: { $first: '$extraCharges' },
-                    status: { $first: '$status' },
-                    canteenId: { $first: '$canteenId' },
-                    studentId: { $first: '$studentId' },
-                    items: { $push: '$items' },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
-                    studentInfo: { $first: '$studentInfo' },
+                {
+                    $group: {
+                        _id: '$_id',
+                        amount: { $first: '$amount' },
+                        extraCharges: { $first: '$extraCharges' },
+                        status: { $first: '$status' },
+                        canteenId: { $first: '$canteenId' },
+                        studentId: { $first: '$studentId' },
+                        items: { $push: '$items' },
+                        createdAt: { $first: '$createdAt' },
+                        updatedAt: { $first: '$updatedAt' },
+                        studentInfo: { $first: '$studentInfo' },
+                    },
                 },
-            },
-            { $project: { snack: 0, packaged: 0 } },
-        ]);
+                { $project: { snack: 0, packaged: 0 } },
+            ]);
 
-        // delete items from redis if complete order is picked up
-        if (status === 'PickedUp') {
-            completeOrder.items = completeOrder.items.map((i) => ({
-                ...i,
-                pickedUp: true,
-                prepared: true,
-            }));
-
-            await redisClient.del(`order_${order._id}`);
-        } else if (status === 'Prepared') {
             const preparedItems = await redisClient.sMembers(
-                `order_${order._id}`
+                `order:${orderId}:items`
+            );
+            const pickupHash = await redisClient.hGetAll(
+                `order:${orderId}:pickup`
             );
 
-            completeOrder.items = completeOrder.items.map((item) => {
-                const preparedItem = preparedItems.find((i) => {
-                    const parsedItem = JSON.parse(i);
-                    return item.id.equals(parsedItem.itemId);
-                });
+            const preparedSet = new Set(preparedItems);
 
-                return {
-                    ...item,
-                    prepared: true,
-                    pickedUp: preparedItem
-                        ? JSON.parse(preparedItem).pickedUp
-                        : false,
-                };
-            });
+            completeOrder.items = completeOrder.items.map((item) => ({
+                ...item,
+                prepared: preparedSet.has(item.id.toString()),
+                pickedUp: pickupHash[item.id.toString()] === '1' || false,
+            }));
+        } else {
+            // pickedUp or rejected (because ho skta hai prepared hone ke baad reject krvaya ho)
+            await redisClient.del(`order:${order._id}:items`);
+            await redisClient.del(`order:${order._id}:pickup`);
         }
-
-        // todo: send sms to student
 
         // socket event
         const stuSocketId = await redisClient.get(order.studentId.toString());
 
         const data =
-            status === 'Prepared'
-                ? { order: completeOrder, orderId }
-                : order._id.toString();
+            status === 'Prepared' ? { order: completeOrder, orderId } : orderId;
 
-        io.to(stuSocketId)
-            .to(`contractor_${order.canteenId}`)
-            .emit(SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`], data);
+        io.to([stuSocketId, `contractor_${canteenId}`]).emit(
+            SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`],
+            data
+        );
 
-        return res.status(OK).json({
-            message: 'order status updated successfully',
-            order: completeOrder,
-        });
+        return res
+            .status(OK)
+            .json({ message: 'order status updated successfully' });
     }
 );
 
@@ -353,36 +342,35 @@ export const updateExtraCharges = tryCatch(
         const { orderId } = req.params;
         const { extraCharges } = req.body;
         const contractor = req.user;
+        const { canteenId } = contractor;
 
-        const order = await Order.findOne({
-            _id: new Types.ObjectId(orderId),
-            canteenId: new Types.ObjectId(contractor.canteenId),
-        });
+        const startOfDay = moment().tz('Asia/Kolkata').startOf('day').toDate();
+        const endOfDay = moment().tz('Asia/Kolkata').endOf('day').toDate();
 
-        if (!order) throw new ErrorHandler('order not found', NOT_FOUND);
+        const order = await Order.findOneAndUpdate(
+            {
+                _id: orderId,
+                canteenId,
+                createdAt: {
+                    $gte: startOfDay,
+                    $lte: endOfDay,
+                },
+                status: { $in: ['Pending', 'Prepared'] },
+            },
+            { $set: { extraCharges } },
+            { new: true }
+        )
+            .select('studentId')
+            .lean();
 
-        const orderDate = moment(order.createdAt)
-            .tz('Asia/Kolkata')
-            .startOf('day');
-        const todayDate = moment().tz('Asia/Kolkata').startOf('day');
-
-        if (!orderDate.isSame(todayDate)) {
-            throw new ErrorHandler('too late', FORBIDDEN);
-        } else if (order.status !== 'Pending' && order.status !== 'Prepared') {
-            throw new ErrorHandler(
-                'cannot update extra charges now',
-                FORBIDDEN
-            );
+        if (!order) {
+            throw new ErrorHandler('too late or not found', FORBIDDEN);
         }
-
-        order.extraCharges = extraCharges;
-        await order.save();
 
         // socket event
         const stuSocketId = await redisClient.get(order.studentId.toString());
-
         io.to(stuSocketId)
-            .to(`contractor_${order.canteenId}`)
+            .to(`contractor_${canteenId}`)
             .emit(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, {
                 orderId,
                 extraCharges,
@@ -498,37 +486,35 @@ export const getStudentOrders = tryCatch(
             }
         );
 
-        if (result.docs.length) {
-            result.docs = await Promise.all(
-                result.docs.map(async (order) => {
+        let orders = result.docs;
+
+        if (orders.length) {
+            orders = await Promise.all(
+                orders.map(async (order) => {
+                    if (order.status === 'PickedUp') return order;
+
                     const preparedItems = await redisClient.sMembers(
-                        `order_${order._id}`
+                        `order:${order._id.toString()}:items`
+                    );
+                    const pickupHash = await redisClient.hGetAll(
+                        `order:${order._id.toString()}:pickup`
                     );
 
-                    const updatedItems = order.items.map((item) => {
-                        const preparedItem = preparedItems.find((i) => {
-                            const parsedItem = JSON.parse(i);
-                            return item.id.equals(parsedItem.itemId);
-                        });
+                    const preparedSet = new Set(preparedItems);
 
-                        if (
-                            order.status === 'Pending' ||
-                            order.status === 'Prepared'
-                        ) {
-                            item.prepared = Boolean(preparedItem);
-                            item.pickedUp = preparedItem
-                                ? JSON.parse(preparedItem).pickedUp
-                                : false;
-                        }
-                        return item;
-                    });
+                    const updatedItems = order.items.map((item) => ({
+                        ...item,
+                        prepared: preparedSet.has(item.id.toString()),
+                        pickedUp:
+                            pickupHash[item.id.toString()] === '1' || false,
+                    }));
 
                     return { ...order, items: updatedItems };
                 })
             );
         }
         return res.status(OK).json({
-            orders: result.docs,
+            orders,
             ordersInfo: {
                 hasNextPage: result.hasNextPage,
                 hasPrevPage: result.hasPrevPage,
@@ -691,31 +677,28 @@ export const getCanteenOrders = tryCatch(
             }
         );
 
-        if (result.docs.length) {
-            result.docs = await Promise.all(
-                result.docs.map(async (order) => {
+        let orders = result.docs;
+
+        if (orders.length) {
+            orders = await Promise.all(
+                orders.map(async (order) => {
+                    if (order.status === 'PickedUp') return order;
+
                     const preparedItems = await redisClient.sMembers(
-                        `order_${order._id}`
+                        `order:${order._id.toString()}:items`
+                    );
+                    const pickupHash = await redisClient.hGetAll(
+                        `order:${order._id.toString()}:pickup`
                     );
 
-                    const updatedItems = order.items.map((item) => {
-                        let preparedItem = preparedItems.find((i) => {
-                            const parsedItem = JSON.parse(i);
-                            return item.id.equals(parsedItem.itemId);
-                        });
+                    const preparedSet = new Set(preparedItems);
 
-                        if (
-                            order.status === 'Pending' ||
-                            order.status === 'Prepared'
-                        ) {
-                            item.prepared = Boolean(preparedItem);
-                            item.pickedUp = preparedItem
-                                ? JSON.parse(preparedItem).pickedUp
-                                : false;
-                        }
-
-                        return item;
-                    });
+                    const updatedItems = order.items.map((item) => ({
+                        ...item,
+                        prepared: preparedSet.has(item.id.toString()),
+                        pickedUp:
+                            pickupHash[item.id.toString()] === '1' || false,
+                    }));
 
                     return { ...order, items: updatedItems };
                 })
@@ -723,7 +706,7 @@ export const getCanteenOrders = tryCatch(
         }
 
         return res.status(OK).json({
-            orders: result.docs,
+            orders,
             ordersInfo: {
                 hasNextPage: result.hasNextPage,
                 hasPrevPage: result.hasPrevPage,
@@ -831,27 +814,27 @@ export const getKitchenOrders = tryCatch(
             { sort: { createdAt: 1 } }
         );
 
-        if (result.docs.length) {
-            result.docs = await Promise.all(
-                result.docs.map(async (order) => {
-                    let preparedItems = await redisClient.sMembers(
-                        `order_${order._id}`
+        let orders = result.docs;
+
+        if (orders.length) {
+            orders = await Promise.all(
+                orders.map(async (order) => {
+                    const preparedItems = await redisClient.sMembers(
+                        `order:${order._id.toString()}:items`
                     );
 
-                    const updatedItems = order.items.map((item) => {
-                        let preparedItem = preparedItems.find((i) => {
-                            const parsedItem = JSON.parse(i);
-                            return item.id.equals(parsedItem.itemId);
-                        });
+                    const preparedSet = new Set(preparedItems);
 
-                        return { ...item, prepared: Boolean(preparedItem) };
-                    });
+                    const updatedItems = order.items.map((item) => ({
+                        ...item,
+                        prepared: preparedSet.has(item.id.toString()),
+                    }));
 
                     return { ...order, items: updatedItems };
                 })
             );
         }
 
-        return res.status(OK).json({ orders: result.docs });
+        return res.status(OK).json({ orders });
     }
 );

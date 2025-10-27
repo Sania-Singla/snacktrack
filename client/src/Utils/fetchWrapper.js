@@ -25,11 +25,12 @@ export async function fetchWrapper({
 
         const contentType = res.headers.get('content-type');
 
-        if (contentType?.includes('application/json')) {
+        if (contentType?.includes('json')) {
             const data = await res.json();
+            console.log(data);
             if (res.status === SERVER_ERROR) throw new Error(data.message);
             else return data;
-        }else{
+        } else {
             return res;
         }
     } catch (err) {

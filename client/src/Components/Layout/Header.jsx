@@ -1,15 +1,37 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Logout, Searchbar, Cart } from '..';
-import { useUserContext, useSideBarContext } from '../../Contexts';
-import { LOGO_SVG } from '../../Constants';
+import {
+    useUserContext,
+    useSideBarContext,
+    useSocketContext,
+} from '../../Contexts';
+import { LOGO_SVG, SOCKET_EVENTS } from '../../Constants';
 import { icons } from '../../Assets/icons';
 import { contractorService } from '../../Services';
+import { useEffect } from 'react';
 
 export default function Header() {
     const { user, setUser } = useUserContext();
     const { pathname } = useLocation();
     const { setShowSideBar } = useSideBarContext();
-    const navigate = useNavigate();
+    const navigate = useNavigate();``
+    const { socket } = useSocketContext();
+
+    useEffect(() => {
+        if (!socket) return;
+
+        socket.on(
+            SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED,
+            ({ isOpen, canteenId }) => {
+                if (user.canteenId !== canteenId) return;
+                setUser((prevUser) => ({ ...prevUser, isOpen }));
+            }
+        );
+
+        return () => {
+            socket.off(SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED);
+        };
+    }, [socket]);
 
     const staticPages = ['/settings', '/statistics', '/cart'];
 

@@ -56,7 +56,7 @@ export const proceedAsAdmin = tryCatch('proceed as admin', async (req, res) => {
     }
 
     const contractor = await Contractor.findOne({ canteenId })
-        .populate('canteenId', 'hostelType hostelNumber hostelName')
+        .populate('canteenId', 'hostelType hostelNumber hostelName isOpen')
         .select('-refreshToken')
         .lean();
 

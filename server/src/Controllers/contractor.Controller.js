@@ -4,7 +4,6 @@ import {
     NOT_FOUND,
     CREATED,
     SOCKET_EVENTS,
-    SERVER_ERROR,
 } from '../Constants/index.js';
 import bcrypt from 'bcryptjs';
 import {
@@ -12,7 +11,6 @@ import {
     tryCatch,
     ErrorHandler,
     sendMail,
-    genQR,
 } from '../Utils/index.js';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../Helpers/index.js';
 import { nanoid } from 'nanoid';
@@ -27,8 +25,6 @@ import {
 import { Types } from 'mongoose';
 import fs from 'fs';
 import { io } from '../socket.js';
-import XLSX from 'xlsx';
-import path from 'path';
 
 // canteen management
 
@@ -204,141 +200,6 @@ export const registerStudent = tryCatch(
         return res.status(CREATED).json(rest);
     }
 );
-
-export const registerBulkStudents = async (req, res) => {
-    try {
-        const contractor = req.user;
-        if (!req.file?.path) {
-            return res.status(400).json({ message: 'No Excel file uploaded' });
-        }
-
-        const filePath = req.file.path;
-        const workbook = XLSX.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-        const validUsers = rows.filter(
-            (r) =>
-                r.fullName &&
-                r.rollNo &&
-                r.phoneNumber &&
-                r.email &&
-                r.hostelType &&
-                r.hostelNumber
-        );
-
-        if (!validUsers.length) {
-            fs.unlinkSync(filePath);
-            return res.status(400).json({
-                message:
-                    'No valid rows found. Ensure columns are: name, rollNo, email, hostelType, hostelNumber',
-            });
-        }
-
-        const emails = validUsers.map((u) => u.email?.toLowerCase().trim());
-        const phoneNumbers = validUsers.map((u) => u.phoneNumber);
-        const userNames = validUsers.map((u) =>
-            `${u.hostelType}${u.hostelNumber}-${u.rollNo}`.trim()
-        );
-
-        const existing = await Student.find({
-            $or: [
-                { email: { $in: emails } },
-                { userName: { $in: userNames } },
-                { phoneNumber: { $in: phoneNumbers } },
-            ],
-        }).select('email userName phoneNumber');
-
-        const existingSet = new Set(
-            existing.flatMap((u) => [u.email, u.userName, u.phoneNumber])
-        );
-        const newUsers = validUsers.filter((u) => {
-            const userName = `${u.hostelType}${u.hostelNumber}-${u.rollNo}`;
-            return (
-                !existingSet.has(u.email?.toLowerCase().trim()) &&
-                !existingSet.has(userName.trim()) &&
-                !existingSet.has(u.phoneNumber)
-            );
-        });
-
-        if (!newUsers.length) {
-            fs.unlinkSync(filePath);
-            return res.status(400).json({
-                message: 'All users already exist. No new registrations added.',
-            });
-        }
-
-        const userDocs = newUsers.map((u) => ({
-            fullName: u.fullName,
-            canteenId: contractor.canteenId,
-            userName: `${u.hostelType}${u.hostelNumber}-${u.rollNo}`,
-            phoneNumber: u.phoneNumber,
-            email: u.email,
-            password: nanoid(8),
-        }));
-
-        const inserted = await Student.insertMany(userDocs, { ordered: false });
-
-        const qrResults = await Promise.allSettled(
-            inserted.map(async (student) => {
-                try {
-                    const qrDataURL = await genQR({
-                        _id: student._id,
-                        passHash: student.password,
-                    });
-                    return {
-                        Name: student.fullName,
-                        UserName: student.userName,
-                        Email: student.email,
-                        Phone: student.phoneNumber,
-                        QR_Code: qrDataURL,
-                    };
-                } catch (err) {
-                    console.error(
-                        'QR generation failed for student:',
-                        student.fullName,
-                        err
-                    );
-                    return null; // mark failed QR
-                }
-            })
-        );
-
-        const successfulQRs = qrResults
-            .map((r) => (r.status === 'fulfilled' ? r.value : null))
-            .filter((r) => r !== null);
-
-        if (!successfulQRs.length) {
-            return res.status(500).json({
-                message:
-                    'Bulk registration failed: QR generation failed for all users',
-            });
-        }
-
-        const newSheet = XLSX.utils.json_to_sheet(successfulQRs);
-        const newWB = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(newWB, newSheet, 'UsersWithQR');
-
-        const tempDir = path.join(process.cwd(), 'public', 'temp');
-        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
-
-        const filename = `students-${Date.now()}.xlsx`;
-        const outputPath = path.join(tempDir, filename);
-        XLSX.writeFile(newWB, outputPath);
-
-        fs.unlinkSync(filePath);
-        return res.download(outputPath, filename, (err) => {
-            if (err) console.error('Error sending file:', err);
-            fs.unlinkSync(outputPath);
-        });
-    } catch (err) {
-        console.error('Bulk registration error:', err.message);
-        return res.status(500).json({
-            message: 'Error during bulk registration',
-            error: err.message,
-        });
-    }
-};
 
 export const removeStudent = tryCatch('remove student', async (req, res) => {
     const { studentId } = req.params;

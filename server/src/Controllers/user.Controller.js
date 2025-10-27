@@ -270,7 +270,7 @@ export const verifyKitchenKey = tryCatch(
         }
 
         const contractor = await Contractor.findOne({ canteenId })
-            .populate('canteenId')
+            .populate('canteenId', 'hostelName hostelNumber hostelType isOpen')
             .select('-refreshToken')
             .lean();
 
@@ -281,6 +281,11 @@ export const verifyKitchenKey = tryCatch(
         const isValid = await bcrypt.compare(key, contractor.password);
         if (!isValid) throw new ErrorHandler('invalid key', BAD_REQUEST);
 
+        const hostelName = contractor.canteenId.hostelName;
+        const hostelNumber = contractor.canteenId.hostelNumber;
+        const hostelType = contractor.canteenId.hostelType;
+        const isOpen = contractor.canteenId.isOpen;
+        contractor.canteenId = contractor.canteenId._id;
         const { password, ...rest } = contractor;
 
         const { accessToken, refreshToken } = await generateTokens({
@@ -301,10 +306,10 @@ export const verifyKitchenKey = tryCatch(
             .json({
                 ...rest,
                 role: 'contractor',
-                hostelType: contractor.canteenId.hostelType,
-                hostelNumber: contractor.canteenId.hostelNumber,
-                hostelName: contractor.canteenId.hostelName,
-                canteenId: contractor.canteenId._id,
+                hostelType,
+                isOpen,
+                hostelNumber,
+                hostelName,
             });
     }
 );
@@ -317,22 +322,20 @@ export const verifyKioskKey = tryCatch('verify kiosk key', async (req, res) => {
         throw new ErrorHandler('missing key', BAD_REQUEST);
     }
 
-    const [canteen, contractor] = await Promise.all([
-        Canteen.findOne({ _id: canteenId }),
-        Contractor.findOne({ canteenId }),
-    ]);
+    const canteen = await Contractor.findById(canteenId)
+        .populate('contractorId', 'password')
+        .select('hostelType hostelNumber hostelName contractorId')
+        .lean();
+
     if (!canteen) {
         throw new ErrorHandler('canteen not found', NOT_FOUND);
     }
-    if (!contractor) {
-        throw new ErrorHandler('contractor not found', NOT_FOUND);
-    }
 
-    const isValid = await bcrypt.compare(key, contractor.password);
+    const isValid = await bcrypt.compare(key, canteen.contractorId.password);
     if (!isValid) throw new ErrorHandler('invalid key', BAD_REQUEST);
 
     return res.status(OK).json({
-        canteenId: canteen._id,
+        canteenId,
         hostelType: canteen.hostelType,
         hostelNumber: canteen.hostelNumber,
         hostelName: canteen.hostelName,

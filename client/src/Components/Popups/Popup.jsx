@@ -18,6 +18,7 @@ import {
     IntermediateBillPopup,
     IntermediateBillDetailPopup,
     ProceedAsAdminPopup,
+    ConfirmBulkStudentRegisterPopup,
 } from '..';
 import { usePopupContext } from '../../Contexts';
 
@@ -31,9 +32,9 @@ export default function Popup() {
 
     const Wrapper = ({ children }) => (
         <div
-            className="fixed inset-0 z-[1000] backdrop-blur-sm flex items-center justify-center drop-shadow-md"
+            className="fixed inset-0 z-[1000] backdrop-blur-sm backdrop-brightness-50 flex items-center justify-center drop-shadow-md"
             ref={ref}
-            onClick={close}
+            onClick={popupInfo.blockScr ? null : close}
         >
             {children}
         </div>
@@ -42,6 +43,12 @@ export default function Popup() {
     if (!showPopup) return null;
 
     switch (popupInfo.type) {
+        case 'ConfirmBulkStudentRegister':
+            return (
+                <Wrapper>
+                    <ConfirmBulkStudentRegisterPopup />
+                </Wrapper>
+            );
         case 'proceedAsAdmin':
             return (
                 <Wrapper>

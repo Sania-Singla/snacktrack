@@ -50,7 +50,7 @@ const SocketContextProvider = ({ children }) => {
     useEffect(() => {
         user ? connectSocket() : disconnectSocket();
         return () => disconnectSocket();
-    }, [user]);
+    }, [user?._id]);
 
     return (
         <SocketContext.Provider

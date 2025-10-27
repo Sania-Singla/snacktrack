@@ -51,11 +51,12 @@ class ContractorService {
     async registerBulk(file) {
         const formData = new FormData();
         formData.append('file', file);
+
         return await fetchWrapper({
-            endPoint: `/contractors/students/register-all`,
+            endPoint: `/contractors/students/register-bulk`,
             method: 'POST',
             credentials: 'include',
-            aim: 'bulk registeration',
+            aim: 'registerBulk',
             body: formData,
             type: 'formData',
         });
