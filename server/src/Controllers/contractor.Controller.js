@@ -13,6 +13,7 @@ import {
     ErrorHandler,
     sendMail,
     genQR,
+    getRollNo,
 } from '../Utils/index.js';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../Helpers/index.js';
 import { nanoid } from 'nanoid';
@@ -27,7 +28,10 @@ import {
 import { Types } from 'mongoose';
 import fs from 'fs';
 import { io } from '../socket.js';
-import XLSX from 'xlsx';
+// import XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import archiver from 'archiver';
+
 import path from 'path';
 
 // canteen management
@@ -205,17 +209,37 @@ export const registerStudent = tryCatch(
     }
 );
 
-export const registerBulkStudents = async (req, res) => {
-    try {
+export const registerBulkStudents = tryCatch(
+    'bulk registration',
+    async (req, res) => {
         const contractor = req.user;
-        if (!req.file?.path) {
-            return res.status(400).json({ message: 'No Excel file uploaded' });
+
+        const file = req.file?.path;
+        if (!file) {
+            throw new ErrorHandler('No Excel file uploaded', BAD_REQUEST);
         }
 
-        const filePath = req.file.path;
-        const workbook = XLSX.readFile(filePath);
-        const sheetName = workbook.SheetNames[0];
-        const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+        // --- Read Excel file ---
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(file);
+        const worksheet = workbook.worksheets[0];
+
+        const headers = worksheet.getRow(1).values;
+        const rows = [];
+
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return;
+            const rowData = {};
+            headers.forEach((header, index) => {
+                if (header && row.getCell(index).value != null) {
+                    const value =
+                        row.getCell(index).text?.trim() ||
+                        String(row.getCell(index).value).trim();
+                    rowData[header] = value;
+                }
+            });
+            rows.push(rowData);
+        });
 
         const validUsers = rows.filter(
             (r) =>
@@ -228,15 +252,20 @@ export const registerBulkStudents = async (req, res) => {
         );
 
         if (!validUsers.length) {
-            fs.unlinkSync(filePath);
-            return res.status(400).json({
-                message:
-                    'No valid rows found. Ensure columns are: name, rollNo, email, hostelType, hostelNumber',
-            });
+            fs.unlinkSync(file);
+            throw new ErrorHandler(
+                'No valid rows found. Ensure columns are: fullName, rollNo, email, hostelType, hostelNumber',
+                BAD_REQUEST
+            );
         }
 
-        const emails = validUsers.map((u) => u.email?.toLowerCase().trim());
-        const phoneNumbers = validUsers.map((u) => u.phoneNumber);
+        // Prepare duplicates check
+        const emails = validUsers.map((u) =>
+            String(u.email).toLowerCase().trim()
+        );
+        const phoneNumbers = validUsers.map((u) =>
+            String(u.phoneNumber).trim()
+        );
         const userNames = validUsers.map((u) =>
             `${u.hostelType}${u.hostelNumber}-${u.rollNo}`.trim()
         );
@@ -252,22 +281,25 @@ export const registerBulkStudents = async (req, res) => {
         const existingSet = new Set(
             existing.flatMap((u) => [u.email, u.userName, u.phoneNumber])
         );
+
         const newUsers = validUsers.filter((u) => {
             const userName = `${u.hostelType}${u.hostelNumber}-${u.rollNo}`;
             return (
-                !existingSet.has(u.email?.toLowerCase().trim()) &&
+                !existingSet.has(String(u.email).toLowerCase().trim()) &&
                 !existingSet.has(userName.trim()) &&
-                !existingSet.has(u.phoneNumber)
+                !existingSet.has(String(u.phoneNumber).trim())
             );
         });
 
         if (!newUsers.length) {
-            fs.unlinkSync(filePath);
-            return res.status(400).json({
-                message: 'All users already exist. No new registrations added.',
-            });
+            fs.unlinkSync(file);
+            throw new ErrorHandler(
+                'All users already exist. No new registrations added.',
+                BAD_REQUEST
+            );
         }
 
+        // Create student docs
         const userDocs = newUsers.map((u) => ({
             fullName: u.fullName,
             canteenId: contractor.canteenId,
@@ -277,68 +309,70 @@ export const registerBulkStudents = async (req, res) => {
             password: nanoid(8),
         }));
 
-        const inserted = await Student.insertMany(userDocs, { ordered: false });
-
-        const qrResults = await Promise.allSettled(
-            inserted.map(async (student) => {
-                try {
-                    const qrDataURL = await genQR({
-                        _id: student._id,
-                        passHash: student.password,
-                    });
-                    return {
-                        Name: student.fullName,
-                        UserName: student.userName,
-                        Email: student.email,
-                        Phone: student.phoneNumber,
-                        QR_Code: qrDataURL,
-                    };
-                } catch (err) {
-                    console.error(
-                        'QR generation failed for student:',
-                        student.fullName,
-                        err
-                    );
-                    return null; // mark failed QR
-                }
-            })
-        );
-
-        const successfulQRs = qrResults
-            .map((r) => (r.status === 'fulfilled' ? r.value : null))
-            .filter((r) => r !== null);
-
-        if (!successfulQRs.length) {
-            return res.status(500).json({
-                message:
-                    'Bulk registration failed: QR generation failed for all users',
-            });
+        // --- Insert into DB ---
+        let inserted = [];
+        try {
+            inserted = await Student.insertMany(userDocs, { ordered: false });
+        } catch (err) {
+            console.error('InsertMany failed:', err);
+            throw new ErrorHandler('Error inserting new students', 500);
         }
 
-        const newSheet = XLSX.utils.json_to_sheet(successfulQRs);
-        const newWB = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(newWB, newSheet, 'UsersWithQR');
+        console.log(`Inserted ${inserted.length} students successfully`);
 
+        // --- Generate QR Codes ---
         const tempDir = path.join(process.cwd(), 'public', 'temp');
-        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+        const qrDir = path.join(tempDir, `qrs-${Date.now()}`);
+        fs.mkdirSync(qrDir, { recursive: true });
 
-        const filename = `students-${Date.now()}.xlsx`;
-        const outputPath = path.join(tempDir, filename);
-        XLSX.writeFile(newWB, outputPath);
+        for (const student of inserted) {
+            const qrDataURL = await genQR({
+                _id: student._id,
+                passHash: student.password,
+            });
 
-        fs.unlinkSync(filePath);
-        return res.download(outputPath, filename, (err) => {
-            if (err) console.error('Error sending file:', err);
-            fs.unlinkSync(outputPath);
+            const base64Data = qrDataURL.replace(
+                /^data:image\/png;base64,/,
+                ''
+            );
+            const fileName = `${getRollNo(student.userName)}.png`; // use rollNo if available
+            const qrFilePath = path.join(qrDir, fileName);
+            fs.writeFileSync(qrFilePath, base64Data, 'base64');
+        }
+
+        const hostelName = newUsers[0].hostelType || 'Hostel';
+        const dateStr = new Date().toISOString().split('T')[0];
+        const zipFileName = `${hostelName}-${dateStr}.zip`;
+        const zipPath = path.join(tempDir, zipFileName);
+
+        // --- Create ZIP ---
+        await new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(zipPath);
+            const archive = archiver('zip', { zlib: { level: 9 } });
+
+            output.on('close', resolve);
+            archive.on('error', reject);
+
+            archive.pipe(output);
+            archive.directory(qrDir, false);
+            archive.finalize();
         });
-    } catch (err) {
-        console.error('Bulk registration error:', err.message);
-        return res.status(500).json({
-            message: 'Error during bulk registration',
-            error: err.message,
+
+        console.log('ZIP created:', zipFileName);
+
+        fs.unlinkSync(file);
+
+        // --- Send ZIP for download ---
+
+        const fileStream = fs.createReadStream(zipPath);
+        fileStream.pipe(res);
+
+        fileStream.on('close', () => {
+            fs.rmSync(qrDir, { recursive: true, force: true });
+            fs.unlinkSync(zipPath);
         });
     }
-};
+);
 
 export const removeStudent = tryCatch('remove student', async (req, res) => {
     const { studentId } = req.params;

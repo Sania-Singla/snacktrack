@@ -12,6 +12,7 @@ import {
     sendOrderRejectedSMS,
 } from './sms.js';
 import { verifyQR, genQR } from './qr.js';
+import { getRollNo } from './student.js';
 
 export {
     verifyExpression,
@@ -30,4 +31,5 @@ export {
     sendOrderRejectedSMS,
     verifyQR,
     genQR,
+    getRollNo,
 };

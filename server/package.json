@@ -12,10 +12,12 @@
     "license": "ISC",
     "description": "A web application to track your snacks",
     "dependencies": {
+        "archiver": "^7.0.1",
         "bcryptjs": "^3.0.2",
         "cloudinary": "^2.5.1",
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
+        "exceljs": "^4.4.0",
         "express": "^4.21.2",
         "jsonwebtoken": "^9.0.2",
         "libphonenumber-js": "^1.12.6",
@@ -31,8 +33,7 @@
         "redis": "^4.7.0",
         "snack-track": "file:..",
         "socket.io": "^4.8.1",
-        "twilio": "^5.5.1",
-        "xlsx": "^0.18.5"
+        "twilio": "^5.5.1"
     },
     "devDependencies": {
         "dotenv": "^17.2.3",
