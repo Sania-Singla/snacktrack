@@ -108,7 +108,7 @@ export const verifyKioskKey = tryCatch('verify kiosk key', async (req, res) => {
         throw new ErrorHandler('missing key', BAD_REQUEST);
     }
 
-    const canteen = await Contractor.findById(canteenId)
+    const canteen = await Canteen.findById(canteenId)
         .populate('contractorId', 'password')
         .select('hostelType hostelNumber hostelName contractorId')
         .lean();

@@ -29,7 +29,7 @@ export default function NewUserPage() {
                     Welcome to SnackTrack!
                 </h1>
 
-                <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                {/* <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-yellow-800 font-semibold mb-2 text-sm">
                         🚀 Prototype Demo
                     </p>
@@ -38,7 +38,7 @@ export default function NewUserPage() {
                         className="bg-yellow-500 text-yellow-900 px-4 py-2 rounded-md font-bold hover:bg-yellow-400 text-sm w-full shadow-md"
                         btnText="View Demo Credentials"
                     />
-                </div>
+                </div> */}
 
                 <div className="relative mb-3">
                     <div className="absolute inset-0 flex items-center">
