@@ -158,47 +158,60 @@ export default function RegisterStudentPage() {
             </div>
 
             <div className="max-w-[500px] min-w-[300px] flex flex-col items-center justify-center">
-                <input
-                    type="file"
-                    className="hidden"
-                    accept=".xlsx,.xls,.csv"
-                    name="excel"
-                    id="excel"
-                    onClick={(e) => (e.target.value = null)}
-                    onChange={(e) => {
-                        const files = e.target.files;
-                        if (!files || !files.length) return;
-                        setFile(files[0]);
-                        setShowPopup(true);
-                        setPopupInfo({
-                            type: 'ConfirmBulkStudentRegister',
-                            excel: files[0],
-                            onClose: () => {
-                                setFile(null);
-                                setShowPopup(false);
-                                setPopupInfo({});
-                            },
-                        });
-                    }}
-                />
+                <div className="flex gap-2 w-full mt-3">
+                    <input
+                        type="file"
+                        className="hidden"
+                        accept=".xlsx,.xls,.csv"
+                        name="excel"
+                        id="excel"
+                        onClick={(e) => (e.target.value = null)}
+                        onChange={(e) => {
+                            const files = e.target.files;
+                            if (!files || !files.length) return;
+                            setFile(files[0]);
+                            setShowPopup(true);
+                            setPopupInfo({
+                                type: 'ConfirmBulkStudentRegister',
+                                excel: files[0],
+                                onClose: () => {
+                                    setFile(null);
+                                    setShowPopup(false);
+                                    setPopupInfo({});
+                                },
+                            });
+                        }}
+                    />
 
-                <label
-                    htmlFor="excel"
-                    className="border mt-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
-                >
-                    {file?.name ? (
-                        <p>{file.name}</p>
-                    ) : (
-                        <>
-                            <span className="text-[#4977ec] text-[15px] font-medium">
-                                Upload Excel
-                            </span>
-                            <div className="size-5.5 fill-[#4977ec]">
-                                {icons.upload}
-                            </div>
-                        </>
-                    )}
-                </label>
+                    <label
+                        htmlFor="excel"
+                        className="border h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
+                    >
+                        {file?.name ? (
+                            <p>{file.name}</p>
+                        ) : (
+                            <>
+                                <span className="text-[#4977ec] text-[15px] font-medium">
+                                    Upload Excel
+                                </span>
+                                <div className="size-5.5 fill-[#4977ec]">
+                                    {icons.upload}
+                                </div>
+                            </>
+                        )}
+                    </label>
+
+                    <Button
+                        btnText="Get Format"
+                        onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = '/bulk_register_format.xlsx'; // from public folder
+                            link.download = 'bulk_register_format.xlsx';
+                            link.click();
+                        }}
+                        className="text-[15px] text-nowrap px-2 bg-green-50 hover:bg-green-100 border border-green-400 text-green-600 rounded-md h-10"
+                    />
+                </div>
 
                 <div className="flex gap-2 items-center w-full mt-3">
                     <hr className="text-gray-300 w-full" />

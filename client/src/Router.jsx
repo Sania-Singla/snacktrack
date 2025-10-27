@@ -43,7 +43,6 @@ export const router = createBrowserRouter(
                 </Route>
             </Route>
 
-            {/* Student & Contractor only */}
             <Route element={<AccessTo />}>
                 <Route element={<Layout />}>
                     <Route
@@ -57,7 +56,6 @@ export const router = createBrowserRouter(
                 </Route>
             </Route>
 
-            {/* Contractor only */}
             <Route element={<AccessTo roles={['contractor']} />}>
                 <Route element={<Layout />}>
                     <Route path="today-orders" element={<TodayOrdersPage />} />
@@ -81,7 +79,6 @@ export const router = createBrowserRouter(
                 </Route>
             </Route>
 
-            {/* Student only */}
             <Route element={<AccessTo roles={['student', 'admin']} />}>
                 <Route element={<Layout />}>
                     <Route path="settings" element={<SettingsPage />}>

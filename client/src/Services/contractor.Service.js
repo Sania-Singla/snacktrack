@@ -48,9 +48,14 @@ class ContractorService {
         });
     }
 
-    async registerBulk(file) {
+    async registerBulk({ file, hostelNumber, hostelType }) {
         const formData = new FormData();
-        formData.append('file', file);
+
+        Object.entries({ file, hostelNumber, hostelType }).forEach(
+            ([key, value]) => {
+                formData.append(key, value);
+            }
+        );
 
         return await fetchWrapper({
             endPoint: `/contractors/students/register-bulk`,

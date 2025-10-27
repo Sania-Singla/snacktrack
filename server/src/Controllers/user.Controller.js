@@ -76,6 +76,7 @@ export const loginFromQR = tryCatch(
     'login student from qr',
     async (req, res) => {
         const { decode } = req.body;
+
         const { _id, token } = decode;
 
         if (!_id || !token) {

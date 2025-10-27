@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { contractorService } from '../../Services';
-import {
-    usePopupContext,
-    useStudentContext,
-    useUserContext,
-} from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import { verifyExpression, getRollNo, checkTokenExpired } from '../../Utils';
 import toast from 'react-hot-toast';
@@ -14,7 +10,6 @@ import PhoneInput from 'react-phone-input-2';
 
 export default function EditStudentPopup() {
     const { setShowPopup, popupInfo } = usePopupContext();
-    const { setStudents } = useStudentContext();
     const [inputs, setInputs] = useState({
         fullName: popupInfo.student?.fullName || '',
         rollNo: getRollNo(popupInfo.student?.userName) || '',
@@ -68,21 +63,6 @@ export default function EditStudentPopup() {
             );
             if (res && !res.message) {
                 toast.success('Details updated successfully 👍');
-                setStudents((prev) =>
-                    prev.map((s) => {
-                        if (s._id === popupInfo.student._id) {
-                            return {
-                                ...s,
-                                fullName: inputs.fullName,
-                                phoneNumber: inputs.phoneNumber,
-                                email: inputs.email,
-                                userName:
-                                    popupInfo.student.userName.slice(0, 4) +
-                                    inputs.rollNo,
-                            };
-                        } else return s;
-                    })
-                );
                 setShowPopup(false);
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));

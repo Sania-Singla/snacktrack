@@ -27,10 +27,8 @@ import {
 import { Types } from 'mongoose';
 import fs from 'fs';
 import { io } from '../socket.js';
-// import XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import archiver from 'archiver';
-
 import path from 'path';
 
 // canteen management
@@ -59,6 +57,18 @@ export const changeCanteenStatus = tryCatch(
 
 export const getStudents = tryCatch('get students', async (req, res) => {
     const { limit = 10, page = 1, search = '' } = req.query;
+    const user = req.user;
+
+    const project =
+        user.role === 'contractor'
+            ? {
+                  project: {
+                      phoneNumber: 0,
+                      email: 0,
+                  },
+              }
+            : {};
+
     const result = await Student.aggregatePaginate(
         [
             {
@@ -120,7 +130,8 @@ export const getStudents = tryCatch('get students', async (req, res) => {
             page: parseInt(page),
             limit: parseInt(limit),
             sort: { userNumber: 1 },
-        }
+        },
+        project
     );
 
     if (result.docs.length) {
@@ -212,166 +223,347 @@ export const registerBulkStudents = tryCatch(
     'bulk registration',
     async (req, res) => {
         const contractor = req.user;
+        const { hostelNumber, hostelType } = req.body;
 
         const file = req.file?.path;
         if (!file) {
             throw new ErrorHandler('No Excel file uploaded', BAD_REQUEST);
         }
 
-        // --- Read Excel file ---
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.readFile(file);
-        const worksheet = workbook.worksheets[0];
+        let workbook, worksheet, rows;
 
-        const headers = worksheet.getRow(1).values;
-        const rows = [];
+        try {
+            // --- Read Excel file ---
+            workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(file);
+            worksheet = workbook.worksheets[0];
 
-        worksheet.eachRow((row, rowNumber) => {
-            if (rowNumber === 1) return;
-            const rowData = {};
-            headers.forEach((header, index) => {
-                if (header && row.getCell(index).value != null) {
-                    const value =
-                        row.getCell(index).text?.trim() ||
-                        String(row.getCell(index).value).trim();
-                    rowData[header] = value;
+            const headers = worksheet.getRow(1).values.slice(1);
+            rows = [];
+
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return;
+                const rowData = {};
+
+                headers.forEach((header, index) => {
+                    const cell = row.getCell(index + 1);
+                    if (header && cell.value != null) {
+                        rowData[header] = (
+                            cell.text || String(cell.value)
+                        ).trim();
+                    }
+                });
+
+                // only push valid rows
+                if (
+                    rowData.rollNo &&
+                    rowData.fullName &&
+                    rowData.email &&
+                    rowData.phoneNumber
+                ) {
+                    rows.push(rowData);
                 }
             });
-            rows.push(rowData);
-        });
 
-        const validUsers = rows.filter(
-            (r) =>
-                r.fullName &&
-                r.rollNo &&
-                r.phoneNumber &&
-                r.email &&
-                r.hostelType &&
-                r.hostelNumber
-        );
+            if (!rows.length) {
+                throw new ErrorHandler(
+                    'Invalid format. Ensure columns are: rollNo, fullName, email, phoneNumber',
+                    BAD_REQUEST
+                );
+            }
 
-        if (!validUsers.length) {
-            fs.unlinkSync(file);
-            throw new ErrorHandler(
-                'No valid rows found. Ensure columns are: fullName, rollNo, email, hostelType, hostelNumber',
-                BAD_REQUEST
-            );
-        }
-
-        // Prepare duplicates check
-        const emails = validUsers.map((u) =>
-            String(u.email).toLowerCase().trim()
-        );
-        const phoneNumbers = validUsers.map((u) =>
-            String(u.phoneNumber).trim()
-        );
-        const userNames = validUsers.map((u) =>
-            `${u.hostelType}${u.hostelNumber}-${u.rollNo}`.trim()
-        );
-
-        const existing = await Student.find({
-            $or: [
-                { email: { $in: emails } },
-                { userName: { $in: userNames } },
-                { phoneNumber: { $in: phoneNumbers } },
-            ],
-        }).select('email userName phoneNumber');
-
-        const existingSet = new Set(
-            existing.flatMap((u) => [u.email, u.userName, u.phoneNumber])
-        );
-
-        const newUsers = validUsers.filter((u) => {
-            const userName = `${u.hostelType}${u.hostelNumber}-${u.rollNo}`;
-            return (
-                !existingSet.has(String(u.email).toLowerCase().trim()) &&
-                !existingSet.has(userName.trim()) &&
-                !existingSet.has(String(u.phoneNumber).trim())
-            );
-        });
-
-        if (!newUsers.length) {
-            fs.unlinkSync(file);
-            throw new ErrorHandler(
-                'All users already exist. No new registrations added.',
-                BAD_REQUEST
-            );
-        }
-
-        // Create student docs
-        const userDocs = newUsers.map((u) => ({
-            fullName: u.fullName,
-            canteenId: contractor.canteenId,
-            userName: `${u.hostelType}${u.hostelNumber}-${u.rollNo}`,
-            phoneNumber: u.phoneNumber,
-            email: u.email,
-            password: nanoid(8),
-        }));
-
-        // --- Insert into DB ---
-        let inserted = [];
-        try {
-            inserted = await Student.insertMany(userDocs, { ordered: false });
-        } catch (err) {
-            console.error('InsertMany failed:', err);
-            throw new ErrorHandler('Error inserting new students', 500);
-        }
-
-        console.log(`Inserted ${inserted.length} students successfully`);
-
-        // --- Generate QR Codes ---
-        const tempDir = path.join(process.cwd(), 'public', 'temp');
-        const qrDir = path.join(tempDir, `qrs-${Date.now()}`);
-        fs.mkdirSync(qrDir, { recursive: true });
-
-        for (const student of inserted) {
-            const qrDataURL = await genQR({
-                _id: student._id,
-                passHash: student.password,
+            // Prepare duplicates check
+            const emails = [],
+                phoneNumbers = [],
+                userNames = [];
+            rows.map((u) => {
+                emails.push(u.email.toLowerCase().trim());
+                phoneNumbers.push(u.phoneNumber.trim());
+                userNames.push(
+                    `${hostelType}${hostelNumber}-${u.rollNo}`.trim()
+                );
             });
 
-            const base64Data = qrDataURL.replace(
-                /^data:image\/png;base64,/,
-                ''
+            const existing = await Student.find({
+                $or: [
+                    { email: { $in: emails } },
+                    { userName: { $in: userNames } },
+                    { phoneNumber: { $in: phoneNumbers } },
+                ],
+            })
+                .select('email userName phoneNumber')
+                .lean();
+
+            const existingSet = new Set(
+                existing.flatMap((u) => [
+                    u.email.toLowerCase(),
+                    u.userName,
+                    u.phoneNumber,
+                ])
             );
-            const fileName = `${getRollNo(student.userName)}.png`; // use rollNo if available
-            const qrFilePath = path.join(qrDir, fileName);
-            fs.writeFileSync(qrFilePath, base64Data, 'base64');
+
+            const userDocs = [];
+            for (let i = 0; i < rows.length; i++) {
+                const u = rows[i];
+                const email = u.email.toLowerCase().trim();
+                const phone = u.phoneNumber.trim();
+                const userName = userNames[i];
+
+                if (
+                    !existingSet.has(email) &&
+                    !existingSet.has(userName) &&
+                    !existingSet.has(phone)
+                ) {
+                    userDocs.push({
+                        fullName: u.fullName,
+                        canteenId: contractor.canteenId,
+                        userName,
+                        phoneNumber: phone,
+                        email,
+                        password: nanoid(8),
+                    });
+                }
+            }
+
+            if (!userDocs.length) {
+                throw new ErrorHandler(
+                    'No new registrations found',
+                    BAD_REQUEST
+                );
+            }
+
+            // --- Insert into DB ---
+
+            const inserted = await Student.insertMany(userDocs, {
+                ordered: false,
+            });
+            console.log(`Inserted ${inserted.length} students successfully`);
+
+            // --- Generate QR Codes ---
+            const tempDir = path.join(process.cwd(), 'public', 'temp');
+            const qrDir = path.join(tempDir, `qrs-${Date.now()}`);
+            fs.mkdirSync(qrDir, { recursive: true });
+
+            // Process QR codes in batches to avoid memory issues
+            const BATCH_SIZE = 50;
+            for (let i = 0; i < inserted.length; i += BATCH_SIZE) {
+                const batch = inserted.slice(i, i + BATCH_SIZE);
+
+                await Promise.all(
+                    batch.map(async (student) => {
+                        const qrDataURL = await genQR({
+                            _id: student._id,
+                            passHash: student.password,
+                        });
+
+                        const base64Data = qrDataURL.replace(
+                            /^data:image\/png;base64,/,
+                            ''
+                        );
+                        const fileName = `${getRollNo(student.userName)}.png`;
+                        const qrFilePath = path.join(qrDir, fileName);
+
+                        await fs.promises.writeFile(
+                            qrFilePath,
+                            base64Data,
+                            'base64'
+                        );
+                    })
+                );
+            }
+
+            // --- Create ZIP ---
+            const zipFileName = `${hostelType}-${hostelNumber}.zip`;
+            const zipPath = path.join(tempDir, zipFileName);
+
+            await new Promise((resolve, reject) => {
+                const output = fs.createWriteStream(zipPath);
+                const archive = archiver('zip', { zlib: { level: 9 } });
+
+                output.on('close', resolve);
+                archive.on('error', reject);
+
+                archive.pipe(output);
+                archive.directory(qrDir, false);
+                archive.finalize();
+            });
+
+            fs.unlinkSync(file);
+
+            // --- Send ZIP for download ---
+            res.download(zipPath, zipFileName, (err) => {
+                // Cleanup after download completes or fails
+                fs.promises
+                    .rm(qrDir, { recursive: true, force: true })
+                    .catch(console.error);
+                fs.promises.unlink(zipPath).catch(console.error);
+
+                if (err) {
+                    console.error('Download error:', err);
+                }
+            });
+        } catch (err) {
+            if (file && fs.existsSync(file)) {
+                fs.unlinkSync(file);
+            }
+            throw err;
         }
-
-        const hostelName = newUsers[0].hostelType || 'Hostel';
-        const dateStr = new Date().toISOString().split('T')[0];
-        const zipFileName = `${hostelName}-${dateStr}.zip`;
-        const zipPath = path.join(tempDir, zipFileName);
-
-        // --- Create ZIP ---
-        await new Promise((resolve, reject) => {
-            const output = fs.createWriteStream(zipPath);
-            const archive = archiver('zip', { zlib: { level: 9 } });
-
-            output.on('close', resolve);
-            archive.on('error', reject);
-
-            archive.pipe(output);
-            archive.directory(qrDir, false);
-            archive.finalize();
-        });
-
-        console.log('ZIP created:', zipFileName);
-
-        fs.unlinkSync(file);
-
-        // --- Send ZIP for download ---
-
-        const fileStream = fs.createReadStream(zipPath);
-        fileStream.pipe(res);
-
-        fileStream.on('close', () => {
-            fs.rmSync(qrDir, { recursive: true, force: true });
-            fs.unlinkSync(zipPath);
-        });
     }
 );
+
+// export const registerBulkStudents = tryCatch(
+//     'bulk registration',
+//     async (req, res) => {
+//         const contractor = req.user;
+//         const { hostelNumber, hostelType } = req.body;
+
+//         const file = req.file?.path;
+//         if (!file) {
+//             throw new ErrorHandler('No Excel file uploaded', BAD_REQUEST);
+//         }
+
+//         // --- Read Excel file ---
+//         const workbook = new ExcelJS.Workbook();
+//         await workbook.xlsx.readFile(file);
+//         const worksheet = workbook.worksheets[0];
+
+//         const headers = worksheet.getRow(1).values;
+//         const rows = [];
+
+//         worksheet.eachRow((row, rowNumber) => {
+//             if (rowNumber === 1) return;
+//             const rowData = {};
+//             headers.forEach((header, index) => {
+//                 if (header && row.getCell(index).value != null) {
+//                     const value =
+//                         row.getCell(index).text?.trim() ||
+//                         String(row.getCell(index).value).trim();
+//                     rowData[header] = value;
+//                 }
+//             });
+//             rows.push(rowData);
+//         });
+
+//         const validUsers = rows.filter(
+//             (r) => r.fullName && r.rollNo && r.phoneNumber && r.email
+//         );
+
+//         if (!validUsers.length) {
+//             fs.unlinkSync(file);
+//             throw new ErrorHandler(
+//                 'Invalid format. Ensure columns are: fullName, rollNo, email, phoneNumber',
+//                 BAD_REQUEST
+//             );
+//         }
+
+//         // Prepare duplicates check
+//         const [emails, phoneNumbers, userNames] = [[], [], []];
+//         validUsers.map((u) => {
+//             emails.push(String(u.email).toLowerCase().trim());
+//             phoneNumbers.push(String(u.phoneNumber).trim());
+//             userNames.push(`${hostelType}${hostelNumber}-${u.rollNo}`.trim());
+//         });
+
+//         const existing = await Student.find({
+//             $or: [
+//                 { email: { $in: emails } },
+//                 { userName: { $in: userNames } },
+//                 { phoneNumber: { $in: phoneNumbers } },
+//             ],
+//         }).select('email userName phoneNumber');
+
+//         const existingSet = new Set(
+//             existing.flatMap((u) => [u.email, u.userName, u.phoneNumber])
+//         );
+
+//         const newUsers = validUsers.filter((u) => {
+//             const userName = `${hostelType}${hostelNumber}-${u.rollNo}`;
+//             return (
+//                 !existingSet.has(String(u.email).toLowerCase().trim()) &&
+//                 !existingSet.has(userName.trim()) &&
+//                 !existingSet.has(String(u.phoneNumber).trim())
+//             );
+//         });
+
+//         if (!newUsers.length) {
+//             fs.unlinkSync(file);
+//             throw new ErrorHandler('No new registrations found', BAD_REQUEST);
+//         }
+
+//         // Create student docs
+//         const userDocs = newUsers.map((u) => ({
+//             fullName: u.fullName,
+//             canteenId: contractor.canteenId,
+//             userName: `${hostelType}${hostelNumber}-${u.rollNo}`,
+//             phoneNumber: u.phoneNumber,
+//             email: u.email,
+//             password: nanoid(8),
+//         }));
+
+//         // --- Insert into DB ---
+//         let inserted = [];
+//         try {
+//             inserted = await Student.insertMany(userDocs, { ordered: false });
+//         } catch (err) {
+//             console.error('InsertMany failed:', err);
+//             throw new ErrorHandler('Error inserting new students', 500);
+//         }
+
+//         console.log(`Inserted ${inserted.length} students successfully`);
+
+//         // --- Generate QR Codes ---
+//         const tempDir = path.join(process.cwd(), 'public', 'temp');
+//         const qrDir = path.join(tempDir, `qrs-${Date.now()}`);
+//         fs.mkdirSync(qrDir, { recursive: true });
+
+//         for (const student of inserted) {
+//             const qrDataURL = await genQR({
+//                 _id: student._id,
+//                 passHash: student.password,
+//             });
+
+//             const base64Data = qrDataURL.replace(
+//                 /^data:image\/png;base64,/,
+//                 ''
+//             );
+//             const fileName = `${getRollNo(student.userName)}.png`; // use rollNo if available
+//             const qrFilePath = path.join(qrDir, fileName);
+//             fs.writeFileSync(qrFilePath, base64Data, 'base64');
+//         }
+
+//         const hostelName = newUsers[0].hostelType || 'Hostel';
+//         const dateStr = new Date().toISOString().split('T')[0];
+//         const zipFileName = `${hostelName}-${dateStr}.zip`;
+//         const zipPath = path.join(tempDir, zipFileName);
+
+//         // --- Create ZIP ---
+//         await new Promise((resolve, reject) => {
+//             const output = fs.createWriteStream(zipPath);
+//             const archive = archiver('zip', { zlib: { level: 9 } });
+
+//             output.on('close', resolve);
+//             archive.on('error', reject);
+
+//             archive.pipe(output);
+//             archive.directory(qrDir, false);
+//             archive.finalize();
+//         });
+
+//         console.log('ZIP created:', zipFileName);
+
+//         fs.unlinkSync(file);
+
+//         // --- Send ZIP for download ---
+
+//         const fileStream = fs.createReadStream(zipPath);
+//         fileStream.pipe(res);
+
+//         fileStream.on('close', () => {
+//             fs.rmSync(qrDir, { recursive: true, force: true });
+//             fs.unlinkSync(zipPath);
+//         });
+//     }
+// );
 
 export const removeStudent = tryCatch('remove student', async (req, res) => {
     const { studentId } = req.params;

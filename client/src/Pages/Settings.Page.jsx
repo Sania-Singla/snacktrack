@@ -49,7 +49,9 @@ export default function SettingsPage() {
                                 {user.hostelType}
                                 {user.hostelNumber}
                             </span>{' '}
-                            - {user.hostelName}
+                            <span className="hidden sm:inline">
+                                - {user.hostelName}
+                            </span>
                         </p>
                     </div>
 

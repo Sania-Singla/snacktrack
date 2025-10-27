@@ -1,9 +1,5 @@
 import { Button } from '..';
-import {
-    usePopupContext,
-    useStudentContext,
-    useUserContext,
-} from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { contractorService } from '../../Services';
 import { checkTokenExpired, getRollNo } from '../../Utils';
@@ -13,7 +9,6 @@ import toast from 'react-hot-toast';
 export default function RemoveStudentPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
-    const { setStudents, setStudentsInfo } = useStudentContext();
     const [check, setCheck] = useState(false);
     const { setUser } = useUserContext();
 
@@ -28,15 +23,6 @@ export default function RemoveStudentPopup() {
                 popupInfo.student._id
             );
             if (res && res.message === 'account deleted successfully') {
-                setStudents((prev) =>
-                    prev.filter(
-                        (student) => student._id !== popupInfo.student._id
-                    )
-                );
-                setStudentsInfo((prev) => ({
-                    ...prev,
-                    totalCount: prev.totalCount - 1,
-                }));
                 toast.success('Account Deleted Successfully 😕');
             } else if (res && res.message !== 'tokens missing') {
                 toast.error(res?.message);

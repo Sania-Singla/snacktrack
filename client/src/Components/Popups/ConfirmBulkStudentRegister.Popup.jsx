@@ -1,19 +1,25 @@
 import { Button } from '..';
-import { usePopupContext } from '../../Contexts';
+import { usePopupContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { contractorService } from '../../Services';
 
 export default function ConfirmBulkStudentRegisterPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
     const [check, setCheck] = useState(false);
     const { excel } = popupInfo;
+    const { user } = useUserContext();
 
-    const handleUpload = async (e) => {
+    async function handleUpload() {
         setLoading(true);
         try {
-            const res = await contractorService.registerBulk(excel);
+            const res = await contractorService.registerBulk({
+                file: excel,
+                hostelNumber: user.hostelNumber,
+                hostelType: user.hostelType,
+            });
             if (res && !res.message) {
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
@@ -32,9 +38,10 @@ export default function ConfirmBulkStudentRegisterPopup() {
         } catch (err) {
             toast.error('Something went wrong. please try again.');
         } finally {
+            popopInfo.onClose();
             setLoading(false);
         }
-    };
+    }
 
     return (
         <div className="relative w-[350px] sm:w-[450px] transition-all duration-300 bg-white rounded-xl overflow-hidden text-black p-5 flex flex-col items-center justify-center gap-4">

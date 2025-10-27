@@ -21,13 +21,13 @@ class UserService {
         });
     }
 
-    async loginByQR({ decode }) {
+    async loginByQR(decode) {
         return await fetchWrapper({
             endPoint: `/users/login-by-qr`,
             method: 'PATCH',
             credentials: 'include',
             body: { decode },
-            aim: 'login',
+            aim: 'loginByQR',
         });
     }
 

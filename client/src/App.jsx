@@ -44,7 +44,7 @@ export default function App() {
     return (
         <div className="bg-white h-[100vh] w-[100vw]">
             {loading || (user && user.role !== 'admin' && !socket) ? (
-                <div className="text-black h-full w-full flex flex-col items-center justify-center">
+                <div className="text-black h-full w-full animate-pulse flex flex-col items-center justify-center">
                     <img src={LOGO} alt="snacktrack logo" className="size-20" />
                 </div>
             ) : (

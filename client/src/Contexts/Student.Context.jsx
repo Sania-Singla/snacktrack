@@ -3,8 +3,6 @@ import { createContext, useContext, useState } from 'react';
 const StudentContext = createContext();
 
 const StudentContextProvider = ({ children }) => {
-    const [students, setStudents] = useState([]);
-    const [studentsInfo, setStudentsInfo] = useState({});
     const [cartItems, setCartItems] = useState(
         JSON.parse(localStorage.getItem('cartItems')) || []
     );
@@ -12,16 +10,7 @@ const StudentContextProvider = ({ children }) => {
 
     return (
         <StudentContext.Provider
-            value={{
-                students,
-                setStudents,
-                cartItems,
-                setCartItems,
-                orderPlaced,
-                setOrderPlaced,
-                studentsInfo,
-                setStudentsInfo,
-            }}
+            value={{ cartItems, setCartItems, orderPlaced, setOrderPlaced }}
         >
             {children}
         </StudentContext.Provider>

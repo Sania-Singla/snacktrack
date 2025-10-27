@@ -1,18 +1,14 @@
 import { useEffect, useState } from 'react';
 import { contractorService } from '../Services';
 import { paginate, checkTokenExpired } from '../Utils';
-import {
-    useStudentContext,
-    useSearchContext,
-    useUserContext,
-} from '../Contexts';
+import { useSearchContext, useUserContext } from '../Contexts';
 import { StudentView } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
 
 export default function StudentsPage() {
-    const { students, setStudents, studentsInfo, setStudentsInfo } =
-        useStudentContext();
+    const [studentsInfo, setStudentsInfo] = useState({});
+    const [students, setStudents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const { debouncedSearch } = useSearchContext();
@@ -117,8 +113,8 @@ export default function StudentsPage() {
                 </div>
             ) : (
                 students.length === 0 && (
-                    <div className="italic text-gray-600">
-                        No student found !!
+                    <div className="italic text-gray-400 text-center">
+                        No student found
                     </div>
                 )
             )}

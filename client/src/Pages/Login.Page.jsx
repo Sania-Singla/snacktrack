@@ -103,13 +103,12 @@ export default function LoginPage() {
         setDisabled(true);
         try {
             const files = e.target.files;
-
-            if (!files || files.length === 0) return;
+            if (!files || !files.length) return;
 
             const decode = await readQR(files[0]);
             setLoading(true);
 
-            const res = await userService.loginByQR({ decode });
+            const res = await userService.loginByQR(decode);
 
             if (res && !res.message) {
                 toast.success('Logged in Successfully 😉');
@@ -117,8 +116,12 @@ export default function LoginPage() {
                 localStorage.clear();
                 navigate('/');
             } else toast.error(res.message);
-        } catch (error) {
-            toast.error('Something went wrong. Please try again.');
+        } catch (err) {
+            if (err.message === 'No QR code found') {
+                toast.error('No QR code found');
+            } else {
+                toast.error('Something went wrong. Please try again.');
+            }
         } finally {
             setLoading(false);
             setDisabled(false);
@@ -189,6 +192,7 @@ export default function LoginPage() {
                     accept="image/*"
                     name="qr"
                     id="qr"
+                    onClick={(e) => (e.target.value = null)}
                     onChange={handleUpload}
                 />
 

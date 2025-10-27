@@ -1,32 +1,17 @@
-import QRCodeReader from 'qrcode-reader';
 import { Jimp } from 'jimp';
+import jsQR from 'jsqr';
 
 export async function readQR(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
+    const image = await Jimp.read(await file.arrayBuffer());
+    const { data, width, height } = image.bitmap;
 
-        reader.onload = async (event) => {
-            try {
-                const image = await Jimp.read(event.target.result);
-                const qr = new QRCodeReader();
+    const code = jsQR(new Uint8ClampedArray(data), width, height);
 
-                qr.callback = (err, value) => {
-                    if (err) return reject(err);
-                    try {
-                        const parsed = JSON.parse(value.result);
-                        resolve(parsed);
-                    } catch {
-                        resolve(value.result);
-                    }
-                };
+    if (!code) throw new Error('No QR code found');
 
-                qr.decode(image.bitmap);
-            } catch (err) {
-                reject(err);
-            }
-        };
-
-        reader.onerror = (err) => reject(err);
-        reader.readAsArrayBuffer(file);
-    });
+    try {
+        return JSON.parse(code.data);
+    } catch {
+        return code.data;
+    }
 }
