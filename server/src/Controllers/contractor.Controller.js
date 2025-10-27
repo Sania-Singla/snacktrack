@@ -11,6 +11,8 @@ import {
     tryCatch,
     ErrorHandler,
     sendMail,
+    genQR,
+    getRollNo,
 } from '../Utils/index.js';
 import { uploadOnCloudinary, deleteFromCloudinary } from '../Helpers/index.js';
 import { nanoid } from 'nanoid';
@@ -25,6 +27,11 @@ import {
 import { Types } from 'mongoose';
 import fs from 'fs';
 import { io } from '../socket.js';
+// import XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import archiver from 'archiver';
+
+import path from 'path';
 
 // canteen management
 
@@ -198,6 +205,171 @@ export const registerStudent = tryCatch(
         const { password: _, refreshToken: __, ...rest } = student.toObject();
 
         return res.status(CREATED).json(rest);
+    }
+);
+
+export const registerBulkStudents = tryCatch(
+    'bulk registration',
+    async (req, res) => {
+        const contractor = req.user;
+
+        const file = req.file?.path;
+        if (!file) {
+            throw new ErrorHandler('No Excel file uploaded', BAD_REQUEST);
+        }
+
+        // --- Read Excel file ---
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(file);
+        const worksheet = workbook.worksheets[0];
+
+        const headers = worksheet.getRow(1).values;
+        const rows = [];
+
+        worksheet.eachRow((row, rowNumber) => {
+            if (rowNumber === 1) return;
+            const rowData = {};
+            headers.forEach((header, index) => {
+                if (header && row.getCell(index).value != null) {
+                    const value =
+                        row.getCell(index).text?.trim() ||
+                        String(row.getCell(index).value).trim();
+                    rowData[header] = value;
+                }
+            });
+            rows.push(rowData);
+        });
+
+        const validUsers = rows.filter(
+            (r) =>
+                r.fullName &&
+                r.rollNo &&
+                r.phoneNumber &&
+                r.email &&
+                r.hostelType &&
+                r.hostelNumber
+        );
+
+        if (!validUsers.length) {
+            fs.unlinkSync(file);
+            throw new ErrorHandler(
+                'No valid rows found. Ensure columns are: fullName, rollNo, email, hostelType, hostelNumber',
+                BAD_REQUEST
+            );
+        }
+
+        // Prepare duplicates check
+        const emails = validUsers.map((u) =>
+            String(u.email).toLowerCase().trim()
+        );
+        const phoneNumbers = validUsers.map((u) =>
+            String(u.phoneNumber).trim()
+        );
+        const userNames = validUsers.map((u) =>
+            `${u.hostelType}${u.hostelNumber}-${u.rollNo}`.trim()
+        );
+
+        const existing = await Student.find({
+            $or: [
+                { email: { $in: emails } },
+                { userName: { $in: userNames } },
+                { phoneNumber: { $in: phoneNumbers } },
+            ],
+        }).select('email userName phoneNumber');
+
+        const existingSet = new Set(
+            existing.flatMap((u) => [u.email, u.userName, u.phoneNumber])
+        );
+
+        const newUsers = validUsers.filter((u) => {
+            const userName = `${u.hostelType}${u.hostelNumber}-${u.rollNo}`;
+            return (
+                !existingSet.has(String(u.email).toLowerCase().trim()) &&
+                !existingSet.has(userName.trim()) &&
+                !existingSet.has(String(u.phoneNumber).trim())
+            );
+        });
+
+        if (!newUsers.length) {
+            fs.unlinkSync(file);
+            throw new ErrorHandler(
+                'All users already exist. No new registrations added.',
+                BAD_REQUEST
+            );
+        }
+
+        // Create student docs
+        const userDocs = newUsers.map((u) => ({
+            fullName: u.fullName,
+            canteenId: contractor.canteenId,
+            userName: `${u.hostelType}${u.hostelNumber}-${u.rollNo}`,
+            phoneNumber: u.phoneNumber,
+            email: u.email,
+            password: nanoid(8),
+        }));
+
+        // --- Insert into DB ---
+        let inserted = [];
+        try {
+            inserted = await Student.insertMany(userDocs, { ordered: false });
+        } catch (err) {
+            console.error('InsertMany failed:', err);
+            throw new ErrorHandler('Error inserting new students', 500);
+        }
+
+        console.log(`Inserted ${inserted.length} students successfully`);
+
+        // --- Generate QR Codes ---
+        const tempDir = path.join(process.cwd(), 'public', 'temp');
+        const qrDir = path.join(tempDir, `qrs-${Date.now()}`);
+        fs.mkdirSync(qrDir, { recursive: true });
+
+        for (const student of inserted) {
+            const qrDataURL = await genQR({
+                _id: student._id,
+                passHash: student.password,
+            });
+
+            const base64Data = qrDataURL.replace(
+                /^data:image\/png;base64,/,
+                ''
+            );
+            const fileName = `${getRollNo(student.userName)}.png`; // use rollNo if available
+            const qrFilePath = path.join(qrDir, fileName);
+            fs.writeFileSync(qrFilePath, base64Data, 'base64');
+        }
+
+        const hostelName = newUsers[0].hostelType || 'Hostel';
+        const dateStr = new Date().toISOString().split('T')[0];
+        const zipFileName = `${hostelName}-${dateStr}.zip`;
+        const zipPath = path.join(tempDir, zipFileName);
+
+        // --- Create ZIP ---
+        await new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(zipPath);
+            const archive = archiver('zip', { zlib: { level: 9 } });
+
+            output.on('close', resolve);
+            archive.on('error', reject);
+
+            archive.pipe(output);
+            archive.directory(qrDir, false);
+            archive.finalize();
+        });
+
+        console.log('ZIP created:', zipFileName);
+
+        fs.unlinkSync(file);
+
+        // --- Send ZIP for download ---
+
+        const fileStream = fs.createReadStream(zipPath);
+        fileStream.pipe(res);
+
+        fileStream.on('close', () => {
+            fs.rmSync(qrDir, { recursive: true, force: true });
+            fs.unlinkSync(zipPath);
+        });
     }
 );
 
