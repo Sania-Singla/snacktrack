@@ -21,7 +21,7 @@ try {
     ]);
 
     startBillingCronJob();
-    startCleanupCronJob();
+    // startCleanupCronJob();
 
     http.listen(PORT, () =>
         console.log(`💻 Server listening on port ${PORT}...`)

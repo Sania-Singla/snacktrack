@@ -314,13 +314,14 @@ export const registerBulkStudents = tryCatch(
                     !existingSet.has(userName) &&
                     !existingSet.has(phone)
                 ) {
+                    const hash = await bcrypt.hash(nanoid(8), 10);
                     userDocs.push({
                         fullName: u.fullName,
                         canteenId: contractor.canteenId,
                         userName,
                         phoneNumber: phone,
                         email,
-                        password: nanoid(8),
+                        password: hash,
                     });
                 }
             }
@@ -337,6 +338,7 @@ export const registerBulkStudents = tryCatch(
             const inserted = await Student.insertMany(userDocs, {
                 ordered: false,
             });
+
             console.log(`Inserted ${inserted.length} students successfully`);
 
             // --- Generate QR Codes ---
@@ -391,7 +393,7 @@ export const registerBulkStudents = tryCatch(
             fs.unlinkSync(file);
 
             // --- Send ZIP for download ---
-            res.download(zipPath, zipFileName, (err) => {
+            return res.download(zipPath, zipFileName, (err) => {
                 // Cleanup after download completes or fails
                 fs.promises
                     .rm(qrDir, { recursive: true, force: true })

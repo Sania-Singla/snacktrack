@@ -115,13 +115,13 @@ export const startBillingCronJob = () => {
 };
 
 export const startCleanupCronJob = () => {
-    console.log('🧹 Cleanup scheduled on 2nd of every month at 12:05 AM');
+    // console.log('🧹 Cleanup scheduled on 2nd of every month at 12:05 AM');
 
-    return cron.schedule(
-        '5 0 2 * *',
-        async () => {
-            await deleteOldOrders();
-        },
-        { timezone: 'Asia/Kolkata' }
-    );
+    // return cron.schedule(
+    //     '5 0 2 * *',
+    //     async () => {
+    //         await deleteOldOrders();
+    //     },
+    //     { timezone: 'Asia/Kolkata' }
+    // );
 };

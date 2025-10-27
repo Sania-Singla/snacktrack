@@ -38,7 +38,7 @@ export default function ConfirmBulkStudentRegisterPopup() {
         } catch (err) {
             toast.error('Something went wrong. please try again.');
         } finally {
-            popopInfo.onClose();
+            popupInfo.onClose();
             setLoading(false);
         }
     }
