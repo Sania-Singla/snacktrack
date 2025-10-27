@@ -2,14 +2,14 @@ import { useState } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { contractorService } from '../Services';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button, InputField } from '../Components';
 import { verifyExpression, checkTokenExpired } from '../Utils';
 import { LOGO } from '../Constants';
 import { motion } from 'framer-motion';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
-import { useUserContext } from '../Contexts';
+import { usePopupContext, useUserContext } from '../Contexts';
 
 export default function RegisterStudentPage() {
     const initialInputs = {
@@ -18,13 +18,14 @@ export default function RegisterStudentPage() {
         email: '',
         rollNo: '',
     };
+    const [file, setFile] = useState(null);
     const [phoneKey, setPhoneKey] = useState(0);
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
     const { user, setUser } = useUserContext();
+    const { setPopupInfo, setShowPopup } = usePopupContext();
 
     function handleChange(e) {
         let { value, name } = e.target;
@@ -130,39 +131,6 @@ export default function RegisterStudentPage() {
         </div>
     ));
 
-    const handleUpload = async (e) => {
-        setLoading(true);
-
-        try {
-            const files = e.target.files;
-
-            if (!files || files.length === 0) return;
-
-            const res = await contractorService.registerBulk(files[0]);
-            if (res instanceof Response) {
-                // It's a file
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'students_result.xlsx';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(url);
-
-                toast.success('Bulk registration successful!');
-            } else {
-                // It's JSON
-                toast.error(res.message || 'No new users to register');
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error(err.message || 'Error uploading or downloading file');
-        } finally {
-            setLoading(false);
-        }
-    };
     return (
         <div className="py-10 text-black flex flex-col items-center justify-center gap-4 min-h-screen">
             <Link
@@ -196,19 +164,40 @@ export default function RegisterStudentPage() {
                     accept=".xlsx,.xls,.csv"
                     name="excel"
                     id="excel"
-                    onChange={handleUpload}
+                    onClick={(e) => (e.target.value = null)}
+                    onChange={(e) => {
+                        const files = e.target.files;
+                        if (!files || !files.length) return;
+                        setFile(files[0]);
+                        setShowPopup(true);
+                        setPopupInfo({
+                            type: 'ConfirmBulkStudentRegister',
+                            excel: files[0],
+                            onClose: () => {
+                                setFile(null);
+                                setShowPopup(false);
+                                setPopupInfo({});
+                            },
+                        });
+                    }}
                 />
 
                 <label
                     htmlFor="excel"
                     className="border mt-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
                 >
-                    <span className="text-[#4977ec] text-[15px] font-medium">
-                        {loading ? 'Uploading...' : 'Upload Excel'}
-                    </span>
-                    <div className="size-5.5 fill-[#4977ec]">
-                        {icons.upload}
-                    </div>
+                    {file?.name ? (
+                        <p>{file.name}</p>
+                    ) : (
+                        <>
+                            <span className="text-[#4977ec] text-[15px] font-medium">
+                                Upload Excel
+                            </span>
+                            <div className="size-5.5 fill-[#4977ec]">
+                                {icons.upload}
+                            </div>
+                        </>
+                    )}
                 </label>
 
                 <div className="flex gap-2 items-center w-full mt-3">
@@ -264,7 +253,7 @@ export default function RegisterStudentPage() {
 
                     <Button
                         type="submit"
-                        className="text-white rounded-md py-2 mt-3 h-[40px] flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
+                        className="text-white rounded-md py-2 mt-3 h-10 flex items-center justify-center w-full transition-all duration-200 bg-[#4977ec] hover:bg-[#3b62c2] hover:shadow-md active:scale-[98%]"
                         disabled={disabled}
                         onMouseOver={onMouseOver}
                         btnText={

@@ -5,7 +5,6 @@ import {
     useUserContext,
 } from '../../Contexts';
 import { icons } from '../../Assets/icons';
-import { useNavigate } from 'react-router-dom';
 import { contractorService } from '../../Services';
 import { checkTokenExpired, getRollNo } from '../../Utils';
 import { useState } from 'react';
@@ -15,9 +14,7 @@ export default function RemoveStudentPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
     const { setStudents, setStudentsInfo } = useStudentContext();
-    const navigate = useNavigate();
     const [check, setCheck] = useState(false);
-    const [disabled, setDisabled] = useState(true);
     const { setUser } = useUserContext();
 
     async function removeStudent() {
@@ -26,7 +23,6 @@ export default function RemoveStudentPopup() {
             return;
         }
         setLoading(true);
-        setDisabled(true);
         try {
             const res = await contractorService.removeStudent(
                 popupInfo.student._id
@@ -48,7 +44,6 @@ export default function RemoveStudentPopup() {
         } catch (err) {
             toast.error('Something went wrong. Please try again.');
         } finally {
-            setDisabled(false);
             setLoading(false);
             setShowPopup(false);
         }
@@ -88,11 +83,9 @@ export default function RemoveStudentPopup() {
                         type="checkbox"
                         checked={check}
                         id="delete student"
+                        disabled={loading}
                         className="cursor-pointer"
-                        onChange={(e) => {
-                            setCheck(e.target.checked);
-                            setDisabled(!e.target.checked);
-                        }}
+                        onChange={(e) => setCheck(e.target.checked)}
                     />
                 </div>
 
@@ -109,7 +102,7 @@ export default function RemoveStudentPopup() {
                         )
                     }
                     onClick={removeStudent}
-                    disabled={disabled}
+                    disabled={loading || !check}
                     className="text-white relative -top-2 rounded-md py-2 px-3 flex items-center justify-center w-full bg-red-700 hover:bg-red-800 transition-all duration-200 hover:shadow-md active:scale-[98%]"
                 />
             </div>

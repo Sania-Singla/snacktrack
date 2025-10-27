@@ -24,6 +24,7 @@ import RemoveStudentPopup from './Popups/RemoveStudent.Popup';
 import RemoveAllStudentsPopup from './Popups/RemoveAllStudents.Popup';
 import EditStudentPopup from './Popups/EditStudent.Popup';
 import EditSnackPopup from './Popups/EditSnack.Popup';
+import ConfirmBulkStudentRegisterPopup from './Popups/ConfirmBulkStudentRegister.Popup';
 import EditItemPopup from './Popups/EditItem.Popup';
 import RemoveSnackPopup from './Popups/RemoveSnack.Popup';
 import IntermediateBillPopup from './Popups/IntermediateBill.Popup';
@@ -87,6 +88,7 @@ export {
     UpdateAccountDetails,
     UpdatePasswordStudent,
     UpdatePasswordAdmin,
+    ConfirmBulkStudentRegisterPopup,
     UpdateAccountDetailsAdmin,
     UpdateAccountDetailsStudent,
     IntermediateBillPopup,

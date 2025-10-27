@@ -58,10 +58,10 @@ export default function StudentsPage() {
     }, [page, debouncedSearch]);
 
     return (
-        <div className="pl-2">
+        <>
             <div className=" w-full flex justify-between gap-4 mb-6">
                 <div className="bg-white px-3 py-1.5 text-sm rounded-md border-1 border-gray-200">
-                    <div className="flex items-center justify-between gap-2.5">
+                    <div className="pl-2 flex items-center justify-between gap-2.5">
                         <h3 className="font-medium text-gray-800">
                             Total Students
                         </h3>
@@ -122,6 +122,6 @@ export default function StudentsPage() {
                     </div>
                 )
             )}
-        </div>
+        </>
     );
 }

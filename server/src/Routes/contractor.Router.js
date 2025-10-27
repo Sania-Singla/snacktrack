@@ -17,7 +17,6 @@ import {
     updateItem,
     toggleItemAvailability,
     changeCanteenStatus,
-    registerBulkStudents,
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.use(verifyJwt);
@@ -25,10 +24,6 @@ contractorRouter.use(verifyJwt);
 contractorRouter.patch('/status', changeCanteenStatus);
 
 // student management
-
-contractorRouter
-    .route('/students/register-all')
-    .post(upload.single('file'), registerBulkStudents);
 
 contractorRouter
     .route('/students')

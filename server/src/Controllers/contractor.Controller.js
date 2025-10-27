@@ -4,7 +4,6 @@ import {
     NOT_FOUND,
     CREATED,
     SOCKET_EVENTS,
-    SERVER_ERROR,
 } from '../Constants/index.js';
 import bcrypt from 'bcryptjs';
 import {

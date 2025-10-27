@@ -10,7 +10,6 @@ export default function RemoveItemPopup() {
     const [loading, setLoading] = useState(false);
     const { setShowPopup, popupInfo } = usePopupContext();
     const [check, setCheck] = useState(false);
-    const [disabled, setDisabled] = useState(true);
     const { setUser } = useUserContext();
 
     async function removeItem() {
@@ -19,7 +18,6 @@ export default function RemoveItemPopup() {
             return;
         }
         setLoading(true);
-        setDisabled(true);
         try {
             const res = await contractorService.removeItem(popupInfo.item._id);
             if (res && res.message === 'item deleted successfully') {
@@ -30,7 +28,6 @@ export default function RemoveItemPopup() {
         } catch (err) {
             toast.error('Something went wrong. Please try again.');
         } finally {
-            setDisabled(false);
             setLoading(false);
             setShowPopup(false);
         }
@@ -68,11 +65,9 @@ export default function RemoveItemPopup() {
                         type="checkbox"
                         checked={check}
                         id="delete item"
+                        disabled={loading}
                         className="cursor-pointer"
-                        onChange={(e) => {
-                            setCheck(e.target.checked);
-                            setDisabled(!e.target.checked);
-                        }}
+                        onChange={(e) => setCheck(e.target.checked)}
                     />
                 </div>
 
@@ -89,7 +84,7 @@ export default function RemoveItemPopup() {
                         )
                     }
                     onClick={removeItem}
-                    disabled={disabled}
+                    disabled={loading || !check}
                     className="text-white relative -top-2 rounded-md py-2 px-3 flex items-center justify-center w-full bg-red-700 hover:bg-red-800 transition-all duration-200 hover:shadow-md active:scale-[98%]"
                 />
             </div>
