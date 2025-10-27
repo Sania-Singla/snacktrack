@@ -80,6 +80,10 @@ export default function StudentOrdersPage() {
             );
         }
 
+        socket.on(SOCKET_EVENTS.ORDER_PENDING, (o) => {
+            helper(o._id, { status: 'Pending' });
+        });
+
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, (orderId) => {
             helper(orderId, { status: 'Rejected' });
         });

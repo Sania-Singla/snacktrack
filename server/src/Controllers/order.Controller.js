@@ -68,35 +68,19 @@ export const placeOrder = tryCatch('place order', async (req, res) => {
         specialInstructions: i.specialInstructions,
     }));
 
-    const packagedItems = cartItems.filter((i) => i.type === 'PackagedFood');
-    const allPackaged = packagedItems.length === cartItems.length;
-
     let order = await Order.create({
         studentId: student._id,
         canteenId: student.canteenId,
         amount,
-        status: allPackaged ? 'Prepared' : 'Pending',
+        status: 'New',
         items: updatedCartItems,
     });
 
     order = order.toObject();
 
-    await Promise.all([
-        packagedItems.map((item) => {
-            redisClient.sAdd(`order:${order._id}:items`, item._id.toString());
-        }),
-    ]);
-
-    const items = cartItems.map((item) => ({
-        ...item,
-        id: item._id,
-        prepared: item.type === 'Snack' ? false : true,
-        pickedUp: false,
-    }));
-
     const data = {
         ...order,
-        items,
+        items: cartItems.map((item) => ({ ...item, id: item._id })),
         studentInfo: {
             fullName: student.fullName,
             phoneNumber: student.phoneNumber,
@@ -148,40 +132,19 @@ export const placeOrderByQR = tryCatch(
             specialInstructions: i.specialInstructions,
         }));
 
-        const packagedItems = cartItems.filter(
-            (i) => i.type === 'PackagedFood'
-        );
-        const allPackaged = packagedItems.length === cartItems.length;
-
         let order = await Order.create({
             studentId: _id,
             canteenId,
             amount,
-            status: allPackaged ? 'Prepared' : 'Pending',
+            status: 'New',
             items: updatedCartItems,
         });
 
         order = order.toObject();
 
-        await Promise.all([
-            packagedItems.map((item) => {
-                redisClient.sAdd(
-                    `order:${order._id}:items`,
-                    item._id.toString()
-                );
-            }),
-        ]);
-
-        const items = cartItems.map((item) => ({
-            ...item,
-            id: item._id,
-            prepared: item.type === 'Snack' ? false : true,
-            pickedUp: false,
-        }));
-
         const result = {
             ...order,
-            items,
+            items: cartItems.map((item) => ({ ...item, id: item._id })),
             studentInfo: {
                 fullName: student.fullName,
                 phoneNumber: student.phoneNumber,
@@ -195,6 +158,273 @@ export const placeOrderByQR = tryCatch(
         return res.status(OK).json(result);
     }
 );
+
+// export const placeOrder = tryCatch('place order', async (req, res) => {
+//     const { cartItems, amount } = req.body;
+//     const student = req.user;
+
+//     const canteen = await Canteen.findById(student.canteenId)
+//         .select('isOpen')
+//         .lean();
+
+//     if (!canteen.isOpen) {
+//         throw new ErrorHandler('canteen is closed', FORBIDDEN);
+//     }
+
+//     const updatedCartItems = cartItems.map((i) => ({
+//         id: i._id,
+//         type: i.type,
+//         price: i.price,
+//         quantity: i.quantity,
+//         specialInstructions: i.specialInstructions,
+//     }));
+
+//     const packagedItems = cartItems.filter((i) => i.type === 'PackagedFood');
+//     const allPackaged = packagedItems.length === cartItems.length;
+
+//     let order = await Order.create({
+//         studentId: student._id,
+//         canteenId: student.canteenId,
+//         amount,
+//         status: allPackaged ? 'Prepared' : 'Pending',
+//         items: updatedCartItems,
+//     });
+
+//     order = order.toObject();
+
+//     await Promise.all([
+//         packagedItems.map((item) => {
+//             redisClient.sAdd(`order:${order._id}:items`, item._id.toString());
+//         }),
+//     ]);
+
+//     const items = cartItems.map((item) => ({
+//         ...item,
+//         id: item._id,
+//         prepared: item.type === 'Snack' ? false : true,
+//         pickedUp: false,
+//     }));
+
+//     const data = {
+//         ...order,
+//         items,
+//         studentInfo: {
+//             fullName: student.fullName,
+//             phoneNumber: student.phoneNumber,
+//             userName: student.userName,
+//         },
+//     };
+
+//     // notify canteen room about new order
+//     io.to(`contractor_${student.canteenId}`).emit(
+//         SOCKET_EVENTS.NEW_ORDER,
+//         data
+//     );
+
+//     return res.status(OK).json(data);
+// });
+
+// export const placeOrderByQR = tryCatch(
+//     'place order by qr',
+//     async (req, res) => {
+//         const { cartItems, amount, canteenId, decode } = req.body;
+//         const { _id, token } = decode;
+
+//         if (!_id || !token) {
+//             throw new ErrorHandler('invalid qr code', FORBIDDEN);
+//         }
+
+//         const student = await Student.findOne({ _id, canteenId })
+//             .populate('canteenId', 'isOpen')
+//             .select('-refreshToken')
+//             .lean();
+
+//         if (!student) {
+//             throw new ErrorHandler('invalid qr code', NOT_FOUND);
+//         }
+
+//         verifyQR({ token, passHash: student.password });
+
+//         if (!student.canteenId.isOpen) {
+//             throw new ErrorHandler('canteen is closed', FORBIDDEN);
+//         }
+
+//         student.canteenId = canteenId;
+
+//         const updatedCartItems = cartItems.map((i) => ({
+//             id: i._id,
+//             type: i.type,
+//             price: i.price,
+//             quantity: i.quantity,
+//             specialInstructions: i.specialInstructions,
+//         }));
+
+//         const packagedItems = cartItems.filter(
+//             (i) => i.type === 'PackagedFood'
+//         );
+//         const allPackaged = packagedItems.length === cartItems.length;
+
+//         let order = await Order.create({
+//             studentId: _id,
+//             canteenId,
+//             amount,
+//             status: allPackaged ? 'Prepared' : 'Pending',
+//             items: updatedCartItems,
+//         });
+
+//         order = order.toObject();
+
+//         await Promise.all([
+//             packagedItems.map((item) => {
+//                 redisClient.sAdd(
+//                     `order:${order._id}:items`,
+//                     item._id.toString()
+//                 );
+//             }),
+//         ]);
+
+//         const items = cartItems.map((item) => ({
+//             ...item,
+//             id: item._id,
+//             prepared: item.type === 'Snack' ? false : true,
+//             pickedUp: false,
+//         }));
+
+//         const result = {
+//             ...order,
+//             items,
+//             studentInfo: {
+//                 fullName: student.fullName,
+//                 phoneNumber: student.phoneNumber,
+//                 userName: student.userName,
+//             },
+//         };
+
+//         // notify canteen room about new order
+//         io.to(`contractor_${canteenId}`).emit(SOCKET_EVENTS.NEW_ORDER, result);
+
+//         return res.status(OK).json(result);
+//     }
+// );
+
+export const acceptOrder = tryCatch('update order status', async (req, res) => {
+    const { orderId } = req.params;
+
+    let [completeOrder] = await Order.aggregate([
+        { $match: { _id: new Types.ObjectId(orderId) } },
+        {
+            $lookup: {
+                from: 'students',
+                localField: 'studentId',
+                foreignField: '_id',
+                as: 'studentInfo',
+                pipeline: [
+                    {
+                        $project: {
+                            fullName: 1,
+                            phoneNumber: 1,
+                            userName: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        { $unwind: '$studentInfo' },
+        { $unwind: '$items' },
+        {
+            $lookup: {
+                from: 'snacks',
+                localField: 'items.id',
+                foreignField: '_id',
+                pipeline: [{ $project: { name: 1, image: 1 } }],
+                as: 'snack',
+            },
+        },
+        {
+            $lookup: {
+                from: 'packagedfoods',
+                localField: 'items.id',
+                foreignField: '_id',
+                pipeline: [{ $project: { name: 1 } }],
+                as: 'packaged',
+            },
+        },
+        {
+            $addFields: {
+                'items.name': {
+                    $cond: [
+                        { $eq: ['$items.type', 'Snack'] },
+                        { $first: '$snack.name' },
+                        { $first: '$packaged.name' },
+                    ],
+                },
+                'items.image': {
+                    $cond: [
+                        { $eq: ['$items.type', 'Snack'] },
+                        { $first: '$snack.image' },
+                        null,
+                    ],
+                },
+            },
+        },
+        {
+            $group: {
+                _id: '$_id',
+                amount: { $first: '$amount' },
+                extraCharges: { $first: '$extraCharges' },
+                status: { $first: '$status' },
+                canteenId: { $first: '$canteenId' },
+                studentId: { $first: '$studentId' },
+                items: { $push: '$items' },
+                createdAt: { $first: '$createdAt' },
+                updatedAt: { $first: '$updatedAt' },
+                studentInfo: { $first: '$studentInfo' },
+            },
+        },
+        { $project: { snack: 0, packaged: 0 } },
+    ]);
+
+    const packagedItems = completeOrder.items.filter(
+        (i) => i.type === 'PackagedFood'
+    );
+    const allPackaged = packagedItems.length === completeOrder.items.length;
+
+    const status = allPackaged ? 'Prepared' : 'Pending';
+
+    await Promise.all([
+        Order.findByIdAndUpdate(orderId, { $set: { status } }, { new: false }),
+        packagedItems.map((item) => {
+            redisClient.sAdd(`order:${orderId}:items`, item._id.toString());
+        }),
+    ]);
+
+    completeOrder.items = completeOrder.items.map((item) => ({
+        ...item,
+        prepared: item.type === 'Snack' ? false : true,
+        pickedUp: false,
+    }));
+
+    // socket event
+    const stuSocketId = await redisClient.get(
+        completeOrder.studentId.toString()
+    );
+
+    console.log(completeOrder);
+
+    completeOrder = { ...completeOrder, status };
+
+    const data =
+        status === 'Prepared'
+            ? { order: completeOrder, orderId }
+            : completeOrder;
+
+    io.to([
+        stuSocketId,
+        `contractor_${completeOrder.canteenId.toString()}`,
+    ]).emit(SOCKET_EVENTS[`ORDER_${status.toUpperCase()}`], data);
+
+    return res.status(OK).json({ message: 'order accepted successfully' });
+});
 
 export const updateOrderStatus = tryCatch(
     'update order status',
@@ -355,7 +585,7 @@ export const updateExtraCharges = tryCatch(
                     $gte: startOfDay,
                     $lte: endOfDay,
                 },
-                status: { $in: ['Pending', 'Prepared'] },
+                status: { $in: ['Pending', 'Prepared', 'New'] },
             },
             { $set: { extraCharges } },
             { new: true }
@@ -715,6 +945,113 @@ export const getCanteenOrders = tryCatch(
         });
     }
 );
+
+export const getNewOrders = tryCatch('get new orders', async (req, res) => {
+    const { canteenId } = req.user;
+
+    const istNow = moment.tz('Asia/Kolkata');
+    const startOfDay = istNow.clone().startOf('day').utc().toDate();
+    const endOfDay = istNow.clone().endOf('day').utc().toDate();
+
+    const result = await Order.aggregatePaginate(
+        [
+            {
+                $match: {
+                    canteenId: new Types.ObjectId(canteenId),
+                    createdAt: { $gte: startOfDay, $lt: endOfDay },
+                    status: 'New',
+                },
+            },
+            { $unwind: '$items' },
+            {
+                $lookup: {
+                    from: 'students',
+                    localField: 'studentId',
+                    foreignField: '_id',
+                    pipeline: [
+                        {
+                            $project: {
+                                fullName: 1,
+                                phoneNumber: 1,
+                                userName: 1,
+                            },
+                        },
+                        {
+                            $addFields: {
+                                rollNumber: {
+                                    $arrayElemAt: [
+                                        { $split: ['$userName', '-'] },
+                                        1,
+                                    ],
+                                },
+                            },
+                        },
+                    ],
+                    as: 'studentInfo',
+                },
+            },
+            {
+                $unwind: '$studentInfo',
+            },
+            {
+                $lookup: {
+                    from: 'snacks',
+                    localField: 'items.id',
+                    foreignField: '_id',
+                    pipeline: [{ $project: { name: 1, image: 1 } }],
+                    as: 'snack',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'packagedfoods',
+                    localField: 'items.id',
+                    foreignField: '_id',
+                    pipeline: [{ $project: { name: 1 } }],
+                    as: 'packaged',
+                },
+            },
+            {
+                $addFields: {
+                    'items.name': {
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $first: '$snack.name' },
+                            { $first: '$packaged.name' },
+                        ],
+                    },
+                    'items.image': {
+                        $cond: [
+                            { $eq: ['$items.type', 'Snack'] },
+                            { $first: '$snack.image' },
+                            null,
+                        ],
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: '$_id',
+                    amount: { $first: '$amount' },
+                    extraCharges: { $first: '$extraCharges' },
+                    status: { $first: '$status' },
+                    canteenId: { $first: '$canteenId' },
+                    studentId: { $first: '$studentId' },
+                    items: { $push: '$items' },
+                    createdAt: { $first: '$createdAt' },
+                    updatedAt: { $first: '$updatedAt' },
+                    studentInfo: { $first: '$studentInfo' },
+                },
+            },
+            { $project: { snack: 0, packaged: 0 } },
+        ],
+        {
+            sort: { createdAt: 1 },
+        }
+    );
+
+    return res.status(OK).json({ orders: result.docs });
+});
 
 export const getOrderStats = tryCatch('get order stats', async (req, res) => {
     const { canteenId } = req.params;

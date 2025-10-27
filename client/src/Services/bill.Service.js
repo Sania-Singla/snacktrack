@@ -30,6 +30,15 @@ class BillService {
             aim: 'generateIntermediateBill',
         });
     }
+
+    async generateIntermediateBillForAll() {
+        return await fetchWrapper({
+            endPoint: '/bills/generate',
+            method: 'GET',
+            credentials: 'include',
+            aim: 'generateIntermediateBillForAll',
+        });
+    }
 }
 
 export const billService = new BillService();

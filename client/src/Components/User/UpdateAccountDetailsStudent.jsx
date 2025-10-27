@@ -1,13 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../Contexts';
-import { getRollNo, verifyExpression } from '../../Utils';
-import { userService } from '../../Services';
-import { Button, InputField } from '..';
-import toast from 'react-hot-toast';
-import { icons } from '../../Assets/icons';
+import { getRollNo } from '../../Utils';
 
-export default function UpdateAccountDetails() {
+export default function UpdateAccountDetailsStudent() {
     const { user } = useUserContext();
 
     return (

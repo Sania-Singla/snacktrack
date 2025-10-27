@@ -13,8 +13,6 @@ import {
     OrderPlacedPopup,
     EditCartItemPopup,
     OrderUnavailablePopup,
-    EditContractorPopup,
-    NewContractorPopup,
     IntermediateBillPopup,
     IntermediateBillDetailPopup,
     ProceedAsAdminPopup,
@@ -131,18 +129,6 @@ export default function Popup() {
             return (
                 <Wrapper>
                     <EmailVerificationPopup />
-                </Wrapper>
-            );
-        case 'editContractor':
-            return (
-                <Wrapper>
-                    <EditContractorPopup />
-                </Wrapper>
-            );
-        case 'newContractor':
-            return (
-                <Wrapper>
-                    <NewContractorPopup />
                 </Wrapper>
             );
         case 'intermediateBill':

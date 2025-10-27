@@ -16,7 +16,7 @@ const orderSchema = new Schema(
         status: {
             type: String,
             required: true,
-            enum: ['Pending', 'Prepared', 'PickedUp', 'Rejected'], // Cancellation not allowed
+            enum: ['New', 'Pending', 'Prepared', 'PickedUp', 'Rejected'], // Cancellation not allowed
             default: 'Pending',
         },
         amount: {

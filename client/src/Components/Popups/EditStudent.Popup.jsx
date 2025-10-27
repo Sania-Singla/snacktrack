@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { contractorService } from '../../Services';
+import { adminService } from '../../Services';
 import { usePopupContext, useUserContext } from '../../Contexts';
 import { Button, InputField } from '..';
 import { verifyExpression, getRollNo, checkTokenExpired } from '../../Utils';
@@ -53,7 +53,7 @@ export default function EditStudentPopup() {
         setDisabled(true);
         setError({});
         try {
-            const res = await contractorService.updateStudent(
+            const res = await adminService.updateStudent(
                 popupInfo.student._id,
                 {
                     ...inputs,

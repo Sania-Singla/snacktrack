@@ -4,11 +4,13 @@ import { orderRouter } from './order.Router.js';
 import { userRouter } from './user.Router.js';
 import { billRouter } from './bill.Router.js';
 import { adminRouter } from './admin.Router.js';
+import { studentRouter } from './student.Router.js';
 import express from 'express';
 export const router = express.Router();
 
 router.use('/users', userRouter);
 router.use('/snacks', snackRouter);
+router.use('/students', studentRouter);
 router.use('/contractors', contractorRouter);
 router.use('/orders', orderRouter);
 router.use('/bills', billRouter);

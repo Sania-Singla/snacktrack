@@ -113,7 +113,7 @@ export default function BillsPage() {
                         </div>
 
                         {bills.length > 0 && (
-                            <div className="hidden md:block shadow-sm font-medium text-[#4977ec] border-1 border-gray-200 bg-white rounded-lg px-3 py-1.5">
+                            <div className="hidden md:block font-medium text-[#4977ec] border-1 border-gray-300 bg-white rounded-md px-3 py-1">
                                 Total: ₹{billsInfo.totalAmount.toFixed(2)}
                             </div>
                         )}
@@ -123,14 +123,14 @@ export default function BillsPage() {
 
             <div className="md:hidden flex items-center justify-center gap-4 mb-6">
                 {bills.length > 0 && (
-                    <div className="font-medium shadow-sm text-[#4977ec] border-1 border-gray-200 bg-white rounded-lg px-3 py-1.5">
+                    <div className="font-medium text-[#4977ec] border-1 border-gray-300 bg-white rounded-md px-3 py-1">
                         Total: ₹{billsInfo.totalAmount.toFixed(2)}
                     </div>
                 )}
 
                 <Button
                     onClick={generateIntermediateBill}
-                    className="text-white rounded-lg py-1.5 w-fit text-nowrap px-3 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
+                    className="text-white rounded-md text-sm py-1.5 w-fit text-nowrap px-3 flex items-center justify-center bg-[#4977ec] hover:bg-[#3b62c2]"
                     btnText="Generate Bill"
                 />
             </div>

@@ -8,6 +8,7 @@ import {
     Stats,
     Kitchen,
     Dropdown,
+    NewOrders,
 } from '../Components';
 import { useOrderContext } from '../Contexts';
 import { Resizable } from 're-resizable';
@@ -23,9 +24,9 @@ export default function TodayOrdersPage() {
     return (
         <div className="flex gap-4 h-full min-h-[calc(100vh-4rem)]">
             <Resizable
-                defaultSize={{ width: '25%' }}
+                defaultSize={{ width: '30%' }}
                 enable={showOrderSide ? { right: true } : {}}
-                className={`${showOrderSide ? 'min-w-[40%] max-w-[50%] lg:min-w-[25%] border-r border-gray-200 pr-4' : 'hidden'} h-full`}
+                className={`${showOrderSide ? 'min-w-[40%] max-w-[50%] lg:min-w-[30%] border-r border-gray-200 pr-4' : 'hidden'} h-full`}
                 style={{ width: showOrderSide ? undefined : 0 }}
             >
                 <div className="h-full overflow-hidden">
@@ -73,6 +74,15 @@ export default function TodayOrdersPage() {
                     showOrderSide={showOrderSide}
                 />
             </div>
+
+            <Resizable
+                defaultSize={{ width: '30%' }}
+                enable={showOrderSide ? { left: true } : {}}
+                className={`${showOrderSide ? 'min-w-[40%] max-w-[50%] lg:min-w-[30%] border-l border-gray-200 pl-4' : 'hidden'} h-full`}
+                style={{ width: showOrderSide ? undefined : 0 }}
+            >
+                <NewOrders />
+            </Resizable>
         </div>
     );
 }

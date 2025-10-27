@@ -42,7 +42,7 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
     useEffect(() => {
         if (!socket) return;
 
-        function newOrder(order) {
+        function orderPending(order) {
             if (order.status === 'Pending') {
                 setOrders((prev) => {
                     const snacks = order.items.filter(
@@ -90,12 +90,12 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
             );
         }
 
-        socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
+        socket.on(SOCKET_EVENTS.ORDER_PENDING, orderPending);
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
         socket.on(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
 
         return () => {
-            socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
+            socket.off(SOCKET_EVENTS.ORDER_PENDING, orderPending);
             socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
             socket.off(SOCKET_EVENTS.ITEM_PREPARED, itemPrepared);
         };
@@ -157,7 +157,7 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
 
     useEffect(() => {
         if (!orders.length) return;
-        setSummary(updateSummary(orders));
+        // setSummary(updateSummary(orders));
         setOrderElements(generateOrderElements(orders));
     }, [orders]);
 
@@ -179,13 +179,13 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
                         Kitchen
                     </h2>
                 </div>
-                <AudioBtn />
+                {/* <AudioBtn /> */}
             </div>
 
             {!loading &&
                 (orders.length > 0 ? (
                     <div className="flex gap-6 lg:gap-4 flex-col w-full lg:flex-row">
-                        <section className="w-full lg:w-[70%] grid grid-flow-dense grid-cols-[repeat(auto-fit,minmax(120px,1fr))] h-fit gap-4">
+                        {/* <section className="w-full lg:w-[70%] grid grid-flow-dense grid-cols-[repeat(auto-fit,minmax(120px,1fr))] h-fit gap-4">
                             {Object.entries(summary)
                                 .sort(([a], [b]) => a.localeCompare(b))
                                 .map(([name, quantity]) => (
@@ -199,12 +199,12 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
                                         </p>
                                     </div>
                                 ))}
-                        </section>
+                        </section> */}
 
                         <Resizable
                             defaultSize={{ width: '30%' }}
                             enable={{ left: true }}
-                            className="max-w-full min-w-full lg:min-w-[30%] lg:max-w-[50%] lg:border-l-1 border-l-gray-200 lg:pl-4 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4"
+                            className="max-w-full min-w-full lg:min-w-[30%] lg:max-w-[50%] grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4"
                         >
                             {orderElements}
                         </Resizable>

@@ -3,7 +3,7 @@ import { usePopupContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
-import { contractorService } from '../../Services';
+import { adminService } from '../../Services';
 
 export default function ConfirmBulkStudentRegisterPopup() {
     const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ export default function ConfirmBulkStudentRegisterPopup() {
     async function handleUpload() {
         setLoading(true);
         try {
-            const res = await contractorService.registerBulk({
+            const res = await adminService.registerBulk({
                 file: excel,
                 hostelNumber: user.hostelNumber,
                 hostelType: user.hostelType,

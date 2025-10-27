@@ -14,7 +14,7 @@ export default function Header() {
     const { user, setUser } = useUserContext();
     const { pathname } = useLocation();
     const { setShowSideBar } = useSideBarContext();
-    const navigate = useNavigate();``
+    const navigate = useNavigate();
     const { socket } = useSocketContext();
 
     useEffect(() => {
@@ -24,7 +24,7 @@ export default function Header() {
             SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED,
             ({ isOpen, canteenId }) => {
                 if (user.canteenId !== canteenId) return;
-                setUser((prevUser) => ({ ...prevUser, isOpen }));
+                setUser((prev) => ({ ...prev, isOpen }));
             }
         );
 
@@ -78,16 +78,9 @@ export default function Header() {
                     {user.role === 'contractor' ? (
                         <Button
                             onClick={async () => {
-                                const res =
-                                    await contractorService.changeCanteenStatus(
-                                        !user.isOpen
-                                    );
-                                if (res) {
-                                    setUser((prev) => ({
-                                        ...prev,
-                                        isOpen: !prev.isOpen,
-                                    }));
-                                }
+                                await contractorService.changeCanteenStatus(
+                                    !user.isOpen
+                                );
                             }}
                             btnText={
                                 <div className="flex items-center justify-center gap-1.5">

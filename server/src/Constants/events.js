@@ -7,4 +7,5 @@ export const SOCKET_EVENTS = {
     ORDER_PICKEDUP: 'orderPickedUp',
     EXTRA_CHARGES_UPDATED: 'extraChargesUpdated',
     CANTEEN_OPEN_STATUS_CHANGED: 'canteenOpenStatusChanged',
+    ORDER_PENDING: 'orderPending', // accepted basically
 };

@@ -1,7 +1,7 @@
 import { Button } from '..';
 import { usePopupContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
-import { contractorService } from '../../Services';
+import { adminService } from '../../Services';
 import { checkTokenExpired, getRollNo } from '../../Utils';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -19,9 +19,7 @@ export default function RemoveStudentPopup() {
         }
         setLoading(true);
         try {
-            const res = await contractorService.removeStudent(
-                popupInfo.student._id
-            );
+            const res = await adminService.removeStudent(popupInfo.student._id);
             if (res && res.message === 'account deleted successfully') {
                 toast.success('Account Deleted Successfully 😕');
             } else if (res && res.message !== 'tokens missing') {

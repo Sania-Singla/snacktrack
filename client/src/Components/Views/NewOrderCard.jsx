@@ -7,82 +7,55 @@ import { orderService } from '../../Services';
 import { useUserContext } from '../../Contexts';
 import toast from 'react-hot-toast';
 
-export default function ActiveOrderCard({ order, reference }) {
+export default function NewOrderCard({ order }) {
     const [expanded, setExpanded] = useState(false);
     const { amount, _id, createdAt, items, studentInfo, extraCharges } = order;
     const { setUser } = useUserContext();
-    const [loading, setLoading] = useState(false);
     const [rejecting, setRejecting] = useState(false);
+    const [accepting, setAccepting] = useState(false);
 
-    async function handleStatusChange(status) {
+    async function reject() {
         try {
-            if (!status) return;
-            if (status === 'Prepared') setLoading(true);
-            else if (status === 'Rejected') setRejecting(true);
-
+            setRejecting(true);
             const res = await orderService.updateOrderStatus({
                 orderId: _id,
-                status,
+                status: 'Rejected',
             });
 
             if (res && res.message === 'order status updated successfully') {
-                toast.success('Order Status Updated');
-            } else if (res && res.message === 'too late') {
+                toast.success('Order Rejected');
+            } else if (res && res.message === 'too late or not found') {
                 toast.error('Too Late');
             } else checkTokenExpired(res, setUser);
         } catch (err) {
             toast.error('Something went wrong. Please try again.');
         } finally {
-            setLoading(false);
             setRejecting(false);
         }
     }
 
+    async function accept() {
+        try {
+            setAccepting(true);
+            const res = await orderService.acceptOrder(_id);
+            if (res && res.message === 'order accepted successfully') {
+                toast.success('Order accepted');
+            } else checkTokenExpired(res, setUser);
+        } catch (err) {
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setAccepting(false);
+        }
+    }
+
     return (
-        <div
-            ref={reference}
-            className="h-fit w-full bg-white rounded-md shadow-xs border-1 border-gray-100 overflow-visible transition-all hover:shadow-sm"
-        >
+        <div className="h-fit w-full bg-white rounded-md shadow-xs border-1 border-gray-100 overflow-visible transition-all hover:shadow-sm">
             <div
                 className="p-3 cursor-pointer"
                 onClick={() => setExpanded(!expanded)}
             >
-                <div className="flex justify-between items-center mb-2 w-full">
+                <div className="mb-2">
                     <OrderStudentInfo studentInfo={studentInfo} />
-
-                    {/* {order.status === 'Pending' && (
-                        <Button
-                            btnText="Ready"
-                            className="rounded-sm text-white bg-green-600 hover:bg-green-700 text-xs font-medium text-center px-2.5 py-1 mb-0.5"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleStatusChange('Prepared');
-                            }}
-                        />
-                    )} */}
-
-                    {order.status === 'Prepared' && (
-                        <Button
-                            btnText="Taken"
-                            className="rounded-sm text-white bg-[#4977ec] hover:bg-[#3b62c2] text-xs font-medium text-center px-2.5 py-1 mb-0.5"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleStatusChange('PickedUp');
-                            }}
-                        />
-                    )}
-
-                    {order.status === 'PickedUp' && (
-                        <div className="fill-green-600 size-4 m-1">
-                            {icons.checkWithoutCircle}
-                        </div>
-                    )}
-
-                    {order.status === 'Rejected' && (
-                        <span className="px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-red-50 text-red-700">
-                            Rejected
-                        </span>
-                    )}
                 </div>
 
                 <div className="flex flex-row justify-between items-center w-full">
@@ -122,7 +95,7 @@ export default function ActiveOrderCard({ order, reference }) {
                                 item={item}
                                 order={order}
                                 key={item.id}
-                                type="active"
+                                type="static"
                             />
                         ))}
 
@@ -132,20 +105,18 @@ export default function ActiveOrderCard({ order, reference }) {
                             rejecting={rejecting}
                         />
 
-                        <div className="w-full p-3 flex items-center justify-start border-t border-gray-100">
+                        <div className="w-full p-3 flex items-center gap-4 justify-between border-t border-gray-100">
                             <Button
-                                btnText={
-                                    rejecting ? (
-                                        <div className="size-4 fill-red-800 dark:text-[#e95555]">
-                                            {icons.loading}
-                                        </div>
-                                    ) : (
-                                        'Reject'
-                                    )
-                                }
-                                disabled={loading || rejecting}
-                                className="w-15 h-7 border-1 border-red-100 text-red-600 flex items-center justify-center bg-red-50 hover:bg-red-100 rounded-md text-[0.8rem] font-medium"
-                                onClick={() => handleStatusChange('Rejected')}
+                                btnText="Accept"
+                                disabled={accepting || rejecting}
+                                className="w-15 h-7 border-1 border-green-400 text-green-600 flex items-center justify-center bg-green-100 hover:bg-green-100 rounded-md text-[0.8rem] font-medium"
+                                onClick={accept}
+                            />
+                            <Button
+                                btnText="Reject"
+                                disabled={rejecting || accepting}
+                                className="w-15 h-7 border-1 border-red-300 text-red-600 flex items-center justify-center bg-red-100 hover:bg-red-100 rounded-md text-[0.8rem] font-medium"
+                                onClick={reject}
                             />
                         </div>
                     </motion.div>

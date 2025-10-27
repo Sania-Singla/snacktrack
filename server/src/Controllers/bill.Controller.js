@@ -1,8 +1,11 @@
 import { NOT_FOUND, OK, TAX } from '../Constants/index.js';
-import { ErrorHandler, tryCatch } from '../Utils/index.js';
+import { ErrorHandler, getRollNo, tryCatch } from '../Utils/index.js';
 import { Bill, Canteen, Order, Student } from '../Models/index.js';
 import { Types } from 'mongoose';
 import moment from 'moment';
+import ExcelJS from 'exceljs';
+import fs from 'fs';
+import path from 'path';
 
 export const getStudentBills = tryCatch(
     'get student bills',
@@ -187,7 +190,7 @@ export const generateIntermediateBill = tryCatch(
         return res.status(OK).json({
             studentInfo: student,
             canteenId,
-            amount,
+            amount: subtotal,
             tax,
             grandTotal,
         });
@@ -196,5 +199,88 @@ export const generateIntermediateBill = tryCatch(
 
 export const generateIntermediateBillsForAll = tryCatch(
     'generate intermediate bills for all students',
-    async (req, res) => {}
+    async (req, res) => {
+        const { canteenId } = req.user;
+
+        const students = await Student.find({ canteenId });
+
+        if (!students.length) {
+            throw new ErrorHandler('no students found', BAD_REQUEST);
+        }
+
+        const bills = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: moment()
+                            .tz('Asia/Kolkata')
+                            .startOf('month')
+                            .toDate(),
+                        $lte: moment()
+                            .tz('Asia/Kolkata')
+                            .endOf('month')
+                            .toDate(),
+                    },
+                    status: 'Prepared',
+                },
+            },
+            {
+                $group: {
+                    _id: '$studentId',
+                    subtotal: { $sum: '$amount' },
+                },
+            },
+            {
+                $addFields: {
+                    tax: { $multiply: ['$subtotal', TAX] },
+                    grandTotal: {
+                        $add: ['$subtotal', { $multiply: ['$subtotal', TAX] }],
+                    },
+                },
+            },
+        ]);
+
+        const studentMap = Object.fromEntries(
+            students.map((s) => [s._id.toString(), s])
+        );
+
+        const data = bills.map((b) => ({
+            fullName: studentMap[b._id]?.fullName,
+            rollNo: getRollNo(studentMap[b._id]?.userName) || '-',
+            subtotal: b.subtotal,
+            taxes: b.tax,
+            grandTotal: b.grandTotal,
+        }));
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Student_Bills');
+
+        worksheet.columns = [
+            { header: 'Full Name', key: 'fullName', width: 20 },
+            { header: 'Roll No', key: 'rollNo', width: 10 },
+            { header: 'Sub total', key: 'subtotal', width: 25 },
+            { header: 'Taxes', key: 'taxes', width: 25 },
+            { header: 'Grand Total', key: 'grandTotal', width: 25 },
+        ];
+
+        worksheet.addRows(data);
+
+        const headerRow = worksheet.getRow(1);
+        headerRow.eachCell((cell) => {
+            cell.font = { bold: true };
+            cell.alignment = { horizontal: 'center' };
+        });
+
+        const fileName = 'bills.xlsx';
+        const tempDir = path.join(process.cwd(), 'public', 'temp');
+        if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir, { recursive: true });
+        const filePath = path.join(tempDir, fileName);
+
+        await workbook.xlsx.writeFile(filePath);
+
+        return res.download(filePath, fileName, (err) => {
+            if (err) console.error('Error sending file:', err);
+            fs.unlink(filePath, () => {}); // delete temp file
+        });
+    }
 );

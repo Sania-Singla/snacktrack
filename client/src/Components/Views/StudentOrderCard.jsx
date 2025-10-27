@@ -27,7 +27,7 @@ export default function StudentOrderCard({ order, reference }) {
                         </p>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                        {status === 'Pending' && (
+                        {(status === 'Pending' || status === 'New') && (
                             <div className="w-fit px-2.5 pt-0.5 pb-1 text-xs font-medium rounded-full bg-yellow-50 text-yellow-700">
                                 Pending
                             </div>

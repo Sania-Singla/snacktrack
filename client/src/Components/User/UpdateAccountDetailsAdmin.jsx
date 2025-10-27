@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useUserContext } from '../../Contexts';
 import { verifyExpression } from '../../Utils';
-import { userService } from '../../Services';
+import { adminService } from '../../Services';
 import { Button, InputField } from '..';
 import toast from 'react-hot-toast';
 import { icons } from '../../Assets/icons';
@@ -10,16 +9,14 @@ import { icons } from '../../Assets/icons';
 export default function UpdateAccountDetails() {
     const { user, setUser } = useUserContext();
     const initialInputs = {
+        fullName: user.fullName,
         email: user.email,
         phoneNumber: user.phoneNumber,
-        password: '',
     };
     const [inputs, setInputs] = useState(initialInputs);
     const [error, setError] = useState({});
     const [disabled, setDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-    const [showPassword, setShowPassword] = useState(false);
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -28,7 +25,7 @@ export default function UpdateAccountDetails() {
 
     function handleBlur(e) {
         const { name, value } = e.target;
-        if (value && name !== 'password') {
+        if (value) {
             verifyExpression(name, value, setError);
         }
     }
@@ -36,12 +33,9 @@ export default function UpdateAccountDetails() {
     function handleDisable() {
         return (
             Object.values(inputs).some((value) => !value) ||
-            Object.entries(error).some(
-                ([key, value]) => value && key !== 'password'
-            ) ||
+            Object.entries(error).some(([key, value]) => value) ||
             !Object.entries(inputs).some(
-                ([key, value]) =>
-                    value !== initialInputs[key] && key !== 'password'
+                ([key, value]) => value !== initialInputs[key]
             )
         );
     }
@@ -60,31 +54,32 @@ export default function UpdateAccountDetails() {
         setDisabled(true);
         setError({});
         try {
-            let res = null;
-            if (user.role === 'contractor') {
-                res = await userService.updateAccountDetails(inputs);
-            }
+            const res = await adminService.updateAccountDetails(inputs);
             if (res && res.message === 'account details updated successfully') {
                 setUser((prev) => ({
                     ...prev,
+                    fullName: inputs.fullName,
                     phoneNumber: inputs.phoneNumber,
                     email: inputs.email,
                 }));
-                setInputs((prev) => ({ ...prev, password: '' }));
                 toast.success('Account details updated successfully');
-            } else if (res && res.message !== 'tokens missing') {
-                setError((prev) => ({ ...prev, password: res.message }));
             } else checkTokenExpired(res, setUser);
         } catch (err) {
             toast.error('Something went wrong. Please try again.');
         } finally {
             setDisabled(false);
             setLoading(false);
-            setShowPassword(false);
         }
     }
 
     const inputFields = [
+        {
+            name: 'fullName',
+            type: 'text',
+            placeholder: 'Enter your full name',
+            label: 'Full Name',
+            required: true,
+        },
         {
             name: 'email',
             type: 'text',
@@ -99,13 +94,6 @@ export default function UpdateAccountDetails() {
             label: 'Phone Number',
             required: true,
         },
-        {
-            name: 'password',
-            type: showPassword ? 'text' : 'password',
-            placeholder: 'Enter your password',
-            label: 'Password',
-            required: true,
-        },
     ];
 
     const inputElements = inputFields.map((field) => (
@@ -115,8 +103,6 @@ export default function UpdateAccountDetails() {
                 handleBlur={handleBlur}
                 handleChange={handleChange}
                 inputs={inputs}
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
             />
             {error[field.name] && (
                 <div className="text-red-500 text-xs font-medium">

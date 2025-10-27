@@ -39,8 +39,6 @@ import ActiveOrderCard from './Views/ActiveOrderCard';
 import AddSnackPopup from './Popups/AddSnack.Popup';
 import AddItemPopup from './Popups/AddItem.Popup';
 import EmailVerificationPopup from './Popups/EmailVerification.Popup';
-import EditContractorPopup from './Popups/EditContractor.Popup';
-import NewContractorPopup from './Popups/NewContractor.Popup';
 import OrderPlacedPopup from './Popups/OrderPlaced.Popup';
 import OrderUnavailablePopup from './Popups/OrderUnavailable.Popup';
 import EmptyCart from './Views/EmptyCart';
@@ -62,10 +60,12 @@ import PreparedHistory from './History/PreparedHistory';
 import PendingHistory from './History/PendingHistory';
 import RejectedHistory from './History/RejectedHistory';
 import StatsHistory from './History/StatsHistory';
-import OrderTotal from './Views/OrderTotal.jsx';
-import OrderItem from './Views/OrderItem.jsx';
-import OrderStudentInfo from './Views/OrderStudentInfo.jsx';
-import ExtraChargeUpdate from './Views/ExtraChargeUpdate.jsx';
+import OrderTotal from './Views/OrderTotal';
+import OrderItem from './Views/OrderItem';
+import OrderStudentInfo from './Views/OrderStudentInfo';
+import ExtraChargeUpdate from './Views/ExtraChargeUpdate';
+import NewOrders from './Today/NewOrders';
+import NewOrderCard from './Views/NewOrderCard';
 
 export {
     Header,
@@ -113,8 +113,6 @@ export {
     AddSnackPopup,
     AddItemPopup,
     EmailVerificationPopup,
-    EditContractorPopup,
-    NewContractorPopup,
     EmptyCart,
     OrderPlacedPopup,
     StudentBillCard,
@@ -136,4 +134,6 @@ export {
     OrderTotal,
     OrderStudentInfo,
     ExtraChargeUpdate,
+    NewOrders,
+    NewOrderCard,
 };

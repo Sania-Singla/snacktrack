@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { adminService } from '../../Services';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../Components';
-import { icons } from '../../Assets/icons';
 import { usePopupContext } from '../../Contexts';
 import { LOGO_SVG, USER_PLACEHOLDER_IMAGE } from '../../Constants';
 import toast from 'react-hot-toast';
@@ -68,7 +67,7 @@ export default function AdminPage() {
                         </div>
                     </div>
 
-                    <div className="flex gap-2 flex-col h-fit self-end">
+                    <div className="self-end">
                         <Button
                             btnText="Details"
                             className="bg-[#4977ec] px-2 py-1 rounded-md shadow-xs text-white"
@@ -80,40 +79,6 @@ export default function AdminPage() {
                                 });
                             }}
                         />
-
-                        {/* <Button
-                            btnText={
-                                <div className="size-4 fill-none stroke-black group-hover:stroke-[#4977ec]">
-                                    {icons.editUnfilled}
-                                </div>
-                            }
-                            className="bg-[#f0efef] p-2 group rounded-md shadow-xs hover:bg-[#ebeaea]"
-                            onClick={() => {
-                                setShowPopup(true);
-                                setPopupInfo({
-                                    type: 'editContractor',
-                                    contractor: canteen.contractor,
-                                });
-                            }}
-                        /> */}
-
-                        {/* add edit password instead ✨✨ but think about a proper reset mechanism ki koi aur kisi ki canteen ka password edit na kr paye */}
-                        {/* <Button
-                            btnText={
-                                <div className="size-[14px] group-hover:fill-[#4977ec]">
-                                    {icons.delete}
-                                </div>
-                            }
-                            className="bg-[#f0efef] p-2 group rounded-md shadow-xs hover:bg-[#ebeaea]"
-                            onClick={() => {
-                                setShowPopup(true);
-                                setPopupInfo({
-                                    type: 'newContractor',
-                                    contractor: canteen.contractor,
-                                    autoFill: false,
-                                });
-                            }}
-                        /> */}
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@ import {
     useSocketContext,
     useUserContext,
 } from '../../Contexts';
-import { checkTokenExpired, paginate, playSound } from '../../Utils';
+import { checkTokenExpired, paginate } from '../../Utils';
 import { icons } from '../../Assets/icons';
 import toast from 'react-hot-toast';
 import { orderService } from '../../Services';
@@ -77,11 +77,8 @@ export default function Pending() {
     useEffect(() => {
         if (!socket) return;
 
-        async function newOrder(o) {
-            // !!⚠️⚠️⚠️⚠️⚠️⚠️!!!!!!!!!!!!!!!!!!!!!!!!! show popup
-
+        function orderPending(o) {
             setOrders((prev) => [o, ...prev]);
-            await playSound();
         }
 
         function orderPrepared({ orderId, order }) {
@@ -104,14 +101,14 @@ export default function Pending() {
             );
         }
 
-        socket.on(SOCKET_EVENTS.NEW_ORDER, newOrder);
+        socket.on(SOCKET_EVENTS.ORDER_PENDING, orderPending);
         socket.on(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
         socket.on(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
         socket.on(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);
         socket.on(SOCKET_EVENTS.EXTRA_CHARGES_UPDATED, extraChargeUpdated);
 
         return () => {
-            socket.off(SOCKET_EVENTS.NEW_ORDER, newOrder);
+            socket.off(SOCKET_EVENTS.ORDER_PENDING, orderPending);
             socket.off(SOCKET_EVENTS.ORDER_PREPARED, orderPrepared);
             socket.off(SOCKET_EVENTS.ORDER_PICKEDUP, orderPickedUp);
             socket.off(SOCKET_EVENTS.ORDER_REJECTED, orderRejected);

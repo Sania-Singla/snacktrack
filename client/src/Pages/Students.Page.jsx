@@ -17,6 +17,7 @@ export default function StudentsPage() {
     const paginateRef = paginate(studentsInfo?.hasNextPage, loading, setPage);
 
     useEffect(() => {
+        setStudents([]);
         setPage(1);
     }, [debouncedSearch]);
 
@@ -105,6 +106,7 @@ export default function StudentsPage() {
                     ))}
                 </div>
             )}
+
             {loading ? (
                 <div className="flex justify-center py-12">
                     <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">

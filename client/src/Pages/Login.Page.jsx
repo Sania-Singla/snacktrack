@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useUserContext } from '../Contexts';
-import { userService } from '../Services';
+import { studentService, userService } from '../Services';
 import { Button, Dropdown, InputField } from '../Components';
 import { icons } from '../Assets/icons';
 import toast from 'react-hot-toast';
@@ -80,7 +80,7 @@ export default function LoginPage() {
         setLoading(true);
         setDisabled(true);
         try {
-            const res = await userService.login({
+            const res = await studentService.login({
                 userName: `${hostel}-${inputs.userName}`,
                 password: inputs.password,
             });
@@ -108,7 +108,7 @@ export default function LoginPage() {
             const decode = await readQR(files[0]);
             setLoading(true);
 
-            const res = await userService.loginByQR(decode);
+            const res = await studentService.loginByQR(decode);
 
             if (res && !res.message) {
                 toast.success('Logged in Successfully 😉');

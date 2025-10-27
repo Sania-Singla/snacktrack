@@ -21,6 +21,15 @@ class OrderService {
         });
     }
 
+    async acceptOrder(orderId) {
+        return await fetchWrapper({
+            endPoint: `/orders/accept/${orderId}`,
+            method: 'PATCH',
+            credentials: 'include',
+            aim: 'acceptOrder',
+        });
+    }
+
     async updateExtraCharges({ orderId, extraCharges }) {
         return await fetchWrapper({
             endPoint: `/orders/extra-charges/${orderId}`,
@@ -63,6 +72,16 @@ class OrderService {
             signal,
             credentials: 'include',
             aim: 'getCanteenOrders',
+        });
+    }
+
+    async getNewOrders({ canteenId, signal }) {
+        return await fetchWrapper({
+            endPoint: `/orders/canteen/new/${canteenId}`,
+            method: 'GET',
+            signal,
+            credentials: 'include',
+            aim: 'getNewOrders',
         });
     }
 

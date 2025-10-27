@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
-import { contractorService } from '../Services';
+import { adminService } from '../Services';
 import { Link } from 'react-router-dom';
 import { Button, InputField } from '../Components';
 import { verifyExpression, checkTokenExpired } from '../Utils';
@@ -72,15 +72,23 @@ export default function RegisterStudentPage() {
         setDisabled(true);
         setError({});
         try {
-            const res = await contractorService.registerStudent({
+            const res = await adminService.registerStudent({
                 ...inputs,
                 hostelType: user.hostelType,
                 hostelNumber: user.hostelNumber,
             });
             if (res && !res.message) {
-                toast.success('Account created successfully');
-                setInputs(initialInputs);
-                setPhoneKey((prev) => prev + 1);
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const name = `${inputs.rollNo}_qr.png`;
+                a.download = name;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                toast.success('Account created Successfully');
             } else if (res && res.message !== 'tokens missing') {
                 setError((prev) => ({ ...prev, root: res.message }));
             } else checkTokenExpired(res, setUser);

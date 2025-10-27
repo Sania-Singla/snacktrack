@@ -4,6 +4,7 @@ import { contractorService } from './contractor.Service';
 import { userService } from './user.Service';
 import { billService } from './bill.Service';
 import { adminService } from './admin.Service';
+import { studentService } from './student.Service';
 
 export {
     snackService,
@@ -12,4 +13,5 @@ export {
     userService,
     billService,
     adminService,
+    studentService,
 };

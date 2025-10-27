@@ -1,7 +1,7 @@
 import { Button, InputField } from '..';
 import { usePopupContext, useUserContext } from '../../Contexts';
 import { icons } from '../../Assets/icons';
-import { contractorService } from '../../Services';
+import { adminService } from '../../Services';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { checkTokenExpired } from '../../Utils';
@@ -32,7 +32,7 @@ export default function RemoveAllStudentsPopup() {
         setLoading(true);
         setDisabled(true);
         try {
-            const res = await contractorService.removeAllStudents(password);
+            const res = await adminService.removeAllStudents(password);
             if (res && res.message === 'all students removed successfully') {
                 toast.success('All students removed successfully');
             } else if (res && res.message !== 'tokens missing') {
