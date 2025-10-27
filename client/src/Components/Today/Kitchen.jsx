@@ -204,7 +204,7 @@ export default function Kitchen({ showOrderSide, setShowOrderSide }) {
                         <Resizable
                             defaultSize={{ width: '30%' }}
                             enable={{ left: true }}
-                            className="max-w-full min-w-full lg:min-w-[30%] lg:max-w-[50%] grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4"
+                            className="max-w-full min-w-full grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4"
                         >
                             {orderElements}
                         </Resizable>
