@@ -10,10 +10,13 @@ import {
     verifyExpression,
     ErrorHandler,
     verifyQR,
+    genQR,
 } from '../Utils/index.js';
 import { generateTokens } from '../Helpers/index.js';
 import { Student, Contractor } from '../Models/index.js';
 import bcrypt from 'bcryptjs';
+import path from 'path';
+import fs from 'fs';
 
 export const login = tryCatch('login student', async (req, res) => {
     const { userName, password } = req.body;
@@ -125,14 +128,40 @@ export const loginFromQR = tryCatch(
     }
 );
 
-export const updatePassword = tryCatch('update password', async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
-    const { password, _id, role } = req.user;
+// export const updatePassword = tryCatch('update password', async (req, res) => {
+//     const { oldPassword, newPassword } = req.body;
+//     const { password, _id, role } = req.user;
 
-    const isPassValid = bcrypt.compareSync(oldPassword, password);
-    if (!isPassValid) {
-        throw new ErrorHandler('invalid credentials', BAD_REQUEST);
+//     const isPassValid = bcrypt.compareSync(oldPassword, password);
+//     if (!isPassValid) {
+//         throw new ErrorHandler('invalid credentials', BAD_REQUEST);
+//     }
+
+//     const isValid = verifyExpression('password', newPassword);
+//     if (!isValid) throw new ErrorHandler('invalid password', BAD_REQUEST);
+
+//     // hash new password
+//     const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
+
+//     const Model = role === 'contractor' ? Contractor : Student;
+//     await Model.findByIdAndUpdate(_id, {
+//         $set: { password: hashedNewPassword },
+//     });
+
+//     return res.status(OK).json({ message: 'password updated successfully' });
+// });
+
+export const updatePassword = tryCatch('update password', async (req, res) => {
+    const { token, newPassword } = req.body;
+    const { password, _id, role } = req.user;
+    const isQRValid = await verifyQR({
+        token: token,
+        passHash: password,
+    });
+    if (!isQRValid) {
+        throw new ErrorHandler('invalid QR', BAD_REQUEST);
     }
+
 
     const isValid = verifyExpression('password', newPassword);
     if (!isValid) throw new ErrorHandler('invalid password', BAD_REQUEST);
@@ -140,10 +169,40 @@ export const updatePassword = tryCatch('update password', async (req, res) => {
     // hash new password
     const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
 
+    let qrDataURL = null;
+
+    if (role === 'student') {
+        qrDataURL = await genQR({
+            _id,
+            passHash: hashedNewPassword,
+        });
+    }
+
     const Model = role === 'contractor' ? Contractor : Student;
     await Model.findByIdAndUpdate(_id, {
         $set: { password: hashedNewPassword },
     });
 
-    return res.status(OK).json({ message: 'password updated successfully' });
+    const base64Data = qrDataURL.replace(/^data:image\/png;base64,/, '');
+
+    const fileName = 'myUpdatedQR.png';
+
+    const tempDir = path.join(process.cwd(), 'public', 'temp');
+
+    if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+    }
+
+    const qrFilePath = path.join(tempDir, fileName);
+    fs.writeFileSync(qrFilePath, base64Data, 'base64');
+
+    res.download(qrFilePath, fileName, (err) => {
+        if (err) {
+            console.error('Error sending file:', err);
+        }
+        fs.unlink(qrFilePath, (unlinkErr) => {
+            if (unlinkErr)
+                console.error('Failed to delete temp QR file:', unlinkErr);
+        });
+    });
 });
