@@ -21,16 +21,6 @@ class StudentService {
         });
     }
 
-    // async updatePassword({ oldPassword, newPassword }) {
-    //     return await fetchWrapper({
-    //         endPoint: `/students/password`,
-    //         method: 'PATCH',
-    //         credentials: 'include',
-    //         body: { newPassword, oldPassword },
-    //         aim: 'updatePassword',
-    //     });
-    // }
-
     async updatePassword({ token, newPassword }) {
         return await fetchWrapper({
             endPoint: `/students/password`,

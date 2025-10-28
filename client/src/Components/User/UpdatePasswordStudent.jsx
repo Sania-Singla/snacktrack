@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import { getRollNo, readQR, verifyExpression } from '../../Utils';
 import { icons } from '../../Assets/icons';
 import InputField from '../General/InputField';
@@ -10,6 +10,7 @@ import { useUserContext } from '../../Contexts/User.Context';
 export default function UpdatePasswordStudent() {
     const [disabled, setDisabled] = useState(false);
     const [token, setToken] = useState('');
+    const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const initialInputs = {
         newPassword: '',
@@ -44,17 +45,23 @@ export default function UpdatePasswordStudent() {
         setDisabled(true);
         try {
             const files = e.target.files;
-
             if (!files || files.length === 0) return;
 
             const decode = await readQR(files[0]);
             setToken(decode.token);
+            setFile(files[0]);
             toast.success('QR uploaded successfully');
-        } catch (error) {
-            toast.error('Something went wrong. Please try again.');
+        } catch (err) {
+            if (err.message === 'No QR code found') {
+                toast.error('No QR code found');
+            } else {
+                toast.error('Something went wrong. Please try again.');
+            }
         }
     }
     async function handleSubmit(e) {
+        e.preventDefault();
+
         setLoading(true);
         setDisabled(true);
         try {
@@ -62,8 +69,6 @@ export default function UpdatePasswordStudent() {
                 token,
                 newPassword: inputs.newPassword,
             });
-
-            console.log(res);
 
             if (res && !res.message) {
                 const blob = await res.blob();
@@ -77,8 +82,8 @@ export default function UpdatePasswordStudent() {
                 a.remove();
                 URL.revokeObjectURL(url);
                 toast.success('Password Updated Successfully.');
-            } else toast.error('Error Updating Password');
-        } catch (error) {
+            } else toast.error(res.message);
+        } catch (err) {
             toast.error('Something went wrong. Please try again.');
         } finally {
             setLoading(false);
@@ -134,59 +139,67 @@ export default function UpdatePasswordStudent() {
     ));
 
     return (
-        <div className="rounded-md border-1 border-gray-200 shadow-xs flex flex-col sm:flex-row bg-white py-7 px-6 sm:gap-14">
-            <div className="w-full">
-                <h3 className="text-xl font-semibold">Password</h3>
-                <p className="mt-4 text-gray-600">
-                    Renew your QR by changing your password.
-                </p>
-            </div>
-            <div className="w-full">
-                <input
-                    type="file"
-                    multiple={false}
-                    className="hidden"
-                    accept="image/*"
-                    name="qr"
-                    id="qr"
-                    onChange={handleUpload}
-                    onClick={(e) => (e.target.value = null)}
-                />
+        <div className="w-full p-2">
+            <div className="rounded-md border-1 border-gray-200 shadow-xs flex flex-col sm:flex-row bg-white py-7 px-6 sm:gap-14">
+                <div className="w-full">
+                    <h3 className="text-xl font-semibold">Password</h3>
+                    <p className="mt-4 text-gray-600">
+                        Renew your QR by changing your password.
+                    </p>
+                </div>
+                <form onSubmit={handleSubmit} className="w-full max-w-[600px]">
+                    <input
+                        type="file"
+                        multiple={false}
+                        className="hidden"
+                        accept="image/*"
+                        name="qr"
+                        id="qr"
+                        onChange={handleUpload}
+                        onClick={(e) => (e.target.value = null)}
+                    />
 
-                <label
-                    htmlFor="qr"
-                    className="border mt-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
-                >
-                    <span className="text-[#4977ec] text-[15px] font-medium">
-                        Upload Old QR
-                    </span>
-                    <div className="size-5.5 fill-[#4977ec]">
-                        {icons.upload}
-                    </div>
-                </label>
-
-                {inputElements}
-
-                <Button
-                    btnText={
-                        loading ? (
-                            <div className="flex items-center justify-center w-full">
-                                <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
-                                    {icons.loading}
-                                </div>
-                            </div>
+                    <label
+                        htmlFor="qr"
+                        className="border my-3 h-10 flex gap-2.5 items-center justify-center transition-all duration-200 hover:bg-[#4977ec]/10 active:scale-[98%] cursor-pointer text-center border-[#4977ec] rounded-md w-full"
+                    >
+                        {file ? (
+                            <p className="text-[#4977ec] font-medium text-sm">
+                                {file.name}
+                            </p>
                         ) : (
-                            'Update'
-                        )
-                    }
-                    type="submit"
-                    onClick={handleSubmit}
-                    disabled={disabled}
-                    onMouseOver={onMouseOver}
-                    className="text-white rounded-md h-9 w-full bg-[#4977ec] hover:bg-[#3b62c2] mt-3"
-                />
+                            <>
+                                <span className="text-[#4977ec] text-[15px] font-medium">
+                                    Upload Old QR
+                                </span>
+                                <div className="size-5.5 fill-[#4977ec]">
+                                    {icons.upload}
+                                </div>
+                            </>
+                        )}
+                    </label>
+
+                    <div className="flex flex-col gap-2">{inputElements}</div>
+
+                    <Button
+                        btnText={
+                            loading ? (
+                                <div className="flex items-center justify-center w-full">
+                                    <div className="size-5 fill-[#4977ec] dark:text-[#a2bdff]">
+                                        {icons.loading}
+                                    </div>
+                                </div>
+                            ) : (
+                                'Update'
+                            )
+                        }
+                        type="submit"
+                        disabled={disabled}
+                        onMouseOver={onMouseOver}
+                        className="text-white rounded-md h-9 w-full bg-[#4977ec] hover:bg-[#3b62c2] mt-6"
+                    />
+                </form>
             </div>
         </div>
     );
 }
-
