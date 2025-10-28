@@ -116,7 +116,7 @@ export const placeOrderByQR = tryCatch(
             throw new ErrorHandler('invalid qr code', NOT_FOUND);
         }
 
-        verifyQR({ token, passHash: student.password });
+        await verifyQR({ token, passHash: student.password });
 
         if (!student.canteenId.isOpen) {
             throw new ErrorHandler('canteen is closed', FORBIDDEN);
