@@ -18,7 +18,6 @@ const canteenSchema = new Schema(
         hostelName: {
             type: String,
             required: true,
-            unique: true,
             trim: true,
         },
         hostelNumber: {

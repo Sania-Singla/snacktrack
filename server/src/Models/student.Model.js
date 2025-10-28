@@ -9,12 +9,11 @@ const studentSchema = new Schema(
             required: true,
             ref: 'Canteen',
         },
+        // ex: GH8-75
         userName: {
-            // ex: GH8-75
             type: String,
             unique: true,
             required: true,
-            index: true,
             trim: true,
         },
         fullName: {
@@ -42,18 +41,11 @@ const studentSchema = new Schema(
             type: String,
             default: '',
         },
-        qr: {
-            // token not base64 image
-            type: String,
-            default: '',
-        },
     },
     { timestamps: true }
 );
 
-studentSchema.index({ canteenId: 1, fullName: 1 }); // If you search students by name
-studentSchema.index({ canteenId: 1, userName: 1 }); // If you search students by userName
-studentSchema.index({ canteenId: 1 }); // If you show all students
+studentSchema.index({ canteenId: 1 });
 
 studentSchema.plugin(mongooseAggregatePaginate);
 

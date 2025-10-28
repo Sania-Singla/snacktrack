@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 import { Button, EmptyCart } from '../Components';
 import { useNavigate } from 'react-router-dom';
 import { icons } from '../Assets/icons';
-import { SNACK_PLACEHOLDER_IMAGE, SOCKET_EVENTS } from '../Constants';
+import { SNACK_PLACEHOLDER_IMAGE } from '../Constants';
 import { orderService } from '../Services';
 import {
     usePopupContext,
-    useSocketContext,
     useStudentContext,
     useUserContext,
 } from '../Contexts';
@@ -20,23 +19,6 @@ export default function CartPage() {
     const { cartItems, setCartItems, setOrderPlaced } = useStudentContext();
     const [loading, setLoading] = useState(true);
     const { user, setUser } = useUserContext();
-    const { socket } = useSocketContext();
-
-    useEffect(() => {
-        if (!socket) return;
-
-        socket.on(
-            SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED,
-            ({ isOpen, canteenId }) => {
-                if (user.canteenId !== canteenId) return;
-                setUser((prevUser) => ({ ...prevUser, isOpen }));
-            }
-        );
-
-        return () => {
-            socket.off(SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED);
-        };
-    }, [socket]);
 
     async function checkAvailability() {
         try {

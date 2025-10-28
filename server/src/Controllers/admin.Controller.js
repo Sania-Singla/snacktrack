@@ -322,7 +322,7 @@ export const updateAccountDetails = tryCatch(
 export const registerStudent = tryCatch(
     'register student',
     async (req, res) => {
-        const contractor = req.user; // only contractor can register a student
+        const contractor = req.user; 
         const {
             fullName,
             rollNo,
@@ -382,7 +382,7 @@ export const registerStudent = tryCatch(
 
         const base64Data = qrDataURL.replace(/^data:image\/png;base64,/, '');
 
-        const fileName =`${getRollNo(student.userName)}.png`;
+        const fileName = `${getRollNo(student.userName)}.png`;
 
         const tempDir = path.join(process.cwd(), 'public', 'temp');
 
@@ -394,13 +394,15 @@ export const registerStudent = tryCatch(
         fs.writeFileSync(qrFilePath, base64Data, 'base64');
 
         return res.download(qrFilePath, fileName, (err) => {
+            fs.unlink(qrFilePath, (unlinkErr) => {
+                if (unlinkErr) {
+                    console.error('Failed to delete temp QR file:', unlinkErr);
+                }
+            });
+
             if (err) {
                 console.error('Error sending file:', err);
             }
-            fs.unlink(qrFilePath, (unlinkErr) => {
-                if (unlinkErr)
-                    console.error('Failed to delete temp QR file:', unlinkErr);
-            });
         });
     }
 );

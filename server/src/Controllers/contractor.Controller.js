@@ -18,14 +18,17 @@ export const changeCanteenStatus = tryCatch(
         const contractor = req.user;
         const { status } = req.body;
 
-        await Canteen.findByIdAndUpdate(contractor.canteenId, {
-            isOpen: status,
-        });
+        await Canteen.findByIdAndUpdate(
+            contractor.canteenId,
+            { $set: { isOpen: status } },
+            { new: false }
+        );
 
         io.emit(SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED, {
             isOpen: status,
             canteenId: contractor.canteenId,
         });
+        
         return res.status(OK).json({
             message: `canteen ${status ? 'opened' : 'closed'} successfully`,
         });
