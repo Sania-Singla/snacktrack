@@ -85,7 +85,7 @@ export const loginFromQR = tryCatch(
         }
 
         const student = await Student.findById(_id)
-            .populate('canteenId', 'hostelName hostelNumber hostelType')
+            .populate('canteenId', 'hostelName hostelNumber hostelType isOpen')
             .select('-refreshToken')
             .lean();
 
