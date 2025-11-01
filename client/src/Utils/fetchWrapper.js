@@ -27,7 +27,7 @@ export async function fetchWrapper({
 
         if (contentType?.includes('json')) {
             const data = await res.json();
-            console.log(data);
+            // console.log(data);
             if (res.status === SERVER_ERROR) throw new Error(data.message);
             else return data;
         } else {
@@ -35,9 +35,9 @@ export async function fetchWrapper({
         }
     } catch (err) {
         if (err.name === 'AbortError') {
-            console.log(`${aim} request aborted with end point: ${endPoint}.`);
+            // console.log(`${aim} request aborted with end point: ${endPoint}.`);
         } else {
-            console.error(`error in ${aim} service`, err.message);
+            // console.error(`error in ${aim} service`, err.message);
             throw err;
         }
     }

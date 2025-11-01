@@ -49,7 +49,6 @@ export default function IntermediateBillPopup() {
                 toast.error('Error getting file');
             }
         } catch (err) {
-            console.log(err);
             toast.error('Something went wrong. Please try again.');
         } finally {
             setLoading(false);
