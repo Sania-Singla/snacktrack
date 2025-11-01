@@ -24,6 +24,7 @@ export default function BillsPage() {
     const paginateRef = paginate(billsInfo?.hasNextPage, loading, setPage);
 
     useEffect(() => {
+        setBills([]);
         setPage(1);
     }, [monthFilter, debouncedSearch]);
 

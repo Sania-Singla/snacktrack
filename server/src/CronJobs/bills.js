@@ -3,10 +3,10 @@ import cron from 'node-cron';
 import moment from 'moment-timezone';
 import { TAX } from '../Constants/index.js';
 
-async function generateBills() {
+export async function generateBills() {
     try {
         const lastMonth = moment().tz('Asia/Kolkata').subtract(1, 'month');
-        const month = lastMonth.month() + 1; // month is 0-indexed in moment.js
+        const month = lastMonth.month() + 1;
         const year = lastMonth.year();
 
         console.log(`📅 Generating bills for ${month}/${year}`);
@@ -14,46 +14,47 @@ async function generateBills() {
         const studentsWithOrders = await Order.aggregate([
             {
                 $match: {
-                    status: 'Prepared',
+                    status: { $in: ['Prepared', 'PickedUp'] },
                     createdAt: {
-                        $gte: lastMonth.clone().startOf('month').utc().toDate(),
-                        $lte: lastMonth.clone().endOf('month').utc().toDate(),
+                        $gte: lastMonth.clone().startOf('month').toDate(),
+                        $lte: lastMonth.clone().endOf('month').toDate(),
                     },
                 },
             },
             {
                 $group: {
                     _id: '$studentId',
-                    totalAmount: { $sum: '$amount' }, // sum of all amounts
-                    totalExtra: { $sum: '$extraCharges' }, // sum of extra charges
+                    totalAmount: { $sum: '$amount' },
+                    totalExtra: { $sum: '$extraCharges' },
                     canteenId: { $first: '$canteenId' },
                 },
             },
         ]);
 
-        if (studentsWithOrders.length) {
-            console.log(
-                `👥 Found ${studentsWithOrders.length} students with orders.`
-            );
-        } else {
+        console.log(studentsWithOrders);
+
+        if (!studentsWithOrders.length) {
             console.log('ℹ️ No students with prepared orders for this period.');
             return;
         }
 
+        console.log(
+            `👥 Found ${studentsWithOrders.length} students with orders.`
+        );
+
         const operations = studentsWithOrders.map((student) => {
             const subtotal = student.totalAmount + student.totalExtra;
-            const grandTotal = subtotal + subtotal * TAX;
+            const tax = subtotal * TAX;
+            const grandTotal = subtotal + tax;
 
             return {
                 updateOne: {
                     filter: { studentId: student._id, month, year },
                     update: {
+                        $set: { amount: subtotal, tax, grandTotal },
                         $setOnInsert: {
                             studentId: student._id,
                             canteenId: student.canteenId,
-                            amount: subtotal,
-                            tax: subtotal * TAX,
-                            grandTotal,
                             month,
                             year,
                         },
@@ -116,7 +117,6 @@ export const startBillingCronJob = () => {
 
 export const startCleanupCronJob = () => {
     // console.log('🧹 Cleanup scheduled on 2nd of every month at 12:05 AM');
-
     // return cron.schedule(
     //     '5 0 2 * *',
     //     async () => {
