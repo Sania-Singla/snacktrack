@@ -22,7 +22,11 @@ export default function AccessTo({ roles = [] }) {
     }
 
     if (roles.length && !roles.includes(user.role)) {
-        return <Navigate to={'/not-found'} replace />;
+        if (location.pathname.includes('admin')) {
+            return <Navigate to="/admin/verify-key" replace />;
+        } else {
+            return <Navigate to={'/not-found'} replace />;
+        }
     }
 
     return <Outlet />;
