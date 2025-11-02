@@ -31,8 +31,6 @@ export async function generateBills() {
             },
         ]);
 
-        console.log(studentsWithOrders);
-
         if (!studentsWithOrders.length) {
             console.log('ℹ️ No students with prepared orders for this period.');
             return;

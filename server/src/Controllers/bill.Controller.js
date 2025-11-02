@@ -172,7 +172,7 @@ export const generateIntermediateBill = tryCatch(
                             .endOf('month')
                             .toDate(),
                     },
-                    status: 'Prepared',
+                    status: { $in: ['Prepared', 'PickedUp'] },
                 },
             },
             {
@@ -221,7 +221,7 @@ export const generateIntermediateBillsForAll = tryCatch(
                             .endOf('month')
                             .toDate(),
                     },
-                    status: 'Prepared',
+                    status: { $in: ['Prepared', 'PickedUp'] },
                 },
             },
             {
@@ -248,7 +248,7 @@ export const generateIntermediateBillsForAll = tryCatch(
             fullName: studentMap[b._id]?.fullName,
             rollNo: getRollNo(studentMap[b._id]?.userName) || '-',
             subtotal: b.subtotal,
-            taxes: b.tax,
+            tax: b.tax,
             grandTotal: b.grandTotal,
         }));
 
@@ -258,8 +258,8 @@ export const generateIntermediateBillsForAll = tryCatch(
         worksheet.columns = [
             { header: 'Full Name', key: 'fullName', width: 20 },
             { header: 'Roll No', key: 'rollNo', width: 10 },
-            { header: 'Sub total', key: 'subtotal', width: 25 },
-            { header: 'Taxes', key: 'taxes', width: 25 },
+            { header: 'Sub Total', key: 'subtotal', width: 25 },
+            { header: 'Tax', key: 'tax', width: 25 },
             { header: 'Grand Total', key: 'grandTotal', width: 25 },
         ];
 
@@ -280,7 +280,7 @@ export const generateIntermediateBillsForAll = tryCatch(
 
         return res.download(filePath, fileName, (err) => {
             if (err) console.error('Error sending file:', err);
-            fs.unlink(filePath, () => {}); // delete temp file
+            fs.unlink(filePath, () => {});
         });
     }
 );
