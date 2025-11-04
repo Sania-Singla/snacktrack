@@ -4,6 +4,7 @@ import Sidebar from './Layout/Sidebar';
 import Layout from './Layout/Layout';
 import Searchbar from './General/Searchbar';
 import Cart from './General/Cart';
+import StatusBadge from './General/StatusBadge';
 import DateBadge from './General/DateBadge';
 import AudioBtn from './Today/AudioBtn';
 import CalendarFilter from './General/CalendarFilter';
@@ -71,6 +72,7 @@ export {
     Header,
     Footer,
     Cart,
+    StatusBadge,
     DateBadge,
     OrderUnavailablePopup,
     Sidebar,

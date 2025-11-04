@@ -34,6 +34,7 @@ export default function StudentOrdersPage() {
     }, []);
 
     useEffect(() => {
+        setOrders([]);
         setPage(1);
     }, [dateFilter, studentId, debouncedSearch]);
 

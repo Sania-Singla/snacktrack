@@ -1,37 +1,14 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Logout, Searchbar, Cart } from '..';
-import {
-    useUserContext,
-    useSideBarContext,
-    useSocketContext,
-} from '../../Contexts';
-import { LOGO_SVG, SOCKET_EVENTS } from '../../Constants';
+import { Button, Searchbar, Cart, StatusBadge } from '..';
+import { useUserContext, useSideBarContext } from '../../Contexts';
+import { LOGO_SVG } from '../../Constants';
 import { icons } from '../../Assets/icons';
-import { contractorService } from '../../Services';
-import { useEffect } from 'react';
 
 export default function Header() {
-    const { user, setUser } = useUserContext();
+    const { user } = useUserContext();
     const { pathname } = useLocation();
     const { setShowSideBar } = useSideBarContext();
     const navigate = useNavigate();
-    const { socket } = useSocketContext();
-
-    useEffect(() => {
-        if (!socket) return;
-
-        socket.on(
-            SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED,
-            ({ isOpen, canteenId }) => {
-                if (user.canteenId !== canteenId) return;
-                setUser((prev) => ({ ...prev, isOpen }));
-            }
-        );
-
-        return () => {
-            socket.off(SOCKET_EVENTS.CANTEEN_OPEN_STATUS_CHANGED);
-        };
-    }, [socket]);
 
     const staticPages = ['/settings', '/statistics', '/cart'];
 
@@ -75,32 +52,7 @@ export default function Header() {
 
             <div className="flex gap-3 items-center">
                 <div className="flex gap-3 items-center">
-                    {user.role === 'contractor' ? (
-                        <Button
-                            onClick={async () => {
-                                await contractorService.changeCanteenStatus(
-                                    !user.isOpen
-                                );
-                            }}
-                            btnText={
-                                <div className="flex items-center justify-center gap-1.5">
-                                    {user.isOpen
-                                        ? 'Close Canteen'
-                                        : 'Open Canteen'}
-                                </div>
-                            }
-                            title={
-                                user.isOpen ? 'Close Canteen' : 'Open Canteen'
-                            }
-                            className={`text-white rounded-md w-fit text-nowrap px-2 h-7 text-sm font-normal ${user.isOpen ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
-                        />
-                    ) : (
-                        <p
-                            className={`rounded-md w-fit text-nowrap px-2 py-1 text-sm font-medium ${user.isOpen ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}
-                        >
-                            {user.isOpen ? 'Open' : 'Closed'}
-                        </p>
-                    )}
+                    <StatusBadge />
 
                     {user.role === 'admin' && (
                         <Button
@@ -136,11 +88,6 @@ export default function Header() {
                         </div>
                     )}
                 </div>
-                {user.role === 'student' && (
-                    <div className="hidden md:block">
-                        <Logout />
-                    </div>
-                )}
             </div>
         </header>
     );
