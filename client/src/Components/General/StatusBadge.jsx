@@ -24,7 +24,7 @@ export default function StatusBadge() {
         };
     }, [socket]);
 
-    return user.role !== 'contractor' ? (
+    return user.role === 'contractor' ? (
         <Button
             onClick={async () => {
                 await contractorService.changeCanteenStatus(!user.isOpen);
