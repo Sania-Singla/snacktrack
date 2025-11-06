@@ -41,8 +41,8 @@ export default function StatusBadge() {
         <p
             className={`rounded-md w-fit text-nowrap px-2 py-0.5 text-sm font-medium border ${
                 user.isOpen
-                    ? 'text-green-700 border-green-400 bg-green-50 shadow-[0_0_8px_rgba(34,197,94,0.4)] animate-glow-green'
-                    : 'text-red-700 border-red-400 bg-red-50 shadow-[0_0_8px_rgba(239,68,68,0.4)] animate-glow-red'
+                    ? 'text-green-700 border-green-400 bg-green-50'
+                    : 'text-red-700 border-red-400 bg-red-50'
             }`}
         >
             {user.isOpen ? 'Open' : 'Closed'}
