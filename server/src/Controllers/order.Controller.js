@@ -1089,6 +1089,7 @@ export const getOrderStats = tryCatch('get order stats', async (req, res) => {
 
     const result = {
         Total: 0,
+        New: 0,
         Pending: 0,
         Prepared: 0,
         PickedUp: 0,

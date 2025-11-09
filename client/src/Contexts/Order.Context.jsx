@@ -10,6 +10,7 @@ const OrderContextProvider = ({ children }) => {
     const [monthFilter, setMonthFilter] = useState(new Date().getMonth() + 1);
     const [stats, setStats] = useState({
         Total: 0,
+        New: 0,
         incomplete: 0, // both pending (even partially ready) and prepared
         Pending: 0,
         Prepared: 0,

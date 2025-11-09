@@ -37,7 +37,7 @@ export default function HistoryPage() {
                 <div className="flex items-center gap-3">
                     <CalendarFilter maxDate={yesterday} />
                     <div className="text-nowrap text-center border-1 border-gray-200 rounded-md px-2 py-1 text-sm bg-white text-[#4977ec] font-medium">
-                        Total Orders: {stats.Total}
+                        Total Orders: {stats.Total - stats.New}
                     </div>
                 </div>
             </div>
