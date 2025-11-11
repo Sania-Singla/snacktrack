@@ -144,13 +144,29 @@ export default function PackagedItems() {
 
     if (loading) return null;
 
-    return items.length === 0 ? (
-        <div className="italic text-center text-gray-600">No items found</div>
-    ) : (
-        <div className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}>
-            {items.map((item, i) => (
-                <PackagedItemView key={item._id} item={item} />
-            ))}
-        </div>
+    return (
+        <>
+            <div
+                className={`grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3`}
+            >
+                {items.map((item, i) => (
+                    <PackagedItemView key={item._id} item={item} />
+                ))}
+            </div>
+
+            {loading ? (
+                <div className="flex justify-center py-12">
+                    <div className="size-[25px] fill-[#4977ec] dark:text-[#a2bdff]">
+                        {icons.loading}
+                    </div>
+                </div>
+            ) : (
+                items.length === 0 && (
+                    <div className="italic text-center text-gray-600">
+                        No items found
+                    </div>
+                )
+            )}
+        </>
     );
 }

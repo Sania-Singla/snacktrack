@@ -11,6 +11,7 @@ import { Snack, Student, PackagedFood, Canteen } from '../Models/index.js';
 import { Types } from 'mongoose';
 import fs from 'fs';
 import { io } from '../socket.js';
+import ExcelJS from 'exceljs';
 
 export const changeCanteenStatus = tryCatch(
     'change canteen status',
@@ -28,7 +29,7 @@ export const changeCanteenStatus = tryCatch(
             isOpen: status,
             canteenId: contractor.canteenId,
         });
-        
+
         return res.status(OK).json({
             message: `canteen ${status ? 'opened' : 'closed'} successfully`,
         });
@@ -175,6 +176,124 @@ export const addSnack = tryCatch('add snack', async (req, res) => {
     }
 });
 
+export const addBulkSnacks = tryCatch(
+    'bulk registration of snacks',
+    async (req, res) => {
+        const contractor = req.user;
+        const file = req.file?.path;
+        if (!file) {
+            throw new ErrorHandler('No Excel file uploaded', BAD_REQUEST);
+        }
+
+        let workbook, worksheet, rows;
+
+        try {
+            // --- Read Excel file ---
+            workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(file);
+            worksheet = workbook.worksheets[0];
+
+            const headers = worksheet.getRow(1).values.slice(1);
+            rows = [];
+
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return;
+                const rowData = {};
+
+                headers.forEach((header, index) => {
+                    const cell = row.getCell(index + 1);
+                    if (header && cell.value != null) {
+                        rowData[header] = (
+                            cell.text || String(cell.value)
+                        ).trim();
+                    }
+                });
+
+                if (rowData.name && rowData.price) {
+                    rows.push(rowData);
+                }
+            });
+
+            if (!rows.length) {
+                throw new ErrorHandler(
+                    'Invalid format. Ensure columns are: name & price',
+                    BAD_REQUEST
+                );
+            }
+
+            // --- Remove duplicate rows inside Excel itself ---
+            const seenNames = new Set();
+            const uniqueRows = [];
+
+            for (const r of rows) {
+                const normalizedName = r.name.toLowerCase().trim();
+                if (!seenNames.has(normalizedName)) {
+                    seenNames.add(normalizedName);
+                    uniqueRows.push(r);
+                }
+            }
+
+            if (!uniqueRows.length) {
+                throw new ErrorHandler('No valid rows found', BAD_REQUEST);
+            }
+
+            // Prepare duplicates check (DB-level)
+            const names = uniqueRows.map((u) => u.name.toLowerCase().trim());
+
+            const existing = await Snack.find({
+                canteenId: contractor.canteenId,
+                name: { $in: names },
+            })
+                .select('name')
+                .lean();
+
+            const existingSet = new Set(
+                existing.map((u) => u.name.toLowerCase())
+            );
+
+            // Build docs to insert
+            const docs = [];
+            for (let i = 0; i < uniqueRows.length; i++) {
+                const u = uniqueRows[i];
+                const name = u.name.toLowerCase().trim();
+                const price = Number(u.price);
+
+                if (isNaN(price)) continue; // invalid price row skip
+
+                if (!existingSet.has(name)) {
+                    docs.push({
+                        canteenId: contractor.canteenId,
+                        price,
+                        name,
+                    });
+                }
+            }
+
+            if (!docs.length) {
+                throw new ErrorHandler('No new snacks found', BAD_REQUEST);
+            }
+
+            // --- Insert into DB ---
+            const inserted = await Snack.insertMany(docs, {
+                ordered: false,
+            });
+
+            console.log(`Inserted ${inserted.length} snacks successfully`);
+
+            fs.unlinkSync(file);
+
+            return res.status(CREATED).json({
+                message: `Successfully added ${inserted.length} snacks`,
+            });
+        } catch (err) {
+            if (file && fs.existsSync(file)) {
+                fs.unlinkSync(file);
+            }
+            throw err;
+        }
+    }
+);
+
 export const deleteSnack = tryCatch('delete post', async (req, res) => {
     const { snackId } = req.params;
     const contractor = req.user;
@@ -307,6 +426,124 @@ export const addItem = tryCatch('add item', async (req, res) => {
 
     return res.status(CREATED).json(item);
 });
+
+export const addBulkItems = tryCatch(
+    'bulk registration of items',
+    async (req, res) => {
+        const contractor = req.user;
+        const file = req.file?.path;
+        if (!file) {
+            throw new ErrorHandler('No Excel file uploaded', BAD_REQUEST);
+        }
+
+        let workbook, worksheet, rows;
+
+        try {
+            // --- Read Excel file ---
+            workbook = new ExcelJS.Workbook();
+            await workbook.xlsx.readFile(file);
+            worksheet = workbook.worksheets[0];
+
+            const headers = worksheet.getRow(1).values.slice(1);
+            rows = [];
+
+            worksheet.eachRow((row, rowNumber) => {
+                if (rowNumber === 1) return;
+                const rowData = {};
+
+                headers.forEach((header, index) => {
+                    const cell = row.getCell(index + 1);
+                    if (header && cell.value != null) {
+                        rowData[header] = (
+                            cell.text || String(cell.value)
+                        ).trim();
+                    }
+                });
+
+                if (rowData.name && rowData.price) {
+                    rows.push(rowData);
+                }
+            });
+
+            if (!rows.length) {
+                throw new ErrorHandler(
+                    'Invalid format. Ensure columns are: name & price',
+                    BAD_REQUEST
+                );
+            }
+
+            // --- Remove duplicate rows inside Excel itself ---
+            const seenNames = new Set();
+            const uniqueRows = [];
+
+            for (const r of rows) {
+                const normalizedName = r.name.toLowerCase().trim();
+                if (!seenNames.has(normalizedName)) {
+                    seenNames.add(normalizedName);
+                    uniqueRows.push(r);
+                }
+            }
+
+            if (!uniqueRows.length) {
+                throw new ErrorHandler('No valid rows found', BAD_REQUEST);
+            }
+
+            // Prepare duplicates check (DB-level)
+            const names = uniqueRows.map((u) => u.name.toLowerCase().trim());
+
+            const existing = await PackagedFood.find({
+                canteenId: contractor.canteenId,
+                name: { $in: names },
+            })
+                .select('name')
+                .lean();
+
+            const existingSet = new Set(
+                existing.map((u) => u.name.toLowerCase())
+            );
+
+            // Build docs to insert
+            const docs = [];
+            for (let i = 0; i < uniqueRows.length; i++) {
+                const u = uniqueRows[i];
+                const name = u.name.toLowerCase().trim();
+                const price = Number(u.price);
+
+                if (isNaN(price)) continue; // invalid price row skip
+
+                if (!existingSet.has(name)) {
+                    docs.push({
+                        canteenId: contractor.canteenId,
+                        price,
+                        name,
+                    });
+                }
+            }
+
+            if (!docs.length) {
+                throw new ErrorHandler('No new items found', BAD_REQUEST);
+            }
+
+            // --- Insert into DB ---
+            const inserted = await PackagedFood.insertMany(docs, {
+                ordered: false,
+            });
+
+            console.log(`Inserted ${inserted.length} items successfully`);
+
+            fs.unlinkSync(file);
+
+            return res.status(CREATED).json({
+                message: `Successfully added ${inserted.length} items`,
+            });
+        } catch (err) {
+            if (file && fs.existsSync(file)) {
+                fs.unlinkSync(file);
+            }
+            throw err;
+        }
+    }
+);
 
 export const deleteItem = tryCatch('delete item', async (req, res) => {
     const { itemId } = req.params;

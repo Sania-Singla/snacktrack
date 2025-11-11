@@ -13,6 +13,8 @@ import {
     deleteItem,
     updateItem,
     toggleItemAvailability,
+    addBulkSnacks,
+    addBulkItems,
 } from '../Controllers/contractor.Controller.js';
 
 contractorRouter.use(verifyJwt);
@@ -21,7 +23,9 @@ contractorRouter.patch('/status', changeCanteenStatus);
 contractorRouter.get('/students', getStudents);
 
 // snack management
-
+contractorRouter
+    .route('/snacks/bulk')
+    .post(upload.single('file'), addBulkSnacks);
 contractorRouter.route('/snacks').post(upload.single('image'), addSnack);
 contractorRouter
     .route('/snacks/:snackId')
@@ -32,7 +36,9 @@ contractorRouter
     .patch(toggleSnackAvailability);
 
 // packaged food management
-
+contractorRouter
+    .route('/packaged/bulk')
+    .post(upload.single('file'), addBulkItems);
 contractorRouter.route('/packaged').post(addItem);
 contractorRouter
     .route('/packaged/:itemId')

@@ -322,7 +322,7 @@ export const updateAccountDetails = tryCatch(
 export const registerStudent = tryCatch(
     'register student',
     async (req, res) => {
-        const contractor = req.user; 
+        const contractor = req.user;
         const {
             fullName,
             rollNo,
@@ -407,76 +407,6 @@ export const registerStudent = tryCatch(
     }
 );
 
-// export const registerStudent = tryCatch(
-//     'register student',
-//     async (req, res) => {
-//         const contractor = req.user; // only contractor can register a student
-//         const {
-//             fullName,
-//             rollNo,
-//             phoneNumber,
-//             email,
-//             hostelType,
-//             hostelNumber,
-//         } = req.body;
-
-//         if (
-//             !fullName ||
-//             !email ||
-//             !phoneNumber ||
-//             !rollNo ||
-//             !hostelType ||
-//             !hostelNumber
-//         ) {
-//             throw new ErrorHandler('Missing fields', BAD_REQUEST);
-//         }
-
-//         const isValid = ['fullName', 'email', 'phoneNumber', 'rollNo'].every(
-//             (key) => verifyExpression(key, req.body[key]?.trim())
-//         );
-//         if (!isValid) {
-//             throw new ErrorHandler('Invalid input data', BAD_REQUEST);
-//         }
-
-//         const userName = (hostelType + hostelNumber + '-' + rollNo).trim();
-
-//         const existingStudent = await Student.findOne({
-//             $or: [
-//                 { userName: userName.trim() },
-//                 { phoneNumber: phoneNumber.trim() },
-//                 { email: email.trim() },
-//             ],
-//         });
-
-//         if (existingStudent) {
-//             throw new ErrorHandler('user already exists', BAD_REQUEST);
-//         }
-
-//         const randomPassword = nanoid(8); // unique temporary random password
-
-//         const student = await Student.create({
-//             fullName,
-//             canteenId: contractor.canteenId,
-//             userName,
-//             phoneNumber,
-//             email,
-//             password: randomPassword,
-//         });
-
-//         // send this password on student's email
-//         await sendMail({
-//             receiverName: student.fullName,
-//             receiverMail: student.email,
-//             subject: 'Welcome to SnackTrack',
-//             html: `Hello ${student.fullName}, <br> Your temporary password is <b>${randomPassword}</b> <br> You can update it anytime from settings.`,
-//         });
-
-//         const { password: _, refreshToken: __, ...rest } = student.toObject();
-
-//         return res.status(CREATED).json(rest);
-//     }
-// );
-
 export const registerBulkStudents = tryCatch(
     'bulk registration',
     async (req, res) => {
@@ -512,7 +442,6 @@ export const registerBulkStudents = tryCatch(
                     }
                 });
 
-                // only push valid rows
                 if (
                     rowData.rollNo &&
                     rowData.fullName &&
@@ -530,11 +459,36 @@ export const registerBulkStudents = tryCatch(
                 );
             }
 
-            // Prepare duplicates check
-            const emails = [],
-                phoneNumbers = [],
-                userNames = [];
-            rows.map((u) => {
+            // Remove duplicate rows inside Excel itself
+            const seen = new Set();
+            const uniqueRows = [];
+
+            for (const r of rows) {
+                const key = [
+                    r.email.toLowerCase().trim(),
+                    r.phoneNumber.trim(),
+                    r.rollNo.trim(),
+                ].join('|');
+
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    uniqueRows.push(r);
+                }
+            }
+
+            if (!uniqueRows.length) {
+                throw new ErrorHandler(
+                    'Invalid format or all rows are duplicates inside the Excel file',
+                    BAD_REQUEST
+                );
+            }
+
+            // Prepare DB-level duplicate check
+            const emails = [];
+            const phoneNumbers = [];
+            const userNames = [];
+
+            uniqueRows.forEach((u) => {
                 emails.push(u.email.toLowerCase().trim());
                 phoneNumbers.push(u.phoneNumber.trim());
                 userNames.push(
@@ -560,9 +514,11 @@ export const registerBulkStudents = tryCatch(
                 ])
             );
 
+            // Build final docs for insertion (after Excel-level + DB-level check)
             const userDocs = [];
-            for (let i = 0; i < rows.length; i++) {
-                const u = rows[i];
+
+            for (let i = 0; i < uniqueRows.length; i++) {
+                const u = uniqueRows[i];
                 const email = u.email.toLowerCase().trim();
                 const phone = u.phoneNumber.trim();
                 const userName = userNames[i];
@@ -573,6 +529,7 @@ export const registerBulkStudents = tryCatch(
                     !existingSet.has(phone)
                 ) {
                     const hash = await bcrypt.hash(nanoid(8), 10);
+
                     userDocs.push({
                         fullName: u.fullName,
                         canteenId: contractor.canteenId,
@@ -592,19 +549,17 @@ export const registerBulkStudents = tryCatch(
             }
 
             // --- Insert into DB ---
-
             const inserted = await Student.insertMany(userDocs, {
                 ordered: false,
             });
 
             console.log(`Inserted ${inserted.length} students successfully`);
 
-            // --- Generate QR Codes ---
+            // QR Code Generation
             const tempDir = path.join(process.cwd(), 'public', 'temp');
             const qrDir = path.join(tempDir, `qrs-${Date.now()}`);
             fs.mkdirSync(qrDir, { recursive: true });
 
-            // Process QR codes in batches to avoid memory issues
             const BATCH_SIZE = 50;
             for (let i = 0; i < inserted.length; i += BATCH_SIZE) {
                 const batch = inserted.slice(i, i + BATCH_SIZE);
@@ -620,6 +575,7 @@ export const registerBulkStudents = tryCatch(
                             /^data:image\/png;base64,/,
                             ''
                         );
+
                         const fileName = `${getRollNo(student.userName)}.png`;
                         const qrFilePath = path.join(qrDir, fileName);
 
@@ -632,7 +588,7 @@ export const registerBulkStudents = tryCatch(
                 );
             }
 
-            // --- Create ZIP ---
+            // Create ZIP
             const zipFileName = `${hostelType}-${hostelNumber}.zip`;
             const zipPath = path.join(tempDir, zipFileName);
 
@@ -650,9 +606,8 @@ export const registerBulkStudents = tryCatch(
 
             fs.unlinkSync(file);
 
-            // --- Send ZIP for download ---
+            // Download ZIP + Cleanup
             return res.download(zipPath, zipFileName, (err) => {
-                // Cleanup after download completes or fails
                 fs.promises
                     .rm(qrDir, { recursive: true, force: true })
                     .catch(console.error);

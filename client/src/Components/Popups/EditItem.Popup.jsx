@@ -79,6 +79,7 @@ export default function AddItemPopup() {
             label: 'Price',
             placeholder: 'Enter item price',
             required: true,
+            step: 'any',
         },
     ];
 

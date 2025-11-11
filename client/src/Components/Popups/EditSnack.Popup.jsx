@@ -14,7 +14,9 @@ import { MAX_FILE_SIZE, SNACK_PLACEHOLDER_IMAGE } from '../../Constants';
 export default function EditSnackPopup() {
     const { setShowPopup, popupInfo } = usePopupContext();
     const ref = useRef();
-    const [imagePreview, setImagePreview] = useState(popupInfo.snack.image);
+    const [imagePreview, setImagePreview] = useState(
+        popupInfo.snack.image || SNACK_PLACEHOLDER_IMAGE
+    );
     const [inputs, setInputs] = useState({
         name: popupInfo.snack.name || '',
         price: popupInfo.snack.price || '',
@@ -107,6 +109,7 @@ export default function EditSnackPopup() {
             label: 'Price',
             placeholder: 'Enter new Price',
             required: true,
+            step: 'any',
         },
     ];
 

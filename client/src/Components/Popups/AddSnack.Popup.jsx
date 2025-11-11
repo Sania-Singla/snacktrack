@@ -104,7 +104,7 @@ export default function AddSnackPopup() {
             name: 'price',
             label: 'Price',
             placeholder: 'Enter snack Price',
-            required: true,
+            required: true,step: 'any',
         },
     ];
 
