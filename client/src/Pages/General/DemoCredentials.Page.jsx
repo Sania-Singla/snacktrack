@@ -35,16 +35,16 @@ export default function DemoCredentialsPage() {
 
     const RoleCard = ({ role, title, icon }) => (
         <div
-            className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+            className={`p-2 rounded-md border cursor-pointer transition-all duration-200 w-full flex items-center justify-center ${
                 activeRole === role
-                    ? 'border-[#3a67d8] bg-blue-50 shadow-md'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
+                    ? 'border-[#3a67d8] bg-blue-50'
+                    : 'border-gray-300 bg-white hover:border-gray-300'
             }`}
             onClick={() => setActiveRole(role)}
         >
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
                 <div
-                    className={`p-1.5 rounded-full ${
+                    className={`size-5.5 p-1 flex items-center justify-center rounded-full ${
                         activeRole === role
                             ? 'bg-[#3a67d8] text-white'
                             : 'bg-gray-100 text-gray-600'
@@ -108,17 +108,16 @@ export default function DemoCredentialsPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-sky-500 to-blue-600 flex items-center justify-center p-5">
-            <div className="bg-white rounded-xl shadow-sm p-7 max-w-4xl w-full">
-                <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+            <div className="bg-white rounded-xl shadow-sm p-5 max-w-2xl w-full">
+                <h1 className="text-xl font-bold text-gray-800 mb-2 text-center">
                     Demo Credentials
                 </h1>
-                <p className="text-gray-600 text-center mb-6">
-                    Use these credentials to explore different roles in the
-                    SnackTrack prototype
+                <p className="text-gray-500 text-center mb-6">
+                    Use these credentials to explore different roles
                 </p>
 
-                {/* Role Selection */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
+                {/* Role cards */}
+                <div className="flex justify-evenly w-full gap-3 mb-6">
                     <RoleCard
                         role="contractor"
                         title="Contractor"
@@ -129,22 +128,22 @@ export default function DemoCredentialsPage() {
                         title="Student"
                         icon={<StudentIcon />}
                     />
-                    <RoleCard role="admin" title="Admin" icon={<AdminIcon />} />
+                    {/* <RoleCard role="admin" title="Admin" icon={<AdminIcon />} /> */}
                 </div>
 
                 {/* Credentials Display */}
-                <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4 capitalize">
+                <div className="bg-gray-50 rounded-lg p-5 mb-6 border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-3.5 capitalize">
                         {activeRole} Credentials
                     </h3>
 
-                    <p className="text-gray-600 mb-4 text-sm">
+                    <p className="text-gray-600 mb-3 text-sm">
                         {currentCredential.description}
                     </p>
 
                     <div className="space-y-3">
                         {currentCredential.email && (
-                            <div className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
+                            <div className="flex items-center justify-between bg-white p-2.5 rounded-md border border-gray-200">
                                 <div>
                                     <p className="text-xs text-gray-500">
                                         Email
@@ -164,7 +163,7 @@ export default function DemoCredentialsPage() {
                         )}
 
                         {currentCredential.hostel && (
-                            <div className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
+                            <div className="flex items-center justify-between bg-white p-2.5 rounded-md border border-gray-200">
                                 <div>
                                     <p className="text-xs text-gray-500">
                                         Hostel
@@ -180,7 +179,7 @@ export default function DemoCredentialsPage() {
                         )}
 
                         {currentCredential.rollNo && (
-                            <div className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
+                            <div className="flex items-center justify-between bg-white p-2.5 rounded-md border border-gray-200">
                                 <div>
                                     <p className="text-xs text-gray-500">
                                         Roll Number
@@ -202,7 +201,7 @@ export default function DemoCredentialsPage() {
                         )}
 
                         {currentCredential.password && (
-                            <div className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
+                            <div className="flex items-center justify-between bg-white p-2.5 rounded-md border border-gray-200">
                                 <div>
                                     <p className="text-xs text-gray-500">
                                         Password
@@ -224,7 +223,7 @@ export default function DemoCredentialsPage() {
                         )}
 
                         {currentCredential.key && (
-                            <div className="flex items-center justify-between bg-white p-3 rounded-md border border-gray-200">
+                            <div className="flex items-center justify-between bg-white p-2.5 rounded-md border border-gray-200">
                                 <div>
                                     <p className="text-xs text-gray-500">
                                         Access Key
@@ -255,12 +254,12 @@ export default function DemoCredentialsPage() {
                                   ? navigate('/verify-kitchen-key')
                                   : navigate('/login')
                         }
-                        className="bg-[#3a67d8] text-white py-2 rounded-md font-semibold hover:bg-[#2c4fa8]"
+                        className="bg-[#3a67d8] text-white py-2 text-sm rounded-md font-medium hover:bg-[#2c4fa8]"
                         btnText={`Go to ${activeRole === 'admin' ? activeRole.charAt(0).toUpperCase() + activeRole.slice(1) + ' Dashboard' : 'Login'}`}
                     />
                     <Button
                         onClick={() => navigate('/')}
-                        className="bg-gray-600 text-white py-2 rounded-md font-semibold hover:bg-gray-700"
+                        className="bg-gray-500 text-white py-2 text-sm rounded-md font-medium hover:bg-gray-600"
                         btnText="Back to Home"
                     />
                 </div>
