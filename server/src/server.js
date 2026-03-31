@@ -4,7 +4,7 @@ import { startBillingCronJob, startCleanupCronJob } from './CronJobs/bills.js';
 import {
     connectMongoDB,
     connectRedis,
-    generateTransporter,
+    // generateTransporter, // for render
     // connectTwilio,
 } from './Config/index.js';
 
@@ -16,12 +16,12 @@ try {
     [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
         connectMongoDB(),
         connectRedis(),
-        generateTransporter(),
+        // generateTransporter(),
         // connectTwilio(),
     ]);
 
     startBillingCronJob();
-    // startCleanupCronJob();
+    // startCleanupCronJob();  // might cause problems verify the concept before enabling
 
     http.listen(PORT, () =>
         console.log(`💻 Server listening on port ${PORT}...`)

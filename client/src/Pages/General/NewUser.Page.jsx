@@ -99,6 +99,7 @@ export default function NewUserPage() {
                     <Button
                         onClick={() => navigate('/admin')}
                         btnText="Admin"
+                        id="adminBtn"
                         className="bg-[#3a67d8] text-white w-full py-2 rounded-md font-medium hover:bg-[#2c4fa8] text-sm"
                     />
                     <Button

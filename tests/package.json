@@ -1,0 +1,14 @@
+{
+    "name": "tests",
+    "version": "1.0.0",
+    "description": "Selenium WebDriver tests for Snack Track application",
+    "main": "index.js",
+    "type": "module",
+    "scripts": {},
+    "keywords": [],
+    "author": "Sania",
+    "license": "ISC",
+    "dependencies": {
+        "selenium-webdriver": "^4.40.0"
+    }
+}

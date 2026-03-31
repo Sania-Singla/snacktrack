@@ -47,6 +47,7 @@ export default function VerifyAdminKeyPage() {
                     <input
                         type={showKey ? 'text' : 'password'}
                         value={key}
+                        id="adminKeyInput"
                         autoFocus={true}
                         onChange={(e) => setKey(e.target.value)}
                         className="w-full text-xl text-center border-[0.01rem] indent-3 pr-12 rounded-md py-[5px] border-gray-600 focus:border-[#4977ec] focus:outline-none"
@@ -72,6 +73,7 @@ export default function VerifyAdminKeyPage() {
                         )
                     }
                     type="submit"
+                    id="verifyAdminKeyBtn"
                     disabled={!key}
                     className="text-white rounded-md h-10 flex items-center justify-center text-lg w-full bg-[#4977ec] hover:bg-[#3b62c2]"
                 />

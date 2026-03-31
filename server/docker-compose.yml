@@ -1,0 +1,8 @@
+services:
+    snacktrack-server:
+        image: saniasingla/snacktrack-server:latest
+        container_name: snacktrack-server
+        ports:
+            - '3000:3000'
+        env_file: /etc/snacktrack_server.env
+        restart: unless-stopped
