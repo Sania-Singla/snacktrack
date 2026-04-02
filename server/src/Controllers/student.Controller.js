@@ -91,7 +91,7 @@ export const loginFromQR = tryCatch(
 
         if (!student) throw new ErrorHandler('invalid qr code', FORBIDDEN);
 
-        verifyQR({ token, passHash: student.password });
+        await verifyQR({ token, passHash: student.password });
 
         const hostelName = student.canteenId.hostelName;
         const hostelNumber = student.canteenId.hostelNumber;

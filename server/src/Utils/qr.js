@@ -12,7 +12,7 @@ export async function genQR({ _id, passHash }) {
         const qr = await QRCode.toDataURL(JSON.stringify({ token, _id }));
         return qr; // a base64 PNG image, we can embed in <img> tag
     } catch (err) {
-        throw new ErrorHandler('Failed to generate QR');
+        throw new ErrorHandler(`Failed to generate QR ${err.message}`);
     }
 }
 
