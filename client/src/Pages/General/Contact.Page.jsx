@@ -42,14 +42,14 @@ export default function ContactPage() {
                 <p>
                     <strong>Official Websites:</strong>
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                        <li>
+                        {/* <li>
                             <a
                                 href="https://pu.snacktrack.live"
                                 className="text-[#4977ec] hover:underline"
                             >
                                 https://pu.snacktrack.live
                             </a>
-                        </li>
+                        </li> */}
                         <li>
                             <a
                                 href="https://uiet.puchd.ac.in"

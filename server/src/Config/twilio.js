@@ -7,9 +7,9 @@ export async function connectTwilio() {
             process.env.TWILIO_AUTH_TOKEN
         );
 
-        console.log('📞 Twilio client ready.');
+        console.log('Twilio client ready.');
         return client;
     } catch (err) {
-        throw new Error(`❌ Twilio connection failed: ${err}`);
+        throw new Error(`Twilio connection failed: ${err}`);
     }
 }

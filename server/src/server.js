@@ -1,34 +1,27 @@
-// import 'dotenv/config';  // specified in package.json as dotenv will need to be install on prod as well otherwise
+// import 'dotenv/config';  // specified in package.json 
 import { http } from './socket.js';
 import { startBillingCronJob, startCleanupCronJob } from './CronJobs/bills.js';
 import {
     connectMongoDB,
     connectRedis,
-    // generateTransporter, // for render
-    // connectTwilio,
+    // generateTransporter, // because of render
+    // connectTwilio, // no credits left
 } from './Config/index.js';
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT;
 
 let mongoConn, redisClient, transporter, twilioClient;
 
-try {
-    [mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
-        connectMongoDB(),
-        connectRedis(),
-        // generateTransporter(),
-        // connectTwilio(),
-    ]);
+[mongoConn, redisClient, transporter, twilioClient] = await Promise.all([
+    connectMongoDB(),
+    connectRedis(),
+    // generateTransporter(),
+    // connectTwilio(),
+]);
 
-    startBillingCronJob();
-    // startCleanupCronJob();  // might cause problems verify the concept before enabling
+startBillingCronJob();
+// startCleanupCronJob();  // pending concept verification
 
-    http.listen(PORT, () =>
-        console.log(`💻 Server listening on port ${PORT}...`)
-    );
-} catch (err) {
-    console.error('❌ Server startup failed:', err);
-    process.exit(1);
-}
+http.listen(PORT, () => console.log(`💻 Server listening on port ${PORT}`));
 
 export { mongoConn, transporter, redisClient, twilioClient };

@@ -11,11 +11,10 @@ export async function generateTransporter() {
             },
         });
 
-        // Test transporter
         await transporter.verify();
-        console.log('📧 Mail transporter ready.');
+        console.log('Mail transporter ready.');
         return transporter;
     } catch (err) {
-        throw new Error(`❌ Mail transporter connection failed: ${err}`);
+        throw new Error(`Mail transporter connection failed: ${err}`);
     }
 }

@@ -1,5 +1,7 @@
 {
     "name": "snack-track",
+    "description": "A web application to track your snacks",
+    "author": "Sania",
     "version": "1.0.0",
     "main": "index.js",
     "scripts": {
@@ -7,13 +9,11 @@
         "client": "cd client && npm run dev",
         "server": "cd server && npm run dev",
         "kiosk": "cd kiosk && npm run dev",
-        "dev": "concurrently \"npm run client\" \"npm run server\" \"npm run kiosk\"",
-        "build": "npm i && npm i --prefix client && npm i --prefix server && npm i --prefix kiosk"
+        "build": "npm i && npm i --prefix client && npm i --prefix server && npm i --prefix kiosk",
+        "dev": "concurrently -n CLIENT,SERVER,KIOSK \"npm run client\" \"npm run server\" \"npm run kiosk\""
     },
     "keywords": [],
-    "author": "Sania",
     "license": "ISC",
-    "description": "A web application to track your snacks",
     "devDependencies": {
         "concurrently": "^9.2.1",
         "prettier": "^3.6.2"
